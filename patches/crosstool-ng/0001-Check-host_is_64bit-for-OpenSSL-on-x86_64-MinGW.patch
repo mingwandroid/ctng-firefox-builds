@@ -1,7 +1,7 @@
-From 6dd16611cfb09878f0467e365eaab658b513430b Mon Sep 17 00:00:00 2001
+From 3d1f0a8c0b5d3a6733cd07e511884c54e924c343 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 18 Nov 2013 19:29:09 +0000
-Subject: [PATCH 2/3] Check host_is_64bit for OpenSSL on x86_64 MinGW
+Subject: [PATCH 1/2] Check host_is_64bit for OpenSSL on x86_64 MinGW
 
 ---
  scripts/build/companion_libs/310-openssl.sh | 29 ++++++++++++++++++++---------
@@ -58,5 +58,5 @@ index 299cec3..ee79491 100644
      fi
  
 -- 
-1.8.4.3
+1.8.4.2
 

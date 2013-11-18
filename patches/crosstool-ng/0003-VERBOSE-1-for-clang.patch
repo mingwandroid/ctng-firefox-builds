@@ -1,0 +1,52 @@
+From 1d17c00b6db8c628c9f729a1ffd27a70b8045ad0 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Mon, 18 Nov 2013 14:23:10 +0000
+Subject: [PATCH 3/3] VERBOSE=1 for clang
+
+---
+ scripts/build/cc/200-clang.sh            | 4 +++-
+ scripts/build/companion_libs/150-llvm.sh | 2 ++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/build/cc/200-clang.sh b/scripts/build/cc/200-clang.sh
+index 518588f..ccc66a0 100644
+--- a/scripts/build/cc/200-clang.sh
++++ b/scripts/build/cc/200-clang.sh
+@@ -160,6 +160,7 @@ do_clang_backend() {
+         LDFLAGS="${ldflags}"          \
+         ONLY_TOOLS="clang"            \
+         ${OPTIM_MAKE_FLAG}            \
++        VERBOSE=1
+ 
+     CT_Pushd "tools/clang/"
+ 
+@@ -170,7 +171,8 @@ do_clang_backend() {
+         LDFLAGS="${ldflags}"          \
+         ONLY_TOOLS="clang"            \
+         ${OPTIM_MAKE_FLAG}            \
+-        
++        VERBOSE=1
++
+     CT_Popd
+ 
+     # clang > 3.1 creates ${CT_TARGET}- prefixed executables already.
+diff --git a/scripts/build/companion_libs/150-llvm.sh b/scripts/build/companion_libs/150-llvm.sh
+index cb33ac8..7fb322a 100644
+--- a/scripts/build/companion_libs/150-llvm.sh
++++ b/scripts/build/companion_libs/150-llvm.sh
+@@ -150,10 +150,12 @@ do_llvm_backend() {
+     CXXFLAGS="${cflags}"              \
+     LDFLAGS="${ldflags}"              \
+     ${OPTIM_MAKE_FLAG}                \
++    VERBOSE=1
+ 
+     CT_DoLog EXTRA "Installing LLVM"
+     CT_DoExecLog ALL make install     \
+     ${OPTIM_MAKE_FLAG}                \
++    VERBOSE=1
+ 
+     # LLVM installs dlls into ${prefix}/lib instead of ${prefix}/bin
+     # so copy them to ${prefix}/bin so that executables load them in
+-- 
+1.8.4.3
+

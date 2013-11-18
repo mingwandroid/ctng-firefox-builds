@@ -79,6 +79,14 @@ print_help()
   echo    ""
   echo -e "Options are (--option=default)\n\n$ALL_OPTIONS_TEXT"
 }
+##################################
+# This set of options are global #
+##################################
+option TARGET_OS           osx \
+"Target OS for the build, valid values are
+osx, linux or windows. All toolchains built
+are multilib enabled, so the arch is not
+selected at the toolchain build stage."
 ######################################################
 # This set of options are for the crosstool-ng build #
 ######################################################
@@ -159,8 +167,8 @@ copy_build_scripts()
   option_output_all $1/regenerate.sh
   chmod +x $1/regenerate.sh
   cp     ${THISDIR}/build.sh ${THISDIR}/tar-sorted.sh ${THISDIR}/mingw-w64-toolchain.sh $1/
-  cp     ${THISDIR}/mozconfig* $1/
-  cp     ${THISDIR}/crosstool.config* $1/
+  cp -rf ${THISDIR}/mozilla.configs $1/
+  cp -rf ${THISDIR}/crosstool-ng.configs $1/
   cp -rf ${THISDIR}/patches $1/
   [ -d $1/final-configs ] && rm -rf $1/final-configs
   mkdir $1/final-configs
@@ -263,7 +271,7 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     # .. he has split packages up more than Arch does, so there is not a 1:1
     #    relationship between them anymore.
     if [ -f /etc/arch-release ]; then
-      PACKAGES=$PACKAGES" ncurses"
+      PACKAGES=$PACKAGES" ncurses gcc-ada${HOST_MULTILIB}"
     else
       # Hmm, no yasm package for Windows yet ..
       PACKAGES=$PACKAGES" ncurses-devel base-devel perl-ack"
@@ -413,34 +421,36 @@ cross_clang_build()
       popd
      ) || ( echo "Error: Failed to clone/patch crosstool-ng" && exit 1 )
     pushd crosstool-ng
-    [ -d samples/gitian-${BITS} ] || mkdir -p samples/gitian-${BITS}
-    cp "${THISDIR}"/crosstool.config-${BITS} samples/gitian-${BITS}/crosstool.config
+    CTNG_SAMPLE=mozbuild-${TARGET_OS}-${BITS}
+    CTNG_SAMPLE_CONFIG=samples/${CTNG_SAMPLE}/crosstool.config
+    [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
+    cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${BITS} ${CTNG_SAMPLE_CONFIG}
     LLVM_VERSION_DOT=$(echo $LLVM_VERSION | tr '_' '.')
-    do_sed $"s/CT_LLVM_V_3_3/CT_LLVM_V_${LLVM_VERSION}/g" samples/gitian-${BITS}/crosstool.config
+    do_sed $"s/CT_LLVM_V_3_3/CT_LLVM_V_${LLVM_VERSION}/g" ${CTNG_SAMPLE_CONFIG}
     if [ "$OSTYPE" = "msys" ]; then
       DUMPEDMACHINE=$(${MINGW_W64_PATH}/gcc -dumpmachine)
-      echo "CT_BUILD=\"${DUMPEDMACHINE}\"" >> samples/gitian-${BITS}/crosstool.config
+      echo "CT_BUILD=\"${DUMPEDMACHINE}\"" >> ${CTNG_SAMPLE_CONFIG}
     fi
     if [ "$COPY_SDK" = "yes" ]; then
-      do_sed $"s/CT_DARWIN_COPY_SDK_TO_SYSROOT=n/CT_DARWIN_COPY_SDK_TO_SYSROOT=y/g" samples/gitian-${BITS}/crosstool.config
+      do_sed $"s/CT_DARWIN_COPY_SDK_TO_SYSROOT=n/CT_DARWIN_COPY_SDK_TO_SYSROOT=y/g" ${CTNG_SAMPLE_CONFIG}
     else
-      do_sed $"s/CT_DARWIN_COPY_SDK_TO_SYSROOT=y/CT_DARWIN_COPY_SDK_TO_SYSROOT=n/g" samples/gitian-${BITS}/crosstool.config
+      do_sed $"s/CT_DARWIN_COPY_SDK_TO_SYSROOT=y/CT_DARWIN_COPY_SDK_TO_SYSROOT=n/g" ${CTNG_SAMPLE_CONFIG}
     fi
     if [ "$COMPILER_RT" = "yes" ]; then
-      do_sed $"s/CT_LLVM_COMPILER_RT=n/CT_LLVM_COMPILER_RT=y/g" samples/gitian-${BITS}/crosstool.config
+      do_sed $"s/CT_LLVM_COMPILER_RT=n/CT_LLVM_COMPILER_RT=y/g" ${CTNG_SAMPLE_CONFIG}
     else
-      do_sed $"s/CT_LLVM_COMPILER_RT=y/CT_LLVM_COMPILER_RT=n/g" samples/gitian-${BITS}/crosstool.config
+      do_sed $"s/CT_LLVM_COMPILER_RT=y/CT_LLVM_COMPILER_RT=n/g" ${CTNG_SAMPLE_CONFIG}
     fi
     if [ "$BUILD_GCC" = "yes" ]; then
-      do_sed $"s/CT_CC_gcc=n/CT_CC_gcc=y/g" samples/gitian-${BITS}/crosstool.config
+      do_sed $"s/CT_CC_gcc=n/CT_CC_gcc=y/g" ${CTNG_SAMPLE_CONFIG}
     else
-      do_sed $"s/CT_CC_gcc=y/CT_CC_gcc=n/g" samples/gitian-${BITS}/crosstool.config
+      do_sed $"s/CT_CC_gcc=y/CT_CC_gcc=n/g" ${CTNG_SAMPLE_CONFIG}
     fi
 
-    echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> samples/gitian-${BITS}/crosstool.config
-    echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> samples/gitian-${BITS}/crosstool.config
+    echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 
-    ./bootstrap && ./configure ${CTNG_CFG_ARGS} && make && make install
+    ./bootstrap && ./configure ${CTNG_CFG_ARGS} && make clean && make && make install
     if [ "$OSTYPE" = "msys" ]; then
       PATH="${MINGW_W64_PATH}:${PATH}"
     fi
@@ -456,7 +466,7 @@ cross_clang_build()
      trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
      ( while [ 0 ] ; do COLM=$(ps aux | grep libtoolize | grep --invert-match grep | awk '{print $2}'); if [ -n "${COLM}" ]; then kill $COLM; echo $COLM; fi; sleep 10; done ) &
     fi
-    ct-ng gitian-${BITS}
+    ct-ng ${CTNG_SAMPLE}
     ct-ng build
     popd
   else
@@ -489,7 +499,7 @@ firefox_build()
   if [ ! -d ${DEST}/obj-macos/dist/firefox/Firefox${MOZBUILDSUFFIX}.app ]; then
     [ -d ${DEST} ] || mkdir -p ${DEST}
     pushd ${DEST}
-    cp "${THISDIR}"/mozconfig${MOZBUILDSUFFIX} ./.mozconfig
+    cp "${THISDIR}"/mozilla.configs/mozconfig${MOZBUILDSUFFIX} ./.mozconfig
     do_sed $"s#CROSS_TCROOT=\$HOME/x-tools/\${HOST_ARCH}-apple-darwin10#CROSS_TCROOT=${BUILT_XCOMPILER_PREFIX}#g" .mozconfig
     if [ "${HOST_ARCH}" = "i686" ]; then
       do_sed $"s/HOST_ARCH=x86_64/HOST_ARCH=i686/g" .mozconfig

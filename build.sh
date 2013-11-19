@@ -1,4 +1,4 @@
-'o#!/bin/bash
+#!/bin/bash
 
 # Problems and related bug reports.
 #

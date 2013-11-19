@@ -1,4 +1,4 @@
-#!/bin/bash
+'o#!/bin/bash
 
 # Problems and related bug reports.
 #
@@ -36,9 +36,9 @@ CROSSTOOL_CONFIG=
 MOZILLA_CONFIG=
 
 declare -A TARGET_TO_PREFIX
-TARGET_TO_PREFIX["osx"]="x"
-TARGET_TO_PREFIX["linux"]="l"
+TARGET_TO_PREFIX["osx"]="o"
 TARGET_TO_PREFIX["windows"]="w"
+TARGET_TO_PREFIX["linux"]="l"
 
 #########################################
 # Simple option processing and options. #
@@ -559,10 +559,10 @@ if [ "$COMPILER_RT" = "yes" ]; then
   BUILD_PREFIX="${BUILD_PREFIX}-rt"
 fi
 
-STUB=${TARGET_TO_PREFIX[${TARGET_OS}]}x
-BUILDDIR=${STUB}-ctng-build-${BUILD_PREFIX}
-INTALLDIR=${STUB}-ctng-install-${BUILD_PREFIX}
-BUILT_XCOMPILER_PREFIX=$PWD/${STUB}x-${BUILD_PREFIX}
+STUB=x-${TARGET_TO_PREFIX[${TARGET_OS}]}
+BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
+INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
+BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
 
 # Because CT_GetGit doesn't download to $HOME/src, but instead into
 # tarballs in the .build folder, and cloning these takes a long

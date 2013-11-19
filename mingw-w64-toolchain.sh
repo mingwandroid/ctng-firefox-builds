@@ -87,12 +87,12 @@ download_install_mingw_w64()
     download_check_sha1 $MINGW_GCC_URL $MINGW_GCC_SHA1
     echo "Extracting "$(basename "${MINGW_GCC_URL}") to ${PWD}
     7za -y x $(basename "${MINGW_GCC_URL}") > /dev/null
+    echo "The md5sum of compiler version ${HOST_GCC_VER} is: ${HOST_GCC_TAG}"   > ${PWD}/mingw${BITS}/COMPILER_VERSION_INFORMATION
+    echo "It was downloaded from: ${MINGW_GCC_URL}"                            >> ${PWD}/mingw${BITS}/COMPILER_VERSION_INFORMATION
+    echo "And the sha1sum of that archive was: ${MINGW_GCC_SHA1}"              >> ${PWD}/mingw${BITS}/COMPILER_VERSION_INFORMATION
     if [ "$HASH_IN_PATH" = "yes" ]; then
       mv ${PWD}/mingw${BITS} ${PWD}/mingw${BITS}-${HOST_GCC_TAG}
     fi
-    echo "The md5sum of compiler version ${HOST_GCC_VER} is: ${HOST_GCC_TAG}"   > $PATH_VAL/../COMPILER_VERSION_INFORMATION
-    echo "It was downloaded from: ${MINGW_GCC_URL}"                            >> $PATH_VAL/../COMPILER_VERSION_INFORMATION
-    echo "And the sha1sum of that archive was: ${MINGW_GCC_SHA1}"              >> $PATH_VAL/../COMPILER_VERSION_INFORMATION
   fi
   popd
 }

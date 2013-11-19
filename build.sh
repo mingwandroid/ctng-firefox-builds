@@ -35,6 +35,11 @@ CROSSTOOL_CONFIG=
 # 2. and Mozilla's .mozconfig
 MOZILLA_CONFIG=
 
+declare -A TARGET_TO_PREFIX
+TARGET_TO_PREFIX["osx"]="x"
+TARGET_TO_PREFIX["linux"]="l"
+TARGET_TO_PREFIX["windows"]="w"
+
 #########################################
 # Simple option processing and options. #
 #########################################
@@ -255,7 +260,6 @@ if [ "${OSTYPE}" = "darwin" ]; then
   brew install mercurial gnu-sed gnu-tar grep wget gawk binutils libelf coreutils automake gperf yasm homebrew/versions/autoconf213
   set -e
 elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
-  export PYTHON=python2
   if [ "${MSYSTEM}" = "MSYS" ]; then
     SUDO=
     # Avoid
@@ -390,7 +394,7 @@ cross_clang_build()
 {
   CTNG_CFG_ARGS=" \
                 --disable-local \
-                --prefix=$PWD/ctng-install-${BUILD_PREFIX} \
+                --prefix=$PWD/${INSTALLDIR} \
                 --with-libtool=$LIBTOOL \
                 --with-libtoolize=$LIBTOOLIZE \
                 --with-objcopy=$OBJCOPY \
@@ -399,11 +403,11 @@ cross_clang_build()
                 --with-gperf=$GPERF \
                 CC=${CC} CXX=${CXX}"
 
-  CROSSTOOL_CONFIG=${PWD}/ctng-build-${BUILD_PREFIX}/.config
+  CROSSTOOL_CONFIG=${PWD}/${BUILDDIR}/.config
   if [ "${CTNG_CLEAN}" = "yes" ]; then
-    [ -d ${BUILT_XCOMPILER_PREFIX} ]  && rm -rf ${BUILT_XCOMPILER_PREFIX}
-    [ -d crosstool-ng ]               && rm -rf crosstool-ng
-    [ -d ctng-build-${BUILD_PREFIX} ] && rm -rf ctng-build-${BUILD_PREFIX}
+    [ -d ${BUILT_XCOMPILER_PREFIX} ] && rm -rf ${BUILT_XCOMPILER_PREFIX}
+    [ -d crosstool-ng ]              && rm -rf crosstool-ng
+    [ -d ${BUILDDIR} ]               && rm -rf ${BUILDDIR}
   fi
   if [ ! -f ${BUILT_XCOMPILER_PREFIX}/bin/${CROSSCC}-clang ]; then
     [ -d "${HOME}"/src ] || mkdir "${HOME}"/src
@@ -456,8 +460,8 @@ cross_clang_build()
     fi
     PATH="${PATH}":$ROOT/ctng-install-${BUILD_PREFIX}/bin
     popd
-    [ -d ctng-build-${BUILD_PREFIX} ] || mkdir ctng-build-${BUILD_PREFIX}
-    pushd ctng-build-${BUILD_PREFIX}
+    [ -d ${BUILDDIR} ] || mkdir ${BUILDDIR}
+    pushd ${BUILDDIR}
     # Horrible hack to prevent cctools autoreconf from hanging on
     # Ubuntu 12.04.3 .. Sorry.
     # If you get a freeze at "[EXTRA]    Patching 'cctools-809'" then
@@ -544,12 +548,21 @@ firefox_package()
 ROOT=$PWD
 download_build_compilers
 
+if [ "${OSTYPE}" = "msys" ]; then
+  export PYTHON=$MINGW_W64_PATH/../opt/bin/python.exe
+else
+  export PYTHON=python2
+fi
+
 BUILD_PREFIX=${LLVM_VERSION}-${HOST_ARCH}${MINGW_W64_HASH}
 if [ "$COMPILER_RT" = "yes" ]; then
   BUILD_PREFIX="${BUILD_PREFIX}-rt"
 fi
 
-BUILT_XCOMPILER_PREFIX=$PWD/dx-${BUILD_PREFIX}
+STUB=${TARGET_TO_PREFIX[${TARGET_OS}]}x
+BUILDDIR=${STUB}-ctng-build-${BUILD_PREFIX}
+INTALLDIR=${STUB}-ctng-install-${BUILD_PREFIX}
+BUILT_XCOMPILER_PREFIX=$PWD/${STUB}x-${BUILD_PREFIX}
 
 # Because CT_GetGit doesn't download to $HOME/src, but instead into
 # tarballs in the .build folder, and cloning these takes a long
@@ -557,7 +570,7 @@ BUILT_XCOMPILER_PREFIX=$PWD/dx-${BUILD_PREFIX}
 if [ "${LLVM_VERSION}" = "HEAD" ]; then
   if [ ! -f ${BUILT_XCOMPILER_PREFIX}/bin/${CROSSCC}-clang ]; then
     set +e
-    rm -rf ctng-build-${BUILD_PREFIX}/.build/src ctng-build-${BUILD_PREFIX}/.build/*-apple-darwin10
+    rm -rf ${BUILDDIR}/.build/src ${BUILDDIR}/.build/*
     set -e
   fi
 fi

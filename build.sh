@@ -458,7 +458,7 @@ cross_clang_build()
     if [ "$OSTYPE" = "msys" ]; then
       PATH="${MINGW_W64_PATH}:${PATH}"
     fi
-    PATH="${PATH}":$ROOT/ctng-install-${BUILD_PREFIX}/bin
+    PATH="${PATH}":$ROOT/${INSTALLDIR}/bin
     popd
     [ -d ${BUILDDIR} ] || mkdir ${BUILDDIR}
     pushd ${BUILDDIR}
@@ -988,3 +988,6 @@ for CONFIG_SUB in $CONFIG_SUBS; do
 done
 popd
 diff -urN a b > update-config-sub-config-guess-for-MSYS2.patch
+
+# Making a git am'able patch after a merge has happened ( http://stackoverflow.com/questions/2285699/git-how-to-create-patches-for-a-merge )
+# git log -p --pretty=email --stat -m --first-parent 7eafc9dce69a184d1b75e4fa26063dd38c863ea4..HEAD

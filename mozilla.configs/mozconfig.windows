@@ -4,28 +4,27 @@ CROSS_SYSROOT=$HOME/MacOSX10.6.sdk
 TARGET_ARCH=x86_64
 # Is x86_64 or i686
 HOST_ARCH=x86_64
-CROSS_TCROOT=$HOME/x-tools/${HOST_ARCH}-apple-darwin10
+VENDOR_OS=apple-darwin10
+CROSS_TCROOT=$HOME/x-tools/${HOST_ARCH}-${VENDOR_OS}
 FLAGS="-arch $TARGET_ARCH -isysroot $CROSS_SYSROOT"
-CC="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-clang $FLAGS"
-CXX="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-clang++ $FLAGS"
+CC="$CROSS_TCROOT/bin/${HOST_ARCH}-${VENDOR_OS}-clang $FLAGS"
+CXX="$CROSS_TCROOT/bin/${HOST_ARCH}-${VENDOR_OS}-clang++ $FLAGS"
 CPP="$CC -E"
 CXXCPP="$CXX -E"
-#CPP="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-cpp"
-#CXXCPP="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-cpp"
 export CROSS_COMPILE=1
-RANLIB="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-ranlib"
-AR="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-ar"
-OTOOL="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-otool"
-AS="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-as"
-LD="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-ld"
-STRIP="$CROSS_TCROOT/bin/${HOST_ARCH}-apple-darwin10-strip"
+RANLIB="$CROSS_TCROOT/bin/${HOST_ARCH}-${VENDOR_OS}-ranlib"
+AR="$CROSS_TCROOT/bin/${HOST_ARCH}-${VENDOR_OS}-ar"
+OTOOL="$CROSS_TCROOT/bin/${HOST_ARCH}-${VENDOR_OS}-otool"
+AS="$CROSS_TCROOT/bin/${HOST_ARCH}-${VENDOR_OS}-as"
+LD="$CROSS_TCROOT/bin/${HOST_ARCH}-${VENDOR_OS}-ld"
+STRIP="$CROSS_TCROOT/bin/${HOST_ARCH}-${VENDOR_OS}-strip"
 #
 # We need them as configure is looking for i386-apple-darwin10-* which is not
 # existing <- does not help as we get a link error in JS when using that target
-TOOLCHAIN_PREFIX=${HOST_ARCH}-apple-darwin10-
+TOOLCHAIN_PREFIX=${HOST_ARCH}-${VENDOR_OS}-
 #
 ac_add_options --enable-application=browser
-ac_add_options --target=${TARGET_ARCH}-apple-darwin10
+ac_add_options --target=${TARGET_ARCH}-${VENDOR_OS}
 #
 mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj-macos
 mk_add_options MOZ_APP_DISPLAYNAME=TorBrowser
@@ -47,11 +46,6 @@ ac_add_options --disable-tests
 # There may be --with-macos-sdk too, but there's a comment "(Mac OS X only)"
 ac_add_options --with-macos-private-frameworks=$HOME/MacOSX10.6.sdk/System/Library/PrivateFrameworks
 #
-# Compiling libffi is currently broken. Although we should try with
-# --enable-system-ffi and again as we now have the headers installed...
-# .. actually disabling ctypes leads to a crash in modules/osfile/osfile_shared_allthreads.jsm:30
-# Cu.import("resource://gre/modules/ctypes.jsm");
-# ac_add_options --disable-ctypes
 # We need a dsymutil program to build ICU ..
 # configure:2917: /home/ray/tbb-work/dx-HEAD/bin/x86_64-apple-darwin10-clang -arch x86_64 -isysroot /home/ray/MacOSX10.6.sdk -fPIC -Qunused-arguments -Wall -Wpointer-arith -Wdeclaration-after-statement -Werror=return-type -Wtype-limits -Wempty-body -Wsign-compare -Wno-unused -std=gnu99 -fno-common -fno-math-errno -pthread -pipe -g  -DU_USING_ICU_NAMESPACE=0 -DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1 -DUCONFIG_NO_LEGACY_CONVERSION -DUCONFIG_NO_TRANSLITERATION -DUCONFIG_NO_REGULAR_EXPRESSIONS -DUCONFIG_NO_BREAK_ITERATION -Qunused-arguments   -framework ExceptionHandling   -lobjc conftest.c  >&5
 # x86_64-apple-darwin10-clang: error: unable to execute command: Executable "dsymutil" doesn't exist!
@@ -59,5 +53,3 @@ ac_add_options --with-macos-private-frameworks=$HOME/MacOSX10.6.sdk/System/Libra
 ac_add_options --without-intl-api
 ac_add_options --enable-default-toolkit=cairo-cocoa
 # Debugging options
-ac_add_options --disable-debug
-ac_add_options --enable-optimize

@@ -1,0 +1,178 @@
+From aa1327c710c5004a69b010eed2332b2e32798cb1 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Wed, 20 Nov 2013 21:19:23 +0000
+Subject: [PATCH 2/5] Fix glibc and eglibc multilib build
+
+--host=${CT_TARGET} with (e.g.) -m32 isn't enough
+and unfortunately GCC has no way of giving us the
+right triplet for each of the multiarches so some
+prior knowledge is used.
+
+Debian can use "gcc -m32 -print-multiarch" but
+unfortunately this is unreliable on other GCCs
+
+The old symlinks from lib32/64 to lib are only
+made if CT_MULTILIB=n
+
+Also, the dummy libc.so is made using the right
+extra_cflags so that it's of the correct arch.
+---
+ scripts/build/cc/100-gcc.sh               |  1 +
+ scripts/build/libc/glibc-eglibc.sh-common | 31 +++++++++++++++++++++++++------
+ scripts/crosstool-NG.sh.in                | 25 ++++++++++++++-----------
+ 3 files changed, 40 insertions(+), 17 deletions(-)
+
+diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
+index ede8cc5..f2ee583 100644
+--- a/scripts/build/cc/100-gcc.sh
++++ b/scripts/build/cc/100-gcc.sh
+@@ -364,6 +364,7 @@ do_gcc_core_backend() {
+ 
+     if [ "${CT_MULTILIB}" = "y" ]; then
+         extra_config+=("--enable-multilib")
++        extra_config+=("--enable-targets=all")
+     else
+         extra_config+=("--disable-multilib")
+     fi
+diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
+index b9c55cb..b26fff6 100644
+--- a/scripts/build/libc/glibc-eglibc.sh-common
++++ b/scripts/build/libc/glibc-eglibc.sh-common
+@@ -76,6 +76,9 @@ do_libc_backend() {
+     local multilib
+     local multi_dir
+     local multi_flags
++    local multi_arch
++    local native_arch
++    local rest_of_triplet
+     local extra_dir
+     local libc_headers libc_startfiles libc_full
+     local hdr
+@@ -85,6 +88,9 @@ do_libc_backend() {
+         eval "${arg// /\\ }"
+     done
+ 
++    native_arch=$(echo "${CT_TARGET}" | ${sed} "s,\(^[^\-]*\).*,\1,g")
++    rest_of_triplet=$(echo "${CT_TARGET}" | ${sed} "s,^[^\-]*\(.*\),\1,g")
++
+     case "${libc_mode}" in
+         startfiles)
+             CT_DoStep INFO "Installing C library headers & start files"
+@@ -104,6 +110,7 @@ do_libc_backend() {
+     # If gcc is not configured for multilib, it still prints
+     # a single line for the default settings
+     multilibs=( $("${CT_TARGET}-gcc" -print-multi-lib 2>/dev/null) )
++    multi_arch="${native_arch}"
+     for multilib in "${multilibs[@]}"; do
+         multi_dir="${multilib%%;*}"
+         if [ "${multi_dir}" != "." ]; then
+@@ -114,6 +121,14 @@ do_libc_backend() {
+                           )"
+             extra_dir="/${multi_dir}"
+ 
++            # If more substitutions are needed then they
++            # should be added here, AArch64 for example?
++            if [ "${extra_flags}" = " -m32" ]; then
++              multi_arch=${native_arch/x86_64/i686}
++            elif [ "${extra_flags}" = " -m64" ]; then
++              multi_arch=${native_arch/i686/x86_64}
++            fi
++
+             # glibc install its files in ${extra_dir}/{usr/,}lib
+             # while gcc expects them in {,usr/}lib/${extra_dir}.
+             # Prepare some symlinks so glibc installs in fact in
+@@ -140,10 +155,11 @@ do_libc_backend() {
+ 
+         CT_mkdir_pushd "${CT_BUILD_DIR}/build-libc-${libc_mode}${extra_dir//\//_}"
+ 
+-        do_libc_backend_once extra_dir="${extra_dir}"               \
+-                             extra_flags="${extra_flags}"           \
+-                             libc_headers="${libc_headers}"         \
+-                             libc_startfiles="${libc_startfiles}"   \
++        do_libc_backend_once extra_dir="${extra_dir}"                           \
++                             extra_flags="${extra_flags}"                       \
++                             libc_headers="${libc_headers}"                     \
++                             libc_startfiles="${libc_startfiles}"               \
++                             libc_triplet="${multi_arch}${rest_of_triplet}"     \
+                              libc_full="${libc_full}"
+ 
+         CT_Popd
+@@ -180,6 +196,7 @@ do_libc_backend() {
+ #   Parameter           : Definition                            : Type      : Default
+ #   libc_headers        : Build libc headers                    : bool      : n
+ #   libc_startfiles     : Build libc start-files                : bool      : n
++#   libc_triplet        : Build libc triplet                    : string    : ${CT_TARGET}
+ #   libc_full           : Build full libc                       : bool      : n
+ #   extra_flags         : Extra CFLAGS to use (for multilib)    : string    : (empty)
+ #   extra_dir           : Extra subdir for multilib             : string    : (empty)
+@@ -196,6 +213,7 @@ do_libc_backend_once() {
+     local glibc_cflags
+     local float_extra
+     local endian_extra
++    local libc_triplet="${CT_TARGET}"
+     local arg
+ 
+     for arg in "$@"; do
+@@ -354,7 +372,7 @@ do_libc_backend_once() {
+     "${src_dir}/configure"                                          \
+         --prefix=/usr                                               \
+         --build=${CT_BUILD}                                         \
+-        --host=${CT_TARGET}                                         \
++        --host=${libc_triplet}                                      \
+         --cache-file="$(pwd)/config.cache"                          \
+         --without-cvs                                               \
+         --disable-profile                                           \
+@@ -438,7 +456,8 @@ do_libc_backend_once() {
+             # However, since we will never actually execute its code,
+             # it doesn't matter what it contains.  So, treating '/dev/null'
+             # as a C source file, we produce a dummy 'libc.so' in one step
+-            CT_DoExecLog ALL "${cross_cc}" -nostdlib        \
++            CT_DoExecLog ALL "${cross_cc}" ${extra_flags} \
++                                            -nostdlib       \
+                                            -nostartfiles    \
+                                            -shared          \
+                                            -x c /dev/null   \
+diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
+index 3c98b8c..5a24439 100644
+--- a/scripts/crosstool-NG.sh.in
++++ b/scripts/crosstool-NG.sh.in
+@@ -338,22 +338,25 @@ if [ -z "${CT_RESTART}" ]; then
+         CT_Popd
+     fi
+ 
+-    # Since we're *not* multilib on the target side, we want all the
+-    # libraries to end up in "lib".  We create "lib64" (for 64-bit
++    # If we are *not* multilib on the target side, we want all the
++    # libraries to end up in "lib".  So create "lib64" (for 64-bit
+     # build or host architectures) and "lib32" (for 32-bit emulation
+     # on 64-bit) as symlinks to "lib".
+     #
+     # Not all of these symlinks are necessary, but better safe than
+     # sorry. They are summarily removed by build/internals.sh:do_finish.
+-    for d in                            \
+-        "${CT_PREFIX_DIR}"              \
+-        "${CT_SYSROOT_DIR}"             \
+-        "${CT_SYSROOT_DIR}/usr"         \
+-        "${CT_PREFIX_DIR}/${CT_TARGET}" \
+-    ; do
+-        CT_DoExecLog ALL ln -sf "lib" "${d}/lib32"
+-        CT_DoExecLog ALL ln -sf "lib" "${d}/lib64"
+-    done
++    if [ "${CT_MULTILIB}" = "n" ]; then
++        for d in                            \
++            "${CT_PREFIX_DIR}"              \
++            "${CT_SYSROOT_DIR}"             \
++            "${CT_SYSROOT_DIR}/usr"         \
++            "${CT_PREFIX_DIR}/${CT_TARGET}" \
++        ; do
++            CT_DoExecLog ALL ln -sf "lib" "${d}/lib32"
++            CT_DoExecLog ALL ln -sf "lib" "${d}/lib64"
++        done
++    fi
++
+ 
+     # Determine build system if not set by the user
+     if [ -z "${CT_BUILD}" ]; then
+-- 
+1.8.4.3
+

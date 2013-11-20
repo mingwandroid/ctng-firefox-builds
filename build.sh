@@ -15,6 +15,12 @@
 #    "__register_frame is for registering DWARF unwind info.  It's currently under __GNUC__, since that usually implies linkage of libgcc, which provides that symbol.
 #     Patches and bugs for avoiding this under mingw when libgcc is using SEH for unwinding are welcome."
 #
+# .. I am currently enabling Linux builds, and have run into:
+# 3. Clang needs sysroot passing to it as per Darwin (probably; can't find crti.o or some such)
+#
+# 4. GTK must be built too and lots of other stuff probably: http://joekiller.com/2012/06/03/install-firefox-on-amazon-linux-x86_64-compiling-gtk/
+#    I may need to adapt that ..
+#    https://gist.github.com/phstc/4121839
 
 # Errors are fatal (occasionally this will be temporarily disabled)
 set -e
@@ -39,6 +45,12 @@ declare -A TARGET_TO_PREFIX
 TARGET_TO_PREFIX["osx"]="o"
 TARGET_TO_PREFIX["windows"]="w"
 TARGET_TO_PREFIX["linux"]="l"
+TARGET_TO_PREFIX["ps3"]="p"
+
+declare -A VENDOR_OSES
+VENDOR_OSES["osx"]="apple-darwin10"
+VENDOR_OSES["windows"]="x86_64-w64-mingw32"
+VENDOR_OSES["linux"]="unknown-linux-gnu"
 
 #########################################
 # Simple option processing and options. #
@@ -118,9 +130,12 @@ symbolic link to be made from ..
 .. to ..
 \${HOME}/MacOSX10.6.sdk/usr/lib/gcc/x86_64-apple-darwin10
 before running this script."
-option BUILD_GCC           no \
+option BUILD_GCC           yes \
 "Do you want GCC 4.2.1 with that? llvm-gcc is broken
 at present."
+option BUILD_CLANG         no \
+"Do you want Clang with that?"
+
 #################################################
 # This set of options are for the Firefox build #
 #################################################
@@ -143,6 +158,9 @@ Note: cross compilers built to run on 32bit systems
 can still target 64bit OS X and vice-versa, however
 with 32bit build compilers, linking failures due to
 a lack of address space will probably happen."
+option MOZ_COMPILER        clang \
+"Which compiler do you want to use, valid options
+are clang and gcc"
 
 # Check for command-line modifications to options.
 while [ "$#" -gt 0 ]; do
@@ -218,9 +236,12 @@ else
   BITS=64
 fi
 
-if [ "${MOZ_TARGET_ARCH}" = "i686" ]; then
-  echo "Warning: You set --moz-target-arch=i686, but that's not a valid Mach-O arch, changing this to i386 for you."
+if [ "${MOZ_TARGET_ARCH}" = "i686" -a "${TARGET_OS}" = "darwin" ]; then
+  echo "Warning: You set --moz-target-arch=i686, but that's not a valid ${TARGET_OS} arch, changing this to i386 for you."
   MOZ_TARGET_ARCH=i386
+elif [ "${MOZ_TARGET_ARCH}" = "i386" -a "${TARGET_OS}" != "darwin" ]; then
+  echo "Warning: You set --moz-target-arch=i386, but that's not a valid ${TARGET_OS} arch, changing this to i686 for you."
+  MOZ_TARGET_ARCH=i686
 fi
 
 if [ "$COMPILER_RT" = "yes" ]; then
@@ -237,7 +258,13 @@ some host/target confusion you need to make a link from ..
   fi
 fi
 
-CROSSCC="$(uname -m)"-apple-darwin10
+VENDOR_OS=${VENDOR_OSES[${TARGET_OS}]}
+# The first part of CROSSCC is HOST_ARCH and the compilers are
+# built to run on that architecture of the host OS. They will
+# generally be multilib though, so MOZ_TARGET_ARCH gets used for
+# all target folder names. CROSSCC is *only* used as part of
+# the filenames for the compiler components.
+CROSSCC=${HOST_ARCH}-${VENDOR_OS}
 
 # Before building compiler-rt with 10.6.sdk, we need to:
 # pushd /home/ray/x-tools/x86_64-apple-darwin10/x86_64-apple-darwin10/sysroot/usr/lib
@@ -445,10 +472,18 @@ cross_clang_build()
     else
       do_sed $"s/CT_LLVM_COMPILER_RT=y/CT_LLVM_COMPILER_RT=n/g" ${CTNG_SAMPLE_CONFIG}
     fi
+
     if [ "$BUILD_GCC" = "yes" ]; then
-      do_sed $"s/CT_CC_gcc=n/CT_CC_gcc=y/g" ${CTNG_SAMPLE_CONFIG}
-    else
-      do_sed $"s/CT_CC_gcc=y/CT_CC_gcc=n/g" ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_GCC_V_4_8_2=y"   >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_CXX=y"      >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_glibc=y"       >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_GLIBC_V_2_7=y" >> ${CTNG_SAMPLE_CONFIG}
+    fi
+
+    if [ "$BUILD_CLANG" = "yes" ]; then
+      echo "CT_LLVM_V_3_3=y"       >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LLVM_COMPILER_RT=n" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_clang=y"         >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
@@ -496,27 +531,42 @@ cross_clang_package()
 firefox_build()
 {
   DEST=${SRC}${BUILDDIRSUFFIX}
+  # OBJDIR is relative to @TOPSRCDIR@ (which is e.g. mozilla-esr24.patched)
+  # so have top level objdir as a sibling of that.
+  OBJDIR=../obj-moz-${VENDOR_OS}-${MOZ_TARGET_ARCH}
   MOZILLA_CONFIG=${PWD}/${DEST}/.mozconfig
   if [ "${MOZ_CLEAN}" = "yes" -a "${MOZ_BUILD_IN_SRCDIR}" = "no" ]; then
     [ -d ${DEST} ] && rm -rf ${DEST}
   fi
-  if [ ! -d ${DEST}/obj-macos/dist/firefox/Firefox${MOZBUILDSUFFIX}.app ]; then
+  if [ ! -d ${DEST}/${OBJDIR}/dist/firefox/Firefox${MOZBUILDSUFFIX}.app ]; then
     [ -d ${DEST} ] || mkdir -p ${DEST}
     pushd ${DEST}
-    cp "${THISDIR}"/mozilla.configs/mozconfig${MOZBUILDSUFFIX} ./.mozconfig
-    do_sed $"s#CROSS_TCROOT=\$HOME/x-tools/\${HOST_ARCH}-apple-darwin10#CROSS_TCROOT=${BUILT_XCOMPILER_PREFIX}#g" .mozconfig
-    if [ "${HOST_ARCH}" = "i686" ]; then
-      do_sed $"s/HOST_ARCH=x86_64/HOST_ARCH=i686/g" .mozconfig
+    cp "${THISDIR}"/mozilla.configs/mozconfig.${TARGET_OS}            .mozconfig
+    do_sed $"s/TARGET_ARCH=/TARGET_ARCH=${MOZ_TARGET_ARCH}/g"         .mozconfig
+    do_sed $"s/HOST_ARCH=/HOST_ARCH=${HOST_ARCH}/g"                   .mozconfig
+    do_sed $"s/VENDOR_OS=/VENDOR_OS=${VENDOR_OS}/g"                   .mozconfig
+    do_sed $"s#TC_STUB=#TC_STUB=${BUILT_XCOMPILER_PREFIX}/bin/${CROSSCC}#g" .mozconfig
+    do_sed $"s#OBJDIR=#OBJDIR=${OBJDIR}#g"                            .mozconfig
+    TC_PATH_PREFIX=
+    if [ "${MOZ_COMPILER}" = "clang" ]; then
+      do_sed $"s/CCOMPILER=/CCOMPILER=clang/g"                        .mozconfig
+      do_sed $"s/CXXCOMPILER=/CXXCOMPILER=clang++/g"                  .mozconfig
     else
-      do_sed $"s/HOST_ARCH=i686/HOST_ARCH=x86_64/g" .mozconfig
-    fi
-    if [ "${MOZ_TARGET_ARCH}" = "i386" ]; then
-      do_sed $"s/TARGET_ARCH=x86_64/TARGET_ARCH=i386/g" .mozconfig
-    else
-      do_sed $"s/TARGET_ARCH=i386/TARGET_ARCH=x86_64/g" .mozconfig
+      do_sed $"s/CCOMPILER=/CCOMPILER=gcc/g"                          .mozconfig
+      do_sed $"s/CXXCOMPILER=/CXXCOMPILER=g++/g"                      .mozconfig
     fi
 
+    if [ "$MOZ_DEBUG" = "yes" ]; then
+      echo "ac_add_options --enable-debug"          >> .mozconfig
+      echo "ac_add_options --disable-optimize"      >> .mozconfig
+      echo "ac_add_options --disable-install-strip" >> .mozconfig
+      echo "ac_add_options --enable-debug-symbols"  >> .mozconfig
+    else
+      echo "ac_add_options --disable-debug"         >> .mozconfig
+      echo "ac_add_options --enable-optimize"       >> .mozconfig
+    fi
     popd
+
     pushd ${DEST}
       echo "Configuring, to see log, tail -F ${PWD}/configure.log from another terminal"
       time make -f ${PWD}/../${SRC}/client.mk configure > configure.log 2>&1 || ( echo "configure failed, see ${PWD}/configure.log" ; exit 1 )
@@ -991,3 +1041,234 @@ diff -urN a b > update-config-sub-config-guess-for-MSYS2.patch
 
 # Making a git am'able patch after a merge has happened ( http://stackoverflow.com/questions/2285699/git-how-to-create-patches-for-a-merge )
 # git log -p --pretty=email --stat -m --first-parent 7eafc9dce69a184d1b75e4fa26063dd38c863ea4..HEAD
+
+
+# Compiling libgcc_s.so uses wrong multilib variant by the look of it.
+pushd /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/32/libgcc
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include    -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -Os -m32 -B./ _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc && rm -f 32/libgcc_s.so && if [ -f 32/libgcc_s.so.1 ]; then mv -f 32/libgcc_s.so.1 32/libgcc_s.so.1.backup; else true; fi && mv 32/libgcc_s.so.1.tmp 32/libgcc_s.so.1 && ln -s libgcc_s.so.1 32/libgcc_s.so
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include    -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -Os -m32 -B./ _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc -v
+# So even though -print-multi-lib shows what we expect .. it doesn't seem to be look in that folder.
+# but unfortunately, even if it did look in the right place, they contain the wrong stuff.
+# [ray@arch-work libgcc]$ file /home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/usr/lib/libc.so
+# /home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/usr/lib/libc.so: ELF 64-bit LSB  shared object, x86-64, version 1 (SYSV), dynamically linked, not stripped
+# [ray@arch-work libgcc]$ file /home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/usr/lib/32/libc.so
+# /home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/usr/lib/32/libc.so: ELF 64-bit LSB  shared object, x86-64, version 1 (SYSV), dynamically linked, not stripped
+# [ray@arch-work libgcc]$ ls -l /home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/usr/lib/
+# Hmm .. here's how mingw-w64 say to do it:
+# http://sourceforge.net/apps/trac/mingw-w64/wiki/Answer%20Multilib%20Toolchain
+
+# pushd /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/32/libgcc
+# /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include    -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -Os -m32 -B./ _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc
+
+From: /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/src/gcc-4.8.2/libgcc/Makefile.in
+libgcc_s$(SHLIB_EXT): $(libgcc-s-objects) $(extra-parts) libgcc.a
+        # @multilib_flags@ is still needed because this may use
+        # $(GCC_FOR_TARGET) and $(LIBGCC2_CFLAGS) directly.
+        # @multilib_dir@ is not really necessary, but sometimes it has
+        # more uses than just a directory name.
+        $(mkinstalldirs) $(MULTIDIR)
+        $(subst @multilib_flags@,$(CFLAGS) -B./,$(subst \
+                @multilib_dir@,$(MULTIDIR),$(subst \
+                @shlib_objs@,$(objects) libgcc.a,$(subst \
+                @shlib_base_name@,libgcc_s,$(subst \
+                @shlib_map_file@,$(mapfile),$(subst \
+                @shlib_slibdir_qual@,$(MULTIOSSUBDIR),$(subst \
+                @shlib_slibdir@,$(shlib_slibdir),$(SHLIB_LINK))))))))
+
+
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/libgcc/Makefile
+
+libgcc_s$(SHLIB_EXT): $(libgcc-s-objects) $(extra-parts) libgcc.a
+        # @multilib_flags@ is still needed because this may use
+        # $(GCC_FOR_TARGET) and $(LIBGCC2_CFLAGS) directly.
+        # @multilib_dir@ is not really necessary, but sometimes it has
+        # more uses than just a directory name.
+        $(mkinstalldirs) $(MULTIDIR)
+        $(subst @multilib_flags@,$(CFLAGS) -B./,$(subst \
+                @multilib_dir@,$(MULTIDIR),$(subst \
+                @shlib_objs@,$(objects) libgcc.a,$(subst \
+                @shlib_base_name@,libgcc_s,$(subst \
+                @shlib_map_file@,$(mapfile),$(subst \
+                @shlib_slibdir_qual@,$(MULTIOSSUBDIR),$(subst \
+                @shlib_slibdir@,$(shlib_slibdir),$(SHLIB_LINK))))))))
+
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include    -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -Os -m32 -B./ _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc && rm -f 32/libgcc_s.so && if [ -f 32/libgcc_s.so.1 ]; then mv -f 32/libgcc_s.so.1 32/libgcc_s.so.1.backup; else true; fi && mv 32/libgcc_s.so.1.tmp 32/libgcc_s.so.1 && ln -s libgcc_s.so.1 32/libgcc_s.so
+
+Makefiles:
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/libgcc/Makefile
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/32/libgcc/Makefile
+
+.. 2nd one has ..
+
+MULTIDIRS =
+MULTISUBDIR = /32
+
+.. but why MULTIDIRS when the usages in same file are of MULTIDIR
+
+Failure line is:
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include    -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -Os -m32 -B./ _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc
+
+.. which contains:  -m32 -B./
+
+
+
+From Arch linux:
+https://projects.archlinux.org/svntogit/community.git/tree/trunk/PKGBUILD?h=packages/lib32-glibc
+
+${srcdir}/${_pkgbasename}-${pkgver}/configure --prefix=/usr \
+     --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+     --with-headers=/usr/include \
+     --with-bugurl=https://bugs.archlinux.org/ \
+     --enable-add-ons=nptl,libidn \
+     --enable-obsolete-rpc \
+     --enable-kernel=2.6.32 \
+     --enable-bind-now --disable-profile \
+     --enable-stackguard-randomization \
+     --enable-lock-elision \
+     --enable-multi-arch i686-unknown-linux-gnu
+
+# enable-multi-arch is something like Apple's fat binaries I think, so probably not relevant to this, also it doesn't take any option.
+
+from /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.log
+Our configure for libc_startfiles_32:
+$ /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/src/glibc-2.18/configure --prefix=/usr \
+   --build=x86_64-build_unknown-linux-gnu --host=i686-unknown-linux-gnu --cache-file=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache \
+   --without-cvs --disable-profile --without-gd --with-headers=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/usr/include \
+   --disable-debug --disable-sanity-checks --enable-kernel=2.6.33 --with-__thread --with-tls --enable-shared --enable-add-ons=nptl --with-pkgversion=crosstool-NG hg+unknown-20131121.135846
+
+from /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles/config.log
+Out configure for libc_startfiles:
+$ /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/src/glibc-2.18/configure --prefix=/usr \
+  --build=x86_64-build_unknown-linux-gnu --host=x86_64-unknown-linux-gnu --cache-file=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles/config.cache \
+  --without-cvs --disable-profile --without-gd --with-headers=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/usr/include \
+  --disable-debug --disable-sanity-checks --enable-kernel=2.6.33 --with-__thread --with-tls --enable-shared --enable-add-ons=nptl --with-pkgversion=crosstool-NG hg+unknown-20131121.135846
+
+.. so      --enable-multi-arch i686-unknown-linux-gnu is not being passed in here?
+
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/src/glibc-2.18/configure --help does not list any arguments for --enable-multi-arch
+
+https://wiki.debian.org/Multiarch/HOWTO
+
+from: https://sourceware.org/glibc/wiki/x32 :
+
+they enable x32 like this:
+--target=x86_64-x32-linux --build=x86_64-linux --host=x86_64-x32-linux
+
+From gcc-multilib:
+https://projects.archlinux.org/svntogit/community.git/tree/trunk/PKGBUILD?h=packages/gcc-multilib
+
+ ${srcdir}/${_basedir}/configure --prefix=/usr \
+      --libdir=/usr/lib --libexecdir=/usr/lib \
+      --mandir=/usr/share/man --infodir=/usr/share/info \
+      --with-bugurl=https://bugs.archlinux.org/ \
+      --enable-languages=c,c++,ada,fortran,go,lto,objc,obj-c++ \
+      --enable-shared --enable-threads=posix \
+      --with-system-zlib --enable-__cxa_atexit \
+      --disable-libunwind-exceptions --enable-clocale=gnu \
+      --disable-libstdcxx-pch \
+      --enable-gnu-unique-object --enable-linker-build-id \
+      --enable-cloog-backend=isl --disable-cloog-version-check \
+      --enable-lto --enable-gold --enable-ld=default \
+      --enable-plugin --with-plugin-ld=ld.gold \
+      --with-linker-hash-style=gnu --disable-install-libiberty \
+      --enable-multilib --disable-libssp --disable-werror \
+      --enable-checking=release
+
+From /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/config.log
+$ /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/src/gcc-4.8.2/configure \
+  --build=x86_64-build_unknown-linux-gnu --host=x86_64-build_unknown-linux-gnu --target=x86_64-unknown-linux-gnu \
+  --prefix=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-local-prefix=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot \
+  --disable-libmudflap \
+  --with-sysroot=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot \
+  --enable-shared --with-pkgversion=crosstool-NG hg+unknown-20131121.135846 \
+  --enable-__cxa_atexit \
+  --with-gmp=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-mpfr=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-mpc=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-isl=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-cloog=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-libelf=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools \
+  --enable-lto \
+  --with-host-libstdcxx=-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm \
+  --enable-target-optspace --disable-libgomp --disable-libmudflap --disable-nls --enable-multilib --enable-languages=c
+
+.. Getting to the nuts and bolts of the failure:
+
+pushd /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/32/libgcc
+PATH=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/tools/bin:/home/ray/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/ray/ctng-firefox-builds//bin
+# /home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/bin *** <- contains binutils install.
+# /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/bin *** <- contains GCC stage 1 and some shell scripts too (x86_64-unknown-linux-gnu-gcc is GCC stage 1, x86_64-build_unknown-linux-gnu-g++ is shell)
+# /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/tools/bin *** <- contains sed awk wrapper scripts etc.
+pushd /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/32/libgcc
+PATH=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/tools/bin:/home/ray/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/ray/ctng-firefox-builds//bin \
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include    -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -Os -m32 -B./ _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc
+
+
+PATH=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/tools/bin:/home/ray/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/ray/ctng-firefox-builds//bin /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include    -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -Os -m32 -Bm32/ _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc -v
+
+
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc
+
+
+PATH=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/tools/bin:/home/ray/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/ray/ctng-firefox-builds//bin 
+
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc \
+  -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ \
+  -m32 -lc -v -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -Os -m32  libgcc.a -lc 
+
+PATH=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/tools/bin:/home/ray/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/ray/ctng-firefox-builds//bin gdbserver 127.0.0.1:6900 /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc \
+-B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ \
+-m32 -lc -v -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -Os -m32  libgcc.a -lc 
+
+Gives:
+LIBRARY_PATH=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/32/:/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/lib/../lib/:/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/usr/lib/../lib/:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/:/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/lib/:/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot/usr/lib/
+
+
+# Some info from MinGW-w64 about multilib cross compilers: http://sourceforge.net/apps/trac/mingw-w64/wiki/Cross%20Win32%20and%20Win64%20compiler
+# Binutils:
+../path/to/configure --target=x86_64-w64-mingw32 \
+--enable-targets=x86_64-w64-mingw32,i686-w64-mingw32
+
+[DEBUG]    ==> Executing: 'CFLAGS=-O0 -ggdb -pipe ' 'CXXFLAGS=-O0 -ggdb -pipe ' 'LDFLAGS= ' '/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/src/binutils-2.22/configure' '--build=x86_64-build_unknown-linux-gnu' '--host=x86_64-build_unknown-linux-gnu' '--target=x86_64-unknown-linux-gnu' '--prefix=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64' '--disable-werror' '--enable-ld=yes' '--enable-gold=no' '--with-pkgversion=crosstool-NG hg+unknown-20131121.233230' '--enable-multilib' '--disable-nls' '--with-sysroot=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64/x86_64-unknown-linux-gnu/sysroot' 
+# Oddly neither --enable-targets nor --enable-multilib show up from configure --help, and --enable-targets doesn't appear in the script either (--enable-multilib does though)
+# It seems like binutils targets can be specified as any free parameters on the end due to:
+# *) as_fn_append ac_config_targets " $1"
+
+
+# GCC:
+For multilib:
+../path/to/configure --target=x86_64-w64-mingw32 --enable-targets=all
+
+.. I added:
+
+    if [ "${CT_MULTILIB}" = "y" ]; then
+        extra_config+=("--enable-multilib")
+        extra_config+=("--enable-targets=all")
+    else
+        extra_config+=("--disable-multilib")
+    fi
+
+.. to 100-gcc.sh but it made no difference.
+
+
+# A difference comparer:
+export TEHCC=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc ; export OPTS="-isystem arse -B. -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/"; $TEHCC ~/Dropbox/a.c $OPTS -m64 -v > ~/Dropbox/m64.txt 2>&1; $TEHCC ~/Dropbox/a.c $OPTS -m32 -v > ~/Dropbox/m32.txt 2>&1
+export TEHCC=gcc ; export OPTS="-isystem arse -B. -B/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/"; $TEHCC ~/Dropbox/a.c $OPTS -m64 -v > ~/Dropbox/m64.txt 2>&1; $TEHCC ~/Dropbox/a.c $OPTS -m32 -v > ~/Dropbox/m32.txt 2>&1
+
+# bcompare ~/Dropbox/m32.txt ~/Dropbox/m64.txt &
+
+.. At the end of the day, "-B./" is the problem, we got  -m32 -B./ 
+and according to:
+http://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html
+"The runtime support file libgcc.a can also be searched for using the -B prefix, if needed. If it is not found there, the two standard prefixes above are tried, and that is all. The file is left out of the link if it is not found by those means."
+
+# More, so I guess my dummy libc's need to be put in the right folders, which appear to be the stage 2 libgcc folders?
+# i.e. /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/32/libgcc
+#  and /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/32/libgcc/m32
+# http://www.emdebian.org/~zumbi/sysroot/gcc-4.6-arm-sysroot-linux-gnueabihf-0.1/build-sysroot
+
+# Seems like an interesting page:
+# http://trac.cross-lfs.org/
+# CLFS takes advantage of the target system's capability, by utilizing a multilib capable build system
+# CLFS-x86.pdf is a very useful document.

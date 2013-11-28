@@ -113,6 +113,12 @@ option CTNG_CLEAN          no \
 "Remove old crosstool-ng build and artefacts
 before starting the build, otherwise an old
 crosstool-ng may be re-used."
+option CTNG_DEBUGGABLE     no \
+"Do you want the toolchain build with crosstool-ng
+to be debuggable? Currently, you can't build a GCC
+with old-ish ISLs at -O2 on Windows. This was fixed
+about a year ago."
+debuggable
 option LLVM_VERSION        HEAD \
 "HEAD, 3_3, 3_2, 3_1 or 3_0 (I test with 3_3 most,
 then HEAD next, then the others hardly at all)."
@@ -474,16 +480,22 @@ cross_clang_build()
     fi
 
     if [ "$BUILD_GCC" = "yes" ]; then
-      echo "CT_CC_GCC_V_4_8_2=y"   >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_LANG_CXX=y"      >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_LIBC_glibc=y"       >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_LIBC_GLIBC_V_2_7=y" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_GCC_V_4_8_2=y"       >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_CXX=y"          >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_glibc=y"           >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_GLIBC_V_2_7=y"     >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     if [ "$BUILD_CLANG" = "yes" ]; then
-      echo "CT_LLVM_V_3_3=y"       >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_LLVM_COMPILER_RT=n" >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_clang=y"         >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LLVM_V_3_3=y"           >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LLVM_COMPILER_RT=n"     >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_clang=y"             >> ${CTNG_SAMPLE_CONFIG}
+    fi
+
+    if [ "$CTNG_DEBUGGABLE" = "yes" ]; then
+      echo "CT_DEBUGGABLE_TOOLCHAIN=y" >> ${CTNG_SAMPLE_CONFIG}
+    else
+      echo "CT_DEBUGGABLE_TOOLCHAIN=n" >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}

@@ -1,4 +1,4 @@
-From f1224218a3701842bcd68bad75eaefb3d88fcae8 Mon Sep 17 00:00:00 2001
+From 958db3d3e2a1edda97910f3c694ecb68f0ce0164 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 25 Nov 2013 22:40:03 +0000
 Subject: [PATCH 4/5] Add PS3 patches from Martell
@@ -1112,7 +1112,7 @@ index 0000000..0f03425
 + 	extra_parts="$extra_parts ecrti.o ecrtn.o ncrti.o ncrtn.o"
 diff --git a/patches/newlib/1.20.0/000-newlib-1.20.0-PS3.patch b/patches/newlib/1.20.0/000-newlib-1.20.0-PS3.patch
 new file mode 100644
-index 0000000..c204fd9
+index 0000000..0d92be4
 --- /dev/null
 +++ b/patches/newlib/1.20.0/000-newlib-1.20.0-PS3.patch
 @@ -0,0 +1,12812 @@
@@ -13973,5 +13973,5 @@ index 0000000..7670b1a
 + #include "mp_std_bits.inlines.hh"
 + 
 -- 
-1.8.4.3
+1.8.4.2
 

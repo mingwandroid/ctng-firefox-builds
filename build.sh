@@ -118,7 +118,6 @@ option CTNG_DEBUGGABLE     no \
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
 about a year ago."
-debuggable
 option LLVM_VERSION        HEAD \
 "HEAD, 3_3, 3_2, 3_1 or 3_0 (I test with 3_3 most,
 then HEAD next, then the others hardly at all)."

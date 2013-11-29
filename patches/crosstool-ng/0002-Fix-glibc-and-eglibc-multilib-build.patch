@@ -1,4 +1,4 @@
-From 1bc6abb39c19a35a32473789933e218d74df819d Mon Sep 17 00:00:00 2001
+From 07985c5f74239388a0b756b44212d76975c4e742 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
 Subject: [PATCH 2/5] Fix glibc and eglibc multilib build
@@ -22,9 +22,9 @@ Specify --with-binutils= for glibc
 .. (WIP) fail deliberately.
 ---
  scripts/build/cc/100-gcc.sh               |  1 +
- scripts/build/libc/glibc-eglibc.sh-common | 35 +++++++++++++++++++++++++------
- scripts/crosstool-NG.sh.in                | 25 ++++++++++++----------
- 3 files changed, 44 insertions(+), 17 deletions(-)
+ scripts/build/libc/glibc-eglibc.sh-common | 32 +++++++++++++++++++++++++------
+ scripts/crosstool-NG.sh.in                | 25 +++++++++++++-----------
+ 3 files changed, 41 insertions(+), 17 deletions(-)
 
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
 index ede8cc5..f2ee583 100644
@@ -39,7 +39,7 @@ index ede8cc5..f2ee583 100644
          extra_config+=("--disable-multilib")
      fi
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index b9c55cb..ac89723 100644
+index b9c55cb..b1c6928 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
 @@ -76,6 +76,9 @@ do_libc_backend() {
@@ -85,7 +85,7 @@ index b9c55cb..ac89723 100644
              # glibc install its files in ${extra_dir}/{usr/,}lib
              # while gcc expects them in {,usr/}lib/${extra_dir}.
              # Prepare some symlinks so glibc installs in fact in
-@@ -140,12 +155,16 @@ do_libc_backend() {
+@@ -140,10 +155,11 @@ do_libc_backend() {
  
          CT_mkdir_pushd "${CT_BUILD_DIR}/build-libc-${libc_mode}${extra_dir//\//_}"
  
@@ -100,13 +100,8 @@ index b9c55cb..ac89723 100644
 +                             libc_triplet="${multi_arch}${rest_of_triplet}"     \
                               libc_full="${libc_full}"
  
-+        CT_DoLog ERROR "Failing deliberately after libc-startfiles for comparison purposes"
-+        exit 1
-+
          CT_Popd
- 
-         if [ "${multi_dir}" != "." ]; then
-@@ -180,6 +199,7 @@ do_libc_backend() {
+@@ -180,6 +196,7 @@ do_libc_backend() {
  #   Parameter           : Definition                            : Type      : Default
  #   libc_headers        : Build libc headers                    : bool      : n
  #   libc_startfiles     : Build libc start-files                : bool      : n
@@ -114,7 +109,7 @@ index b9c55cb..ac89723 100644
  #   libc_full           : Build full libc                       : bool      : n
  #   extra_flags         : Extra CFLAGS to use (for multilib)    : string    : (empty)
  #   extra_dir           : Extra subdir for multilib             : string    : (empty)
-@@ -196,6 +216,7 @@ do_libc_backend_once() {
+@@ -196,6 +213,7 @@ do_libc_backend_once() {
      local glibc_cflags
      local float_extra
      local endian_extra
@@ -122,7 +117,7 @@ index b9c55cb..ac89723 100644
      local arg
  
      for arg in "$@"; do
-@@ -354,12 +375,13 @@ do_libc_backend_once() {
+@@ -354,12 +372,13 @@ do_libc_backend_once() {
      "${src_dir}/configure"                                          \
          --prefix=/usr                                               \
          --build=${CT_BUILD}                                         \
@@ -137,7 +132,7 @@ index b9c55cb..ac89723 100644
          "${extra_config[@]}"                                        \
          "${CT_LIBC_GLIBC_EXTRA_CONFIG_ARRAY[@]}"
  
-@@ -438,7 +460,8 @@ do_libc_backend_once() {
+@@ -438,7 +457,8 @@ do_libc_backend_once() {
              # However, since we will never actually execute its code,
              # it doesn't matter what it contains.  So, treating '/dev/null'
              # as a C source file, we produce a dummy 'libc.so' in one step

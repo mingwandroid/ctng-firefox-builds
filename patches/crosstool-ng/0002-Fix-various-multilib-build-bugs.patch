@@ -1,4 +1,4 @@
-From b17829c6f0d64eddb445e3cfab6f6afa6c3337df Mon Sep 17 00:00:00 2001
+From 0f201933aa8986340649dd4d7883da506971163f Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
 Subject: [PATCH 2/5] Fix various multilib build bugs
@@ -15,13 +15,18 @@ The old symlinks from lib32/64 to lib are only
 made if CT_MULTILIB=n, and the comment that we
 are not multilib on the target side corrected.
 
-The dummy libc.so is compiled with extra_cflags
-so that it is for the current multilib arch.
+The stub libc.so is compiled with extra_cflags
+so that it is for the correct multilib arch.
 
-The dummy libc.so and crt* files and placed in
+The stub libc.so and crt*.o files are moved to
 the multilib os directory and not the multilib
 directory if gcc arg -print-multi-os-directory
 is supported.
+
+--libdir=<> is passed to libc's configure such
+that it is made inplace in the multilib-os dir
+and 'Fixing up multilib location' is no longer
+required.
 
 Before starting the build of the 2nd stage GCC,
 as well as copying the headers, it is necessary
@@ -35,12 +40,12 @@ ranlib was added to binutils tools list to make
 available to the core C compiler because static
 libraries are built and ranlib is used on them.
 ---
- scripts/build/binutils/binutils.sh        |  6 ++--
- scripts/build/cc/100-gcc.sh               | 21 +++++++----
- scripts/build/cc/llvmgcc.sh               | 20 +++++++----
- scripts/build/libc/glibc-eglibc.sh-common | 59 ++++++++++++++++++++++++++-----
- scripts/crosstool-NG.sh.in                | 25 +++++++------
- 5 files changed, 94 insertions(+), 37 deletions(-)
+ scripts/build/binutils/binutils.sh        |   6 +-
+ scripts/build/cc/100-gcc.sh               |  21 ++++--
+ scripts/build/cc/llvmgcc.sh               |  20 ++++--
+ scripts/build/libc/glibc-eglibc.sh-common | 104 ++++++++++++++++++------------
+ scripts/crosstool-NG.sh.in                |  25 +++----
+ 5 files changed, 108 insertions(+), 68 deletions(-)
 
 diff --git a/scripts/build/binutils/binutils.sh b/scripts/build/binutils/binutils.sh
 index d973594..4a052ad 100644
@@ -178,7 +183,7 @@ index 6d82a7d..3c3348c 100644
  
      for tmp in ARCH ABI CPU TUNE FPU FLOAT; do
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index b9c55cb..5b2fac6 100644
+index b9c55cb..61d7449 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
 @@ -76,6 +76,9 @@ do_libc_backend() {
@@ -224,7 +229,7 @@ index b9c55cb..5b2fac6 100644
              # glibc install its files in ${extra_dir}/{usr/,}lib
              # while gcc expects them in {,usr/}lib/${extra_dir}.
              # Prepare some symlinks so glibc installs in fact in
-@@ -140,10 +155,11 @@ do_libc_backend() {
+@@ -140,36 +155,15 @@ do_libc_backend() {
  
          CT_mkdir_pushd "${CT_BUILD_DIR}/build-libc-${libc_mode}${extra_dir//\//_}"
  
@@ -240,7 +245,33 @@ index b9c55cb..5b2fac6 100644
                               libc_full="${libc_full}"
  
          CT_Popd
-@@ -180,6 +196,7 @@ do_libc_backend() {
+ 
+-        if [ "${multi_dir}" != "." ]; then
+-            if [ "${libc_mode}" = "final" ]; then
+-                CT_DoLog EXTRA "Fixing up multilib location"
+-
+-                # rewrite the library multiplexers
+-                for d in "lib/${multi_dir}" "usr/lib/${multi_dir}"; do
+-                    for l in libc libpthread libgcc_s; do
+-                        if [    -f "${CT_SYSROOT_DIR}/${d}/${l}.so"    \
+-                             -a ! -L ${CT_SYSROOT_DIR}/${d}/${l}.so    ]
+-                        then
+-                            CT_DoExecLog DEBUG ${sed} -r -i                                 \
+-                                                      -e "s:/lib/:/lib/${multi_dir}/:g;"    \
+-                                                      "${CT_SYSROOT_DIR}/${d}/${l}.so"
+-                        fi
+-                    done
+-                done
+-                # Remove the multi_dir now it is no longer useful
+-                CT_DoExecLog DEBUG rm -rf "${CT_SYSROOT_DIR}/${multi_dir}"
+-            fi # libc_mode == final
+-
+-            CT_EndStep
+-        fi
+     done
+ 
+     CT_EndStep
+@@ -180,6 +174,7 @@ do_libc_backend() {
  #   Parameter           : Definition                            : Type      : Default
  #   libc_headers        : Build libc headers                    : bool      : n
  #   libc_startfiles     : Build libc start-files                : bool      : n
@@ -248,15 +279,16 @@ index b9c55cb..5b2fac6 100644
  #   libc_full           : Build full libc                       : bool      : n
  #   extra_flags         : Extra CFLAGS to use (for multilib)    : string    : (empty)
  #   extra_dir           : Extra subdir for multilib             : string    : (empty)
-@@ -189,6 +206,7 @@ do_libc_backend_once() {
+@@ -189,6 +184,8 @@ do_libc_backend_once() {
      local libc_full
      local extra_flags
      local extra_dir
 +    local extraos_dir
++    local lib_dir
      local src_dir="${CT_SRC_DIR}/${CT_LIBC}-${CT_LIBC_VERSION}"
      local extra_cc_args
      local -a extra_config
-@@ -196,6 +214,7 @@ do_libc_backend_once() {
+@@ -196,6 +193,7 @@ do_libc_backend_once() {
      local glibc_cflags
      local float_extra
      local endian_extra
@@ -264,7 +296,7 @@ index b9c55cb..5b2fac6 100644
      local arg
  
      for arg in "$@"; do
-@@ -328,6 +347,26 @@ do_libc_backend_once() {
+@@ -328,6 +326,28 @@ do_libc_backend_once() {
      # or even after they get installed...
      echo "ac_cv_path_BASH_SHELL=/bin/bash" >>config.cache
  
@@ -285,21 +317,34 @@ index b9c55cb..5b2fac6 100644
 +        extraos_dir="${CT_HEADERS_DIR}/"$("${cross_cc}" -print-multi-os-directory ${extra_cc_args})
 +    else
 +        # maintain the previous behaviour if -print-multi-os-directory doesn't work.
-+        extraos_dir="${CT_SYSROOT_DIR}${extra_dir}/usr/lib"
++        extraos_dir="${CT_HEADERS_DIR}/../${extra_dir}/usr/lib"
 +    fi
++    # Everything after 'include/../' is passed to configure as --libdir=/usr/${lib_dir}
++    lib_dir=$(echo "$extraos_dir" | "${sed}" -r -e 's|^.*include/\.\./||')
 +
      # Configure with --prefix the way we want it on the target...
      # There are a whole lot of settings here.  You'll probably want
      # to read up on what they all mean, and customize a bit, possibly by setting GLIBC_EXTRA_CONFIG_ARRAY
-@@ -343,6 +382,7 @@ do_libc_backend_once() {
-     CT_DoLog DEBUG "Extra config args passed: '${extra_config[*]}'"
-     CT_DoLog DEBUG "Extra CC args passed    : '${glibc_cflags}'"
-     CT_DoLog DEBUG "Extra flags (multilib)  : '${extra_flags}'"
-+    CT_DoLog DEBUG "Multilib os dir         : '${extraos_dir}'"
+@@ -338,11 +358,13 @@ do_libc_backend_once() {
+     # Run explicitly through CONFIG_SHELL, or the build breaks badly (loop-of-death)
+     # when the shell is not bash... Sigh... :-(
+ 
+-    CT_DoLog DEBUG "Using gcc for target    : '${cross_cc}'"
+-    CT_DoLog DEBUG "Configuring with addons : '$(do_libc_add_ons_list ,)'"
+-    CT_DoLog DEBUG "Extra config args passed: '${extra_config[*]}'"
+-    CT_DoLog DEBUG "Extra CC args passed    : '${glibc_cflags}'"
+-    CT_DoLog DEBUG "Extra flags (multilib)  : '${extra_flags}'"
++    CT_DoLog DEBUG "Using gcc for target     : '${cross_cc}'"
++    CT_DoLog DEBUG "Configuring with addons  : '$(do_libc_add_ons_list ,)'"
++    CT_DoLog DEBUG "Extra config args passed : '${extra_config[*]}'"
++    CT_DoLog DEBUG "Extra CC args passed     : '${glibc_cflags}'"
++    CT_DoLog DEBUG "Extra flags (multilib)   : '${extra_flags}'"
++    CT_DoLog DEBUG "Multilib os dir          : '${extraos_dir}'"
++    CT_DoLog DEBUG "Configuring with --libdir: '${lib_dir}'"
  
      CT_DoExecLog CFG                                                \
      BUILD_CC="${CT_BUILD}-gcc"                                      \
-@@ -354,7 +394,7 @@ do_libc_backend_once() {
+@@ -354,12 +376,13 @@ do_libc_backend_once() {
      "${src_dir}/configure"                                          \
          --prefix=/usr                                               \
          --build=${CT_BUILD}                                         \
@@ -308,7 +353,22 @@ index b9c55cb..5b2fac6 100644
          --cache-file="$(pwd)/config.cache"                          \
          --without-cvs                                               \
          --disable-profile                                           \
-@@ -427,22 +467,23 @@ do_libc_backend_once() {
+         --without-gd                                                \
+         --with-headers="${CT_HEADERS_DIR}"                          \
++        --libdir=/usr/${lib_dir}                                    \
+         "${extra_config[@]}"                                        \
+         "${CT_LIBC_GLIBC_EXTRA_CONFIG_ARRAY[@]}"
+ 
+@@ -378,7 +401,7 @@ do_libc_backend_once() {
+         # use the 'install-headers' makefile target to install the
+         # headers
+         CT_DoExecLog ALL make ${JOBSFLAGS}                          \
+-                         install_root=${CT_SYSROOT_DIR}${extra_dir} \
++                         install_root="${CT_SYSROOT_DIR}"           \
+                          install-bootstrap-headers=yes              \
+                          "${extra_make_args[@]}"                    \
+                          install-headers
+@@ -427,22 +450,23 @@ do_libc_backend_once() {
  
              # there are a few object files needed to link shared libraries,
              # which we build and install by hand
@@ -336,6 +396,19 @@ index b9c55cb..5b2fac6 100644
          fi # threads == nptl
      fi # libc_headers == y
  
+@@ -453,9 +477,9 @@ do_libc_backend_once() {
+                               all
+ 
+         CT_DoLog EXTRA "Installing C library"
+-        CT_DoExecLog ALL make ${JOBSFLAGS}                                  \
+-                              "${extra_make_args[@]}"                       \
+-                              install_root="${CT_SYSROOT_DIR}${extra_dir}"  \
++        CT_DoExecLog ALL make ${JOBSFLAGS}                       \
++                              "${extra_make_args[@]}"            \
++                              install_root="${CT_SYSROOT_DIR}"   \
+                               install
+ 
+         if [ "${CT_BUILD_MANUALS}" = "y" ]; then
 diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
 index 3c98b8c..5a24439 100644
 --- a/scripts/crosstool-NG.sh.in

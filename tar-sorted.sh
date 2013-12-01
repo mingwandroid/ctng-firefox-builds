@@ -58,8 +58,8 @@ process_tar_sorted_argument ()
 # Find gnu awk and gnutar.
 # Prefer gnutar if it exists.
 TAR=gtar
-if [ ! $(which $TAR) ]; then
-    if [ $(which tar) ]; then
+if [ ! $(which $TAR > /dev/null 2>&1) ]; then
+    if [ $(which tar > /dev/null 2>&1) ]; then
         TAR=tar
     else
         echo "neither tar nor gtar (OSX: brew install gnu-tar) were found."

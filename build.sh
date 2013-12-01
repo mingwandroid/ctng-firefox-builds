@@ -113,7 +113,7 @@ option CTNG_CLEAN          no \
 "Remove old crosstool-ng build and artefacts
 before starting the build, otherwise an old
 crosstool-ng may be re-used."
-option CTNG_DEBUGGABLE     no \
+option CTNG_DEBUGGABLE     yes \
 "Do you want the toolchain build with crosstool-ng
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
@@ -1283,3 +1283,6 @@ http://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html
 # http://trac.cross-lfs.org/
 # CLFS takes advantage of the target system's capability, by utilizing a multilib capable build system
 # CLFS-x86.pdf is a very useful document.
+
+pushd ~/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-1/gcc
+build/gengtype.exe                      -S /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/gcc-4.8.2/gcc -I gtyp-input.list -w tmp-gtype.state

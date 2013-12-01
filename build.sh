@@ -1065,7 +1065,12 @@ if [ ! -f bin/libtool ]; then
 fi
 popd > /dev/null
 export PATH=$PWD/tools/bin:$PATH
-
+tar -xf ~/src/gcc-4.8.2.tar.bz2
+cp -rf gcc-4.8.2 gcc-4.8.2.orig
+pushd gcc-4.8.2
+patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch
+find ./ -name configure.ac | while read f; do (cd "$(dirname "$f")"/ && autoconf); done
+popd
 
 # Even with sjlj Windows 64bit has problems:
 # [ALL  ]    C:/msys64/home/ray/tbb-work-sjlj/ctng-build-HEAD/.build/x86_64-apple-darwin10/build/build-LLVM-host-x86_64-build_w64-mingw32/Release+Asserts/lib/libgtest.a(gtest-all.o): In function `testing::internal::DefaultDeathTestFactory::~DefaultDeathTestFactory()':

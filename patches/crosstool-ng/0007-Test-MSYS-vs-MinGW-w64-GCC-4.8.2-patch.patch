@@ -1,4 +1,4 @@
-From ae4639afca269edc7f38ccf98d4c3e5dc8899099 Mon Sep 17 00:00:00 2001
+From 4dbc750804e528d3d1402e4c550a08612d916218 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 16:57:31 +0000
 Subject: [PATCH 7/7] Test MSYS vs MinGW-w64 GCC 4.8.2 patch
@@ -102,5 +102,5 @@ index 0000000..75c0212
 + 
 + AC_CONFIG_COMMANDS([default],
 -- 
-1.8.4.2
+1.8.4.3
 

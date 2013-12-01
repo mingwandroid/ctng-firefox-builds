@@ -1,4 +1,4 @@
-From 297a295275c216861841921694f421df9cfecae6 Mon Sep 17 00:00:00 2001
+From f9ec82f92c0f74c7c2e64bf6276ba547a575fa32 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 18 Nov 2013 14:23:10 +0000
 Subject: [PATCH 6/7] VERBOSE=1 for clang
@@ -48,5 +48,5 @@ index cb33ac8..7fb322a 100644
      # LLVM installs dlls into ${prefix}/lib instead of ${prefix}/bin
      # so copy them to ${prefix}/bin so that executables load them in
 -- 
-1.8.4.2
+1.8.4.3
 

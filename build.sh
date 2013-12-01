@@ -1290,5 +1290,8 @@ build/gengtype.exe                      -S /home/ray/ctng-firefox-builds/ctng-bu
 isl problems (ffs).
 pushd /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/build/build-isl-host-x86_64-build_w64-mingw32
 rm ./libisl_la-isl_map_simplify.*
-PATH=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools/bin:$PATH \
+export PATH=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools/bin:$PATH
   make V=1
+
+# Leads to:
+x86_64-build_w64-mingw32-gcc -DHAVE_CONFIG_H -I. -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1 -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1/include -Iinclude/ -I. -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1 -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1/include -Iinclude/ -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools/include -O0 -ggdb -pipe -D__USE_MINGW_ANSI_STDIO=1 -MT libisl_la-isl_map_simplify.lo -MD -MP -MF .deps/libisl_la-isl_map_simplify.Tpo -c /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1/isl_map_simplify.c -o libisl_la-isl_map_simplify.o

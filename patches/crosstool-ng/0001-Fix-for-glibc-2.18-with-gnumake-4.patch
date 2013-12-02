@@ -1,4 +1,4 @@
-From 0bd3e98e7b5277653b7084475372fe9a3a19f800 Mon Sep 17 00:00:00 2001
+From feb20d1e765c3c600b19fcb2be7d914c460131d6 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 23 Nov 2013 02:42:05 +0000
 Subject: [PATCH 1/7] Fix for glibc-2.18 with gnumake 4

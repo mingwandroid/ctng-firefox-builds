@@ -21,6 +21,10 @@
 # 4. GTK must be built too and lots of other stuff probably: http://joekiller.com/2012/06/03/install-firefox-on-amazon-linux-x86_64-compiling-gtk/
 #    I may need to adapt that ..
 #    https://gist.github.com/phstc/4121839
+#
+# Restarting at steps:
+#
+# https://sourceware.org/ml/crossgcc/2011-08/msg00119.html
 
 # Errors are fatal (occasionally this will be temporarily disabled)
 set -e
@@ -113,6 +117,19 @@ option CTNG_CLEAN          no \
 "Remove old crosstool-ng build and artefacts
 before starting the build, otherwise an old
 crosstool-ng may be re-used."
+option CTNG_SAVE_STEPS     yes \
+"Save steps so that they can be restarted
+later. This doesn't work well for llvm
+and clang unfortunately, but while iterating
+on GCC it can save a lot of time.
+
+To restart the build you can use:
+ ct-ng STEP_NAME+ -> restart at STEP_NAME and continue
+ ct-ng STEP_NAME  -> restart at STEP_NAME and stop just after
+ ct-ng +STEP_NAME -> start from scratch, and stop just before STEP_NAME
+
+To see all steps:
+ ct-ng list-steps"
 option CTNG_DEBUGGABLE     yes \
 "Do you want the toolchain build with crosstool-ng
 to be debuggable? Currently, you can't build a GCC
@@ -479,22 +496,28 @@ cross_clang_build()
     fi
 
     if [ "$BUILD_GCC" = "yes" ]; then
-      echo "CT_CC_GCC_V_4_8_2=y"       >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_LANG_CXX=y"          >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_LIBC_glibc=y"           >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_LIBC_GLIBC_V_2_7=y"     >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_GCC_V_4_8_2=y"           >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_CXX=y"              >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_glibc=y"               >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_GLIBC_V_2_7=y"         >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     if [ "$BUILD_CLANG" = "yes" ]; then
-      echo "CT_LLVM_V_3_3=y"           >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_LLVM_COMPILER_RT=n"     >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_clang=y"             >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LLVM_V_3_3=y"               >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LLVM_COMPILER_RT=n"         >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_clang=y"                 >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     if [ "$CTNG_DEBUGGABLE" = "yes" ]; then
-      echo "CT_DEBUGGABLE_TOOLCHAIN=y" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_DEBUGGABLE_TOOLCHAIN=y"     >> ${CTNG_SAMPLE_CONFIG}
     else
-      echo "CT_DEBUGGABLE_TOOLCHAIN=n" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_DEBUGGABLE_TOOLCHAIN=n"     >> ${CTNG_SAMPLE_CONFIG}
+    fi
+
+    if [ "$CTNG_SAVE_STEPS" = "yes" ]; then
+      echo "CT_DEBUG_CT=y"                 >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_DEBUG_CT_SAVE_STEPS=y"      >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_DEBUG_CT_SAVE_STEPS_GZIP=y" >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
@@ -994,26 +1017,49 @@ ld: warning: can't parse dwarf compilation unit info in /home/ray/tbb-work/ctng-
 # Build build tools .. only needed when updating autotools #
 ############################################################
 
+# Versions for llvm
+AUTOCONF_VER=2.60
+AUTOMAKE_VER=1.9.6
+LIBTOOL_VER=1.5.22
+# Versions for isl 0.11.1
+AUTOCONF_VER=2.68
+AUTOMAKE_VER=1.11.3
+LIBTOOL_VER=2.4
+# Versions for isl 0.12.1
+AUTOCONF_VER=2.69
+AUTOMAKE_VER=1.11.6
+LIBTOOL_VER=2.4
+# Versions for GCC 4.8.2
+AUTOCONF_VER=2.64
+AUTOMAKE_VER=1.11.1
+#LIBTOOL_VER=2.2.7a
 [ -d tools ] || mkdir tools
 pushd tools > /dev/null
 if [ ! -f bin/autoconf ]; then
- curl -SLO http://ftp.gnu.org/gnu/autoconf/autoconf-2.60.tar.bz2
- tar -xf autoconf-2.60.tar.bz2
- cd autoconf-2.60
+# curl -SLO http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VER}.tar.bz2
+ wget -c http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VER}.tar.gz
+ tar -xf autoconf-${AUTOCONF_VER}.tar.gz
+ cd autoconf-${AUTOCONF_VER}
+ wget -O config.guess 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
+ wget -O config.sub 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' 
  ./configure --prefix=$PWD/.. && make && make install
  cd ..
 fi
 if [ ! -f bin/automake ]; then
- curl -SLO http://ftp.gnu.org/gnu/automake/automake-1.9.6.tar.bz2
- tar -xf automake-1.9.6.tar.bz2
- cd automake-1.9.6
+ wget -c http://ftp.gnu.org/gnu/automake/automake-${AUTOMAKE_VER}.tar.gz
+ tar -xf automake-${AUTOMAKE_VER}.tar.gz
+ cd automake-${AUTOMAKE_VER}
+ wget -O config.guess 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
+ wget -O config.sub 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' 
  ./configure --prefix=$PWD/.. && make && make install
  cd ..
 fi
 if [ ! -f bin/libtool ]; then
- curl -SLO http://ftp.gnu.org/gnu/libtool/libtool-1.5.22.tar.gz
- tar -xf libtool-1.5.22.tar.gz
- cd libtool-1.5.22
+ curl -SLO http://ftp.gnu.org/gnu/libtool/libtool-${LIBTOOL_VER}.tar.gz
+ tar -xf libtool-${LIBTOOL_VER}.tar.gz
+ cd libtool-${LIBTOOL_VER}
+ wget -O config.guess 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
+ wget -O config.sub 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' 
  ./configure --prefix=$PWD/.. && make && make install
  cd ..
 fi
@@ -1295,3 +1341,41 @@ export PATH=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.b
 
 # Leads to:
 x86_64-build_w64-mingw32-gcc -DHAVE_CONFIG_H -I. -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1 -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1/include -Iinclude/ -I. -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1 -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1/include -Iinclude/ -I/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools/include -O0 -ggdb -pipe -D__USE_MINGW_ANSI_STDIO=1 -MT libisl_la-isl_map_simplify.lo -MD -MP -MF .deps/libisl_la-isl_map_simplify.Tpo -c /home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/isl-0.11.1/isl_map_simplify.c -o libisl_la-isl_map_simplify.o
+
+
+# My old gengtypes patch isn't working?!
+export PATH=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64-235295c4/bin:/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools/bin:$PATH
+CC_FOR_BUILD=x86_64-build_w64-mingw32-gcc CFLAGS_FOR_BUILD= CFLAGS="-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1" \
+  CXXFLAGS="-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1" LDFLAGS= \
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/gcc-4.8.2/configure \
+  --build=x86_64-build_w64-mingw32 --host=x86_64-build_w64-mingw32 --target=x86_64-unknown-linux-gnu \
+  --prefix=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-local-prefix=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64-235295c4/x86_64-unknown-linux-gnu/sysroot \
+  --disable-libmudflap --with-sysroot=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64-235295c4/x86_64-unknown-linux-gnu/sysroot \
+  --with-newlib --enable-threads=no --disable-shared --with-pkgversion=crosstool-NG hg+unknown-20131201.170407 \
+  --enable-__cxa_atexit --with-gmp=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-mpfr=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-mpc=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-isl=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-cloog=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+  --with-libelf=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+  --enable-lto --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" \
+  --enable-target-optspace --disable-libgomp --disable-libmudflap --disable-nls --enable-multilib --enable-targets=all --enable-languages=c
+
+
+/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/gcc-4.8.2/gcc/configure \
+--cache-file=./config.cache --prefix=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+--with-local-prefix=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64-235295c4/x86_64-unknown-linux-gnu/sysroot \
+--with-sysroot=/home/ray/ctng-firefox-builds/x-l-HEAD-x86_64-235295c4/x86_64-unknown-linux-gnu/sysroot --with-newlib --enable-threads=no \
+--disable-shared --with-pkgversion=crosstool-NG hg+unknown-20131201.170407 --enable-__cxa_atexit \
+--with-gmp=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+--with-mpfr=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+--with-mpc=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+--with-isl=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+--with-cloog=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+--with-libelf=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+--enable-lto --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" \
+--enable-target-optspace --disable-libgomp --disable-libmudflap --disable-nls --enable-multilib --enable-targets=all --enable-languages=c,lto \
+--program-transform-name="s&^&x86_64-unknown-linux-gnu-&" --disable-option-checking \
+--build=x86_64-build_w64-mingw32 --host=x86_64-build_w64-mingw32 --target=x86_64-unknown-linux-gnu \
+--srcdir=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/gcc-4.8.2/gcc

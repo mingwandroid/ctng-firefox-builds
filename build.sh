@@ -1063,14 +1063,46 @@ if [ ! -f bin/libtool ]; then
  ./configure --prefix=$PWD/.. && make && make install
  cd ..
 fi
-popd > /dev/null
+# Test re-autoconfigured GCC with my patch ..
 export PATH=$PWD/tools/bin:$PATH
+popd > /dev/null
+pushd /tmp
 tar -xf ~/src/gcc-4.8.2.tar.bz2
 cp -rf gcc-4.8.2 gcc-4.8.2.orig
 pushd gcc-4.8.2
-patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch
-find ./ -name configure.ac | while read f; do (cd "$(dirname "$f")"/ && autoconf); done
+# patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch
+find ./ -name configure.ac | while read f; do (cd "$(dirname "$f")"/ && [ -f configure ] && autoconf); done
 popd
+mkdir gcc-build
+pushd gcc-build
+/tmp/gcc-4.8.2/configure 2>&1 | grep "absolute srcdir"
+make 2>&1 | grep "checking the absolute srcdir"
+popd
+popd
+
+# single liner to iterate quickly on changing configure.ac:
+cfg_build()
+{
+#pushd gcc-4.8.2/gcc
+#autoconf
+#popd
+[ -d gcc-build ] && rm -rf gcc-build
+mkdir gcc-build
+pushd gcc-build
+if [ "$OSTYPE" = "msys" ]; then
+  export PATH=/home/ukrdonnell/ctng-firefox-builds/mingw64-235295c4/bin:$PATH
+  BHT="--build=x86_64-build_w64-mingw32 --host=x86_64-build_w64-mingw32 --target=x86_64-unknown-linux-gnu \
+  --with-gmp=/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools --with-mpfr=/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools --with-mpc=/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools --with-isl=/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools --with-cloog=/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools --with-libelf=/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools \
+  --prefix=/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/x86_64-unknown-linux-gnu/buildtools"
+fi
+/tmp/gcc-4.8.2/configure $BHT 2>&1 > configure.log # | grep "checking the absolute srcdir"
+make 2>&1 > make.log # | grep "checking the absolute srcdir"
+popd
+}
+
+# Regenerate the patch:
+find gcc-4.8.2 \( -name "*.orig" -or -name "*.rej" -or -name "*.old" -or -name "autom4te.cache" -or -name "config.in~" \) -exec rm -rf {} \;
+diff -urN gcc-4.8.2.orig gcc-4.8.2 > ~/Dropbox/gcc482.new.patch
 
 # Even with sjlj Windows 64bit has problems:
 # [ALL  ]    C:/msys64/home/ray/tbb-work-sjlj/ctng-build-HEAD/.build/x86_64-apple-darwin10/build/build-LLVM-host-x86_64-build_w64-mingw32/Release+Asserts/lib/libgtest.a(gtest-all.o): In function `testing::internal::DefaultDeathTestFactory::~DefaultDeathTestFactory()':

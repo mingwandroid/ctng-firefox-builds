@@ -1,19 +1,19 @@
-From 4d11af9547485a2ea0c56a343a63110d9c4868f6 Mon Sep 17 00:00:00 2001
+From 304e763fed95e3bfc236044a895eac19bce5379f Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 16:57:31 +0000
 Subject: [PATCH 7/7] Test MSYS vs MinGW-w64 GCC 4.8.2 patch
 
 ---
- .../gcc/4.8.2/100-msys-native-paths-gengtype.patch | 160 +++++++++++++++++++++
- 1 file changed, 160 insertions(+)
+ .../gcc/4.8.2/100-msys-native-paths-gengtype.patch | 244 +++++++++++++++++++++
+ 1 file changed, 244 insertions(+)
  create mode 100644 patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch
 
 diff --git a/patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch b/patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch
 new file mode 100644
-index 0000000..964f450
+index 0000000..c641551
 --- /dev/null
 +++ b/patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch
-@@ -0,0 +1,160 @@
+@@ -0,0 +1,244 @@
 +diff -urN gcc-4.8.2.orig/gcc/Makefile.in gcc-4.8.2/gcc/Makefile.in
 +--- gcc-4.8.2.orig/gcc/Makefile.in	2013-12-02 11:57:04.792311915 +0000
 ++++ gcc-4.8.2/gcc/Makefile.in	2013-12-02 11:57:05.758993475 +0000
@@ -130,13 +130,13 @@ index 0000000..964f450
 ++    case $host_os in
 ++      mingw*)
 ++        # We're building on MSYS*/Cygwin to run on Windows.
-++        # Requires fixing up path translation conflicts.
+++	# Requires fixing up path translation conflicts.
 ++        abs_srcdir_native=$(cd $srcdir; pwd -W)
-++        AC_MSG_RESULT($abs_srcdir_native .. yes - build is MSYS*/Cygwin and host is native Windows)
+++        AC_MSG_RESULT($abs_srcdir_native .. yes - build is MSYS*/Cygwin host is Native Windows)
 ++        ;;
 ++      *)
 ++        abs_srcdir_native=$(cd $srcdir; pwd)
-++        AC_MSG_RESULT($abs_srcdir_native .. no - build is MSYS*/Cygwin and host is not native Windows)
+++        AC_MSG_RESULT($abs_srcdir_native .. no - build is MSYS*/Cygwin host is not Native Windows)
 ++        ;;
 ++    esac
 ++    ;;
@@ -174,6 +174,90 @@ index 0000000..964f450
 + 		$(srcdir)/mkheader.sh > tmp-libgcc_tm.h
 + 	$(SHELL) $(srcdir)/../move-if-change tmp-libgcc_tm.h libgcc_tm.h
 + 	echo timestamp > $@
++diff -urN gcc-4.8.2.orig/libgcc/configure gcc-4.8.2/libgcc/configure
++--- gcc-4.8.2.orig/libgcc/configure	2013-12-02 11:57:05.215651758 +0000
+++++ gcc-4.8.2/libgcc/configure	2013-12-02 19:59:43.023476394 +0000
++@@ -562,6 +562,7 @@
++ tm_defines
++ tm_file
++ tmake_file
+++abs_srcdir_native
++ sfp_machine_header
++ set_use_emutls
++ set_have_cc_tls
++@@ -4482,6 +4483,36 @@
++ fi
++ 
++ 
+++# This block prevents mismatch between the host system for GCC build tools (e.g. a MinGW-w64 built
+++# gengtypes.exe) and the build system (e.g. MSYS2/Cygwin) from causing path conflicts. Makefile.in
+++# uses abs_srcdir_native var when it needs to transform build-machine paths to host-machine ones.
+++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking where (build) absolute srcdir is in the (host) native filesystem (MSYS*/Cygwin)" >&5
+++$as_echo_n "checking where (build) absolute srcdir is in the (host) native filesystem (MSYS*/Cygwin)... " >&6; }
+++case $build_os in
+++  mingw*|cygwin*)
+++    case $host_os in
+++      mingw*)
+++        # We're building on MSYS*/Cygwin to run on Windows.
+++        # Requires fixing up path translation conflicts.
+++        abs_srcdir_native=$(cd $srcdir; pwd -W)
+++        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $abs_srcdir_native .. yes - build is MSYS*/Cygwin and host is native Windows" >&5
+++$as_echo "$abs_srcdir_native .. yes - build is MSYS*/Cygwin and host is native Windows" >&6; }
+++        ;;
+++      *)
+++        abs_srcdir_native=$(cd $srcdir; pwd)
+++        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $abs_srcdir_native .. no - build is MSYS*/Cygwin and host is not native Windows" >&5
+++$as_echo "$abs_srcdir_native .. no - build is MSYS*/Cygwin and host is not native Windows" >&6; }
+++        ;;
+++    esac
+++    ;;
+++  *)
+++    abs_srcdir_native=$(cd $srcdir; pwd)
+++    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $abs_srcdir_native .. no" >&5
+++$as_echo "$abs_srcdir_native .. no" >&6; }
+++    ;;
+++esac
+++
+++
++ # Conditionalize the makefile for this target machine.
++ tmake_file_=
++ for f in ${tmake_file}
++diff -urN gcc-4.8.2.orig/libgcc/configure.ac gcc-4.8.2/libgcc/configure.ac
++--- gcc-4.8.2.orig/libgcc/configure.ac	2013-12-02 11:57:05.215651758 +0000
+++++ gcc-4.8.2/libgcc/configure.ac	2013-12-02 19:52:57.323868856 +0000
++@@ -354,6 +354,32 @@
++ fi
++ AC_SUBST(sfp_machine_header)
++ 
+++# This block prevents mismatch between the host system for GCC build tools (e.g. a MinGW-w64 built
+++# gengtypes.exe) and the build system (e.g. MSYS2/Cygwin) from causing path conflicts. Makefile.in
+++# uses abs_srcdir_native var when it needs to transform build-machine paths to host-machine ones.
+++AC_MSG_CHECKING([where (build) absolute srcdir is in the (host) native filesystem (MSYS*/Cygwin)])
+++case $build_os in
+++  mingw*|cygwin*)
+++    case $host_os in
+++      mingw*)
+++        # We're building on MSYS*/Cygwin to run on Windows.
+++        # Requires fixing up path translation conflicts.
+++        abs_srcdir_native=$(cd $srcdir; pwd -W)
+++        AC_MSG_RESULT($abs_srcdir_native .. yes - build is MSYS*/Cygwin and host is native Windows)
+++        ;;
+++      *)
+++        abs_srcdir_native=$(cd $srcdir; pwd)
+++        AC_MSG_RESULT($abs_srcdir_native .. no - build is MSYS*/Cygwin and host is not native Windows)
+++        ;;
+++    esac
+++    ;;
+++  *)
+++    abs_srcdir_native=$(cd $srcdir; pwd)
+++    AC_MSG_RESULT($abs_srcdir_native .. no)
+++    ;;
+++esac
+++AC_SUBST(abs_srcdir_native)
+++
++ # Conditionalize the makefile for this target machine.
++ tmake_file_=
++ for f in ${tmake_file}
 -- 
-1.8.4.4
+1.8.4.2
 

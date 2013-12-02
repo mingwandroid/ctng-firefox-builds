@@ -1,91 +1,22 @@
-From f05dd67aa73048b05a4cf007ec42df0127919539 Mon Sep 17 00:00:00 2001
+From 4d11af9547485a2ea0c56a343a63110d9c4868f6 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 16:57:31 +0000
 Subject: [PATCH 7/7] Test MSYS vs MinGW-w64 GCC 4.8.2 patch
 
 ---
- .../gcc/4.8.2/100-msys-native-paths-gengtype.patch | 103 +++++++++++++++++++++
- 1 file changed, 103 insertions(+)
+ .../gcc/4.8.2/100-msys-native-paths-gengtype.patch | 160 +++++++++++++++++++++
+ 1 file changed, 160 insertions(+)
  create mode 100644 patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch
 
 diff --git a/patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch b/patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch
 new file mode 100644
-index 0000000..1049871
+index 0000000..964f450
 --- /dev/null
 +++ b/patches/gcc/4.8.2/100-msys-native-paths-gengtype.patch
-@@ -0,0 +1,103 @@
-+diff -urN gcc-4.8.2.orig/gcc/configure gcc-4.8.2/gcc/configure
-+--- gcc-4.8.2.orig/gcc/configure	2013-12-01 21:38:48.051307500 +0000
-++++ gcc-4.8.2/gcc/configure	2013-12-01 21:44:52.965145700 +0000
-+@@ -934,6 +934,7 @@
-+ CCC
-+ CPP
-+ CXXCPP
-++abs_srcdir_native
-+ GMPLIBS
-+ GMPINC
-+ ISLLIBS
-+@@ -3267,6 +3268,15 @@
-+ *** and run configure again." "$LINENO" 5
-+ fi
-+ 
-++# Hack for MSYS2 gengtypes filename emission when build
-++# machine is mingw*.
-++case $build_os in
-++  mingw*)
-++    abs_srcdir_native=$(cd $srcdir; pwd -W) ;;
-++  *)
-++    abs_srcdir_native=$(cd $srcdir; pwd) ;;
-++esac
-++
-+ # -----------
-+ # Directories
-+ # -----------
-+@@ -28655,6 +28665,7 @@
-+ s&@top_build_prefix@&$ac_top_build_prefix&;t t
-+ s&@srcdir@&$ac_srcdir&;t t
-+ s&@abs_srcdir@&$ac_abs_srcdir&;t t
-++s&@abs_srcdir_native@&$abs_srcdir_native&;t t
-+ s&@top_srcdir@&$ac_top_srcdir&;t t
-+ s&@abs_top_srcdir@&$ac_abs_top_srcdir&;t t
-+ s&@builddir@&$ac_builddir&;t t
-+diff -urN gcc-4.8.2.orig/gcc/configure.ac gcc-4.8.2/gcc/configure.ac
-+--- gcc-4.8.2.orig/gcc/configure.ac	2013-12-01 21:38:48.051807600 +0000
-++++ gcc-4.8.2/gcc/configure.ac	2013-12-01 21:44:51.323437200 +0000
-+@@ -97,6 +97,15 @@
-+ *** and run configure again.])
-+ fi
-+ 
-++# Hack for MSYS2 gengtypes filename emission when build
-++# machine is mingw*.
-++case $build_os in
-++  mingw*)
-++    abs_srcdir_native=$(cd $srcdir; pwd -W) ;;
-++  *)
-++    abs_srcdir_native=$(cd $srcdir; pwd) ;;
-++esac
-++
-+ # -----------
-+ # Directories
-+ # -----------
-+@@ -5305,6 +5314,14 @@
-+ 
-+ # Create the Makefile
-+ # and configure language subdirectories
-++
-++if test "$build_os" != "mingw32" ; then
-++    abs_srcdir_native=$ac_abs_srcdir
-++else
-++    abs_srcdir_native=$(cd $ac_abs_srcdir; pwd -W)
-++fi
-++AC_SUBST(abs_srcdir_native)
-++
-+ AC_CONFIG_FILES($all_outputs)
-+ 
-+ AC_CONFIG_COMMANDS([default],
+@@ -0,0 +1,160 @@
 +diff -urN gcc-4.8.2.orig/gcc/Makefile.in gcc-4.8.2/gcc/Makefile.in
-+--- gcc-4.8.2.orig/gcc/Makefile.in	2013-12-01 21:38:48.342844500 +0000
-++++ gcc-4.8.2/gcc/Makefile.in	2013-12-01 21:40:08.123975500 +0000
++--- gcc-4.8.2.orig/gcc/Makefile.in	2013-12-02 11:57:04.792311915 +0000
+++++ gcc-4.8.2/gcc/Makefile.in	2013-12-02 11:57:05.758993475 +0000
 +@@ -72,6 +72,9 @@
 + 
 + # Directory where sources are, absolute.
@@ -117,6 +48,132 @@ index 0000000..1049871
 + 	$(SHELL) $(srcdir)/../move-if-change tmp-gi.list gtyp-input.list
 + 	$(STAMP) s-gtyp-input
 + 
++diff -urN gcc-4.8.2.orig/gcc/configure gcc-4.8.2/gcc/configure
++--- gcc-4.8.2.orig/gcc/configure	2013-12-02 11:57:04.798978644 +0000
+++++ gcc-4.8.2/gcc/configure	2013-12-02 17:45:02.295176810 +0000
++@@ -800,6 +800,7 @@
++ LDFLAGS
++ CFLAGS
++ CC
+++abs_srcdir_native
++ GENINSRC
++ target_subdir
++ host_subdir
++@@ -3364,6 +3365,36 @@
++ fi
++ 
++ 
+++# This block prevents mismatch between the host system for GCC build tools (e.g. a MinGW-w64 built
+++# gengtypes.exe) and the build system (e.g. MSYS2/Cygwin) from causing path conflicts. Makefile.in
+++# uses abs_srcdir_native var when it needs to transform build-machine paths to host-machine ones.
+++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking where (build) absolute srcdir is in the (host) native filesystem (MSYS*/Cygwin)" >&5
+++$as_echo_n "checking where (build) absolute srcdir is in the (host) native filesystem (MSYS*/Cygwin)... " >&6; }
+++case $build_os in
+++  mingw*|cygwin*)
+++    case $host_os in
+++      mingw*)
+++        # We're building on MSYS*/Cygwin to run on Windows.
+++	# Requires fixing up path translation conflicts.
+++        abs_srcdir_native=$(cd $srcdir; pwd -W)
+++        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $abs_srcdir_native .. yes - build is MSYS*/Cygwin host is Native Windows" >&5
+++$as_echo "$abs_srcdir_native .. yes - build is MSYS*/Cygwin host is Native Windows" >&6; }
+++        ;;
+++      *)
+++        abs_srcdir_native=$(cd $srcdir; pwd)
+++        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $abs_srcdir_native .. no - build is MSYS*/Cygwin host is not Native Windows" >&5
+++$as_echo "$abs_srcdir_native .. no - build is MSYS*/Cygwin host is not Native Windows" >&6; }
+++        ;;
+++    esac
+++    ;;
+++  *)
+++    abs_srcdir_native=$(cd $srcdir; pwd)
+++    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $abs_srcdir_native .. no" >&5
+++$as_echo "$abs_srcdir_native .. no" >&6; }
+++    ;;
+++esac
+++
+++
++ # -------------------
++ # Find default linker
++ # -------------------
++@@ -17828,7 +17859,7 @@
++   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
++   lt_status=$lt_dlunknown
++   cat > conftest.$ac_ext <<_LT_EOF
++-#line 17831 "configure"
+++#line 17862 "configure"
++ #include "confdefs.h"
++ 
++ #if HAVE_DLFCN_H
++@@ -17934,7 +17965,7 @@
++   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
++   lt_status=$lt_dlunknown
++   cat > conftest.$ac_ext <<_LT_EOF
++-#line 17937 "configure"
+++#line 17968 "configure"
++ #include "confdefs.h"
++ 
++ #if HAVE_DLFCN_H
++diff -urN gcc-4.8.2.orig/gcc/configure.ac gcc-4.8.2/gcc/configure.ac
++--- gcc-4.8.2.orig/gcc/configure.ac	2013-12-02 11:57:04.038966904 +0000
+++++ gcc-4.8.2/gcc/configure.ac	2013-12-02 15:24:27.000000000 +0000
++@@ -188,6 +188,32 @@
++ fi
++ AC_SUBST(GENINSRC)
++ 
+++# This block prevents mismatch between the host system for GCC build tools (e.g. a MinGW-w64 built
+++# gengtypes.exe) and the build system (e.g. MSYS2/Cygwin) from causing path conflicts. Makefile.in
+++# uses abs_srcdir_native var when it needs to transform build-machine paths to host-machine ones.
+++AC_MSG_CHECKING([where (build) absolute srcdir is in the (host) native filesystem (MSYS*/Cygwin)])
+++case $build_os in
+++  mingw*|cygwin*)
+++    case $host_os in
+++      mingw*)
+++        # We're building on MSYS*/Cygwin to run on Windows.
+++        # Requires fixing up path translation conflicts.
+++        abs_srcdir_native=$(cd $srcdir; pwd -W)
+++        AC_MSG_RESULT($abs_srcdir_native .. yes - build is MSYS*/Cygwin and host is native Windows)
+++        ;;
+++      *)
+++        abs_srcdir_native=$(cd $srcdir; pwd)
+++        AC_MSG_RESULT($abs_srcdir_native .. no - build is MSYS*/Cygwin and host is not native Windows)
+++        ;;
+++    esac
+++    ;;
+++  *)
+++    abs_srcdir_native=$(cd $srcdir; pwd)
+++    AC_MSG_RESULT($abs_srcdir_native .. no)
+++    ;;
+++esac
+++AC_SUBST(abs_srcdir_native)
+++
++ # -------------------
++ # Find default linker
++ # -------------------
++diff -urN gcc-4.8.2.orig/libgcc/Makefile.in gcc-4.8.2/libgcc/Makefile.in
++--- gcc-4.8.2.orig/libgcc/Makefile.in	2013-12-02 11:57:05.215651758 +0000
+++++ gcc-4.8.2/libgcc/Makefile.in	2013-12-02 17:46:54.000000000 +0000
++@@ -25,6 +25,10 @@
++ gcc_objdir = $(MULTIBUILDTOP)../../$(host_subdir)/gcc
++ 
++ srcdir = @srcdir@
+++# Directory where sources are, absolute.
+++abs_srcdir = @abs_srcdir@
+++# Directory where sources are, absolute, natively (for MSYS/Cygwin)
+++abs_srcdir_native = @abs_srcdir_native@
++ 
++ prefix = @prefix@
++ 
++@@ -343,7 +347,8 @@
++ libgcc_tm_file = @tm_file@
++ libgcc_tm.h: libgcc_tm.stamp; @true
++ libgcc_tm.stamp:
++-	DEFINES='$(libgcc_tm_defines)' HEADERS='$(libgcc_tm_file)' \
+++	DEFINES='$(libgcc_tm_defines)' \
+++	HEADERS='$(subst $(abs_srcdir),$(abs_srcdir_native),$(libgcc_tm_file))' \
++ 		$(srcdir)/mkheader.sh > tmp-libgcc_tm.h
++ 	$(SHELL) $(srcdir)/../move-if-change tmp-libgcc_tm.h libgcc_tm.h
++ 	echo timestamp > $@
 -- 
-1.8.4.3
+1.8.4.4
 

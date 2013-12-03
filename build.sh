@@ -526,7 +526,9 @@ cross_clang_build()
     fi
 
 #    if [ "$OSTYPE" = "msys" ]; then
-    echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=2" >> ${CTNG_SAMPLE_CONFIG}
+    # Verbosity 2 doesn't output anything when installing the kernel headers?!
+    echo "CT_KERNEL_LINUX_VERBOSITY_1=y"   >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=1" >> ${CTNG_SAMPLE_CONFIG}
 #    fi
 
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
@@ -1425,3 +1427,35 @@ CC_FOR_BUILD=x86_64-build_w64-mingw32-gcc CFLAGS_FOR_BUILD= CFLAGS="-O0 -ggdb -p
 --program-transform-name="s&^&x86_64-unknown-linux-gnu-&" --disable-option-checking \
 --build=x86_64-build_w64-mingw32 --host=x86_64-build_w64-mingw32 --target=x86_64-unknown-linux-gnu \
 --srcdir=/home/ray/ctng-firefox-builds/ctng-build-x-l-HEAD-x86_64-235295c4/.build/src/gcc-4.8.2/gcc
+
+
+
+# Current working directory isn't searched on Windows for cc1; well, it is, but not with .exe extension.
+# C:\msys64\home\ukrdonnell\ctng-firefox-builds\ctng-build-x-r-HEAD-x86_64-235295c4\.build\src\gcc-4.8.2\libiberty\pex-win32.c
+
+# Got a potential fix .. maybe not, but it fixed the issue when debugging under QtCreator at least.
+cp ~/Dropbox/pex-win32.c C:/msys64/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gcc-4.8.2/libiberty
+pushd C:/msys64/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1
+export PATH=/home/ukrdonnell/ctng-firefox-builds/x-r-HEAD-x86_64-235295c4/bin:/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/tools/bin:/home/ukrdonnell/ctng-firefox-builds/mingw64-235295c4/bin:$PATH
+
+
+# Despite that patch seeming to work (it arguably shouldn't be needed due to -B flag anyway):
+[ALL  ]    echo "" | /home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1/./gcc/xgcc -B/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1/./gcc/ -E -dM - |   sed -n -e 's/^#define ([^_][a-zA-Z0-9_]*).*/1/p' 	 -e 's/^#define (_[^_A-Z][a-zA-Z0-9_]*).*/1/p' |   sort -u > tmp-macro_list
+[ALL  ]    echo GCC_CFLAGS = '-g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include ' >> tmp-libgcc.mvars
+[ALL  ]    if /home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1/./gcc/xgcc -B/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1/./gcc/ -print-sysroot-headers-suffix > /dev/null 2>&1; then   set -e; for ml in `/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1/./gcc/xgcc -B/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1/./gcc/ -print-multi-lib`; do     multi_dir=`echo ${ml} | sed -e 's/;.*$//'`;     flags=`echo ${ml} | sed -e 's/^[^;]*;//' -e 's/@/ -/g'`;     sfx=`/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1/./gcc/xgcc -B/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1/./gcc/ ${flags} -print-sysroot-headers-suffix`;     if [ "${multi_dir}" = "." ];       then multi_dir="";     else       multi_dir=/${multi_dir};     fi;     echo "${sfx};${multi_dir}";   done; else   echo ";"; fi > tmp-fixinc_list
+[ALL  ]    echo INHIBIT_LIBC_CFLAGS = '-Dinhibit_libc' >> tmp-libgcc.mvars
+[ERROR]    xgcc.exe: error: CreateProcess: No such file or directory
+[ALL  ]    /usr/bin/bash /home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gcc-4.8.2/gcc/../move-if-change tmp-macro_list macro_list
+
+
+
+.. hmm something in the env is bad, to repro:
+pushd $HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/linux-3.10.19
+. ~/Dropbox/ctng-firefox-builds/env.sh
+pushd $HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
+make -C $HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/linux-3.10.19 O=$HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=$HOME/ctng-firefox-builds/x-r-HEAD-x86_64-235295c4/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install
+
+.. problem is the internal processing in fixdep.exe (or maybe the inputs to it)
+
+pushd C:/msys64/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers/
+C:/msys64/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers/scripts/basic/fixdep.exe scripts/basic/.fixdep.d scripts/basic/fixdep "gcc -Wp,-MD,scripts/basic/.fixdep.d -Iscripts/basic -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -o scripts/basic/fixdep /home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/linux-3.10.19/scripts/basic/fixdep.c  "

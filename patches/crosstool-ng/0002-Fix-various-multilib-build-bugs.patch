@@ -1,4 +1,4 @@
-From aeed648b1eb83fce972e5199ab10742cdb725fe7 Mon Sep 17 00:00:00 2001
+From 24e7a48083a33f3dc1ce80a1417029a5e76424b9 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
 Subject: [PATCH 2/8] Fix various multilib build bugs
@@ -183,7 +183,7 @@ index 6d82a7d..3c3348c 100644
  
      for tmp in ARCH ABI CPU TUNE FPU FLOAT; do
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index b9c55cb..61d7449 100644
+index b9c55cb..07b56fe 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
 @@ -76,6 +76,9 @@ do_libc_backend() {
@@ -314,10 +314,10 @@ index b9c55cb..61d7449 100644
 +    # back on some simple transformations (that are wrong in the
 +    # above example!)
 +    if "${cross_cc}" -print-multi-os-directory ${extra_cc_args} > /dev/null 2>&1; then
-+        extraos_dir="${CT_HEADERS_DIR}/"$("${cross_cc}" -print-multi-os-directory ${extra_cc_args})
++        extraos_dir="${CT_SYSROOT_DIR}/lib/"$("${cross_cc}" -print-multi-os-directory ${extra_cc_args})
 +    else
 +        # maintain the previous behaviour if -print-multi-os-directory doesn't work.
-+        extraos_dir="${CT_HEADERS_DIR}/../${extra_dir}/usr/lib"
++        extraos_dir="${CT_SYSROOT_DIR}/lib/${extra_dir}/usr/lib"
 +    fi
 +    # Everything after 'include/../' is passed to configure as --libdir=/usr/${lib_dir}
 +    lib_dir=$(echo "$extraos_dir" | "${sed}" -r -e 's|^.*include/\.\./||')
@@ -451,5 +451,5 @@ index 3c98b8c..5a24439 100644
      # Determine build system if not set by the user
      if [ -z "${CT_BUILD}" ]; then
 -- 
-1.8.4.3
+1.8.4.2
 

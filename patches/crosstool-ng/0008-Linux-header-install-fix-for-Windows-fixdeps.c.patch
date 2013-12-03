@@ -1,4 +1,4 @@
-From cecbc8de314925f95f4df0d7c290abd2e7124988 Mon Sep 17 00:00:00 2001
+From 8159e62e1d1648ed672151845261babb25b0e7f3 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 3 Dec 2013 00:16:22 +0000
 Subject: [PATCH 8/8] Linux header install fix for Windows (fixdeps.c)
@@ -92,5 +92,5 @@ index 0000000..726b85e
 + char *depfile;
 + char *cmdline;
 -- 
-1.8.4.3
+1.8.4.2
 

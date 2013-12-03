@@ -1,7 +1,7 @@
-From a7b61e5aa6cad1fcc72b6253e8b8607c2ee7ceea Mon Sep 17 00:00:00 2001
+From e4fdc159795aa7069692d9e83c6752a8ae03fa02 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 23:51:16 +0000
-Subject: [PATCH 3/7] More Python stuff (7eafc9)
+Subject: [PATCH 3/8] More Python stuff (7eafc9)
 
 Search for python2 then python26 then finally python
 as python3 is sometimes python and that doesn't work
@@ -125,5 +125,5 @@ index fea75bb..e85d24d 100644
 +1.8.4.2
  
 -- 
-1.8.4.2
+1.8.4.3
 

@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# ^ /usr/bin/env since we need bash 4 or greater for the associative arrays
+#   and for OS X this is only available from homebrew.
 
 # Problems and related bug reports.
 #
@@ -50,11 +53,13 @@ TARGET_TO_PREFIX["osx"]="o"
 TARGET_TO_PREFIX["windows"]="w"
 TARGET_TO_PREFIX["linux"]="l"
 TARGET_TO_PREFIX["ps3"]="p"
+TARGET_TO_PREFIX["raspi"]="r"
 
 declare -A VENDOR_OSES
 VENDOR_OSES["osx"]="apple-darwin10"
 VENDOR_OSES["windows"]="x86_64-w64-mingw32"
 VENDOR_OSES["linux"]="unknown-linux-gnu"
+VENDOR_OSES["raspi"]="unknown-linux-gnu"
 
 #########################################
 # Simple option processing and options. #
@@ -519,6 +524,10 @@ cross_clang_build()
       echo "CT_DEBUG_CT_SAVE_STEPS=y"      >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_DEBUG_CT_SAVE_STEPS_GZIP=y" >> ${CTNG_SAMPLE_CONFIG}
     fi
+
+#    if [ "$OSTYPE" = "msys" ]; then
+    echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=2" >> ${CTNG_SAMPLE_CONFIG}
+#    fi
 
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}

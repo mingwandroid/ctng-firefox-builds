@@ -1,21 +1,21 @@
-From 8159e62e1d1648ed672151845261babb25b0e7f3 Mon Sep 17 00:00:00 2001
+From c9724dc3765797fa8a017afb2b0e85ed7a0b0eaf Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 3 Dec 2013 00:16:22 +0000
 Subject: [PATCH 8/8] Linux header install fix for Windows (fixdeps.c)
 
 ---
- .../3.10.19/100-fixdep-fixes-for-Windows.patch     | 77 ++++++++++++++++++++++
- 1 file changed, 77 insertions(+)
+ .../3.10.19/100-fixdep-fixes-for-Windows.patch     | 89 ++++++++++++++++++++++
+ 1 file changed, 89 insertions(+)
  create mode 100644 patches/linux/3.10.19/100-fixdep-fixes-for-Windows.patch
 
 diff --git a/patches/linux/3.10.19/100-fixdep-fixes-for-Windows.patch b/patches/linux/3.10.19/100-fixdep-fixes-for-Windows.patch
 new file mode 100644
-index 0000000..726b85e
+index 0000000..87b6ea2
 --- /dev/null
 +++ b/patches/linux/3.10.19/100-fixdep-fixes-for-Windows.patch
-@@ -0,0 +1,77 @@
-+--- a/scripts/basic/fixdep.c	2013-11-13 03:05:59.000000000 +0000
-++++ b/scripts/basic/fixdep.c	2013-12-02 22:49:14.266122500 +0000
+@@ -0,0 +1,89 @@
++--- linux-3.10.19/scripts/basic/fixdep.c	2013-11-13 03:05:59.000000000 +0000
+++++ /home/ray/Dropbox/fixdep.c	2013-12-03 00:11:57.152829100 +0000
 +@@ -105,7 +105,9 @@
 + 
 + #include <sys/types.h>
@@ -26,14 +26,21 @@ index 0000000..726b85e
 + #include <unistd.h>
 + #include <fcntl.h>
 + #include <string.h>
-+@@ -113,13 +115,64 @@
++@@ -113,13 +115,76 @@
 + #include <stdio.h>
 + #include <limits.h>
 + #include <ctype.h>
 ++#ifndef __MINGW32__
 + #include <arpa/inet.h>
 ++#else
-++#include <alloca.h>
+++inline unsigned int ntohl(unsigned int val);
+++inline unsigned int ntohl(unsigned int val)
+++{
+++	return (((val&0xff      ) << 24) |
+++			((val&0xff00    ) << 8 ) |
+++			((val&0xff0000  ) >> 8 ) |
+++			((val&0xff000000) >> 24) );
+++}
 ++#endif
 + 
 + #define INT_CONF ntohl(0x434f4e46)
@@ -43,6 +50,11 @@ index 0000000..726b85e
 + 
 ++#ifdef __MINGW32__
 ++#define UNUSED __attribute__ ((__unused__))
+++
+++void *mmap(void *start UNUSED, size_t size, int prot UNUSED,
+++	   int flags UNUSED, int fd, off_t offset UNUSED);
+++
+++void munmap(void *p, size_t size UNUSED);
 ++
 ++/* Workaround specifically for fixdep */
 ++#define PROT_READ 0
@@ -92,5 +104,5 @@ index 0000000..726b85e
 + char *depfile;
 + char *cmdline;
 -- 
-1.8.4.2
+1.8.4.3
 

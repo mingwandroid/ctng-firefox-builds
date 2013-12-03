@@ -1,4 +1,4 @@
-From a1f22657c10405b0199a4779e6c511a7626bb549 Mon Sep 17 00:00:00 2001
+From fdaf76d1a24cfdfd57d5add11918441d6abbe39e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 18 Nov 2013 14:23:10 +0000
 Subject: [PATCH 6/8] VERBOSE=1 for clang

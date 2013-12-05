@@ -57,22 +57,23 @@ process_tar_sorted_argument ()
 
 # Find gnu awk and gnutar.
 # Prefer gnutar if it exists.
-TAR=gtar
-if [ ! $(which $TAR > /dev/null 2>&1) ]; then
-    if [ $(which tar > /dev/null 2>&1) ]; then
-        TAR=tar
-    else
-        echo "neither tar nor gtar (OSX: brew install gnu-tar) were found."
-    fi
+TAR=
+type gtar > /dev/null 2>&1 && TAR=gtar
+[ "$TAR" = "" ] && type tar > /dev/null 2>&1 && TAR=tar
+
+if [ "$TAR" = "" ]; then
+  echo "neither tar nor gtar (OSX: brew install gnu-tar) were found."
+  exit 1
 fi
-# Prefer awk if it exists.
-AWK=gawk
-if [ ! $(which $AWK) ]; then
-    if [ $(which awk) ]; then
-        AWK=awk
-    else
-        echo "neither awk nor gawk were found."
-    fi
+
+# Prefer gawk if it exists.
+AWK=
+type gawk > /dev/null 2>&1 && AWK=gawk
+[ "$AWK" = "" ] && type awk > /dev/null 2>&1 && AWK=awk
+
+if [ "$AWK" = "" ]; then
+  echo "neither awk nor gawk were found."
+  exit 1
 fi
 
 declare -a ARGS_FILE_AND_FOLDER

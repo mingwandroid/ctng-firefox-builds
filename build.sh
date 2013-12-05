@@ -474,6 +474,7 @@ cross_clang_build()
         PATCHES=$(find "${THISDIR}/patches/crosstool-ng" -name "*.patch" | sort)
         for PATCH in $PATCHES; do
           git am $PATCH
+#           patch -p1 < $PATCH
         done
       fi
       popd

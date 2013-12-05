@@ -1,4 +1,4 @@
-From 99c3ce0662e65f0a421ca4ca4557ab64998fd0df Mon Sep 17 00:00:00 2001
+From 19099cac1175fff01f6150a7626414d1c65b190e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 4 Dec 2013 00:30:02 +0000
 Subject: [PATCH 09/10] Fix for xgcc not finding cc1 on Windows

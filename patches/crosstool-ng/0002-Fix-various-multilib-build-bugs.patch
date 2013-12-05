@@ -1,4 +1,4 @@
-From a90c580c8d4df524b6892c2f40b772907143267e Mon Sep 17 00:00:00 2001
+From 8f0b912b95a219ade547894dd88ac6d87b68e06b Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
 Subject: [PATCH 02/10] Fix various multilib build bugs
@@ -183,7 +183,7 @@ index 6d82a7d..3c3348c 100644
  
      for tmp in ARCH ABI CPU TUNE FPU FLOAT; do
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index b9c55cb..d8b59b8 100644
+index b9c55cb..0e634a2 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
 @@ -76,6 +76,9 @@ do_libc_backend() {
@@ -319,7 +319,7 @@ index b9c55cb..d8b59b8 100644
 +        install_root="${CT_SYSROOT_DIR}"
 +    else
 +        # maintain the previous behaviour if -print-multi-os-directory doesn't work.
-+        lib_dir=/usr/lib"
++        lib_dir=/usr/lib
 +        install_root="${CT_SYSROOT_DIR}${extra_dir}"
 +    fi
 +    extraos_dir="${install_root}${lib_dir}"

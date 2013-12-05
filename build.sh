@@ -324,7 +324,7 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     if [ -f /etc/arch-release ]; then
       HOST_MULTILIB="-multilib"
     fi
-    PACKAGES="openssh git python2 tar mercurial gcc${HOST_MULTILIB} libtool${HOST_MULTILIB} wget p7zip unzip zip yasm"
+    PACKAGES="openssh git python2 tar mercurial gcc${HOST_MULTILIB} libtool${HOST_MULTILIB} wget p7zip unzip zip yasm svn"
     # ncurses for Arch Linux vs ncurses-devel for MSYS is Alexey's fault ;-)
     # .. he has split packages up more than Arch does, so there is not a 1:1
     #    relationship between them anymore.
@@ -504,8 +504,10 @@ cross_clang_build()
     if [ "$BUILD_GCC" = "yes" ]; then
       echo "CT_CC_GCC_V_4_8_2=y"           >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_CXX=y"              >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_LIBC_glibc=y"               >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_LIBC_GLIBC_V_2_7=y"         >> ${CTNG_SAMPLE_CONFIG}
+      # Debian has switched to eglibc, Arch uses glibc.
+      echo "CT_LIBC_EGLIBC_V_2_18=y"        >> ${CTNG_SAMPLE_CONFIG}
+#      echo "CT_LIBC_glibc=y"               >> ${CTNG_SAMPLE_CONFIG}
+#      echo "CT_LIBC_GLIBC_V_2_7=y"         >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     if [ "$BUILD_CLANG" = "yes" ]; then

@@ -1,4 +1,4 @@
-From 3c6cd768c563b7b926b8eb06bd545282c9cacfa6 Mon Sep 17 00:00:00 2001
+From 8a39a5f5ed17ac66be5d73d6f3da4b98931b1431 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 25 Nov 2013 22:40:03 +0000
 Subject: [PATCH 05/11] Add PS3 patches from Martell
@@ -13973,5 +13973,5 @@ index 0000000..7670b1a
 + #include "mp_std_bits.inlines.hh"
 + 
 -- 
-1.8.4.4
+1.8.4.2
 

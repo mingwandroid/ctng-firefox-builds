@@ -1462,3 +1462,110 @@ make -C $HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src
 
 pushd C:/msys64/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers/
 C:/msys64/home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers/scripts/basic/fixdep.exe scripts/basic/.fixdep.d scripts/basic/fixdep "gcc -Wp,-MD,scripts/basic/.fixdep.d -Iscripts/basic -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -o scripts/basic/fixdep /home/ukrdonnell/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/linux-3.10.19/scripts/basic/fixdep.c  "
+
+
+# Windows build of unifdef is broken .. here's how to test making a fix for it.
+export PATH=~/ctng-firefox-builds/mingw64-235295c4/bin:$PATH
+
+ROOT=/tmp/kern-head
+INSTROOT=/tmp/kern-head/install
+mkdir -p $INSTROOT
+[ -d $ROOT/src ] || (
+  mkdir -p $ROOT/src
+  pushd $ROOT/src
+  tar -xf ~/src/linux-3.10.19.tar.xz
+  pushd linux-3.10.19
+  patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/linux/3.10.19/120-unifdef-win32.patch
+  popd
+  git clone git://dotat.at/unifdef.git
+  popd
+)
+
+mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
+pushd $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers; make -C $ROOT/src/linux-3.10.19 O=$ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=$INSTROOT/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install; popd
+
+
+# Making new unifdef patches for Linux Kernel headers_install.
+# First, remove any existing unifdef patches!
+KVER=3.12
+ROOT=/tmp/kern-head.new
+rm -rf $ROOT
+INSTROOT=$ROOT/install
+mkdir -p $INSTROOT
+mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
+[ -d $ROOT/src ] || (
+  mkdir -p $ROOT/src
+  pushd $ROOT/src
+   tar -xf ~/src/linux-${KVER}.tar.xz
+   # Apply any existing patches.
+   pushd linux-${KVER}
+   PATCHES=$(find ~/ctng-firefox-builds/crosstool-ng/patches/linux/${KVER} -name "*.patch" | sort)
+   for PATCH in $PATCHES; do
+     echo "Applying pre-existing kernel patch $PATCH .. it better not be a previous version of the one I'm making"
+     patch -p1 < $PATCH
+   done
+   popd
+   cp -rf linux-${KVER} linux-${KVER}.orig
+   pushd linux-${KVER}/scripts
+    pushd /tmp
+     [ -d unifdef ] && rm -rf unifdef
+     git clone git://dotat.at/unifdef.git
+     pushd unifdef
+      ./scripts/reversion.sh
+     popd
+    popd
+    mkdir unifdef-upstream
+    mkdir unifdef-upstream/FreeBSD
+    mkdir unifdef-upstream/win32
+    cp -f /tmp/unifdef/COPYING          unifdef-upstream/
+    # Duplicate all files into platform specific subdirs.
+    cp -f /tmp/unifdef/FreeBSD/err.c    unifdef-upstream/win32/
+    cp -f /tmp/unifdef/FreeBSD/getopt.c unifdef-upstream/win32/
+    cp -f /tmp/unifdef/unifdef.c        unifdef-upstream/win32/
+    cp -f /tmp/unifdef/win32/win32.c    unifdef-upstream/win32/
+    cp -f /tmp/unifdef/win32/unifdef.h  unifdef-upstream/win32/
+    cp -f /tmp/unifdef/version.h        unifdef-upstream/win32/
+    cp -f /tmp/unifdef/FreeBSD/err.c    unifdef-upstream/FreeBSD/
+    cp -f /tmp/unifdef/FreeBSD/getopt.c unifdef-upstream/FreeBSD/
+    cp -f /tmp/unifdef/unifdef.c        unifdef-upstream/FreeBSD/
+    cp -f /tmp/unifdef/win32/unifdef.h  unifdef-upstream/FreeBSD/
+    cp -f /tmp/unifdef/version.h        unifdef-upstream/FreeBSD/
+   popd
+   pushd linux-${KVER}
+   # Patch the Makefile.
+    patch -p1 <<- "EOF"
+	--- linux-3.10.19.orig/scripts/Makefile      2013-11-13 03:05:59.000000000 +0000
+	+++ linux-3.10.19.orig/scripts/Makefile   2013-12-06 11:07:46.000000000 +0000
+	@@ -26,6 +26,17 @@
+	 # The following hostprogs-y programs are only build on demand
+	 hostprogs-y += unifdef docproc
+
+	+gcc_machine := $(shell gcc -dumpmachine)
+	+ifneq (, $(findstring linux, $(gcc_machine)))
+	+  unifdef-objs := unifdef.o
+	+else
+	+  ifeq (, $(findstring mingw, $(gcc_machine)))
+	+    unifdef-objs := unifdef-upstream/FreeBSD/unifdef.o unifdef-upstream/FreeBSD/err.o unifdef-upstream/FreeBSD/getopt.o
+	+  else
+	+    unifdef-objs := unifdef-upstream/win32/unifdef.o unifdef-upstream/win32/err.o unifdef-upstream/win32/getopt.o unifdef-upstream/win32/win32.o
+	+  endif
+	+endif
+	+
+	 # These targets are used internally to avoid "is up to date" messages
+	 PHONY += build_unifdef
+	 build_unifdef: scripts/unifdef FORCE
+	EOF
+   popd
+  popd
+)
+
+# Testing it:
+mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
+pushd $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers; make -C $ROOT/src/linux-${KVER} O=$ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=$INSTROOT/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install; popd
+
+pushd $ROOT/src
+[ -d ~/Dropbox/ctng-firefox-builds/patches/linux/${KVER} ] || mkdir -p ~/Dropbox/ctng-firefox-builds/patches/linux/${KVER}
+diff -urN linux-${KVER}.orig linux-${KVER} > ~/Dropbox/ctng-firefox-builds/patches/linux/${KVER}/120-win32-use-upstream-unifdef.patch
+popd
+
+cat ~/Dropbox/ctng-firefox-builds/120-win32-use-upstream-unifdef.patch

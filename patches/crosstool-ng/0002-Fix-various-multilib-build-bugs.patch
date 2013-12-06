@@ -1,4 +1,4 @@
-From fb1d9543f9a5bdcaaa52fc516733534dc30fc294 Mon Sep 17 00:00:00 2001
+From 1b51d5c081aef03038f35813541e6c1757e6b037 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
 Subject: [PATCH 02/11] Fix various multilib build bugs
@@ -69,7 +69,7 @@ index d973594..4a052ad 100644
                  binutils_tools+=( elf2flt flthdr )
              fi
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index ede8cc5..fa31646 100644
+index ede8cc5..fda75e1 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
 @@ -189,6 +189,7 @@ do_gcc_core_backend() {
@@ -112,10 +112,10 @@ index ede8cc5..fa31646 100644
 -        CT_DoExecLog ALL cp -a "${CT_HEADERS_DIR}" "${prefix}/${CT_TARGET}/include"
 +    if [ "${copy_minimal_sysroot}" = "y" ]; then
 +        CT_DoLog DEBUG "Copying headers and libs to install area of bootstrap gcc, so it can build libgcc2"
-+        CT_Pushd "${CT_SYSROOT_DIR}"
-+        sysroot_dirs=$(find -mindepth 1 -maxdepth 1 -type d \( -name "lib*" -or -name "include" \) -printf '%f\n')
++        CT_Pushd "${CT_HEADERS_DIR}/.."
++        sysroot_dirs=$(find . -mindepth 1 -maxdepth 1 -type d \( -name "lib*" -or -name "include" \) -exec basename {} \;)
 +        for sysroot_dir in $sysroot_dirs; do
-+          CT_DoExecLog ALL cp -a "${CT_SYSROOT_DIR}/${sysroot_dir}" "${prefix}/${CT_TARGET}/${sysroot_dir}"
++          CT_DoExecLog ALL cp -a "${sysroot_dir}" "${prefix}/${CT_TARGET}/${sysroot_dir}"
 +        done
 +        CT_Popd
      fi

@@ -1,4 +1,4 @@
-From 2f9835d14e3f7375eb4610c271766ff5ddf19822 Mon Sep 17 00:00:00 2001
+From 282b54405000822c1c3f4401703aa8f349f3ac7a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 5 Dec 2013 23:26:41 +0000
 Subject: [PATCH 11/11] Kernel (3.10.19, 2.12) header fix for unifdef on Win32

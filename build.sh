@@ -305,6 +305,8 @@ if [ "${OSTYPE}" = "darwin" ]; then
   GNUFIX=$BREWFIX/bin/g
   CC=clang
   CXX=clang++
+#  CC=llvm-gcc
+#  CXX=llvm-g++
   # To install gperf 3.0.4 I did:
   set +e
   brew tap homebrew/dupes
@@ -534,6 +536,15 @@ cross_clang_build()
     echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=1" >> ${CTNG_SAMPLE_CONFIG}
 #    fi
 
+    if [ "${OSTYPE}" = "darwin" ]; then
+      # Darwin always fails with:
+      # "Checking that gcc can compile a trivial statically linked program (CT_WANTS_STATIC_LINK)"
+      # We definitely don't want to be forcing CT_CC_GCC_STATIC_LIBSTDCXX=n so this needs to be
+      #  fixed properly.
+      echo "CT_WANTS_STATIC_LINK=n"        >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_STATIC_TOOLCHAIN=n"         >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_GCC_STATIC_LIBSTDCXX=n"  >> ${CTNG_SAMPLE_CONFIG}
+    fi
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 
@@ -1492,8 +1503,7 @@ rm -rf $ROOT
 INSTROOT=$ROOT/install
 mkdir -p $INSTROOT
 mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
-[ -d $ROOT/src ] || (
-  mkdir -p $ROOT/src
+[ -d $ROOT/src ] || mkdir -p $ROOT/src
   pushd $ROOT/src
    tar -xf ~/src/linux-${KVER}.tar.xz
    # Apply any existing patches.
@@ -1522,32 +1532,25 @@ mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
     # Duplicate all files into platform specific subdirs.
     cp -f /tmp/unifdef/FreeBSD/err.c    unifdef-upstream/win32/
     cp -f /tmp/unifdef/FreeBSD/getopt.c unifdef-upstream/win32/
-    cp -f /tmp/unifdef/unifdef.c        unifdef-upstream/win32/
     cp -f /tmp/unifdef/win32/win32.c    unifdef-upstream/win32/
     cp -f /tmp/unifdef/win32/unifdef.h  unifdef-upstream/win32/
+    cp -f /tmp/unifdef/unifdef.c        unifdef-upstream/win32/
     cp -f /tmp/unifdef/version.h        unifdef-upstream/win32/
-    cp -f /tmp/unifdef/FreeBSD/err.c    unifdef-upstream/FreeBSD/
-    cp -f /tmp/unifdef/FreeBSD/getopt.c unifdef-upstream/FreeBSD/
-    cp -f /tmp/unifdef/unifdef.c        unifdef-upstream/FreeBSD/
-    cp -f /tmp/unifdef/unifdef.h        unifdef-upstream/FreeBSD/
-    cp -f /tmp/unifdef/version.h        unifdef-upstream/FreeBSD/
    popd
    pushd linux-${KVER}
    # Patch the Makefile.
     patch -p1 <<- "EOF"
 	--- linux-3.10.19.orig/scripts/Makefile      2013-11-13 03:05:59.000000000 +0000
 	+++ linux-3.10.19.orig/scripts/Makefile   2013-12-06 11:07:46.000000000 +0000
-	@@ -26,6 +26,17 @@
+	@@ -26,6 +26,15 @@
 	 # The following hostprogs-y programs are only build on demand
 	 hostprogs-y += unifdef docproc
-
+	
 	+cc_machine := $(shell $(CC) -dumpmachine)
 	+ifneq (, $(findstring linux, $(cc_machine)))
 	+  unifdef-objs := unifdef.o
 	+else
-	+  ifeq (, $(findstring mingw, $(cc_machine)))
-	+    unifdef-objs := unifdef-upstream/FreeBSD/unifdef.o unifdef-upstream/FreeBSD/err.o unifdef-upstream/FreeBSD/getopt.o
-	+  else
+	+  ifneq (, $(findstring mingw, $(cc_machine)))
 	+    unifdef-objs := unifdef-upstream/win32/unifdef.o unifdef-upstream/win32/err.o unifdef-upstream/win32/getopt.o unifdef-upstream/win32/win32.o
 	+  endif
 	+endif
@@ -1558,12 +1561,12 @@ mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
 	EOF
    popd
   popd
-)
 
 pushd $ROOT/src
 find . -type f -and \( -name "*.orig" -or -name "*.rej" \) -exec rm {} \;
 [ -d ~/ctng-firefox-builds/crosstool-ng/patches/linux/${KVER} ] || mkdir -p ~/ctng-firefox-builds/crosstool-ng/patches/linux/${KVER}
-diff -urN linux-${KVER}.orig linux-${KVER} > ~/ctng-firefox-builds/crosstool-ng/patches/linux/${KVER}/120-Win32-FreeBSD-use-upstream-unifdef.patch2
+#diff -urN linux-${KVER}.orig linux-${KVER} > ~/ctng-firefox-builds/crosstool-ng/patches/linux/${KVER}/120-Win32-FreeBSD-use-upstream-unifdef.patch2
+diff -urN linux-${KVER}.orig linux-${KVER} > ~/Dropbox/120-Win32-FreeBSD-use-upstream-unifdef.patch.${KVER}
 popd
 
 # Testing it:
@@ -1571,3 +1574,7 @@ mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
 pushd $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers; make -C $ROOT/src/linux-${KVER} O=$ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=$INSTROOT/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install; popd
 
 cat ~/Dropbox/ctng-firefox-builds/120-win32-use-upstream-unifdef.patch
+
+pushd armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
+gcc -Wp,-MD,scripts/unifdef-upstream/FreeBSD/.err.o.d -Iscripts -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer   -I/Users/raydonnelly/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64/.build/src/linux-3.10.19/tools/include -c -o scripts/unifdef-upstream/FreeBSD/err.o /Users/raydonnelly/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64/.build/src/linux-3.10.19/scripts/unifdef-upstream/FreeBSD/err.c
+

@@ -55,9 +55,6 @@ CT_PATCH_BUNDLED_LOCAL=y
 # CT_PATCH_BUNDLED_FALLBACK_LOCAL is not set
 # CT_PATCH_LOCAL_FALLBACK_BUNDLED is not set
 # CT_PATCH_NONE is not set
-CT_PATCH_ORDER="bundled,local"
-CT_PATCH_USE_LOCAL=y
-CT_LOCAL_PATCH_DIR="${CT_TOP_DIR}/patches"
 
 #
 # Build behavior

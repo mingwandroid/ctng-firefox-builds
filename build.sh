@@ -48,18 +48,31 @@ CROSSTOOL_CONFIG=
 # 2. and Mozilla's .mozconfig
 MOZILLA_CONFIG=
 
-declare -A TARGET_TO_PREFIX
-TARGET_TO_PREFIX["osx"]="o"
-TARGET_TO_PREFIX["windows"]="w"
-TARGET_TO_PREFIX["linux"]="l"
-TARGET_TO_PREFIX["ps3"]="p"
-TARGET_TO_PREFIX["raspi"]="r"
+# I wolud use associative arrays (declare -A) for this
+# but OS X with Bash 3 doesn't support that.
+TARGET_TO_PREFIX_osx="o"
+TARGET_TO_PREFIX_windows="w"
+TARGET_TO_PREFIX_linux="l"
+TARGET_TO_PREFIX_ps3="p"
+TARGET_TO_PREFIX_raspi="r"
 
-declare -A VENDOR_OSES
-VENDOR_OSES["osx"]="apple-darwin10"
-VENDOR_OSES["windows"]="x86_64-w64-mingw32"
-VENDOR_OSES["linux"]="unknown-linux-gnu"
-VENDOR_OSES["raspi"]="unknown-linux-gnu"
+VENDOR_OSES_osx="apple-darwin10"
+VENDOR_OSES_windows="x86_64-w64-mingw32"
+VENDOR_OSES_linux="unknown-linux-gnu"
+VENDOR_OSES_raspi="unknown-linux-gnu"
+
+TARGET_GCC_VERSIONS_osx="4.2.1"
+TARGET_GCC_VERSIONS_windows="4.8.2"
+TARGET_GCC_VERSIONS_linux="4.8.2"
+TARGET_GCC_VERSIONS_ps3="4.7.0"
+TARGET_GCC_VERSIONS_raspi="4.8.2"
+
+# Stands for associative lookup!
+_al()
+{
+  local _tmp=${1}_${2}
+  echo ${!_tmp}
+}
 
 #########################################
 # Simple option processing and options. #
@@ -285,7 +298,10 @@ some host/target confusion you need to make a link from ..
   fi
 fi
 
-VENDOR_OS=${VENDOR_OSES[${TARGET_OS}]}
+VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
+GCC_VERS=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
+GCC_VERS_=$(echo $GCC_VERS | tr '.' '_')
+
 # The first part of CROSSCC is HOST_ARCH and the compilers are
 # built to run on that architecture of the host OS. They will
 # generally be multilib though, so MOZ_TARGET_ARCH gets used for
@@ -504,9 +520,11 @@ cross_clang_build()
     fi
 
     if [ "$BUILD_GCC" = "yes" ]; then
-      echo "CT_CC_GCC_V_4_8_2=y"           >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_LANG_CXX=y"              >> ${CTNG_SAMPLE_CONFIG}
-      # Debian has switched to eglibc, Arch uses glibc.
+      echo "CT_CC_GCC_V_${GCC_VERS_}=y"     >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_CXX=y"               >> ${CTNG_SAMPLE_CONFIG}
+      # Debian has switched to eglibc, Arch uses glibc. This needs to be an option ..
+      # e.g. --target-distro={arch|debian|ubuntu} then use correct setting according
+      #      to that?
       echo "CT_LIBC_EGLIBC_V_2_18=y"        >> ${CTNG_SAMPLE_CONFIG}
 #      echo "CT_LIBC_glibc=y"               >> ${CTNG_SAMPLE_CONFIG}
 #      echo "CT_LIBC_GLIBC_V_2_7=y"         >> ${CTNG_SAMPLE_CONFIG}
@@ -668,7 +686,7 @@ if [ "$COMPILER_RT" = "yes" ]; then
   BUILD_PREFIX="${BUILD_PREFIX}-rt"
 fi
 
-STUB=x-${TARGET_TO_PREFIX[${TARGET_OS}]}
+STUB=x-$(_al TARGET_TO_PREFIX $TARGET_OS)
 BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}

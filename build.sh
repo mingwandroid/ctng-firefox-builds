@@ -1529,7 +1529,7 @@ mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
     cp -f /tmp/unifdef/FreeBSD/err.c    unifdef-upstream/FreeBSD/
     cp -f /tmp/unifdef/FreeBSD/getopt.c unifdef-upstream/FreeBSD/
     cp -f /tmp/unifdef/unifdef.c        unifdef-upstream/FreeBSD/
-    cp -f /tmp/unifdef/win32/unifdef.h  unifdef-upstream/FreeBSD/
+    cp -f /tmp/unifdef/unifdef.h        unifdef-upstream/FreeBSD/
     cp -f /tmp/unifdef/version.h        unifdef-upstream/FreeBSD/
    popd
    pushd linux-${KVER}

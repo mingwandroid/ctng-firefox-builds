@@ -242,32 +242,32 @@ copy_build_scripts()
   cp $(dirname $MOZILLA_CONFIG)/configure.log $1/logs/
   cp $(dirname $MOZILLA_CONFIG)/build.log     $1/logs/
   cp $(dirname $MOZILLA_CONFIG)/package.log   $1/logs/
-  echo "  ****************************  "       > $1/README
-  echo "  * crosstool-ng and Firefox *  "      >> $1/README
-  echo "  * build script and patches *  "      >> $1/README
-  echo "  ****************************  "      >> $1/README
-  echo ""                                      >> $1/README
-  echo "To regenerate this Firefox cross"      >> $1/README
-  echo "build run regenerate.sh"               >> $1/README
-  echo ""                                      >> $1/README
-  echo "To see options for making another"     >> $1/README
-  echo "build run build.sh --help"             >> $1/README
-  echo ""                                      >> $1/README
-  echo "Some scripts and patches in this"      >> $1/README
-  echo "folder structure won't be needed"      >> $1/README
-  echo "to re-generate this exact build,"      >> $1/README
-  echo "but may be used by other configs"      >> $1/README
-  echo ""                                      >> $1/README
-  echo "final-configs/ contains two files:"    >> $1/README
-  echo ".config is the crosstool-ng config"    >> $1/README
-  echo "after it has been created from one"    >> $1/README
-  echo "of the more minimal sample configs"    >> $1/README
-  echo ".mozconfig is the configuration of"    >> $1/README
-  echo "the Firefox build."                    >> $1/README
-  echo ""                                      >> $1/README
-  echo "Comments/suggestions to:             " >> $1/README
-  echo ""                                      >> $1/README
-  echo "Ray Donnelly <mingw.android@gmail.com" >> $1/README
+  echo "  ****************************  "        > $1/README
+  echo "  * crosstool-ng and Firefox *  "       >> $1/README
+  echo "  * build script and patches *  "       >> $1/README
+  echo "  ****************************  "       >> $1/README
+  echo ""                                       >> $1/README
+  echo "To regenerate this Firefox cross"       >> $1/README
+  echo "build run regenerate.sh"                >> $1/README
+  echo ""                                       >> $1/README
+  echo "To see options for making another"      >> $1/README
+  echo "build run build.sh --help"              >> $1/README
+  echo ""                                       >> $1/README
+  echo "Some scripts and patches in this"       >> $1/README
+  echo "folder structure won't be needed"       >> $1/README
+  echo "to re-generate this exact build,"       >> $1/README
+  echo "but may be used by other configs"       >> $1/README
+  echo ""                                       >> $1/README
+  echo "final-configs/ contains two files:"     >> $1/README
+  echo ".config is the crosstool-ng config"     >> $1/README
+  echo "after it has been created from one"     >> $1/README
+  echo "of the more minimal sample configs"     >> $1/README
+  echo ".mozconfig is the configuration of"     >> $1/README
+  echo "the Firefox build."                     >> $1/README
+  echo ""                                       >> $1/README
+  echo "Comments/suggestions to:"               >> $1/README
+  echo ""                                       >> $1/README
+  echo "Ray Donnelly <mingw.android@gmail.com>" >> $1/README
 }
 
 if [ "${HOST_ARCH}" = "i686" ]; then

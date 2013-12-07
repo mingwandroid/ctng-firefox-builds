@@ -1,4 +1,4 @@
-From ccbe1c96ef3e0cfdfc025731862e7552b5aaa0a3 Mon Sep 17 00:00:00 2001
+From 87e36a42948521f605f28afbff074829a78c4ddf Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 3 Dec 2013 00:16:22 +0000
 Subject: [PATCH 08/11] Linux header install fix for Windows (fixdeps.c)
@@ -331,5 +331,5 @@ index 0000000..8b6b901
 + 		fprintf(stderr, "fixdep: error opening depfile: ");
 + 		perror(depfile);
 -- 
-1.8.4.2
+1.8.5.1
 

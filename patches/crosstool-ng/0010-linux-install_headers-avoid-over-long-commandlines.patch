@@ -1,4 +1,4 @@
-From bf4266ac7bbeea3fdcc202a9f4ae27b42b4430e6 Mon Sep 17 00:00:00 2001
+From f6a1d83dde1faf4d3bdaec81ae2db4addee1a545 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 4 Dec 2013 19:30:02 +0000
 Subject: [PATCH 10/11] linux install_headers: avoid over-long commandlines
@@ -74,5 +74,5 @@ index 0000000..7eb7def
 + else
 + __headerscheck: $(subdirs) $(check-file)
 -- 
-1.8.4.2
+1.8.5.1
 

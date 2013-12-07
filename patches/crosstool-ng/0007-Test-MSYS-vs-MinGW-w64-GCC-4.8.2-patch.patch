@@ -1,4 +1,4 @@
-From 1006f560d8564f54fe8e807a804be99a3543fe73 Mon Sep 17 00:00:00 2001
+From 831fa06cb1dbe0f03263649e6c2a33f314348133 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 16:57:31 +0000
 Subject: [PATCH 07/11] Test MSYS vs MinGW-w64 GCC 4.8.2 patch
@@ -259,5 +259,5 @@ index 0000000..c641551
 + tmake_file_=
 + for f in ${tmake_file}
 -- 
-1.8.4.2
+1.8.5.1
 

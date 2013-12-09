@@ -554,6 +554,11 @@ cross_clang_build()
     echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=1" >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_JOBS=1"                       >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_PARALLEL_JOBS=1"              >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_gettext=y"                    >> ${CTNG_SAMPLE_CONFIG}
+    # gettext is needed for {e}glibc-2_18; but not just on Windows!
+    echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}
+    
+    
 #    fi
 
     if [ "${OSTYPE}" = "darwin" ]; then
@@ -1664,3 +1669,72 @@ if /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv
 # /usr/bin/make "DESTDIR=" "RPATH_ENVVAR=PATH" "TARGET_SUBDIR=armv6hl-unknown-linux-gnueabi" "bindir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin" "datadir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/share" "exec_prefix=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools" "includedir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/include" "datarootdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/share" "docdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/share/doc/" "infodir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/share/info" "pdfdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/share/doc/" "htmldir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/share/doc/" "libdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib" "libexecdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/libexec" "lispdir=" "localstatedir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/var" "mandir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/share/man" "oldincludedir=/usr/include" "prefix=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools" "sbindir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/sbin" "sharedstatedir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/com" "sysconfdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/etc" "tooldir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi" "build_tooldir=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi" "target_alias=armv6hl-unknown-linux-gnueabi" "AWK=gawk" "BISON=bison" "CC_FOR_BUILD=x86_64-build_w64-mingw32-gcc" "CFLAGS_FOR_BUILD=" "CXX_FOR_BUILD=x86_64-build_w64-mingw32-g++" "EXPECT=expect" "FLEX=flex" "INSTALL=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/tools/bin/install -c" "INSTALL_DATA=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/tools/bin/install -c -m 644" "INSTALL_PROGRAM=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/tools/bin/install -c" "INSTALL_SCRIPT=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/tools/bin/install -c" "LDFLAGS_FOR_BUILD=" "LEX=flex" "M4=m4" "MAKE=/usr/bin/make" "RUNTEST=runtest" "RUNTESTFLAGS=" "SED=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/tools/bin/sed" "SHELL=/usr/bin/bash" "YACC=bison -y" "`echo 'ADAFLAGS=' | sed -e s'/[^=][^=]*=$/XFOO=/'`" "ADA_CFLAGS=" "AR_FLAGS=rc" "`echo 'BOOT_ADAFLAGS=-gnatpg' | sed -e s'/[^=][^=]*=$/XFOO=/'`" "BOOT_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format" "BOOT_LDFLAGS= -Wl,--stack,12582912" "CFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1 -D__USE_MINGW_ACCESS" "CXXFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1" "LDFLAGS= -Wl,--stack,12582912" "LIBCFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1 -D__USE_MINGW_ACCESS" "LIBCXXFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1 -fno-implicit-templates" "STAGE1_CHECKING=--enable-checking=yes,types" "STAGE1_LANGUAGES=c,lto" "GNATBIND=x86_64-build_w64-mingw32-gnatbind" "GNATMAKE=x86_64-build_w64-mingw32-gnatmake" "AR_FOR_TARGET=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/bin/ar" "AS_FOR_TARGET=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/bin/as" "CC_FOR_TARGET= $r/./gcc/xgcc -B$r/./gcc/" "CFLAGS_FOR_TARGET=-g -Os" "CPPFLAGS_FOR_TARGET=" "CXXFLAGS_FOR_TARGET=-g -Os" "DLLTOOL_FOR_TARGET=armv6hl-unknown-linux-gnueabi-dlltool" "FLAGS_FOR_TARGET=-B/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/bin/ -B/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/lib/ -isystem /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/sys-include" "GCJ_FOR_TARGET= armv6hl-unknown-linux-gnueabi-gcj" "GFORTRAN_FOR_TARGET= armv6hl-unknown-linux-gnueabi-gfortran" "GOC_FOR_TARGET= armv6hl-unknown-linux-gnueabi-gccgo" "GOCFLAGS_FOR_TARGET=-O2 -g" "LD_FOR_TARGET=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/bin/ld" "LIPO_FOR_TARGET=armv6hl-unknown-linux-gnueabi-lipo" "LDFLAGS_FOR_TARGET=" "LIBCFLAGS_FOR_TARGET=-g -Os" "LIBCXXFLAGS_FOR_TARGET=-g -Os -fno-implicit-templates" "NM_FOR_TARGET=armv6hl-unknown-linux-gnueabi-nm" "OBJDUMP_FOR_TARGET=armv6hl-unknown-linux-gnueabi-objdump" "RANLIB_FOR_TARGET=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/bin/ranlib" "READELF_FOR_TARGET=armv6hl-unknown-linux-gnueabi-readelf" "STRIP_FOR_TARGET=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/bin/strip" "WINDRES_FOR_TARGET=armv6hl-unknown-linux-gnueabi-windres" "WINDMC_FOR_TARGET=armv6hl-unknown-linux-gnueabi-windmc" "BUILD_CONFIG=" "`echo 'LANGUAGES=' | sed -e s'/[^=][^=]*=$/XFOO=/'`" "LEAN=false" "STAGE1_CFLAGS=-g" "STAGE1_CXXFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1" "STAGE1_TFLAGS=" "STAGE2_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format" "STAGE2_CXXFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1" "STAGE2_TFLAGS=" "STAGE3_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format" "STAGE3_CXXFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1" "STAGE3_TFLAGS=" "STAGE4_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format" "STAGE4_CXXFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1" "STAGE4_TFLAGS=" "STAGEprofile_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format -fprofile-generate" "STAGEprofile_CXXFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1" "STAGEprofile_TFLAGS=" "STAGEfeedback_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format -fprofile-use" "STAGEfeedback_CXXFLAGS=-O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1" "STAGEfeedback_TFLAGS=" "CXX_FOR_TARGET= armv6hl-unknown-linux-gnueabi-c++" "TFLAGS=" "CONFIG_SHELL=/usr/bin/bash" "MAKEINFO=makeinfo --split-size=5000000" 'AR=x86_64-build_w64-mingw32-ar' 'AS=x86_64-build_w64-mingw32-as' 'CC=x86_64-build_w64-mingw32-gcc' 'CXX=x86_64-build_w64-mingw32-g++' 'DLLTOOL=x86_64-build_w64-mingw32-dlltool' 'GCJ=' 'GFORTRAN=' 'GOC=' 'LD=c:/msys64/home/ray/ctng-firefox-builds/mingw64-235295c4/bin/../lib/gcc/x86_64-w64-mingw32/4.8.2/../../../../x86_64-w64-mingw32/bin/ld.exe' 'LIPO=lipo' 'NM=x86_64-build_w64-mingw32-nm' 'OBJDUMP=x86_64-build_w64-mingw32-objdump' 'RANLIB=x86_64-build_w64-mingw32-ranlib' 'READELF=readelf' 'STRIP=x86_64-build_w64-mingw32-strip' 'WINDRES=x86_64-build_w64-mingw32-windres' 'WINDMC=windmc' LDFLAGS="${LDFLAGS}" HOST_LIBS="${HOST_LIBS}" "GCC_FOR_TARGET= $r/./gcc/xgcc -B$r/./gcc/" "`echo 'STMP_FIXPROTO=' | sed -e s'/[^=][^=]*=$/XFOO=/'`" "`echo 'LIMITS_H_TEST=' | sed -e s'/[^=][^=]*=$/XFOO=/'`" all
 # ...
 # echo "" | "C:/msys64/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-1/gcc/cc1.exe" "-E" "-quiet" "-iprefix" "c:\msys64\home\ray\ctng-firefox-builds\ctng-build-x-r-head-x86_64-235295c4\.build\armv6hl-unknown-linux-gnueabi\build\build-cc-gcc-core-pass-1\gcc\../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/" "-" "-march=armv6" "-mtune=arm1176jzf-s" "-mfloat-abi=hard" "-mfpu=vfp" "-mtls-dialect=gnu" "-dM"
+
+.. where its at:
+
+[INFO ]  Installing pass-1 core C gcc compiler
+[EXTRA]    Configuring core C gcc compiler
+[EXTRA]    Building core C gcc compiler
+[ERROR]    cc1.exe: error: no include path in which to search for stdc-predef.h
+[EXTRA]    Installing core C gcc compiler
+[INFO ]  Installing pass-1 core C gcc compiler: done in 1833.37s (at 72:13)
+[EXTRA]  Saving state to restart at step 'kernel_headers'...
+[INFO ]  =================================================================
+[INFO ]  Installing kernel headers
+[EXTRA]    Installing kernel headers
+[EXTRA]    Checking installed headers
+[INFO ]  Installing kernel headers: done in 192.54s (at 75:35)
+[EXTRA]  Saving state to restart at step 'libc_start_files'...
+[INFO ]  =================================================================
+[INFO ]  Installing C library headers & start files
+[EXTRA]    Configuring C library
+[EXTRA]    Installing C library headers
+[ERROR]    rpc_main.c:41:21: fatal error: libintl.h: No such file or directory
+[ERROR]    make[3]: *** [/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_main.o] Error 1
+[ERROR]    make[2]: *** [sunrpc/install-headers] Error 2
+[ERROR]    make[1]: *** [install-headers] Error 2
+
+
+mkdir /tmp/gettext
+pushd /tmp/gettext
+CFLAGS= LDFLAGS= /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/configure --prefix=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools
+
+pushd /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libiconv-build-x86_64-build_w64-mingw32/lib
+/usr/bin/bash ../libtool --mode=compile x86_64-build_w64-mingw32-gcc -O0 -ggdb  -D__USE_MINGW_ANSI_STDIO=1 -I. -I/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/libiconv-1.14/lib -I../include -I/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/libiconv-1.14/lib/../include -I.. -I/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/libiconv-1.14/lib/..  -fvisibility=hidden -DLIBDIR="/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib" -DBUILDING_LIBICONV -DBUILDING_DLL -DENABLE_RELOCATABLE=1 -DIN_LIBRARY -DINSTALLDIR="/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib" -DNO_XMALLOC -Dset_relocation_prefix=libiconv_set_relocation_prefix -Drelocate=libiconv_relocate -DHAVE_CONFIG_H -c /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/libiconv-1.14/lib/iconv.c
+
+
+#pushd /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-gettext-build-x86_64-build_w64-mingw32
+export PATH=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"${PATH}"
+mkdir /tmp/gettext-build
+pushd /tmp/gettext-build
+CFLAGS= LDFLAGS= /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/configure --prefix=/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools --host=x86_64-build_w64-mingw32 --disable-java --disable-native-java --disable-csharp --enable-static --enable-threads=win32 --without-emacs --disable-openmp
+
+
+
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:67:1: error: conflicting types for ‘rpl_lstat’
+ rpl_lstat (const char *file, struct stat *sbuf)
+ ^
+In file included from /usr/include/time.h:145:0,
+                 from ./time.h:39,
+                 from /usr/include/sys/stat.h:9,
+                 from ./sys/stat.h:32,
+                 from /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:35:
+./sys/stat.h:782:1: note: previous declaration of ‘rpl_lstat’ was here
+ _GL_FUNCDECL_RPL (lstat, int, (const char *name, struct stat *buf)
+ ^
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c: In function ‘rpl_lstat’:
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:70:3: warning: passing argument 2 of ‘orig_lstat’ from incompatible pointer type [enabled by default]
+   int lstat_result = orig_lstat (file, sbuf);
+   ^
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:39:1: note: expected ‘struct stat *’ but argument is of type ‘struct _stati64 *’
+ orig_lstat (const char *filename, struct stat *buf)
+ ^
+In file included from ./sys/stat.h:32:0,
+                 from /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:35:
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:81:44: error: dereferencing pointer to incomplete type
+   if (file[len - 1] != '/' || S_ISDIR (sbuf->st_mode))
+                                            ^
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:89:21: error: dereferencing pointer to incomplete type
+   if (!S_ISLNK (sbuf->st_mode))
+                     ^
+Makefile:1436: recipe for target 'lstat.o' failed

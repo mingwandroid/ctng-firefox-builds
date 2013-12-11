@@ -332,9 +332,12 @@ if [ "${OSTYPE}" = "darwin" ]; then
   brew install mercurial gnu-sed gnu-tar grep wget gawk binutils libelf coreutils automake gperf yasm homebrew/versions/autoconf213
   set -e
 elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
-  if [ "${MSYSTEM}" = "MSYS" ]; then
+  if [ "${OSTYPE}" = "msys" ]; then
+    if [ ! "${MSYSTEM}" = "MSYS" ]; then
+      echo "Please use an MSYS shell, not a MinGW one, i.e. \$MSYSTEM should be \"MSYS\""
+      exit 1
+    fi
     SUDO=
-    # Avoid
   fi
   CC=gcc
   CXX=g++

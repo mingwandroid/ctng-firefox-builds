@@ -1,25 +1,27 @@
-From 8bbb39a3d3cdb37130744dd43b3716b9a645bc98 Mon Sep 17 00:00:00 2001
+From fb788beb4c46ecfe2a0f2966620ccafd11fcd48d Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 8 Dec 2013 19:37:31 +0000
 Subject: [PATCH 12/12] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
 ---
- config/companion_libs.in                           |  27 ++++++
- config/companion_libs/gettext.in                   |  19 ++++
- config/companion_libs/libiconv.in                  |  19 ++++
+ config/companion_libs.in                           |  27 +++
+ config/companion_libs/gettext.in                   |  19 ++
+ config/companion_libs/libiconv.in                  |  19 ++
  config/libc/eglibc.in                              |   1 +
  config/libc/glibc.in                               |   3 +
- ...ix-linker-error-redefinition-of-vasprintf.patch |  31 +++++++
- ...ix-linker-error-redefinition-of-vasprintf.patch |  31 +++++++
+ ...ix-linker-error-redefinition-of-vasprintf.patch |  31 +++
+ ...ix-linker-error-redefinition-of-vasprintf.patch |  31 +++
+ .../100-stdio-don-t-assume-gets-any-more.patch     | 241 +++++++++++++++++++++
  scripts/build/companion_libs/310-openssl.sh        |   4 +-
- scripts/build/companion_libs/320-libiconv.sh       |  94 +++++++++++++++++++
- scripts/build/companion_libs/330-gettext.sh        | 101 +++++++++++++++++++++
- 10 files changed, 328 insertions(+), 2 deletions(-)
+ scripts/build/companion_libs/320-libiconv.sh       |  94 ++++++++
+ scripts/build/companion_libs/330-gettext.sh        | 101 +++++++++
+ 11 files changed, 569 insertions(+), 2 deletions(-)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
  create mode 100644 patches/gettext/0.18.3.1/110-Fix-linker-error-redefinition-of-vasprintf.patch
+ create mode 100644 patches/libiconv/1.14/100-stdio-don-t-assume-gets-any-more.patch
  create mode 100644 scripts/build/companion_libs/320-libiconv.sh
  create mode 100644 scripts/build/companion_libs/330-gettext.sh
 
@@ -228,6 +230,253 @@ index 0000000..a5287b3
 + #include "autosprintf.h"
 +-- 
 +1.8.4
++
+diff --git a/patches/libiconv/1.14/100-stdio-don-t-assume-gets-any-more.patch b/patches/libiconv/1.14/100-stdio-don-t-assume-gets-any-more.patch
+new file mode 100644
+index 0000000..dbae2cc
+--- /dev/null
++++ b/patches/libiconv/1.14/100-stdio-don-t-assume-gets-any-more.patch
+@@ -0,0 +1,241 @@
++From 66712c23388e93e5c518ebc8515140fa0c807348 Mon Sep 17 00:00:00 2001
++From: Eric Blake <eblake@redhat.com>
++Date: Thu, 29 Mar 2012 13:30:41 -0600
++Subject: [PATCH] stdio: don't assume gets any more
++
++Gnulib intentionally does not have a gets module, and now that C11
++and glibc have dropped it, we should be more proactive about warning
++any user on a platform that still has a declaration of this dangerous
++interface.
++
++* m4/stdio_h.m4 (gl_STDIO_H, gl_STDIO_H_DEFAULTS): Drop gets
++support.
++* modules/stdio (Makefile.am): Likewise.
++* lib/stdio-read.c (gets): Likewise.
++* tests/test-stdio-c++.cc: Likewise.
++* m4/warn-on-use.m4 (gl_WARN_ON_USE_PREPARE): Fix comment.
++* lib/stdio.in.h (gets): Make warning occur in more places.
++* doc/posix-functions/gets.texi (gets): Update documentation.
++Reported by Christer Solskogen.
++
++Signed-off-by: Eric Blake <eblake@redhat.com>
++---
++ ChangeLog                     | 11 +++++++++++
++ doc/posix-functions/gets.texi | 14 +++++++-------
++ lib/stdio-read.c              |  8 +-------
++ lib/stdio.in.h                | 25 +++++++------------------
++ m4/stdio_h.m4                 | 10 ++++------
++ m4/warn-on-use.m4             |  6 +++---
++ modules/stdio                 |  1 -
++ tests/test-stdio-c++.cc       |  4 +---
++ 8 files changed, 34 insertions(+), 45 deletions(-)
++
++diff --git a/ChangeLog b/ChangeLog
++index 58c4c6d..4c1daf4 100644
++--- a/ChangeLog
+++++ b/ChangeLog
++@@ -1,5 +1,16 @@
++ 2012-03-29  Eric Blake  <eblake@redhat.com>
++ 
+++	stdio: don't assume gets any more
+++	* m4/stdio_h.m4 (gl_STDIO_H, gl_STDIO_H_DEFAULTS): Drop gets
+++	support.
+++	* modules/stdio (Makefile.am): Likewise.
+++	* lib/stdio-read.c (gets): Likewise.
+++	* tests/test-stdio-c++.cc: Likewise.
+++	* m4/warn-on-use.m4 (gl_WARN_ON_USE_PREPARE): Fix comment.
+++	* lib/stdio.in.h (gets): Make warning occur in more places.
+++	* doc/posix-functions/gets.texi (gets): Update documentation.
+++	Reported by Christer Solskogen.
+++
++ 	maint.mk: fix syntax checks without exclusions
++ 	* top/maint.mk (_sc_search_regexp): Allow for empty variable.
++ 	Reported by Daniel P. Berrange.
++diff --git a/doc/posix-functions/gets.texi b/doc/posix-functions/gets.texi
++index cf2716a..dc80dda 100644
++--- a/doc/posix-functions/gets.texi
+++++ b/doc/posix-functions/gets.texi
++@@ -4,15 +4,10 @@
++ 
++ POSIX specification:@* @url{http://www.opengroup.org/onlinepubs/9699919799/functions/gets.html}
++ 
++-Gnulib module: stdio, nonblocking
+++Gnulib module: ---
++ 
++-Portability problems fixed by Gnulib module @code{stdio}, together with module @code{nonblocking}:
+++Portability problems fixed by Gnulib:
++ @itemize
++-@item
++-When reading from a non-blocking pipe whose buffer is empty, this function
++-fails with @code{errno} being set to @code{EINVAL} instead of @code{EAGAIN} on
++-some platforms:
++-mingw, MSVC 9.
++ @end itemize
++ 
++ Portability problems not fixed by Gnulib:
++@@ -20,6 +15,11 @@ Portability problems not fixed by Gnulib:
++ @item
++ This function should never be used, because it can overflow any given buffer.
++ @item
+++When reading from a non-blocking pipe whose buffer is empty, this function
+++fails with @code{errno} being set to @code{EINVAL} instead of @code{EAGAIN} on
+++some platforms:
+++mingw, MSVC 9.
+++@item
++ On Windows platforms (excluding Cygwin), this function does not set @code{errno}
++ upon failure.
++ @end itemize
++diff --git a/lib/stdio-read.c b/lib/stdio-read.c
++index 9155a0b..358d8cd 100644
++--- a/lib/stdio-read.c
+++++ b/lib/stdio-read.c
++@@ -131,13 +131,7 @@ fgets (char *s, int n, FILE *stream)
++   CALL_WITH_ERRNO_FIX (char *, fgets (s, n, stream), ret == NULL)
++ }
++ 
++-char *
++-gets (char *s)
++-#undef gets
++-{
++-  FILE *stream = stdin;
++-  CALL_WITH_ERRNO_FIX (char *, gets (s), ret == NULL)
++-}
+++/* We intentionally don't bother to fix gets.  */
++ 
++ size_t
++ fread (void *ptr, size_t s, size_t n, FILE *stream)
++diff --git a/lib/stdio.in.h b/lib/stdio.in.h
++index aa7b599..c377b6e 100644
++--- a/lib/stdio.in.h
+++++ b/lib/stdio.in.h
++@@ -698,22 +698,11 @@ _GL_WARN_ON_USE (getline, "getline is unportable - "
++ # endif
++ #endif
++ 
++-#if @GNULIB_GETS@
++-# if @REPLACE_STDIO_READ_FUNCS@ && @GNULIB_STDIO_H_NONBLOCKING@
++-#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
++-#   undef gets
++-#   define gets rpl_gets
++-#  endif
++-_GL_FUNCDECL_RPL (gets, char *, (char *s) _GL_ARG_NONNULL ((1)));
++-_GL_CXXALIAS_RPL (gets, char *, (char *s));
++-# else
++-_GL_CXXALIAS_SYS (gets, char *, (char *s));
++-#  undef gets
++-# endif
++-_GL_CXXALIASWARN (gets);
++ /* It is very rare that the developer ever has full control of stdin,
++-   so any use of gets warrants an unconditional warning.  Assume it is
++-   always declared, since it is required by C89.  */
+++   so any use of gets warrants an unconditional warning; besides, C11
+++   removed it.  */
+++#undef gets
+++#if HAVE_RAW_DECL_GETS
++ _GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");
++ #endif
++ 
++@@ -1053,9 +1042,9 @@ _GL_WARN_ON_USE (snprintf, "snprintf is unportable - "
++ # endif
++ #endif
++ 
++-/* Some people would argue that sprintf should be handled like gets
++-   (for example, OpenBSD issues a link warning for both functions),
++-   since both can cause security holes due to buffer overruns.
+++/* Some people would argue that all sprintf uses should be warned about
+++   (for example, OpenBSD issues a link warning for it),
+++   since it can cause security holes due to buffer overruns.
++    However, we believe that sprintf can be used safely, and is more
++    efficient than snprintf in those safe cases; and as proof of our
++    belief, we use sprintf in several gnulib modules.  So this header
++diff --git a/m4/stdio_h.m4 b/m4/stdio_h.m4
++index 1973e8d..b03393b 100644
++--- a/m4/stdio_h.m4
+++++ b/m4/stdio_h.m4
++@@ -1,4 +1,4 @@
++-# stdio_h.m4 serial 40
+++# stdio_h.m4 serial 41
++ dnl Copyright (C) 2007-2012 Free Software Foundation, Inc.
++ dnl This file is free software; the Free Software Foundation
++ dnl gives unlimited permission to copy and/or distribute it,
++@@ -18,7 +18,6 @@ AC_DEFUN([gl_STDIO_H],
++   GNULIB_GETC=1
++   GNULIB_GETCHAR=1
++   GNULIB_FGETS=1
++-  GNULIB_GETS=1
++   GNULIB_FREAD=1
++   dnl This ifdef is necessary to avoid an error "missing file lib/stdio-read.c"
++   dnl "expected source file, required through AC_LIBSOURCES, not found". It is
++@@ -72,10 +71,10 @@ AC_DEFUN([gl_STDIO_H],
++ 
++   dnl Check for declarations of anything we want to poison if the
++   dnl corresponding gnulib module is not in use, and which is not
++-  dnl guaranteed by C89.
+++  dnl guaranteed by both C89 and C11.
++   gl_WARN_ON_USE_PREPARE([[#include <stdio.h>
++-    ]], [dprintf fpurge fseeko ftello getdelim getline pclose popen renameat
++-    snprintf tmpfile vdprintf vsnprintf])
+++    ]], [dprintf fpurge fseeko ftello getdelim getline gets pclose popen
+++    renameat snprintf tmpfile vdprintf vsnprintf])
++ ])
++ 
++ AC_DEFUN([gl_STDIO_MODULE_INDICATOR],
++@@ -113,7 +112,6 @@ AC_DEFUN([gl_STDIO_H_DEFAULTS],
++   GNULIB_GETCHAR=0;              AC_SUBST([GNULIB_GETCHAR])
++   GNULIB_GETDELIM=0;             AC_SUBST([GNULIB_GETDELIM])
++   GNULIB_GETLINE=0;              AC_SUBST([GNULIB_GETLINE])
++-  GNULIB_GETS=0;                 AC_SUBST([GNULIB_GETS])
++   GNULIB_OBSTACK_PRINTF=0;       AC_SUBST([GNULIB_OBSTACK_PRINTF])
++   GNULIB_OBSTACK_PRINTF_POSIX=0; AC_SUBST([GNULIB_OBSTACK_PRINTF_POSIX])
++   GNULIB_PCLOSE=0;               AC_SUBST([GNULIB_PCLOSE])
++diff --git a/m4/warn-on-use.m4 b/m4/warn-on-use.m4
++index 03b113c..a77802e 100644
++--- a/m4/warn-on-use.m4
+++++ b/m4/warn-on-use.m4
++@@ -1,4 +1,4 @@
++-# warn-on-use.m4 serial 4
+++# warn-on-use.m4 serial 5
++ dnl Copyright (C) 2010-2012 Free Software Foundation, Inc.
++ dnl This file is free software; the Free Software Foundation
++ dnl gives unlimited permission to copy and/or distribute it,
++@@ -18,8 +18,8 @@ dnl with or without modifications, as long as this notice is preserved.
++ # some systems declare functions in the wrong header, then INCLUDES
++ # should do likewise.
++ #
++-# If you assume C89, then it is generally safe to assume declarations
++-# for functions declared in that standard (such as gets) without
+++# It is generally safe to assume declarations for functions declared
+++# in the intersection of C89 and C11 (such as printf) without
++ # needing gl_WARN_ON_USE_PREPARE.
++ AC_DEFUN([gl_WARN_ON_USE_PREPARE],
++ [
++diff --git a/modules/stdio b/modules/stdio
++index 2e094b8..a389440 100644
++--- a/modules/stdio
+++++ b/modules/stdio
++@@ -53,7 +53,6 @@ stdio.h: stdio.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H)
++ 	      -e 's/@''GNULIB_GETCHAR''@/$(GNULIB_GETCHAR)/g' \
++ 	      -e 's/@''GNULIB_GETDELIM''@/$(GNULIB_GETDELIM)/g' \
++ 	      -e 's/@''GNULIB_GETLINE''@/$(GNULIB_GETLINE)/g' \
++-	      -e 's/@''GNULIB_GETS''@/$(GNULIB_GETS)/g' \
++ 	      -e 's/@''GNULIB_OBSTACK_PRINTF''@/$(GNULIB_OBSTACK_PRINTF)/g' \
++ 	      -e 's/@''GNULIB_OBSTACK_PRINTF_POSIX''@/$(GNULIB_OBSTACK_PRINTF_POSIX)/g' \
++ 	      -e 's/@''GNULIB_PCLOSE''@/$(GNULIB_PCLOSE)/g' \
++diff --git a/tests/test-stdio-c++.cc b/tests/test-stdio-c++.cc
++index 699e2de..6400448 100644
++--- a/tests/test-stdio-c++.cc
+++++ b/tests/test-stdio-c++.cc
++@@ -122,9 +122,7 @@ SIGNATURE_CHECK (GNULIB_NAMESPACE::getline, ssize_t,
++                  (char **, size_t *, FILE *));
++ #endif
++ 
++-#if GNULIB_TEST_GETS
++-SIGNATURE_CHECK (GNULIB_NAMESPACE::gets, char *, (char *));
++-#endif
+++/* Don't bother testing gets; it should never be used.  */
++ 
++ #if GNULIB_TEST_OBSTACK_PRINTF || GNULIB_TEST_OBSTACK_PRINTF_POSIX
++ SIGNATURE_CHECK (GNULIB_NAMESPACE::obstack_printf, int,
++-- 
++1.8.5.1
 +
 diff --git a/scripts/build/companion_libs/310-openssl.sh b/scripts/build/companion_libs/310-openssl.sh
 index ee79491..240769b 100644

@@ -1,7 +1,7 @@
-From 46184858b29c6ad0b7eb76cbac86e10c0b48531f Mon Sep 17 00:00:00 2001
+From b1c79a842d4539b9196e02d39a79667b91375a1a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 8 Dec 2013 19:37:31 +0000
-Subject: [PATCH 12/12] Add gettext and libiconv as a companion lib
+Subject: [PATCH 12/13] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
 ---
@@ -12,16 +12,14 @@ Subject: [PATCH 12/12] Add gettext and libiconv as a companion lib
  config/libc/glibc.in                               |   3 +
  ...ix-linker-error-redefinition-of-vasprintf.patch |  31 +++++++
  ...ix-linker-error-redefinition-of-vasprintf.patch |  31 +++++++
- ...rclib_stdio.in.h-remove-gets-declarations.patch |  30 ++++++
  scripts/build/companion_libs/310-openssl.sh        |   4 +-
- scripts/build/companion_libs/320-libiconv.sh       |  94 +++++++++++++++++++
- scripts/build/companion_libs/330-gettext.sh        | 101 +++++++++++++++++++++
- 11 files changed, 358 insertions(+), 2 deletions(-)
+ scripts/build/companion_libs/320-libiconv.sh       |  95 +++++++++++++++++++
+ scripts/build/companion_libs/330-gettext.sh        | 102 +++++++++++++++++++++
+ 10 files changed, 330 insertions(+), 2 deletions(-)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
  create mode 100644 patches/gettext/0.18.3.1/110-Fix-linker-error-redefinition-of-vasprintf.patch
- create mode 100644 patches/libiconv/1.14/100-srclib_stdio.in.h-remove-gets-declarations.patch
  create mode 100644 scripts/build/companion_libs/320-libiconv.sh
  create mode 100644 scripts/build/companion_libs/330-gettext.sh
 
@@ -231,42 +229,6 @@ index 0000000..a5287b3
 +-- 
 +1.8.4
 +
-diff --git a/patches/libiconv/1.14/100-srclib_stdio.in.h-remove-gets-declarations.patch b/patches/libiconv/1.14/100-srclib_stdio.in.h-remove-gets-declarations.patch
-new file mode 100644
-index 0000000..382c841
---- /dev/null
-+++ b/patches/libiconv/1.14/100-srclib_stdio.in.h-remove-gets-declarations.patch
-@@ -0,0 +1,30 @@
-+diff -r -u libiconv-1.14/srclib/stdio.in.h.orig libiconv-1.14/srclib/stdio.in.h
-+--- libiconv-1.14/srclib/stdio.in.h.orig	2013-02-22 13:52:46.336327969 -0600
-++++ libiconv-1.14/srclib/stdio.in.h	2013-02-22 13:54:27.948207059 -0600
-+@@ -679,22 +679,11 @@
-+ # endif
-+ #endif
-+ 
-+-#if @GNULIB_GETS@
-+-# if @REPLACE_STDIO_READ_FUNCS@ && @GNULIB_STDIO_H_NONBLOCKING@
-+-#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
-+-#   undef gets
-+-#   define gets rpl_gets
-+-#  endif
-+-_GL_FUNCDECL_RPL (gets, char *, (char *s) _GL_ARG_NONNULL ((1)));
-+-_GL_CXXALIAS_RPL (gets, char *, (char *s));
-+-# else
-+-_GL_CXXALIAS_SYS (gets, char *, (char *s));
-+-#  undef gets
-+-# endif
-+-_GL_CXXALIASWARN (gets);
-+ /* It is very rare that the developer ever has full control of stdin,
-+-   so any use of gets warrants an unconditional warning.  Assume it is
-+-   always declared, since it is required by C89.  */
-++   so any use of gets warrants an unconditional warning; besides, C11
-++   removed it.  */
-++#undef gets
-++#if HAVE_RAW_DECL_GETS
-+ _GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");
-+ #endif
-+ 
 diff --git a/scripts/build/companion_libs/310-openssl.sh b/scripts/build/companion_libs/310-openssl.sh
 index ee79491..240769b 100644
 --- a/scripts/build/companion_libs/310-openssl.sh
@@ -284,10 +246,10 @@ index ee79491..240769b 100644
      CT_Popd
 diff --git a/scripts/build/companion_libs/320-libiconv.sh b/scripts/build/companion_libs/320-libiconv.sh
 new file mode 100644
-index 0000000..2c40cef
+index 0000000..60cb78f
 --- /dev/null
 +++ b/scripts/build/companion_libs/320-libiconv.sh
-@@ -0,0 +1,94 @@
+@@ -0,0 +1,95 @@
 +# Build script for libiconv
 +
 +do_libiconv_get() { :; }
@@ -367,11 +329,12 @@ index 0000000..2c40cef
 +    CT_DoExecLog ALL cp -aT "${CT_SRC_DIR}/libiconv-${CT_LIBICONV_VERSION}" "."
 +
 +    CT_DoExecLog CFG                                          \
-+    CFLAGS="${clfags}"                                        \
++    CFLAGS="${cflags}"                                        \
 +    LDFLAGS="${ldflags}"                                      \
 +    "${CT_SRC_DIR}/libiconv-${CT_LIBICONV_VERSION}/configure" \
-+        --prefix="${prefix}"                                  \
++        --build=${CT_BUILD}                                   \
 +        --host="${host}"                                      \
++        --prefix="${prefix}"                                  \
 +        "${extra_config[@]}"                                  \
 + 
 +    CT_DoLog EXTRA "Building libiconv"
@@ -384,10 +347,10 @@ index 0000000..2c40cef
 +fi
 diff --git a/scripts/build/companion_libs/330-gettext.sh b/scripts/build/companion_libs/330-gettext.sh
 new file mode 100644
-index 0000000..d2f1296
+index 0000000..4d20ae2
 --- /dev/null
 +++ b/scripts/build/companion_libs/330-gettext.sh
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,102 @@
 +# Build script for gettext
 +
 +do_gettext_get() { :; }
@@ -467,11 +430,12 @@ index 0000000..d2f1296
 +    CT_DoExecLog ALL cp -aT "${CT_SRC_DIR}/gettext-${CT_GETTEXT_VERSION}" "."
 +
 +    CT_DoExecLog CFG                                        \
-+    CFLAGS="${clfags}"                                      \
++    CFLAGS="${cflags}"                                      \
 +    LDFLAGS="${ldflags}"                                    \
 +    "${CT_SRC_DIR}/gettext-${CT_GETTEXT_VERSION}/configure" \
-+        --prefix="${prefix}"                                \
++        --build=${CT_BUILD}                                 \
 +        --host="${host}"                                    \
++        --prefix="${prefix}"                                \
 +        --disable-java                                      \
 +        --disable-native-java                               \
 +        --disable-csharp                                    \

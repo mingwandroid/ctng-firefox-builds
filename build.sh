@@ -1774,3 +1774,31 @@ libtool: compile:  x86_64-w64-mingw32-gcc -DIN_LIBASPRINTF -DHAVE_CONFIG_H -I. -
 [ALL  ]    C:msys64homerayctng-firefox-buildsctng-build-x-r-HEAD-x86_64-235295c4.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:107: undefined reference to `term_ostream_free(any_ostream_representation*)'
 [ALL  ]    ../woe32dll/.libs/c++term-styled-ostream.o: In function `term_styled_ostream__write_mem':
 [ALL  ]    C:msys64homerayctng-firefox-buildsctng-build-x-r-HEAD-x86_64-235295c4.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:89: undefined reference to `term_ostream_set_color(any_ostream_representation*, int)'
+
+
+# Stupid gettext bug and broken patch:
+
+mkdir /tmp/gettext-bug
+pushd /tmp/gettext-bug
+AUTOMAKE_VER=1.14.3
+if [ ! -f bin/autoconf ]; then
+# curl -SLO http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VER}.tar.bz2
+ wget -c http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VER}.tar.gz
+ tar -xf autoconf-${AUTOCONF_VER}.tar.gz
+ cd autoconf-${AUTOCONF_VER}
+ wget -O config.guess 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
+ wget -O config.sub 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD'
+ ./configure --prefix=$PWD/.. && make && make install
+ cd ..
+fi
+export PATH=$PWD/bin:"$PATH"
+tar -xf ~/src/gettext-0.18.3.1.tar.gz
+mv gettext-0.18.3.1 a
+pushd a
+patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/gettext/0.18.3.1/110-Fix-linker-error-redefinition-of-vasprintf.patch
+popd
+cp -rf a b
+pushd b
+patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch
+# Fix the mess made of color.o handling in that patch
+pushd b/gettext-tools && /tmp/gettext-bug/b/build-aux/missing automake-1.13 --gnits src/Makefile

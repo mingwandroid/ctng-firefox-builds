@@ -1,21 +1,21 @@
-From b1c79a842d4539b9196e02d39a79667b91375a1a Mon Sep 17 00:00:00 2001
+From 0080c7936fdebca87526272f806a49b4a5d86a67 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 8 Dec 2013 19:37:31 +0000
 Subject: [PATCH 12/13] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
 ---
- config/companion_libs.in                           |  27 ++++++
+ config/companion_libs.in                           |  27 +++++
  config/companion_libs/gettext.in                   |  19 ++++
  config/companion_libs/libiconv.in                  |  19 ++++
  config/libc/eglibc.in                              |   1 +
  config/libc/glibc.in                               |   3 +
- ...ix-linker-error-redefinition-of-vasprintf.patch |  31 +++++++
- ...ix-linker-error-redefinition-of-vasprintf.patch |  31 +++++++
+ ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++++++
+ ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++++++
  scripts/build/companion_libs/310-openssl.sh        |   4 +-
- scripts/build/companion_libs/320-libiconv.sh       |  95 +++++++++++++++++++
- scripts/build/companion_libs/330-gettext.sh        | 102 +++++++++++++++++++++
- 10 files changed, 330 insertions(+), 2 deletions(-)
+ scripts/build/companion_libs/320-libiconv.sh       |  95 +++++++++++++++++
+ scripts/build/companion_libs/330-gettext.sh        | 116 +++++++++++++++++++++
+ 10 files changed, 344 insertions(+), 2 deletions(-)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
@@ -347,10 +347,10 @@ index 0000000..60cb78f
 +fi
 diff --git a/scripts/build/companion_libs/330-gettext.sh b/scripts/build/companion_libs/330-gettext.sh
 new file mode 100644
-index 0000000..4d20ae2
+index 0000000..2ec2c5f
 --- /dev/null
 +++ b/scripts/build/companion_libs/330-gettext.sh
-@@ -0,0 +1,102 @@
+@@ -0,0 +1,116 @@
 +# Build script for gettext
 +
 +do_gettext_get() { :; }
@@ -429,6 +429,20 @@ index 0000000..4d20ae2
 +
 +    CT_DoExecLog ALL cp -aT "${CT_SRC_DIR}/gettext-${CT_GETTEXT_VERSION}" "."
 +
++    # A bit ugly. D__USE_MINGW_ANSI_STDIO=1 has its own {v}asprintf functions
++    # but gettext configure doesn't see this flag when it checks for that. An
++    # alternative may be to use CC="${host}-gcc ${cflags}" but that didn't
++    # work.
++    case "${host}" in
++        *mingw*)
++            case "${cflags}" in
++                *D__USE_MINGW_ANSI_STDIO=1*)
++                    extra_config+=( --disable-libasprintf )
++                    ;;
++            esac
++        ;;
++    esac
++
 +    CT_DoExecLog CFG                                        \
 +    CFLAGS="${cflags}"                                      \
 +    LDFLAGS="${ldflags}"                                    \
@@ -446,10 +460,10 @@ index 0000000..4d20ae2
 +        "${extra_config[@]}"
 + 
 +    CT_DoLog EXTRA "Building gettext"
-+    CT_DoExecLog ALL make CC="${CT_HOST}-gcc ${cflags}"
++    CT_DoExecLog ALL make
 +
 +    CT_DoLog EXTRA "Installing gettext"
-+    CT_DoExecLog ALL make install CC="${CT_HOST}-gcc ${cflags}"
++    CT_DoExecLog ALL make install
 +}
 +
 +fi

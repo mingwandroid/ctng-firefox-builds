@@ -1,4 +1,4 @@
-From 491218b34187cbedb9b8cbe91b91fb1a8d864867 Mon Sep 17 00:00:00 2001
+From f463f6d15deb5e226ae8fafc731478d05a7da06b Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 01:52:18 +0000
 Subject: [PATCH 13/13] OpenSSL: clfags -> cflags
@@ -21,5 +21,5 @@ index 240769b..6bdfbbd 100644
      "./Configure"                              \
          --prefix="${prefix}"                   \
 -- 
-1.8.5.1
+1.8.4.4
 

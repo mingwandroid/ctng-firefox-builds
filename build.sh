@@ -148,7 +148,7 @@ To restart the build you can use:
 
 To see all steps:
  ct-ng list-steps"
-option CTNG_DEBUGGABLE     yes \
+option CTNG_DEBUGGABLE     no \
 "Do you want the toolchain build with crosstool-ng
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
@@ -539,6 +539,9 @@ cross_clang_build()
       echo "CT_CC_clang=y"                 >> ${CTNG_SAMPLE_CONFIG}
     fi
 
+    # Gettext fails to build on Windows at -O0. One of the patches:
+    # gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch
+    # .. should have fixed this but it still doesn't work ..)
     if [ "$CTNG_DEBUGGABLE" = "yes" ]; then
       echo "CT_DEBUGGABLE_TOOLCHAIN=y"     >> ${CTNG_SAMPLE_CONFIG}
     else

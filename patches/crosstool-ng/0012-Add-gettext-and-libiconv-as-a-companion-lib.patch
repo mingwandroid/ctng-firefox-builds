@@ -1,25 +1,27 @@
-From 0080c7936fdebca87526272f806a49b4a5d86a67 Mon Sep 17 00:00:00 2001
+From 8de13aad878078b69bc56a13e6fef3d1f3a68036 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 8 Dec 2013 19:37:31 +0000
 Subject: [PATCH 12/13] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
 ---
- config/companion_libs.in                           |  27 +++++
- config/companion_libs/gettext.in                   |  19 ++++
- config/companion_libs/libiconv.in                  |  19 ++++
+ config/companion_libs.in                           |  27 +++
+ config/companion_libs/gettext.in                   |  19 ++
+ config/companion_libs/libiconv.in                  |  19 ++
  config/libc/eglibc.in                              |   1 +
  config/libc/glibc.in                               |   3 +
- ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++++++
- ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++++++
+ ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++++
+ ...ix-linker-error-redefinition-of-vasprintf.patch |  14 ++
+ ...-Woe32-link-errors-when-compiling-with-O0.patch | 205 +++++++++++++++++++++
  scripts/build/companion_libs/310-openssl.sh        |   4 +-
- scripts/build/companion_libs/320-libiconv.sh       |  95 +++++++++++++++++
- scripts/build/companion_libs/330-gettext.sh        | 116 +++++++++++++++++++++
- 10 files changed, 344 insertions(+), 2 deletions(-)
+ scripts/build/companion_libs/320-libiconv.sh       |  95 ++++++++++
+ scripts/build/companion_libs/330-gettext.sh        | 116 ++++++++++++
+ 11 files changed, 532 insertions(+), 2 deletions(-)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
  create mode 100644 patches/gettext/0.18.3.1/110-Fix-linker-error-redefinition-of-vasprintf.patch
+ create mode 100644 patches/gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch
  create mode 100644 scripts/build/companion_libs/320-libiconv.sh
  create mode 100644 scripts/build/companion_libs/330-gettext.sh
 
@@ -194,28 +196,14 @@ index 0000000..a5287b3
 +
 diff --git a/patches/gettext/0.18.3.1/110-Fix-linker-error-redefinition-of-vasprintf.patch b/patches/gettext/0.18.3.1/110-Fix-linker-error-redefinition-of-vasprintf.patch
 new file mode 100644
-index 0000000..a5287b3
+index 0000000..091130b
 --- /dev/null
 +++ b/patches/gettext/0.18.3.1/110-Fix-linker-error-redefinition-of-vasprintf.patch
-@@ -0,0 +1,31 @@
-+From a76649dae62768d0af7017b3fc0ca5f891588c78 Mon Sep 17 00:00:00 2001
-+From: Andoni Morales Alastruey <ylatuya@gmail.com>
-+Date: Wed, 29 Feb 2012 10:44:43 +0100
-+Subject: [PATCH] Fix linker error: redefinition of vasprintf
-+
-+This might not be the best patch, but it works for us
-+The link error was:
-+.libs/autosprintf.o:autosprintf.cc:(.text$vasprintf[_vasprintf]+0x0): multiple definition of `_vasprintf'
-+.libs/lib-asprintf.o:lib-asprintf.c:(.text+0x4621): first defined here
-+---
-+ gettext-runtime/libasprintf/autosprintf.cc | 2 ++
-+ 1 file changed, 2 insertions(+)
-+
-+diff --git a/gettext-runtime/libasprintf/autosprintf.cc b/gettext-runtime/libasprintf/autosprintf.cc
-+index ca318f7..2526210 100644
-+--- a/gettext-runtime/libasprintf/autosprintf.cc
-++++ b/gettext-runtime/libasprintf/autosprintf.cc
-+@@ -21,8 +21,10 @@
+@@ -0,0 +1,14 @@
++diff -urN a/gettext-runtime/libasprintf/autosprintf.cc b/gettext-runtime/libasprintf/autosprintf.cc
++--- a/gettext-runtime/libasprintf/autosprintf.cc	2013-07-29 12:35:59.000000000 +0100
+++++ b/gettext-runtime/libasprintf/autosprintf.cc	2013-12-12 18:16:42.493506400 +0000
++@@ -19,8 +19,10 @@
 +    This must come before <config.h> because <config.h> may include
 +    <features.h>, and once <features.h> has been included, it's too late.  */
 + #ifndef _GNU_SOURCE
@@ -226,9 +214,217 @@ index 0000000..a5287b3
 + 
 + /* Specification.  */
 + #include "autosprintf.h"
-+-- 
-+1.8.4
+diff --git a/patches/gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch b/patches/gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch
+new file mode 100644
+index 0000000..a4c4673
+--- /dev/null
++++ b/patches/gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch
+@@ -0,0 +1,205 @@
++From d4ecf6f15ad7a428786df2efdc88b03be0a4fdbb Mon Sep 17 00:00:00 2001
++From: Daiki Ueno <ueno@gnu.org>
++Date: Thu, 17 Jan 2013 18:33:40 +0900
++Subject: [PATCH] Fix Woe32 link errors when compiling with -O0.
 +
++---
++ gettext-tools/src/Makefile.am                  | 24 ++++++++++++++++++++++--
++ gettext-tools/src/color.c                      |  1 +
++ gettext-tools/woe32dll/c++color.cc             |  1 +
++ gettext-tools/woe32dll/c++file-ostream.cc      |  2 ++
++ gettext-tools/woe32dll/c++html-ostream.cc      |  1 +
++ gettext-tools/woe32dll/c++styled-ostream.cc    |  1 +
++ gettext-tools/woe32dll/c++term-ostream.cc      |  1 +
++ gettext-tools/woe32dll/c++write-catalog.cc     |  1 +
++ gettext-tools/woe32dll/c++write-po.cc          |  1 +
++ gettext-tools/woe32dll/c++write-properties.cc  |  1 +
++ gettext-tools/woe32dll/c++write-stringtable.cc |  1 +
++ gnulib-local/modules/file-ostream              |  4 ++++
++ gnulib-local/modules/html-ostream              |  4 ++++
++ gnulib-local/modules/ostream                   |  4 ++++
++ gnulib-local/modules/styled-ostream            |  4 ++++
++ gnulib-local/modules/term-ostream              |  4 ++++
++ 16 files changed, 53 insertions(+), 2 deletions(-)
++ create mode 100644 gettext-tools/woe32dll/c++color.cc
++ create mode 100644 gettext-tools/woe32dll/c++file-ostream.cc
++ create mode 100644 gettext-tools/woe32dll/c++html-ostream.cc
++ create mode 100644 gettext-tools/woe32dll/c++styled-ostream.cc
++ create mode 100644 gettext-tools/woe32dll/c++term-ostream.cc
++ create mode 100644 gettext-tools/woe32dll/c++write-catalog.cc
++ create mode 100644 gettext-tools/woe32dll/c++write-po.cc
++ create mode 100644 gettext-tools/woe32dll/c++write-properties.cc
++ create mode 100644 gettext-tools/woe32dll/c++write-stringtable.cc
++
++diff -urN a/gettext-tools/src/color.c b/gettext-tools/src/color.c
++--- a/gettext-tools/src/color.c	2013-12-12 18:18:34.258506400 +0000
+++++ b/gettext-tools/src/color.c	2013-12-12 18:18:50.236506400 +0000
++@@ -28,6 +28,7 @@
++ #include <sys/types.h>
++ #include <sys/stat.h>
++ 
+++#include "ostream.h"
++ #include "term-ostream.h"
++ #include "xalloc.h"
++ #include "relocatable.h"
++diff -urN a/gettext-tools/src/Makefile.am b/gettext-tools/src/Makefile.am
++--- a/gettext-tools/src/Makefile.am	2013-12-12 18:18:34.293506400 +0000
+++++ b/gettext-tools/src/Makefile.am	2013-12-12 18:18:50.233506400 +0000
++@@ -141,14 +141,34 @@
++   format-lua.c \
++   format-javascript.c
++ 
+++if !WOE32DLL
+++OUTPUT_SOURCE = color.c
+++else
+++OUTPUT_SOURCE = ../woe32dll/c++color.cc
+++endif
+++
+++if !WOE32DLL
+++OUTPUT_SOURCE = \
+++  write-catalog.c \
+++  write-po.c \
+++  write-properties.c \
+++  write-stringtable.c
+++else
+++OUTPUT_SOURCE = \
+++  ../woe32dll/c++write-catalog.cc \
+++  ../woe32dll/c++write-po.cc \
+++  ../woe32dll/c++write-properties.cc \
+++  ../woe32dll/c++write-stringtable.cc
+++endif
+++
++ # libgettextsrc contains all code that is needed by at least two programs.
++ libgettextsrc_la_SOURCES = \
++ $(COMMON_SOURCE) read-catalog.c \
++-color.c write-catalog.c write-properties.c write-stringtable.c write-po.c \
++ msgl-ascii.c msgl-iconv.c msgl-equal.c msgl-cat.c msgl-header.c msgl-english.c \
++ msgl-check.c file-list.c msgl-charset.c po-time.c plural-exp.c plural-eval.c \
++ plural-table.c \
++-$(FORMAT_SOURCE)
+++$(FORMAT_SOURCE) \
+++$(OUTPUT_SOURCE)
++ 
++ # msggrep needs pattern matching.
++ LIBGREP = ../libgrep/libgrep.a
++diff -urN a/gettext-tools/woe32dll/c++color.cc b/gettext-tools/woe32dll/c++color.cc
++--- a/gettext-tools/woe32dll/c++color.cc	1970-01-01 01:00:00.000000000 +0100
+++++ b/gettext-tools/woe32dll/c++color.cc	2013-12-12 18:18:50.239506400 +0000
++@@ -0,0 +1 @@
+++#include "../src/color.c"
++diff -urN a/gettext-tools/woe32dll/c++file-ostream.cc b/gettext-tools/woe32dll/c++file-ostream.cc
++--- a/gettext-tools/woe32dll/c++file-ostream.cc	1970-01-01 01:00:00.000000000 +0100
+++++ b/gettext-tools/woe32dll/c++file-ostream.cc	2013-12-12 18:18:50.243506400 +0000
++@@ -0,0 +1,2 @@
+++#include "../gnulib-lib/file-ostream.c"
+++
++diff -urN a/gettext-tools/woe32dll/c++html-ostream.cc b/gettext-tools/woe32dll/c++html-ostream.cc
++--- a/gettext-tools/woe32dll/c++html-ostream.cc	1970-01-01 01:00:00.000000000 +0100
+++++ b/gettext-tools/woe32dll/c++html-ostream.cc	2013-12-12 18:18:50.247506400 +0000
++@@ -0,0 +1 @@
+++#include "../gnulib-lib/html-ostream.c"
++diff -urN a/gettext-tools/woe32dll/c++styled-ostream.cc b/gettext-tools/woe32dll/c++styled-ostream.cc
++--- a/gettext-tools/woe32dll/c++styled-ostream.cc	1970-01-01 01:00:00.000000000 +0100
+++++ b/gettext-tools/woe32dll/c++styled-ostream.cc	2013-12-12 18:18:50.251506400 +0000
++@@ -0,0 +1 @@
+++#include "../gnulib-lib/styled-ostream.c"
++diff -urN a/gettext-tools/woe32dll/c++term-ostream.cc b/gettext-tools/woe32dll/c++term-ostream.cc
++--- a/gettext-tools/woe32dll/c++term-ostream.cc	1970-01-01 01:00:00.000000000 +0100
+++++ b/gettext-tools/woe32dll/c++term-ostream.cc	2013-12-12 18:18:50.254506400 +0000
++@@ -0,0 +1 @@
+++#include "../gnulib-lib/term-ostream.c"
++diff -urN a/gettext-tools/woe32dll/c++write-catalog.cc b/gettext-tools/woe32dll/c++write-catalog.cc
++--- a/gettext-tools/woe32dll/c++write-catalog.cc	1970-01-01 01:00:00.000000000 +0100
+++++ b/gettext-tools/woe32dll/c++write-catalog.cc	2013-12-12 18:18:50.256506400 +0000
++@@ -0,0 +1 @@
+++#include "../src/write-catalog.c"
++diff -urN a/gettext-tools/woe32dll/c++write-po.cc b/gettext-tools/woe32dll/c++write-po.cc
++--- a/gettext-tools/woe32dll/c++write-po.cc	1970-01-01 01:00:00.000000000 +0100
+++++ b/gettext-tools/woe32dll/c++write-po.cc	2013-12-12 18:18:50.257506400 +0000
++@@ -0,0 +1 @@
+++#include "../src/write-po.c"
++diff -urN a/gettext-tools/woe32dll/c++write-properties.cc b/gettext-tools/woe32dll/c++write-properties.cc
++--- a/gettext-tools/woe32dll/c++write-properties.cc	1970-01-01 01:00:00.000000000 +0100
+++++ b/gettext-tools/woe32dll/c++write-properties.cc	2013-12-12 18:18:50.259506400 +0000
++@@ -0,0 +1 @@
+++#include "../src/write-properties.c"
++diff -urN a/gettext-tools/woe32dll/c++write-stringtable.cc b/gettext-tools/woe32dll/c++write-stringtable.cc
++--- a/gettext-tools/woe32dll/c++write-stringtable.cc	1970-01-01 01:00:00.000000000 +0100
+++++ b/gettext-tools/woe32dll/c++write-stringtable.cc	2013-12-12 18:18:50.261506400 +0000
++@@ -0,0 +1 @@
+++#include "../src/write-stringtable.c"
++diff -urN a/gnulib-local/modules/file-ostream b/gnulib-local/modules/file-ostream
++--- a/gnulib-local/modules/file-ostream	2013-12-12 18:18:34.849506400 +0000
+++++ b/gnulib-local/modules/file-ostream	2013-12-12 18:18:50.263506400 +0000
++@@ -12,7 +12,11 @@
++ configure.ac:
++ 
++ Makefile.am:
+++if !WOE32DLL
++ lib_SOURCES += file-ostream.c
+++else
+++lib_SOURCES += ../woe32dll/c++file-ostream.cc
+++endif
++ # This is a Makefile rule that generates multiple files at once; see the
++ # automake documentation, node "Multiple Outputs", for details.
++ file-ostream.h : $(top_srcdir)/build-aux/moopp file-ostream.oo.h file-ostream.oo.c ostream.oo.h
++diff -urN a/gnulib-local/modules/html-ostream b/gnulib-local/modules/html-ostream
++--- a/gnulib-local/modules/html-ostream	2013-12-12 18:18:34.852506400 +0000
+++++ b/gnulib-local/modules/html-ostream	2013-12-12 18:18:50.265506400 +0000
++@@ -15,7 +15,11 @@
++ configure.ac:
++ 
++ Makefile.am:
+++if !WOE32DLL
++ lib_SOURCES += html-ostream.c
+++else
+++lib_SOURCES += ../woe32dll/c++html-ostream.cc
+++endif
++ # This is a Makefile rule that generates multiple files at once; see the
++ # automake documentation, node "Multiple Outputs", for details.
++ html-ostream.h : $(top_srcdir)/build-aux/moopp html-ostream.oo.h html-ostream.oo.c ostream.oo.h
++diff -urN a/gnulib-local/modules/ostream b/gnulib-local/modules/ostream
++--- a/gnulib-local/modules/ostream	2013-12-12 18:18:34.859506400 +0000
+++++ b/gnulib-local/modules/ostream	2013-12-12 18:18:50.266506400 +0000
++@@ -11,7 +11,11 @@
++ configure.ac:
++ 
++ Makefile.am:
+++if !WOE32DLL
++ lib_SOURCES += ostream.c
+++else
+++lib_SOURCES += ../woe32dll/c++ostream.cc
+++endif
++ # This is a Makefile rule that generates multiple files at once; see the
++ # automake documentation, node "Multiple Outputs", for details.
++ ostream.h : $(top_srcdir)/build-aux/moopp ostream.oo.h ostream.oo.c
++diff -urN a/gnulib-local/modules/styled-ostream b/gnulib-local/modules/styled-ostream
++--- a/gnulib-local/modules/styled-ostream	2013-12-12 18:18:34.860506400 +0000
+++++ b/gnulib-local/modules/styled-ostream	2013-12-12 18:18:50.268506400 +0000
++@@ -11,7 +11,11 @@
++ configure.ac:
++ 
++ Makefile.am:
+++if !WOE32DLL
++ lib_SOURCES += styled-ostream.c
+++else
+++lib_SOURCES += ../woe32dll/c++styled-ostream.cc
+++endif
++ # This is a Makefile rule that generates multiple files at once; see the
++ # automake documentation, node "Multiple Outputs", for details.
++ styled-ostream.h : $(top_srcdir)/build-aux/moopp styled-ostream.oo.h styled-ostream.oo.c ostream.oo.h
++diff -urN a/gnulib-local/modules/term-ostream b/gnulib-local/modules/term-ostream
++--- a/gnulib-local/modules/term-ostream	2013-12-12 18:18:34.860506400 +0000
+++++ b/gnulib-local/modules/term-ostream	2013-12-12 18:18:50.269506400 +0000
++@@ -22,7 +22,11 @@
++ gl_TERM_OSTREAM
++ 
++ Makefile.am:
+++if !WOE32DLL
++ lib_SOURCES += term-ostream.c
+++else
+++lib_SOURCES += ../woe32dll/c++term-ostream.cc
+++endif
++ # This is a Makefile rule that generates multiple files at once; see the
++ # automake documentation, node "Multiple Outputs", for details.
++ term-ostream.h : $(top_srcdir)/build-aux/moopp term-ostream.oo.h term-ostream.oo.c ostream.oo.h
 diff --git a/scripts/build/companion_libs/310-openssl.sh b/scripts/build/companion_libs/310-openssl.sh
 index ee79491..240769b 100644
 --- a/scripts/build/companion_libs/310-openssl.sh
@@ -468,5 +664,5 @@ index 0000000..2ec2c5f
 +
 +fi
 -- 
-1.8.5.1
+1.8.4.4
 

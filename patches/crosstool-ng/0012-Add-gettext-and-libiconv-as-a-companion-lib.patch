@@ -1,6 +1,6 @@
-From 8de13aad878078b69bc56a13e6fef3d1f3a68036 Mon Sep 17 00:00:00 2001
+From 9f44ed6e435c3b67a5e19dff605e0b4339b3529e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
-Date: Sun, 8 Dec 2013 19:37:31 +0000
+Date: Thu, 12 Dec 2013 21:10:56 +0000
 Subject: [PATCH 12/13] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
@@ -13,10 +13,9 @@ Subject: [PATCH 12/13] Add gettext and libiconv as a companion lib
  ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++++
  ...ix-linker-error-redefinition-of-vasprintf.patch |  14 ++
  ...-Woe32-link-errors-when-compiling-with-O0.patch | 205 +++++++++++++++++++++
- scripts/build/companion_libs/310-openssl.sh        |   4 +-
  scripts/build/companion_libs/320-libiconv.sh       |  95 ++++++++++
  scripts/build/companion_libs/330-gettext.sh        | 116 ++++++++++++
- 11 files changed, 532 insertions(+), 2 deletions(-)
+ 10 files changed, 530 insertions(+)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
@@ -425,21 +424,6 @@ index 0000000..a4c4673
 + # This is a Makefile rule that generates multiple files at once; see the
 + # automake documentation, node "Multiple Outputs", for details.
 + term-ostream.h : $(top_srcdir)/build-aux/moopp term-ostream.oo.h term-ostream.oo.c ostream.oo.h
-diff --git a/scripts/build/companion_libs/310-openssl.sh b/scripts/build/companion_libs/310-openssl.sh
-index ee79491..240769b 100644
---- a/scripts/build/companion_libs/310-openssl.sh
-+++ b/scripts/build/companion_libs/310-openssl.sh
-@@ -30,8 +30,8 @@ do_openssl_for_build() {
- 
-     openssl_opts+=( "host=${CT_BUILD}" )
-     openssl_opts+=( "prefix=${CT_BUILDTOOLS_PREFIX_DIR}" )
--    libuuid_opts+=( "cflags=${CT_CFLAGS_FOR_BUILD}" )
--    libuuid_opts+=( "ldflags=${CT_LDFLAGS_FOR_BUILD}" )
-+    openssl_opts+=( "cflags=${CT_CFLAGS_FOR_BUILD}" )
-+    openssl_opts+=( "ldflags=${CT_LDFLAGS_FOR_BUILD}" )
-     do_openssl_backend "${gmp_opts[@]}"
- 
-     CT_Popd
 diff --git a/scripts/build/companion_libs/320-libiconv.sh b/scripts/build/companion_libs/320-libiconv.sh
 new file mode 100644
 index 0000000..60cb78f
@@ -664,5 +648,5 @@ index 0000000..2ec2c5f
 +
 +fi
 -- 
-1.8.4.4
+1.8.5.1
 

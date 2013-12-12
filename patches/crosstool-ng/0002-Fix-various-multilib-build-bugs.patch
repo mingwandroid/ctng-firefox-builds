@@ -1,4 +1,4 @@
-From ac3367267b3c37d7cbdff86dd6f4b736e1f4c58c Mon Sep 17 00:00:00 2001
+From f5e756bd10bd94a355687ea9a1ad11bca66fd943 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
 Subject: [PATCH 02/13] Fix various multilib build bugs
@@ -454,5 +454,5 @@ index 3c98b8c..5a24439 100644
      # Determine build system if not set by the user
      if [ -z "${CT_BUILD}" ]; then
 -- 
-1.8.4.4
+1.8.5.1
 

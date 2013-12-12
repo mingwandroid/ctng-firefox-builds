@@ -700,7 +700,14 @@ if [ "$COMPILER_RT" = "yes" ]; then
 fi
 
 STUB=x-$(_al TARGET_TO_PREFIX $TARGET_OS)
-BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
+if [ "$OSTYPE" = "msys" ]; then
+  # Avoid over-long build paths on Windows, a real-world example:
+  # echo "C:/msys64/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-gettext-build-x86_64-build_w64-mingw32/gettext-tools/gnulib-lib/.libs/libgettextlib.lax/libcroco_rpl.a/libcroco_rpl_la-cr-additional-sel.o" | wc -c
+  # 263.
+  BUILDDIR=/c/ctng-build-${STUB}-${BUILD_PREFIX}
+else
+  BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
+fi
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
 

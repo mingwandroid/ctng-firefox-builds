@@ -1,4 +1,4 @@
-From bfcd763e97953e67b99f1e07a48a279369d83ad7 Mon Sep 17 00:00:00 2001
+From 319b817f6b22d2076008b214349bfc4ff37d98f5 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 16:57:31 +0000
 Subject: [PATCH 07/13] Test MSYS vs MinGW-w64 GCC 4.8.2 patch

@@ -61,11 +61,29 @@ VENDOR_OSES_windows="x86_64-w64-mingw32"
 VENDOR_OSES_linux="unknown-linux-gnu"
 VENDOR_OSES_raspi="unknown-linux-gnu"
 
-TARGET_GCC_VERSIONS_osx="4.2.1"
+TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="4.8.2"
 TARGET_GCC_VERSIONS_linux="4.8.2"
 TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="4.8.2"
+
+TARGET_IS_LINUX_osx="n"
+TARGET_IS_LINUX_windows="n"
+TARGET_IS_LINUX_linux="y"
+TARGET_IS_LINUX_ps3="n"
+TARGET_IS_LINUX_raspi="y"
+
+TARGET_IS_DARWIN_osx="y"
+TARGET_IS_DARWIN_windows="n"
+TARGET_IS_DARWIN_linux="n"
+TARGET_IS_DARWIN_ps3="n"
+TARGET_IS_DARWIN_raspi="n"
+
+TARGET_LIBC_osx="none"
+TARGET_LIBC_windows="none"
+TARGET_LIBC_linux="GLIBC_V_2.18"
+TARGET_LIBC_ps3="newlib"
+TARGET_LIBC_raspi="EGLIBC_V_2.18"
 
 # Stands for associative lookup!
 _al()
@@ -156,11 +174,11 @@ about a year ago."
 option LLVM_VERSION        HEAD \
 "HEAD, 3_3, 3_2, 3_1 or 3_0 (I test with 3_3 most,
 then HEAD next, then the others hardly at all)."
-option COPY_SDK            no \
+option COPY_SDK            yes \
 "Do you want the MacOSX10.6.sdk copied from
 \$HOME/MacOSX10.6.sdk to the sysroot of the
 built toolchain?"
-option COMPILER_RT         no \
+option COMPILER_RT         yes \
 "Compiler-rt allows for profiling, address
 sanitization, coverage reporting and other
 such runtime nicities, mostly un-tested, and
@@ -173,7 +191,7 @@ before running this script."
 option BUILD_GCC           yes \
 "Do you want GCC 4.2.1 with that? llvm-gcc is broken
 at present."
-option BUILD_CLANG         no \
+option BUILD_CLANG         yes \
 "Do you want Clang with that?"
 
 #################################################
@@ -276,14 +294,15 @@ else
   BITS=64
 fi
 
-if [ "${MOZ_TARGET_ARCH}" = "i686" -a "${TARGET_OS}" = "darwin" ]; then
+if [ "${MOZ_TARGET_ARCH}" = "i686" -a "${TARGET_OS}" = "osx" ]; then
   echo "Warning: You set --moz-target-arch=i686, but that's not a valid ${TARGET_OS} arch, changing this to i386 for you."
   MOZ_TARGET_ARCH=i386
-elif [ "${MOZ_TARGET_ARCH}" = "i386" -a "${TARGET_OS}" != "darwin" ]; then
+elif [ "${MOZ_TARGET_ARCH}" = "i386" -a "${TARGET_OS}" != "osx" ]; then
   echo "Warning: You set --moz-target-arch=i386, but that's not a valid ${TARGET_OS} arch, changing this to i686 for you."
   MOZ_TARGET_ARCH=i686
 fi
 
+# Check that compiler-rt can be built if requested.
 if [ "$COMPILER_RT" = "yes" ]; then
   if [ ! -d $HOME/MacOSX10.6.sdk/usr/lib/gcc/x86_64-apple-darwin10 ]; then
     if [ "${BITS}" = "64" ]; then
@@ -296,11 +315,17 @@ some host/target confusion you need to make a link from ..
       exit 1
     fi
   fi
+  if [ "$COPY_SDK" = "no" -a "$TARGET_OS" = "osx" ]; then
+    echo "Error: You are trying to build compiler-rt but without --copy-sdk=yes. This is currently broken
+as there's no way to pass the SDK's location into the build of compiler-rt."
+    exit 1
+  fi
 fi
 
 VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
 GCC_VERS=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
 GCC_VERS_=$(echo $GCC_VERS | tr '.' '_')
+LIBC_=$(echo $(_al TARGET_LIBC ${TARGET_OS}) | tr '.' '_')
 
 # The first part of CROSSCC is HOST_ARCH and the compilers are
 # built to run on that architecture of the host OS. They will
@@ -490,7 +515,6 @@ cross_clang_build()
      (
       git clone git@github.com:diorcety/crosstool-ng.git
       pushd crosstool-ng
-      git checkout -b cctools-llvm remotes/origin/cctools-llvm
       if [ -d "${THISDIR}/patches/crosstool-ng" ]; then
         PATCHES=$(find "${THISDIR}/patches/crosstool-ng" -name "*.patch" | sort)
         for PATCH in $PATCHES; do
@@ -506,37 +530,49 @@ cross_clang_build()
     [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
     cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${BITS} ${CTNG_SAMPLE_CONFIG}
     LLVM_VERSION_DOT=$(echo $LLVM_VERSION | tr '_' '.')
-    do_sed $"s/CT_LLVM_V_3_3/CT_LLVM_V_${LLVM_VERSION}/g" ${CTNG_SAMPLE_CONFIG}
+    echo "CT_LLVM_V_${LLVM_VERSION}"           >> ${CTNG_SAMPLE_CONFIG}
     if [ "$OSTYPE" = "msys" ]; then
       DUMPEDMACHINE=$(${MINGW_W64_PATH}/gcc -dumpmachine)
-      echo "CT_BUILD=\"${DUMPEDMACHINE}\"" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BUILD=\"${DUMPEDMACHINE}\""     >> ${CTNG_SAMPLE_CONFIG}
     fi
-    if [ "$COPY_SDK" = "yes" ]; then
-      do_sed $"s/CT_DARWIN_COPY_SDK_TO_SYSROOT=n/CT_DARWIN_COPY_SDK_TO_SYSROOT=y/g" ${CTNG_SAMPLE_CONFIG}
-    else
-      do_sed $"s/CT_DARWIN_COPY_SDK_TO_SYSROOT=y/CT_DARWIN_COPY_SDK_TO_SYSROOT=n/g" ${CTNG_SAMPLE_CONFIG}
+    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "y" ]; then
+      if [ "$COPY_SDK" = "yes" ]; then
+        echo "CT_DARWIN_COPY_SDK_TO_SYSROOT=y" >> ${CTNG_SAMPLE_CONFIG}
+      else
+        echo "CT_DARWIN_COPY_SDK_TO_SYSROOT=n" >> ${CTNG_SAMPLE_CONFIG}
+      fi
     fi
-    if [ "$COMPILER_RT" = "yes" ]; then
-      do_sed $"s/CT_LLVM_COMPILER_RT=n/CT_LLVM_COMPILER_RT=y/g" ${CTNG_SAMPLE_CONFIG}
+
+    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "y" ]; then
+      echo "CT_BINUTILS_cctools=y"             >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CCTOOLS_V_809=y"                >> ${CTNG_SAMPLE_CONFIG}
+      if [ "$BUILD_GCC" = "yes" ]; then
+        echo "CT_CC_GCC_APPLE=y"               >> ${CTNG_SAMPLE_CONFIG}
+      fi
     else
-      do_sed $"s/CT_LLVM_COMPILER_RT=y/CT_LLVM_COMPILER_RT=n/g" ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_V_2_22=y"              >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_FOR_TARGET=y"          >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     if [ "$BUILD_GCC" = "yes" ]; then
-      echo "CT_CC_GCC_V_${GCC_VERS_}=y"     >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_LANG_CXX=y"               >> ${CTNG_SAMPLE_CONFIG}
-      # Debian has switched to eglibc, Arch uses glibc. This needs to be an option ..
-      # e.g. --target-distro={arch|debian|ubuntu} then use correct setting according
-      #      to that?
-      echo "CT_LIBC_EGLIBC_V_2_18=y"        >> ${CTNG_SAMPLE_CONFIG}
-#      echo "CT_LIBC_glibc=y"               >> ${CTNG_SAMPLE_CONFIG}
-#      echo "CT_LIBC_GLIBC_V_2_7=y"         >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_gcc=y"                       >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_GCC_V_${GCC_VERS_}=y"        >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_CXX=y"                  >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_CXX=y"                  >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_OBJC=y"                 >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_OBJCXX=y"               >> ${CTNG_SAMPLE_CONFIG}
     fi
 
+    echo "CT_LIBC_${LIBC_}=y"                  >> ${CTNG_SAMPLE_CONFIG}
+
     if [ "$BUILD_CLANG" = "yes" ]; then
-      echo "CT_LLVM_V_3_3=y"               >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_LLVM_COMPILER_RT=n"         >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_clang=y"                 >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LLVM_V_${LLVM_VERSION}=y"       >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_clang=y"                     >> ${CTNG_SAMPLE_CONFIG}
+      if [ "$COMPILER_RT" = "yes" ]; then
+        echo "CT_LLVM_COMPILER_RT=y"           >> ${CTNG_SAMPLE_CONFIG}
+      else
+        echo "CT_LLVM_COMPILER_RT=n"           >> ${CTNG_SAMPLE_CONFIG}
+      fi
     fi
 
     # Gettext fails to build on Windows at -O0. One of the patches:
@@ -563,11 +599,8 @@ cross_clang_build()
     echo "CT_gettext=y"                    >> ${CTNG_SAMPLE_CONFIG}
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}
-    
-    
-#    fi
 
-    if [ "${OSTYPE}" = "darwin" ]; then
+    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "y" ]; then
       # Darwin always fails with:
       # "Checking that gcc can compile a trivial statically linked program (CT_WANTS_STATIC_LINK)"
       # We definitely don't want to be forcing CT_CC_GCC_STATIC_LIBSTDCXX=n so this needs to be
@@ -576,7 +609,7 @@ cross_clang_build()
       echo "CT_STATIC_TOOLCHAIN=n"         >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_GCC_STATIC_LIBSTDCXX=n"  >> ${CTNG_SAMPLE_CONFIG}
     fi
-    echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 
     ./bootstrap && ./configure ${CTNG_CFG_ARGS} && make clean && make && make install

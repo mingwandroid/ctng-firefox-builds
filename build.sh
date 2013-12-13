@@ -1548,10 +1548,10 @@ mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
    pushd linux-${KVER}
    PATCHES=$(find ~/ctng-firefox-builds/crosstool-ng/patches/linux/${KVER} -name "*.patch" | sort)
    for PATCH in $PATCHES; do
-     if [ "${PATCH/unifdef/}" = "$PATCH" ]; then
+#     if [ "${PATCH/unifdef/}" = "$PATCH" ]; then
        echo "Applying pre-existing kernel patch $PATCH"
        patch -p1 < $PATCH
-     fi
+#     fi
    done
    popd
    cp -rf linux-${KVER} linux-${KVER}.orig
@@ -1611,11 +1611,13 @@ popd
 mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
 pushd $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers; make -C $ROOT/src/linux-${KVER} O=$ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=$INSTROOT/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install; popd
 
+make install_root=$ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers install-bootstrap-headers=yes
+-C $ROOT/src/linux-${KVER} O=$ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=$INSTROOT/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install; popd
+
 cat ~/Dropbox/ctng-firefox-builds/120-win32-use-upstream-unifdef.patch
 
 pushd armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
 gcc -Wp,-MD,scripts/unifdef-upstream/FreeBSD/.err.o.d -Iscripts -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer   -I/Users/raydonnelly/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64/.build/src/linux-3.10.19/tools/include -c -o scripts/unifdef-upstream/FreeBSD/err.o /Users/raydonnelly/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64/.build/src/linux-3.10.19/scripts/unifdef-upstream/FreeBSD/err.c
-
 
 
 # Hang when --target-os=ps3 during patch cloog-ppl-0.15.11 seems to be from:
@@ -1776,7 +1778,7 @@ libtool: compile:  x86_64-w64-mingw32-gcc -DIN_LIBASPRINTF -DHAVE_CONFIG_H -I. -
 [ALL  ]    C:msys64homerayctng-firefox-buildsctng-build-x-r-HEAD-x86_64-235295c4.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:89: undefined reference to `term_ostream_set_color(any_ostream_representation*, int)'
 
 
-# Stupid gettext bug and broken patch:
+# Stupid gettext bug and broken patch
 
 mkdir /tmp/gettext-bug
 pushd /tmp/gettext-bug
@@ -1802,3 +1804,71 @@ pushd b
 patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch
 # Fix the mess made of color.o handling in that patch
 pushd b/gettext-tools && /tmp/gettext-bug/b/build-aux/missing automake-1.13 --gnits src/Makefile
+
+
+
+
+
+# .. with sunrpc test also:
+
+ROOT=/tmp/eglibc-test
+CT_BUILDTOOLS_PREFIX_DIR=/c/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools
+rm -rf $ROOT
+mkdir -p $ROOT
+pushd $ROOT
+tar -xf ~/src/eglibc-2_18.tar.bz2
+pushd eglibc-2_18
+patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/eglibc/2_18/100-make-4.patch
+popd
+popd
+mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/eglibc
+pushd $ROOT/armv6hl-unknown-linux-gnueabi/build/eglibc
+echo "libc_cv_forced_unwind=yes" >>config.cache
+echo "libc_cv_c_cleanup=yes" >>config.cache
+export PATH=/c/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"$PATH"
+BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE  -mlittle-endian -march=armv6   -mtune=arm1176jzf-s -mfpu=vfp -mhard-float -O2" \
+      CC=armv6hl-unknown-linux-gnueabi-gcc AR=armv6hl-unknown-linux-gnueabi-ar RANLIB=armv6hl-unknown-linux-gnueabi-ranlib \
+      /tmp/eglibc-test/eglibc-2_18/configure --prefix=/usr --build=x86_64-build_w64-mingw32 --host=armv6hl-unknown-linux-gnueabi -without-cvs \
+      --disable-profile --without-gd --with-headers=/home/ray/ctng-firefox-builds/x-r-HEAD-x86_64-235295c4/armv6hl-unknown-linux-gnueabi/sysroot/usr/include --libdir=/usr/lib/. --enable-obsolete-rpc --enable-kernel=3.10.19 \
+      --with-__thread --with-tls --enable-shared --with-fp --enable-add-ons=nptl,ports \
+      --cache-file="$(pwd)/config.cache" CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib/"
+
+make ${JOBSFLAGS}                                    \
+     install_root="$PWD/...eglibc-install"           \
+     install-bootstrap-headers=yes                   \
+     "${extra_make_args[@]}"                         \
+     BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/"  \
+     BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -lintl" \
+     sunrpc/install-headers
+
+.. that gets us as far as #include <sys/wait.h> in C:\msys64\tmp\eglibc-test\eglibc-2_18\sunrpc\rpc_main.c
+
+.. commenting that out gets to:
+
+In file included from rpc_parse.c:39:0:
+rpc/types.h:73:1: error: unknown type name '__u_char'
+ typedef __u_char u_char;
+ 
+for __u_char __u_short __u_int __u_long __quad_t __u_quad_t __fsid_t __daddr_t __caddr_t
+that block in types.h is not needed, nor is 
+#include <netinet/in.h>
+
+.. and eventually to:
+
+x86_64-build_w64-mingw32-gcc /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_hout.o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_cout.o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_parse.o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_scan.o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_util.o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_svcout.o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_clntout.o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_tblout.o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_sample.o -L/c/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib -lintl -o /tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpcgen
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x781): undefined reference to `pipe'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x7a0): undefined reference to `fork'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x952): undefined reference to `waitpid'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x971): undefined reference to `WIFSIGNALED'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x97f): undefined reference to `WEXITSTATUS'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x991): undefined reference to `WIFSIGNALED'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x99f): undefined reference to `WTERMSIG'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x9d6): undefined reference to `WEXITSTATUS'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x1be1): undefined reference to `rindex'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x1c3b): undefined reference to `stpncpy'
+C:/msys64/tmp/eglibc-test/armv6hl-unknown-linux-gnueabi/build/eglibc/sunrpc/cross-rpc_main.o:rpc_main.c:(.text+0x2a22): undefined reference to `stpcpy'
+
+.. so rpc_main.c calls C-preprocessor:
+/*
+* Open input file with given define for C-preprocessor
+*/

@@ -1,4 +1,4 @@
-From 38980b0b7ae5b5b73e7eb4e262bd533b26e72b17 Mon Sep 17 00:00:00 2001
+From fe578a3eedf9edec1c35561eb65c606b424cb2be Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 21:10:56 +0000
 Subject: [PATCH 12/13] Add gettext and libiconv as a companion lib
@@ -16,7 +16,8 @@ Subject: [PATCH 12/13] Add gettext and libiconv as a companion lib
  ...rclib_stdio.in.h-remove-gets-declarations.patch |  30 ++
  scripts/build/companion_libs/320-libiconv.sh       |  95 ++++++
  scripts/build/companion_libs/330-gettext.sh        | 116 +++++++
- 11 files changed, 744 insertions(+)
+ scripts/build/libc/glibc-eglibc.sh-common          |  18 +-
+ 12 files changed, 758 insertions(+), 4 deletions(-)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
@@ -869,6 +870,35 @@ index 0000000..2ec2c5f
 +}
 +
 +fi
+diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
+index d339a49..8a8f776 100644
+--- a/scripts/build/libc/glibc-eglibc.sh-common
++++ b/scripts/build/libc/glibc-eglibc.sh-common
+@@ -403,10 +403,20 @@ do_libc_backend_once() {
+ 
+         # use the 'install-headers' makefile target to install the
+         # headers
+-        CT_DoExecLog ALL make ${JOBSFLAGS}                          \
+-                         install_root="${install_root}"             \
+-                         install-bootstrap-headers=yes              \
+-                         "${extra_make_args[@]}"                    \
++        case "$CT_BUILD" in
++            *mingw*)
++                # When installing headers on MinGW-w64, sunrpc needs gettext for building
++                # cross-rpcgen.
++                # used to parse the output of the C-preprocessor.
++                extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
++                extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -lintl" )
++                ;;
++        esac
++
++        CT_DoExecLog ALL make ${JOBSFLAGS}                                        \
++                         install_root="${install_root}"                           \
++                         install-bootstrap-headers=yes                            \
++                         "${extra_make_args[@]}"                                  \
+                          install-headers
+ 
+         # For glibc, a few headers need to be manually installed
 -- 
 1.8.5.1
 

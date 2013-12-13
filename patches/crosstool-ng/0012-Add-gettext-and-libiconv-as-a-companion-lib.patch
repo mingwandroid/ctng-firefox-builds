@@ -1,4 +1,4 @@
-From 8f4515ae61f23256336a4b30d34878231166c9a9 Mon Sep 17 00:00:00 2001
+From 38980b0b7ae5b5b73e7eb4e262bd533b26e72b17 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 21:10:56 +0000
 Subject: [PATCH 12/13] Add gettext and libiconv as a companion lib
@@ -12,11 +12,11 @@ Subject: [PATCH 12/13] Add gettext and libiconv as a companion lib
  config/libc/glibc.in                               |   3 +
  ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++
  ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++
- ...-Woe32-link-errors-when-compiling-with-O0.patch | 337 +++++++++++++++++++++
+ ...-Woe32-link-errors-when-compiling-with-O0.patch | 372 +++++++++++++++++++++
  ...rclib_stdio.in.h-remove-gets-declarations.patch |  30 ++
  scripts/build/companion_libs/320-libiconv.sh       |  95 ++++++
  scripts/build/companion_libs/330-gettext.sh        | 116 +++++++
- 11 files changed, 709 insertions(+)
+ 11 files changed, 744 insertions(+)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
@@ -234,10 +234,45 @@ index 0000000..dacdfb1
 +
 diff --git a/patches/gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch b/patches/gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch
 new file mode 100644
-index 0000000..21ce789
+index 0000000..24e75aa
 --- /dev/null
 +++ b/patches/gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch
-@@ -0,0 +1,337 @@
+@@ -0,0 +1,372 @@
++From d4ecf6f15ad7a428786df2efdc88b03be0a4fdbb Mon Sep 17 00:00:00 2001
++From: Daiki Ueno <ueno@gnu.org>
++Date: Thu, 17 Jan 2013 18:33:40 +0900
++Subject: [PATCH] Fix Woe32 link errors when compiling with -O0.
++
++---
++ gettext-tools/src/Makefile.am                  | 24 ++++++++++++++++++++++--
++ gettext-tools/src/color.c                      |  1 +
++ gettext-tools/woe32dll/c++color.cc             |  1 +
++ gettext-tools/woe32dll/c++file-ostream.cc      |  2 ++
++ gettext-tools/woe32dll/c++html-ostream.cc      |  1 +
++ gettext-tools/woe32dll/c++styled-ostream.cc    |  1 +
++ gettext-tools/woe32dll/c++term-ostream.cc      |  1 +
++ gettext-tools/woe32dll/c++write-catalog.cc     |  1 +
++ gettext-tools/woe32dll/c++write-po.cc          |  1 +
++ gettext-tools/woe32dll/c++write-properties.cc  |  1 +
++ gettext-tools/woe32dll/c++write-stringtable.cc |  1 +
++ gnulib-local/modules/file-ostream              |  4 ++++
++ gnulib-local/modules/html-ostream              |  4 ++++
++ gnulib-local/modules/ostream                   |  4 ++++
++ gnulib-local/modules/styled-ostream            |  4 ++++
++ gnulib-local/modules/term-ostream              |  4 ++++
++ 16 files changed, 53 insertions(+), 2 deletions(-)
++ create mode 100644 gettext-tools/woe32dll/c++color.cc
++ create mode 100644 gettext-tools/woe32dll/c++file-ostream.cc
++ create mode 100644 gettext-tools/woe32dll/c++html-ostream.cc
++ create mode 100644 gettext-tools/woe32dll/c++styled-ostream.cc
++ create mode 100644 gettext-tools/woe32dll/c++term-ostream.cc
++ create mode 100644 gettext-tools/woe32dll/c++write-catalog.cc
++ create mode 100644 gettext-tools/woe32dll/c++write-po.cc
++ create mode 100644 gettext-tools/woe32dll/c++write-properties.cc
++ create mode 100644 gettext-tools/woe32dll/c++write-stringtable.cc
++
++Additional fix (COLOR_SOURCE) by Ray Donnelly <mingw.android@gmail.com>
++
 +diff -urN a/gettext-tools/src/Makefile.am b/gettext-tools/src/Makefile.am
 +--- a/gettext-tools/src/Makefile.am	2013-08-15 17:15:56.000000000 +0100
 ++++ b/gettext-tools/src/Makefile.am	2013-12-12 23:49:22.198570891 +0000

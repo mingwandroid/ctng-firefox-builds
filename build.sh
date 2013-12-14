@@ -67,6 +67,12 @@ TARGET_GCC_VERSIONS_linux="4.8.2"
 TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="4.8.2"
 
+TARGET_LLVM_VERSIONS_osx="3.3"
+TARGET_LLVM_VERSIONS_windows="head"
+TARGET_LLVM_VERSIONS_linux="3.3"
+TARGET_LLVM_VERSIONS_ps3="none"
+TARGET_LLVM_VERSIONS_raspi="none"
+
 TARGET_IS_LINUX_osx="n"
 TARGET_IS_LINUX_windows="n"
 TARGET_IS_LINUX_linux="y"
@@ -171,9 +177,11 @@ option CTNG_DEBUGGABLE     no \
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
 about a year ago."
-option LLVM_VERSION        HEAD \
-"HEAD, 3_3, 3_2, 3_1 or 3_0 (I test with 3_3 most,
-then HEAD next, then the others hardly at all)."
+option LLVM_VERSION        default \
+"default, none, head, 3.3, 3.2, 3.1 or 3.0 (I test with 3.3 most,
+then next, then the others hardly at all)."
+option GCC_VERSION        default \
+"default, none, head, or a sensible GCC version number."
 option COPY_SDK            yes \
 "Do you want the MacOSX10.6.sdk copied from
 \$HOME/MacOSX10.6.sdk to the sysroot of the
@@ -188,11 +196,6 @@ symbolic link to be made from ..
 .. to ..
 \${HOME}/MacOSX10.6.sdk/usr/lib/gcc/x86_64-apple-darwin10
 before running this script."
-option BUILD_GCC           yes \
-"Do you want GCC 4.2.1 with that? llvm-gcc is broken
-at present."
-option BUILD_CLANG         yes \
-"Do you want Clang with that?"
 
 #################################################
 # This set of options are for the Firefox build #
@@ -323,8 +326,18 @@ as there's no way to pass the SDK's location into the build of compiler-rt."
 fi
 
 VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
-GCC_VERS=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
-GCC_VERS_=$(echo $GCC_VERS | tr '.' '_')
+if [ "$GCC_VERSION" = "default" ]; then
+  GCC_VERSION=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
+fi
+if [ "$LLVM_VERSION" = "default" ]; then
+  LLVM_VERSION=$(_al TARGET_LLVM_VERSIONS ${TARGET_OS})
+fi
+if [ "$LLVM_VERSION" = "none" ]; then
+  COMPILER_RT="no"
+fi
+GCC_VERS_=$(echo $GCC_VERSION  | tr '.' '_')
+LLVM_VERS_=$(echo $LLVM_VERSION | tr '.' '_')
+
 LIBC_=$(echo $(_al TARGET_LIBC ${TARGET_OS}) | tr '.' '_')
 
 # The first part of CROSSCC is HOST_ARCH and the compilers are
@@ -546,7 +559,7 @@ cross_clang_build()
     if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "y" ]; then
       echo "CT_BINUTILS_cctools=y"             >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CCTOOLS_V_809=y"                >> ${CTNG_SAMPLE_CONFIG}
-      if [ "$BUILD_GCC" = "yes" ]; then
+      if [ ! "$GCC_VERSION" = "none" ]; then
         echo "CT_CC_GCC_APPLE=y"               >> ${CTNG_SAMPLE_CONFIG}
       fi
     else
@@ -554,7 +567,7 @@ cross_clang_build()
       echo "CT_BINUTILS_FOR_TARGET=y"          >> ${CTNG_SAMPLE_CONFIG}
     fi
 
-    if [ "$BUILD_GCC" = "yes" ]; then
+    if [ ! "$GCC_VERSION" = "none" ]; then
       echo "CT_CC_gcc=y"                       >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_GCC_V_${GCC_VERS_}=y"        >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_CXX=y"                  >> ${CTNG_SAMPLE_CONFIG}
@@ -565,8 +578,8 @@ cross_clang_build()
 
     echo "CT_LIBC_${LIBC_}=y"                  >> ${CTNG_SAMPLE_CONFIG}
 
-    if [ "$BUILD_CLANG" = "yes" ]; then
-      echo "CT_LLVM_V_${LLVM_VERSION}=y"       >> ${CTNG_SAMPLE_CONFIG}
+    if [ ! "$LLVM_VERSION" = "none" ]; then
+      echo "CT_LLVM_V_${LLVM_VERS_}=y"         >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_clang=y"                     >> ${CTNG_SAMPLE_CONFIG}
       if [ "$COMPILER_RT" = "yes" ]; then
         echo "CT_LLVM_COMPILER_RT=y"           >> ${CTNG_SAMPLE_CONFIG}
@@ -727,7 +740,7 @@ else
   export PYTHON=python2
 fi
 
-BUILD_PREFIX=${LLVM_VERSION}-${HOST_ARCH}${MINGW_W64_HASH}
+BUILD_PREFIX=${LLVM_VERS_}-${GCC_VERS_}-${HOST_ARCH}${MINGW_W64_HASH}
 if [ "$COMPILER_RT" = "yes" ]; then
   BUILD_PREFIX="${BUILD_PREFIX}-rt"
 fi

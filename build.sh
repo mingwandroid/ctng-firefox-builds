@@ -1665,7 +1665,7 @@ popd
 mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
 pushd $ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers; make -C $ROOT/src/linux-${KVER} O=$ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=$INSTROOT/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install; popd
 
-make install_root=$ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers install-bootstrap-headers=yes
+make install_root=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4/armv6hl-unknown-linux-gnueabi/sysroot install-bootstrap-headers=yes
 -C $ROOT/src/linux-${KVER} O=$ROOT/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=$INSTROOT/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install; popd
 
 cat ~/Dropbox/ctng-firefox-builds/120-win32-use-upstream-unifdef.patch
@@ -1866,37 +1866,38 @@ pushd b/gettext-tools && /tmp/gettext-bug/b/build-aux/missing automake-1.13 --gn
 # .. with sunrpc test also:
 
 ROOT=/tmp/eglibc-test
-CT_BUILDTOOLS_PREFIX_DIR=/c/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools
+CT_BUILDTOOLS_PREFIX_DIR=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools
 rm -rf $ROOT
 mkdir -p $ROOT
 pushd $ROOT
 # The last GCC under GPLv2 AFAIK.
-wget -c http://ftp.gnu.org/gnu/gcc/gcc-4.2.4/gcc-4.2.4.tar.bz2
+#wget -c http://ftp.gnu.org/gnu/gcc/gcc-4.2.4/gcc-4.2.4.tar.bz2
+#tar -xf gcc-4.2.4.tar.bz2
 tar -xf ~/src/eglibc-2_18.tar.bz2
-tar -xf gcc-4.2.4.tar.bz2
 pushd eglibc-2_18
 patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/eglibc/2_18/100-make-4.patch
+patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/eglibc/2_18/110-Add-libiberty-pex-for-sunrpc-build.patch
 popd
 cp -rf eglibc-2_18 eglibc-2_18.orig
-
-cp -rf gcc-4.2.4/libibery/pex-win32.c eglibc-2_18/sumrpc/pex-win32.c
-cp -rf gcc-4.2.4/libibery/pex-unix.c eglibc-2_18/sumrpc/pex-unix.c
-
+#cp -rf gcc-4.2.4/libiberty/pex-common.c eglibc-2_18/sunrpc/
+#cp -rf gcc-4.2.4/libiberty/pex-common.h eglibc-2_18/sunrpc/
+#cp -rf gcc-4.2.4/libiberty/pex-unix.c   eglibc-2_18/sunrpc/
+#cp -rf gcc-4.2.4/libiberty/pex-win32.c  eglibc-2_18/sunrpc/
 popd
 mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/eglibc
 pushd $ROOT/armv6hl-unknown-linux-gnueabi/build/eglibc
 echo "libc_cv_forced_unwind=yes" >>config.cache
 echo "libc_cv_c_cleanup=yes" >>config.cache
-export PATH=/c/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"$PATH"
+export PATH=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"$PATH"
 BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE  -mlittle-endian -march=armv6   -mtune=arm1176jzf-s -mfpu=vfp -mhard-float -O2" \
       CC=armv6hl-unknown-linux-gnueabi-gcc AR=armv6hl-unknown-linux-gnueabi-ar RANLIB=armv6hl-unknown-linux-gnueabi-ranlib \
       /tmp/eglibc-test/eglibc-2_18/configure --prefix=/usr --build=x86_64-build_w64-mingw32 --host=armv6hl-unknown-linux-gnueabi -without-cvs \
-      --disable-profile --without-gd --with-headers=/home/ray/ctng-firefox-builds/x-r-HEAD-x86_64-235295c4/armv6hl-unknown-linux-gnueabi/sysroot/usr/include --libdir=/usr/lib/. --enable-obsolete-rpc --enable-kernel=3.10.19 \
+      --disable-profile --without-gd --with-headers=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4/armv6hl-unknown-linux-gnueabi/sysroot/usr/include --libdir=/usr/lib/. --enable-obsolete-rpc --enable-kernel=3.10.19 \
       --with-__thread --with-tls --enable-shared --with-fp --enable-add-ons=nptl,ports \
       --cache-file="$(pwd)/config.cache" CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib/"
 
 make ${JOBSFLAGS}                                    \
-     install_root="$PWD/...eglibc-install"           \
+     install_root="/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4/armv6hl-unknown-linux-gnueabi/sysroot"           \
      install-bootstrap-headers=yes                   \
      "${extra_make_args[@]}"                         \
      BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/"  \

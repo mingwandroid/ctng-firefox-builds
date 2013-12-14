@@ -297,6 +297,21 @@ else
   BITS=64
 fi
 
+# Sanitise options and lookup per-target defaults.
+VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
+if [ "$GCC_VERSION" = "default" ]; then
+  GCC_VERSION=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
+fi
+if [ "$LLVM_VERSION" = "default" ]; then
+  LLVM_VERSION=$(_al TARGET_LLVM_VERSIONS ${TARGET_OS})
+fi
+if [ "$LLVM_VERSION" = "none" ]; then
+  COMPILER_RT="no"
+fi
+GCC_VERS_=$(echo $GCC_VERSION  | tr '.' '_')
+LLVM_VERS_=$(echo $LLVM_VERSION | tr '.' '_')
+
+# Error checking
 if [ "${MOZ_TARGET_ARCH}" = "i686" -a "${TARGET_OS}" = "osx" ]; then
   echo "Warning: You set --moz-target-arch=i686, but that's not a valid ${TARGET_OS} arch, changing this to i386 for you."
   MOZ_TARGET_ARCH=i386
@@ -306,7 +321,7 @@ elif [ "${MOZ_TARGET_ARCH}" = "i386" -a "${TARGET_OS}" != "osx" ]; then
 fi
 
 # Check that compiler-rt can be built if requested.
-if [ "$COMPILER_RT" = "yes" ]; then
+if [ "$COMPILER_RT" = "yes" -a "$TARGET_OS" = "osx" ]; then
   if [ ! -d $HOME/MacOSX10.6.sdk/usr/lib/gcc/x86_64-apple-darwin10 ]; then
     if [ "${BITS}" = "64" ]; then
       echo -n "Error: You are trying to build x86_64 hosted cross compilers. Due to
@@ -325,18 +340,8 @@ as there's no way to pass the SDK's location into the build of compiler-rt."
   fi
 fi
 
-VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
-if [ "$GCC_VERSION" = "default" ]; then
-  GCC_VERSION=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
-fi
-if [ "$LLVM_VERSION" = "default" ]; then
-  LLVM_VERSION=$(_al TARGET_LLVM_VERSIONS ${TARGET_OS})
-fi
-if [ "$LLVM_VERSION" = "none" ]; then
-  COMPILER_RT="no"
-fi
-GCC_VERS_=$(echo $GCC_VERSION  | tr '.' '_')
-LLVM_VERS_=$(echo $LLVM_VERSION | tr '.' '_')
+
+
 
 LIBC_=$(echo $(_al TARGET_LIBC ${TARGET_OS}) | tr '.' '_')
 
@@ -363,6 +368,9 @@ if [ "${OSTYPE}" = "darwin" ]; then
 #  CXX=llvm-g++
   # To install gperf 3.0.4 I did:
   set +e
+  if ! which brew; then
+    ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
+  fi
   brew tap homebrew/dupes
   brew install homebrew/dupes/gperf
   GPERF=${BREWFIX}/Cellar/gperf/3.0.4/bin/gperf
@@ -390,7 +398,6 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     if [ -f /etc/arch-release ]; then
       PACKAGES=$PACKAGES" ncurses gcc-ada${HOST_MULTILIB}"
     else
-      # Hmm, no yasm package for Windows yet ..
       PACKAGES=$PACKAGES" ncurses-devel base-devel perl-ack"
     fi
     ${SUDO} pacman -S --force --noconfirm --needed $PACKAGES
@@ -613,7 +620,8 @@ cross_clang_build()
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}
 
-    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "y" ]; then
+    if [ "$OSTYPE" = "darwin" ]; then
+#    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "y" ]; then
       # Darwin always fails with:
       # "Checking that gcc can compile a trivial statically linked program (CT_WANTS_STATIC_LINK)"
       # We definitely don't want to be forcing CT_CC_GCC_STATIC_LIBSTDCXX=n so this needs to be

@@ -1,7 +1,7 @@
-From a6dba3b2d0e23678a060512c8477864a440f81c8 Mon Sep 17 00:00:00 2001
+From 03c571ab2b1f65ac0048b3c243047a9183f1c26d Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
-Subject: [PATCH 02/13] Fix various multilib build bugs
+Subject: [PATCH 02/14] Fix various multilib build bugs
 
 --host=${CT_TARGET} with eg -m32 is not right.
 The arch part must be correct (i686 for 32-bit
@@ -69,10 +69,10 @@ index d973594..4a052ad 100644
                  binutils_tools+=( elf2flt flthdr )
              fi
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index ede8cc5..fda75e1 100644
+index 4b99d5d..26ffc7f 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
-@@ -189,6 +189,7 @@ do_gcc_core_backend() {
+@@ -191,6 +191,7 @@ do_gcc_core_backend() {
      local -a core_targets
      local arg
      local exeext
@@ -80,7 +80,7 @@ index ede8cc5..fda75e1 100644
  
      for arg in "$@"; do
          eval "${arg// /\\ }"
-@@ -201,18 +202,18 @@ do_gcc_core_backend() {
+@@ -203,18 +204,18 @@ do_gcc_core_backend() {
              extra_config+=("--with-newlib")
              extra_config+=("--enable-threads=no")
              extra_config+=("--disable-shared")
@@ -103,7 +103,7 @@ index ede8cc5..fda75e1 100644
              ;;
          *)
              CT_Abort "Internal Error: 'mode' must be one of: 'static', 'shared' or 'baremetal', not '${mode:-(empty)}'"
-@@ -225,9 +226,14 @@ do_gcc_core_backend() {
+@@ -227,9 +228,14 @@ do_gcc_core_backend() {
          [ -n "${CT_TOOLCHAIN_BUGURL}" ] && extra_config+=("--with-bugurl=${CT_TOOLCHAIN_BUGURL}")
      fi
  
@@ -121,7 +121,7 @@ index ede8cc5..fda75e1 100644
      fi
  
      for tmp in ARCH ABI CPU TUNE FPU FLOAT; do
-@@ -364,6 +370,7 @@ do_gcc_core_backend() {
+@@ -366,6 +372,7 @@ do_gcc_core_backend() {
  
      if [ "${CT_MULTILIB}" = "y" ]; then
          extra_config+=("--enable-multilib")

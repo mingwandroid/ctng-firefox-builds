@@ -1870,10 +1870,18 @@ CT_BUILDTOOLS_PREFIX_DIR=/c/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-u
 rm -rf $ROOT
 mkdir -p $ROOT
 pushd $ROOT
+# The last GCC under GPLv2 AFAIK.
+wget -c http://ftp.gnu.org/gnu/gcc/gcc-4.2.4/gcc-4.2.4.tar.bz2
 tar -xf ~/src/eglibc-2_18.tar.bz2
+tar -xf gcc-4.2.4.tar.bz2
 pushd eglibc-2_18
 patch -p1 < ~/ctng-firefox-builds/crosstool-ng/patches/eglibc/2_18/100-make-4.patch
 popd
+cp -rf eglibc-2_18 eglibc-2_18.orig
+
+cp -rf gcc-4.2.4/libibery/pex-win32.c eglibc-2_18/sumrpc/pex-win32.c
+cp -rf gcc-4.2.4/libibery/pex-unix.c eglibc-2_18/sumrpc/pex-unix.c
+
 popd
 mkdir -p $ROOT/armv6hl-unknown-linux-gnueabi/build/eglibc
 pushd $ROOT/armv6hl-unknown-linux-gnueabi/build/eglibc

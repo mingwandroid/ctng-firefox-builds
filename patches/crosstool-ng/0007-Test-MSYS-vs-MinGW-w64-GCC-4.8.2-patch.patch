@@ -1,7 +1,7 @@
-From 562df69b9109983b9d9653e4d2450442f149250c Mon Sep 17 00:00:00 2001
+From 18054f9ede40ba49c9e323ec7f1d213bda07b991 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 16:57:31 +0000
-Subject: [PATCH 07/13] Test MSYS vs MinGW-w64 GCC 4.8.2 patch
+Subject: [PATCH 07/14] Test MSYS vs MinGW-w64 GCC 4.8.2 patch
 
 ---
  .../gcc/4.8.2/100-msys-native-paths-gengtype.patch | 244 +++++++++++++++++++++

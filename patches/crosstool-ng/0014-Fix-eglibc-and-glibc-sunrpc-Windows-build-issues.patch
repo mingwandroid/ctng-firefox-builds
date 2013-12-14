@@ -1,0 +1,2204 @@
+From 96c52405f424303807c1169845b57c0fdf39e427 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Sat, 14 Dec 2013 03:18:53 +0000
+Subject: [PATCH 14/14] Fix eglibc and glibc sunrpc Windows build issues
+
+.. fork, exec were being used. Changed to pex from libiberty
+from GCC 4.2.4
+---
+ .../110-Add-libiberty-pex-for-sunrpc-build.patch   | 2183 ++++++++++++++++++++
+ 1 file changed, 2183 insertions(+)
+ create mode 100644 patches/eglibc/2_18/110-Add-libiberty-pex-for-sunrpc-build.patch
+
+diff --git a/patches/eglibc/2_18/110-Add-libiberty-pex-for-sunrpc-build.patch b/patches/eglibc/2_18/110-Add-libiberty-pex-for-sunrpc-build.patch
+new file mode 100644
+index 0000000..8665958
+--- /dev/null
++++ b/patches/eglibc/2_18/110-Add-libiberty-pex-for-sunrpc-build.patch
+@@ -0,0 +1,2183 @@
++diff -urN eglibc-2_18.orig/sunrpc/pex-common.c eglibc-2_18/sunrpc/pex-common.c
++--- eglibc-2_18.orig/sunrpc/pex-common.c	1970-01-01 01:00:00.000000000 +0100
+++++ eglibc-2_18/sunrpc/pex-common.c	2013-12-14 02:58:28.731472700 +0000
++@@ -0,0 +1,598 @@
+++/* Common code for executing a program in a sub-process.
+++   Copyright (C) 2005 Free Software Foundation, Inc.
+++   Written by Ian Lance Taylor <ian@airs.com>.
+++
+++This file is part of the libiberty library.
+++Libiberty is free software; you can redistribute it and/or
+++modify it under the terms of the GNU Library General Public
+++License as published by the Free Software Foundation; either
+++version 2 of the License, or (at your option) any later version.
+++
+++Libiberty is distributed in the hope that it will be useful,
+++but WITHOUT ANY WARRANTY; without even the implied warranty of
+++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+++Library General Public License for more details.
+++
+++You should have received a copy of the GNU Library General Public
+++License along with libiberty; see the file COPYING.LIB.  If not,
+++write to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
+++Boston, MA 02110-1301, USA.  */
+++
+++#include "config.h"
+++#include "libiberty.h"
+++#include "pex-common.h"
+++
+++#include <stdio.h>
+++#include <errno.h>
+++#ifdef NEED_DECLARATION_ERRNO
+++extern int errno;
+++#endif
+++#ifdef HAVE_STDLIB_H
+++#include <stdlib.h>
+++#endif
+++#ifdef HAVE_STRING_H
+++#include <string.h>
+++#endif
+++#ifdef HAVE_UNISTD_H
+++#include <unistd.h>
+++#endif
+++
+++extern int mkstemps (char *, int);
+++
+++/* This file contains subroutines for the program execution routines
+++   (pex_init, pex_run, etc.).  This file is compiled on all
+++   systems.  */
+++
+++static void pex_add_remove (struct pex_obj *, const char *, int);
+++static int pex_get_status_and_time (struct pex_obj *, int, const char **,
+++				    int *);
+++
+++/* Initialize a pex_obj structure.  */
+++
+++struct pex_obj *
+++pex_init_common (int flags, const char *pname, const char *tempbase,
+++		 const struct pex_funcs *funcs)
+++{
+++  struct pex_obj *obj;
+++
+++  obj = XNEW (struct pex_obj);
+++  obj->flags = flags;
+++  obj->pname = pname;
+++  obj->tempbase = tempbase;
+++  obj->next_input = STDIN_FILE_NO;
+++  obj->next_input_name = NULL;
+++  obj->next_input_name_allocated = 0;
+++  obj->count = 0;
+++  obj->children = NULL;
+++  obj->status = NULL;
+++  obj->time = NULL;
+++  obj->number_waited = 0;
+++  obj->input_file = NULL;
+++  obj->read_output = NULL;
+++  obj->remove_count = 0;
+++  obj->remove = NULL;
+++  obj->funcs = funcs;
+++  obj->sysdep = NULL;
+++  return obj;
+++}
+++
+++/* Add a file to be removed when we are done.  */
+++
+++static void
+++pex_add_remove (struct pex_obj *obj, const char *name, int allocated)
+++{
+++  char *add;
+++
+++  ++obj->remove_count;
+++  obj->remove = XRESIZEVEC (char *, obj->remove, obj->remove_count);
+++  if (allocated)
+++    add = (char *) name;
+++  else
+++    add = xstrdup (name);
+++  obj->remove[obj->remove_count - 1] = add;
+++}
+++
+++/* Generate a temporary file name based on OBJ, FLAGS, and NAME.
+++   Return NULL if we were unable to reserve a temporary filename.
+++
+++   If non-NULL, the result is either allocated with malloc, or the
+++   same pointer as NAME.  */
+++static char *
+++temp_file (struct pex_obj *obj, int flags, char *name)
+++{
+++  if (name == NULL)
+++    {
+++      if (obj->tempbase == NULL)
+++        {
+++          name = make_temp_file (NULL);
+++        }
+++      else
+++        {
+++          int len = strlen (obj->tempbase);
+++          int out;
+++
+++          if (len >= 6
+++              && strcmp (obj->tempbase + len - 6, "XXXXXX") == 0)
+++            name = xstrdup (obj->tempbase);
+++          else
+++            name = concat (obj->tempbase, "XXXXXX", NULL);
+++
+++          out = mkstemps (name, 0);
+++          if (out < 0)
+++            {
+++              free (name);
+++              return NULL;
+++            }
+++
+++          /* This isn't obj->funcs->close because we got the
+++             descriptor from mkstemps, not from a function in
+++             obj->funcs.  Calling close here is just like what
+++             make_temp_file does.  */
+++          close (out);
+++        }
+++    }
+++  else if ((flags & PEX_SUFFIX) != 0)
+++    {
+++      if (obj->tempbase == NULL)
+++        name = make_temp_file (name);
+++      else
+++        name = concat (obj->tempbase, name, NULL);
+++    }
+++
+++  return name;
+++}
+++
+++
+++/* As for pex_run (), but permits the environment for the child process
+++   to be specified. */
+++
+++const char *
+++pex_run_in_environment (struct pex_obj *obj, int flags, const char *executable,
+++       	                char * const * argv, char * const * env,
+++                        const char *orig_outname, const char *errname,
+++                  	int *err)
+++{
+++  const char *errmsg;
+++  int in, out, errdes;
+++  char *outname;
+++  int outname_allocated;
+++  int p[2];
+++  int toclose;
+++  long pid;
+++
+++  in = -1;
+++  out = -1;
+++  errdes = -1;
+++  outname = (char *) orig_outname;
+++  outname_allocated = 0;
+++
+++  /* If the user called pex_input_file, close the file now.  */
+++  if (obj->input_file)
+++    {
+++      if (fclose (obj->input_file) == EOF)
+++        {
+++          errmsg = "closing pipeline input file";
+++          goto error_exit;
+++        }
+++      obj->input_file = NULL;
+++    }
+++
+++  /* Set IN.  */
+++
+++  if (obj->next_input_name != NULL)
+++    {
+++      /* We have to make sure that the previous process has completed
+++	 before we try to read the file.  */
+++      if (!pex_get_status_and_time (obj, 0, &errmsg, err))
+++	goto error_exit;
+++
+++      in = obj->funcs->open_read (obj, obj->next_input_name,
+++				  (flags & PEX_BINARY_INPUT) != 0);
+++      if (in < 0)
+++	{
+++	  *err = errno;
+++	  errmsg = "open temporary file";
+++	  goto error_exit;
+++	}
+++      if (obj->next_input_name_allocated)
+++	{
+++	  free (obj->next_input_name);
+++	  obj->next_input_name_allocated = 0;
+++	}
+++      obj->next_input_name = NULL;
+++    }
+++  else
+++    {
+++      in = obj->next_input;
+++      if (in < 0)
+++	{
+++	  *err = 0;
+++	  errmsg = "pipeline already complete";
+++	  goto error_exit;
+++	}
+++    }
+++
+++  /* Set OUT and OBJ->NEXT_INPUT/OBJ->NEXT_INPUT_NAME.  */
+++
+++  if ((flags & PEX_LAST) != 0)
+++    {
+++      if (outname == NULL)
+++	out = STDOUT_FILE_NO;
+++      else if ((flags & PEX_SUFFIX) != 0)
+++	{
+++	  outname = concat (obj->tempbase, outname, NULL);
+++	  outname_allocated = 1;
+++	}
+++      obj->next_input = -1;
+++    }
+++  else if ((obj->flags & PEX_USE_PIPES) == 0)
+++    {
+++      outname = temp_file (obj, flags, outname);
+++      if (! outname)
+++        {
+++          *err = 0;
+++          errmsg = "could not create temporary file";
+++          goto error_exit;
+++        }
+++
+++      if (outname != orig_outname)
+++        outname_allocated = 1;
+++
+++      if ((obj->flags & PEX_SAVE_TEMPS) == 0)
+++	{
+++	  pex_add_remove (obj, outname, outname_allocated);
+++	  outname_allocated = 0;
+++	}
+++
+++      /* Hand off ownership of outname to the next stage.  */
+++      obj->next_input_name = outname;
+++      obj->next_input_name_allocated = outname_allocated;
+++      outname_allocated = 0;
+++    }
+++  else
+++    {
+++      if (obj->funcs->pipe (obj, p, (flags & PEX_BINARY_OUTPUT) != 0) < 0)
+++	{
+++	  *err = errno;
+++	  errmsg = "pipe";
+++	  goto error_exit;
+++	}
+++
+++      out = p[WRITE_PORT];
+++      obj->next_input = p[READ_PORT];
+++    }
+++
+++  if (out < 0)
+++    {
+++      out = obj->funcs->open_write (obj, outname,
+++				    (flags & PEX_BINARY_OUTPUT) != 0);
+++      if (out < 0)
+++	{
+++	  *err = errno;
+++	  errmsg = "open temporary output file";
+++	  goto error_exit;
+++	}
+++    }
+++
+++  if (outname_allocated)
+++    {
+++      free (outname);
+++      outname_allocated = 0;
+++    }
+++
+++  /* Set ERRDES.  */
+++
+++  if (errname == NULL)
+++    errdes = STDERR_FILE_NO;
+++  else
+++    {
+++      /* We assume that stderr is in text mode--it certainly shouldn't
+++	 be controlled by PEX_BINARY_OUTPUT.  If necessary, we can add
+++	 a PEX_BINARY_STDERR flag.  */
+++      errdes = obj->funcs->open_write (obj, errname, 0);
+++      if (errdes < 0)
+++	{
+++	  *err = errno;
+++	  errmsg = "open error file";
+++	  goto error_exit;
+++	}
+++    }
+++
+++  /* If we are using pipes, the child process has to close the next
+++     input pipe.  */
+++
+++  if ((obj->flags & PEX_USE_PIPES) == 0)
+++    toclose = -1;
+++  else
+++    toclose = obj->next_input;
+++
+++  /* Run the program.  */
+++
+++  pid = obj->funcs->exec_child (obj, flags, executable, argv, env,
+++				in, out, errdes, toclose, &errmsg, err);
+++  if (pid < 0)
+++    goto error_exit;
+++
+++  ++obj->count;
+++  obj->children = XRESIZEVEC (long, obj->children, obj->count);
+++  obj->children[obj->count - 1] = pid;
+++
+++  return NULL;
+++
+++ error_exit:
+++  if (in >= 0 && in != STDIN_FILE_NO)
+++    obj->funcs->close (obj, in);
+++  if (out >= 0 && out != STDOUT_FILE_NO)
+++    obj->funcs->close (obj, out);
+++  if (errdes >= 0 && errdes != STDERR_FILE_NO)
+++    obj->funcs->close (obj, errdes);
+++  if (outname_allocated)
+++    free (outname);
+++  return errmsg;
+++}
+++
+++/* Run a program.  */
+++
+++const char *
+++pex_run (struct pex_obj *obj, int flags, const char *executable,
+++       	 char * const * argv, const char *orig_outname, const char *errname,
+++         int *err)
+++{
+++  return pex_run_in_environment (obj, flags, executable, argv, NULL,
+++				 orig_outname, errname, err);
+++}
+++
+++/* Return a FILE pointer for a temporary file to fill with input for
+++   the pipeline.  */
+++FILE *
+++pex_input_file (struct pex_obj *obj, int flags, const char *in_name)
+++{
+++  char *name = (char *) in_name;
+++  FILE *f;
+++
+++  /* This must be called before the first pipeline stage is run, and
+++     there must not have been any other input selected.  */
+++  if (obj->count != 0
+++      || (obj->next_input >= 0 && obj->next_input != STDIN_FILE_NO)
+++      || obj->next_input_name)
+++    {
+++      errno = EINVAL;
+++      return NULL;
+++    }
+++
+++  name = temp_file (obj, flags, name);
+++  if (! name)
+++    return NULL;
+++
+++  f = fopen (name, (flags & PEX_BINARY_OUTPUT) ? "wb" : "w");
+++  if (! f)
+++    {
+++      free (name);
+++      return NULL;
+++    }
+++
+++  obj->input_file = f;
+++  obj->next_input_name = name;
+++  obj->next_input_name_allocated = (name != in_name);
+++
+++  return f;
+++}
+++
+++/* Return a stream for a pipe connected to the standard input of the
+++   first stage of the pipeline.  */
+++FILE *
+++pex_input_pipe (struct pex_obj *obj, int binary)
+++{
+++  int p[2];
+++  FILE *f;
+++
+++  /* You must call pex_input_pipe before the first pex_run or pex_one.  */
+++  if (obj->count > 0)
+++    goto usage_error;
+++
+++  /* You must be using pipes.  Implementations that don't support
+++     pipes clear this flag before calling pex_init_common.  */
+++  if (! (obj->flags & PEX_USE_PIPES))
+++    goto usage_error;
+++
+++  /* If we have somehow already selected other input, that's a
+++     mistake.  */
+++  if ((obj->next_input >= 0 && obj->next_input != STDIN_FILE_NO)
+++      || obj->next_input_name)
+++    goto usage_error;
+++
+++  if (obj->funcs->pipe (obj, p, binary != 0) < 0)
+++    return NULL;
+++
+++  f = obj->funcs->fdopenw (obj, p[WRITE_PORT], binary != 0);
+++  if (! f)
+++    {
+++      int saved_errno = errno;
+++      obj->funcs->close (obj, p[READ_PORT]);
+++      obj->funcs->close (obj, p[WRITE_PORT]);
+++      errno = saved_errno;
+++      return NULL;
+++    }
+++
+++  obj->next_input = p[READ_PORT];
+++
+++  return f;
+++
+++ usage_error:
+++  errno = EINVAL;
+++  return NULL;
+++}
+++
+++/* Return a FILE pointer for the output of the last program
+++   executed.  */
+++
+++FILE *
+++pex_read_output (struct pex_obj *obj, int binary)
+++{
+++  if (obj->next_input_name != NULL)
+++    {
+++      const char *errmsg;
+++      int err;
+++
+++      /* We have to make sure that the process has completed before we
+++	 try to read the file.  */
+++      if (!pex_get_status_and_time (obj, 0, &errmsg, &err))
+++	{
+++	  errno = err;
+++	  return NULL;
+++	}
+++
+++      obj->read_output = fopen (obj->next_input_name, binary ? "rb" : "r");
+++
+++      if (obj->next_input_name_allocated)
+++	{
+++	  free (obj->next_input_name);
+++	  obj->next_input_name_allocated = 0;
+++	}
+++      obj->next_input_name = NULL;
+++    }
+++  else
+++    {
+++      int o;
+++
+++      o = obj->next_input;
+++      if (o < 0 || o == STDIN_FILE_NO)
+++	return NULL;
+++      obj->read_output = obj->funcs->fdopenr (obj, o, binary);
+++      obj->next_input = -1;
+++    }
+++
+++  return obj->read_output;
+++}
+++
+++/* Get the exit status and, if requested, the resource time for all
+++   the child processes.  Return 0 on failure, 1 on success.  */
+++
+++static int
+++pex_get_status_and_time (struct pex_obj *obj, int done, const char **errmsg,
+++			 int *err)
+++{
+++  int ret;
+++  int i;
+++
+++  if (obj->number_waited == obj->count)
+++    return 1;
+++
+++  obj->status = XRESIZEVEC (int, obj->status, obj->count);
+++  if ((obj->flags & PEX_RECORD_TIMES) != 0)
+++    obj->time = XRESIZEVEC (struct pex_time, obj->time, obj->count);
+++
+++  ret = 1;
+++  for (i = obj->number_waited; i < obj->count; ++i)
+++    {
+++      if (obj->funcs->wait (obj, obj->children[i], &obj->status[i],
+++			    obj->time == NULL ? NULL : &obj->time[i],
+++			    done, errmsg, err) < 0)
+++	ret = 0;
+++    }
+++  obj->number_waited = i;
+++
+++  return ret;
+++}
+++
+++/* Get exit status of executed programs.  */
+++
+++int
+++pex_get_status (struct pex_obj *obj, int count, int *vector)
+++{
+++  if (obj->status == NULL)
+++    {
+++      const char *errmsg;
+++      int err;
+++
+++      if (!pex_get_status_and_time (obj, 0, &errmsg, &err))
+++	return 0;
+++    }
+++
+++  if (count > obj->count)
+++    {
+++      memset (vector + obj->count, 0, (count - obj->count) * sizeof (int));
+++      count = obj->count;
+++    }
+++
+++  memcpy (vector, obj->status, count * sizeof (int));
+++
+++  return 1;
+++}
+++
+++/* Get process times of executed programs.  */
+++
+++int
+++pex_get_times (struct pex_obj *obj, int count, struct pex_time *vector)
+++{
+++  if (obj->status == NULL)
+++    {
+++      const char *errmsg;
+++      int err;
+++
+++      if (!pex_get_status_and_time (obj, 0, &errmsg, &err))
+++	return 0;
+++    }
+++
+++  if (obj->time == NULL)
+++    return 0;
+++
+++  if (count > obj->count)
+++    {
+++      memset (vector + obj->count, 0,
+++	      (count - obj->count) * sizeof (struct pex_time));
+++      count = obj->count;
+++    }
+++
+++  memcpy (vector, obj->time, count * sizeof (struct pex_time));
+++
+++  return 1;
+++}
+++
+++/* Free a pex_obj structure.  */
+++
+++void
+++pex_free (struct pex_obj *obj)
+++{
+++  if (obj->next_input >= 0 && obj->next_input != STDIN_FILE_NO)
+++    obj->funcs->close (obj, obj->next_input);
+++
+++  /* If the caller forgot to wait for the children, we do it here, to
+++     avoid zombies.  */
+++  if (obj->status == NULL)
+++    {
+++      const char *errmsg;
+++      int err;
+++
+++      obj->flags &= ~ PEX_RECORD_TIMES;
+++      pex_get_status_and_time (obj, 1, &errmsg, &err);
+++    }
+++
+++  if (obj->next_input_name_allocated)
+++    free (obj->next_input_name);
+++  if (obj->children != NULL)
+++    free (obj->children);
+++  if (obj->status != NULL)
+++    free (obj->status);
+++  if (obj->time != NULL)
+++    free (obj->time);
+++  if (obj->read_output != NULL)
+++    fclose (obj->read_output);
+++
+++  if (obj->remove_count > 0)
+++    {
+++      int i;
+++
+++      for (i = 0; i < obj->remove_count; ++i)
+++	{
+++	  remove (obj->remove[i]);
+++	  free (obj->remove[i]);
+++	}
+++      free (obj->remove);
+++    }
+++
+++  if (obj->funcs->cleanup != NULL)
+++    obj->funcs->cleanup (obj);
+++
+++  free (obj);
+++}
++diff -urN eglibc-2_18.orig/sunrpc/pex-common.h eglibc-2_18/sunrpc/pex-common.h
++--- eglibc-2_18.orig/sunrpc/pex-common.h	1970-01-01 01:00:00.000000000 +0100
+++++ eglibc-2_18/sunrpc/pex-common.h	2013-12-14 02:58:28.747974800 +0000
++@@ -0,0 +1,143 @@
+++/* Utilities to execute a program in a subprocess (possibly linked by pipes
+++   with other subprocesses), and wait for it.  Shared logic.
+++   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004
+++   Free Software Foundation, Inc.
+++
+++This file is part of the libiberty library.
+++Libiberty is free software; you can redistribute it and/or
+++modify it under the terms of the GNU Library General Public
+++License as published by the Free Software Foundation; either
+++version 2 of the License, or (at your option) any later version.
+++
+++Libiberty is distributed in the hope that it will be useful,
+++but WITHOUT ANY WARRANTY; without even the implied warranty of
+++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+++Library General Public License for more details.
+++
+++You should have received a copy of the GNU Library General Public
+++License along with libiberty; see the file COPYING.LIB.  If not,
+++write to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
+++Boston, MA 02110-1301, USA.  */
+++
+++#ifndef PEX_COMMON_H
+++#define PEX_COMMON_H
+++
+++#include "config.h"
+++#include "libiberty.h"
+++#include <stdio.h>
+++
+++#define install_error_msg "installation problem, cannot exec `%s'"
+++
+++/* stdin file number.  */
+++#define STDIN_FILE_NO 0
+++
+++/* stdout file number.  */
+++#define STDOUT_FILE_NO 1
+++
+++/* stderr file number.  */
+++#define STDERR_FILE_NO 2
+++
+++/* value of `pipe': port index for reading.  */
+++#define READ_PORT 0
+++
+++/* value of `pipe': port index for writing.  */
+++#define WRITE_PORT 1
+++
+++/* The structure used by pex_init and friends.  */
+++
+++struct pex_obj
+++{
+++  /* Flags.  */
+++  int flags;
+++  /* Name of calling program, for error messages.  */
+++  const char *pname;
+++  /* Base name to use for temporary files.  */
+++  const char *tempbase;
+++  /* Pipe to use as stdin for next process.  */
+++  int next_input;
+++  /* File name to use as stdin for next process.  */
+++  char *next_input_name;
+++  /* Whether next_input_name was allocated using malloc.  */
+++  int next_input_name_allocated;
+++  /* Number of child processes.  */
+++  int count;
+++  /* PIDs of child processes; array allocated using malloc.  */
+++  long *children;
+++  /* Exit statuses of child processes; array allocated using malloc.  */
+++  int *status;
+++  /* Time used by child processes; array allocated using malloc.  */
+++  struct pex_time *time;
+++  /* Number of children we have already waited for.  */
+++  int number_waited;
+++  /* FILE created by pex_input_file.  */
+++  FILE *input_file;
+++  /* FILE created by pex_read_output.  */
+++  FILE *read_output;
+++  /* Number of temporary files to remove.  */
+++  int remove_count;
+++  /* List of temporary files to remove; array allocated using malloc
+++     of strings allocated using malloc.  */
+++  char **remove;
+++  /* Pointers to system dependent functions.  */
+++  const struct pex_funcs *funcs;
+++  /* For use by system dependent code.  */
+++  void *sysdep;
+++};
+++
+++/* Functions passed to pex_run_common.  */
+++
+++struct pex_funcs
+++{
+++  /* Open file NAME for reading.  If BINARY is non-zero, open in
+++     binary mode.  Return >= 0 on success, -1 on error.  */
+++  int (*open_read) (struct pex_obj *, const char */* name */, int /* binary */);
+++  /* Open file NAME for writing.  If BINARY is non-zero, open in
+++     binary mode.  Return >= 0 on success, -1 on error.  */
+++  int (*open_write) (struct pex_obj *, const char */* name */,
+++                     int /* binary */);
+++  /* Execute a child process.  FLAGS, EXECUTABLE, ARGV, ERR are from
+++     pex_run.  IN, OUT, ERRDES, TOCLOSE are all descriptors, from
+++     open_read, open_write, or pipe, or they are one of STDIN_FILE_NO,
+++     STDOUT_FILE_NO or STDERR_FILE_NO; if IN, OUT, and ERRDES are not
+++     STD*_FILE_NO, they should be closed.  If the descriptor TOCLOSE
+++     is not -1, and the system supports pipes, TOCLOSE should be
+++     closed in the child process.  The function should handle the
+++     PEX_STDERR_TO_STDOUT flag.  Return >= 0 on success, or -1 on
+++     error and set *ERRMSG and *ERR.  */
+++  long (*exec_child) (struct pex_obj *, int /* flags */,
+++                      const char */* executable */, char * const * /* argv */,
+++                      char * const * /* env */,
+++                      int /* in */, int /* out */, int /* errdes */,
+++		      int /* toclose */, const char **/* errmsg */,
+++		      int */* err */);
+++  /* Close a descriptor.  Return 0 on success, -1 on error.  */
+++  int (*close) (struct pex_obj *, int);
+++  /* Wait for a child to complete, returning exit status in *STATUS
+++     and time in *TIME (if it is not null).  CHILD is from fork.  DONE
+++     is 1 if this is called via pex_free.  ERRMSG and ERR are as in
+++     fork.  Return 0 on success, -1 on error.  */
+++  int (*wait) (struct pex_obj *, long /* child */, int * /* status */,
+++               struct pex_time * /* time */, int /* done */,
+++               const char ** /* errmsg */, int * /* err */);
+++  /* Create a pipe (only called if PEX_USE_PIPES is set) storing two
+++     descriptors in P[0] and P[1].  If BINARY is non-zero, open in
+++     binary mode.  Return 0 on success, -1 on error.  */
+++  int (*pipe) (struct pex_obj *, int * /* p */, int /* binary */);
+++  /* Get a FILE pointer to read from a file descriptor (only called if
+++     PEX_USE_PIPES is set).  If BINARY is non-zero, open in binary
+++     mode.  Return pointer on success, NULL on error.  */
+++  FILE * (*fdopenr) (struct pex_obj *, int /* fd */, int /* binary */);
+++  /* Get a FILE pointer to write to the file descriptor FD (only
+++     called if PEX_USE_PIPES is set).  If BINARY is non-zero, open in
+++     binary mode.  Arrange for FD not to be inherited by the child
+++     processes.  Return pointer on success, NULL on error.  */
+++  FILE * (*fdopenw) (struct pex_obj *, int /* fd */, int /* binary */);
+++  /* Free any system dependent data associated with OBJ.  May be
+++     NULL if there is nothing to do.  */
+++  void (*cleanup) (struct pex_obj *);
+++};
+++
+++extern struct pex_obj *pex_init_common (int, const char *, const char *,
+++					const struct pex_funcs *);
+++
+++#endif
++diff -urN eglibc-2_18.orig/sunrpc/pex-unix.c eglibc-2_18/sunrpc/pex-unix.c
++--- eglibc-2_18.orig/sunrpc/pex-unix.c	1970-01-01 01:00:00.000000000 +0100
+++++ eglibc-2_18/sunrpc/pex-unix.c	2013-12-14 02:58:28.758976200 +0000
++@@ -0,0 +1,538 @@
+++/* Utilities to execute a program in a subprocess (possibly linked by pipes
+++   with other subprocesses), and wait for it.  Generic Unix version
+++   (also used for UWIN and VMS).
+++   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005
+++   Free Software Foundation, Inc.
+++
+++This file is part of the libiberty library.
+++Libiberty is free software; you can redistribute it and/or
+++modify it under the terms of the GNU Library General Public
+++License as published by the Free Software Foundation; either
+++version 2 of the License, or (at your option) any later version.
+++
+++Libiberty is distributed in the hope that it will be useful,
+++but WITHOUT ANY WARRANTY; without even the implied warranty of
+++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+++Library General Public License for more details.
+++
+++You should have received a copy of the GNU Library General Public
+++License along with libiberty; see the file COPYING.LIB.  If not,
+++write to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
+++Boston, MA 02110-1301, USA.  */
+++
+++#include "config.h"
+++#include "libiberty.h"
+++#include "pex-common.h"
+++
+++#include <stdio.h>
+++#include <signal.h>
+++#include <errno.h>
+++#ifdef NEED_DECLARATION_ERRNO
+++extern int errno;
+++#endif
+++#ifdef HAVE_STDLIB_H
+++#include <stdlib.h>
+++#endif
+++#ifdef HAVE_STRING_H
+++#include <string.h>
+++#endif
+++#ifdef HAVE_UNISTD_H
+++#include <unistd.h>
+++#endif
+++
+++#include <sys/types.h>
+++
+++#ifdef HAVE_FCNTL_H
+++#include <fcntl.h>
+++#endif
+++#ifdef HAVE_SYS_WAIT_H
+++#include <sys/wait.h>
+++#endif
+++#ifdef HAVE_GETRUSAGE
+++#include <sys/time.h>
+++#include <sys/resource.h>
+++#endif
+++#ifdef HAVE_SYS_STAT_H
+++#include <sys/stat.h>
+++#endif
+++
+++
+++#ifdef vfork /* Autoconf may define this to fork for us. */
+++# define VFORK_STRING "fork"
+++#else
+++# define VFORK_STRING "vfork"
+++#endif
+++#ifdef HAVE_VFORK_H
+++#include <vfork.h>
+++#endif
+++#ifdef VMS
+++#define vfork() (decc$$alloc_vfork_blocks() >= 0 ? \
+++               lib$get_current_invo_context(decc$$get_vfork_jmpbuf()) : -1)
+++#endif /* VMS */
+++
+++
+++/* File mode to use for private and world-readable files.  */
+++
+++#if defined (S_IRUSR) && defined (S_IWUSR) && defined (S_IRGRP) && defined (S_IWGRP) && defined (S_IROTH) && defined (S_IWOTH)
+++#define PUBLIC_MODE  \
+++    (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
+++#else
+++#define PUBLIC_MODE 0666
+++#endif
+++
+++/* Get the exit status of a particular process, and optionally get the
+++   time that it took.  This is simple if we have wait4, slightly
+++   harder if we have waitpid, and is a pain if we only have wait.  */
+++
+++static pid_t pex_wait (struct pex_obj *, pid_t, int *, struct pex_time *);
+++
+++#ifdef HAVE_WAIT4
+++
+++static pid_t
+++pex_wait (struct pex_obj *obj ATTRIBUTE_UNUSED, pid_t pid, int *status,
+++	  struct pex_time *time)
+++{
+++  pid_t ret;
+++  struct rusage r;
+++
+++#ifdef HAVE_WAITPID
+++  if (time == NULL)
+++    return waitpid (pid, status, 0);
+++#endif
+++
+++  ret = wait4 (pid, status, 0, &r);
+++
+++  if (time != NULL)
+++    {
+++      time->user_seconds = r.ru_utime.tv_sec;
+++      time->user_microseconds= r.ru_utime.tv_usec;
+++      time->system_seconds = r.ru_stime.tv_sec;
+++      time->system_microseconds= r.ru_stime.tv_usec;
+++    }
+++
+++  return ret;
+++}
+++
+++#else /* ! defined (HAVE_WAIT4) */
+++
+++#ifdef HAVE_WAITPID
+++
+++#ifndef HAVE_GETRUSAGE
+++
+++static pid_t
+++pex_wait (struct pex_obj *obj ATTRIBUTE_UNUSED, pid_t pid, int *status,
+++	  struct pex_time *time)
+++{
+++  if (time != NULL)
+++    memset (time, 0, sizeof (struct pex_time));
+++  return waitpid (pid, status, 0);
+++}
+++
+++#else /* defined (HAVE_GETRUSAGE) */
+++
+++static pid_t
+++pex_wait (struct pex_obj *obj ATTRIBUTE_UNUSED, pid_t pid, int *status,
+++	  struct pex_time *time)
+++{
+++  struct rusage r1, r2;
+++  pid_t ret;
+++
+++  if (time == NULL)
+++    return waitpid (pid, status, 0);
+++
+++  getrusage (RUSAGE_CHILDREN, &r1);
+++
+++  ret = waitpid (pid, status, 0);
+++  if (ret < 0)
+++    return ret;
+++
+++  getrusage (RUSAGE_CHILDREN, &r2);
+++
+++  time->user_seconds = r2.ru_utime.tv_sec - r1.ru_utime.tv_sec;
+++  time->user_microseconds = r2.ru_utime.tv_usec - r1.ru_utime.tv_usec;
+++  if (r2.ru_utime.tv_usec < r1.ru_utime.tv_usec)
+++    {
+++      --time->user_seconds;
+++      time->user_microseconds += 1000000;
+++    }
+++
+++  time->system_seconds = r2.ru_stime.tv_sec - r1.ru_stime.tv_sec;
+++  time->system_microseconds = r2.ru_stime.tv_usec - r1.ru_stime.tv_usec;
+++  if (r2.ru_stime.tv_usec < r1.ru_stime.tv_usec)
+++    {
+++      --time->system_seconds;
+++      time->system_microseconds += 1000000;
+++    }
+++
+++  return ret;
+++}
+++
+++#endif /* defined (HAVE_GETRUSAGE) */
+++
+++#else /* ! defined (HAVE_WAITPID) */
+++
+++struct status_list
+++{
+++  struct status_list *next;
+++  pid_t pid;
+++  int status;
+++  struct pex_time time;
+++};
+++
+++static pid_t
+++pex_wait (struct pex_obj *obj, pid_t pid, int *status, struct pex_time *time)
+++{
+++  struct status_list **pp;
+++
+++  for (pp = (struct status_list **) &obj->sysdep;
+++       *pp != NULL;
+++       pp = &(*pp)->next)
+++    {
+++      if ((*pp)->pid == pid)
+++	{
+++	  struct status_list *p;
+++
+++	  p = *pp;
+++	  *status = p->status;
+++	  if (time != NULL)
+++	    *time = p->time;
+++	  *pp = p->next;
+++	  free (p);
+++	  return pid;
+++	}
+++    }
+++
+++  while (1)
+++    {
+++      pid_t cpid;
+++      struct status_list *psl;
+++      struct pex_time pt;
+++#ifdef HAVE_GETRUSAGE
+++      struct rusage r1, r2;
+++#endif
+++
+++      if (time != NULL)
+++	{
+++#ifdef HAVE_GETRUSAGE
+++	  getrusage (RUSAGE_CHILDREN, &r1);
+++#else
+++	  memset (&pt, 0, sizeof (struct pex_time));
+++#endif
+++	}
+++
+++      cpid = wait (status);
+++
+++#ifdef HAVE_GETRUSAGE
+++      if (time != NULL && cpid >= 0)
+++	{
+++	  getrusage (RUSAGE_CHILDREN, &r2);
+++
+++	  pt.user_seconds = r2.ru_utime.tv_sec - r1.ru_utime.tv_sec;
+++	  pt.user_microseconds = r2.ru_utime.tv_usec - r1.ru_utime.tv_usec;
+++	  if (pt.user_microseconds < 0)
+++	    {
+++	      --pt.user_seconds;
+++	      pt.user_microseconds += 1000000;
+++	    }
+++
+++	  pt.system_seconds = r2.ru_stime.tv_sec - r1.ru_stime.tv_sec;
+++	  pt.system_microseconds = r2.ru_stime.tv_usec - r1.ru_stime.tv_usec;
+++	  if (pt.system_microseconds < 0)
+++	    {
+++	      --pt.system_seconds;
+++	      pt.system_microseconds += 1000000;
+++	    }
+++	}
+++#endif
+++
+++      if (cpid < 0 || cpid == pid)
+++	{
+++	  if (time != NULL)
+++	    *time = pt;
+++	  return cpid;
+++	}
+++
+++      psl = XNEW (struct status_list);
+++      psl->pid = cpid;
+++      psl->status = *status;
+++      if (time != NULL)
+++	psl->time = pt;
+++      psl->next = (struct status_list *) obj->sysdep;
+++      obj->sysdep = (void *) psl;
+++    }
+++}
+++
+++#endif /* ! defined (HAVE_WAITPID) */
+++#endif /* ! defined (HAVE_WAIT4) */
+++
+++static void pex_child_error (struct pex_obj *, const char *, const char *, int)
+++     ATTRIBUTE_NORETURN;
+++static int pex_unix_open_read (struct pex_obj *, const char *, int);
+++static int pex_unix_open_write (struct pex_obj *, const char *, int);
+++static long pex_unix_exec_child (struct pex_obj *, int, const char *,
+++				 char * const *, char * const *,
+++				 int, int, int, int,
+++				 const char **, int *);
+++static int pex_unix_close (struct pex_obj *, int);
+++static int pex_unix_wait (struct pex_obj *, long, int *, struct pex_time *,
+++			  int, const char **, int *);
+++static int pex_unix_pipe (struct pex_obj *, int *, int);
+++static FILE *pex_unix_fdopenr (struct pex_obj *, int, int);
+++static FILE *pex_unix_fdopenw (struct pex_obj *, int, int);
+++static void pex_unix_cleanup (struct pex_obj *);
+++
+++/* The list of functions we pass to the common routines.  */
+++
+++const struct pex_funcs funcs =
+++{
+++  pex_unix_open_read,
+++  pex_unix_open_write,
+++  pex_unix_exec_child,
+++  pex_unix_close,
+++  pex_unix_wait,
+++  pex_unix_pipe,
+++  pex_unix_fdopenr,
+++  pex_unix_fdopenw,
+++  pex_unix_cleanup
+++};
+++
+++/* Return a newly initialized pex_obj structure.  */
+++
+++struct pex_obj *
+++pex_init (int flags, const char *pname, const char *tempbase)
+++{
+++  return pex_init_common (flags, pname, tempbase, &funcs);
+++}
+++
+++/* Open a file for reading.  */
+++
+++static int
+++pex_unix_open_read (struct pex_obj *obj ATTRIBUTE_UNUSED, const char *name,
+++		    int binary ATTRIBUTE_UNUSED)
+++{
+++  return open (name, O_RDONLY);
+++}
+++
+++/* Open a file for writing.  */
+++
+++static int
+++pex_unix_open_write (struct pex_obj *obj ATTRIBUTE_UNUSED, const char *name,
+++		     int binary ATTRIBUTE_UNUSED)
+++{
+++  /* Note that we can't use O_EXCL here because gcc may have already
+++     created the temporary file via make_temp_file.  */
+++  return open (name, O_WRONLY | O_CREAT | O_TRUNC, PUBLIC_MODE);
+++}
+++
+++/* Close a file.  */
+++
+++static int
+++pex_unix_close (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd)
+++{
+++  return close (fd);
+++}
+++
+++/* Report an error from a child process.  We don't use stdio routines,
+++   because we might be here due to a vfork call.  */
+++
+++static void
+++pex_child_error (struct pex_obj *obj, const char *executable,
+++		 const char *errmsg, int err)
+++{
+++#define writeerr(s) write (STDERR_FILE_NO, s, strlen (s))
+++  writeerr (obj->pname);
+++  writeerr (": error trying to exec '");
+++  writeerr (executable);
+++  writeerr ("': ");
+++  writeerr (errmsg);
+++  writeerr (": ");
+++  writeerr (xstrerror (err));
+++  writeerr ("\n");
+++  _exit (-1);
+++}
+++
+++/* Execute a child.  */
+++
+++extern char **environ;
+++
+++static long
+++pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,
+++		     char * const * argv, char * const * env,
+++                     int in, int out, int errdes,
+++		     int toclose, const char **errmsg, int *err)
+++{
+++  pid_t pid;
+++
+++  /* We declare these to be volatile to avoid warnings from gcc about
+++     them being clobbered by vfork.  */
+++  volatile int sleep_interval;
+++  volatile int retries;
+++
+++  sleep_interval = 1;
+++  pid = -1;
+++  for (retries = 0; retries < 4; ++retries)
+++    {
+++      pid = vfork ();
+++      if (pid >= 0)
+++	break;
+++      sleep (sleep_interval);
+++      sleep_interval *= 2;
+++    }
+++
+++  switch (pid)
+++    {
+++    case -1:
+++      *err = errno;
+++      *errmsg = VFORK_STRING;
+++      return -1;
+++
+++    case 0:
+++      /* Child process.  */
+++      if (in != STDIN_FILE_NO)
+++	{
+++	  if (dup2 (in, STDIN_FILE_NO) < 0)
+++	    pex_child_error (obj, executable, "dup2", errno);
+++	  if (close (in) < 0)
+++	    pex_child_error (obj, executable, "close", errno);
+++	}
+++      if (out != STDOUT_FILE_NO)
+++	{
+++	  if (dup2 (out, STDOUT_FILE_NO) < 0)
+++	    pex_child_error (obj, executable, "dup2", errno);
+++	  if (close (out) < 0)
+++	    pex_child_error (obj, executable, "close", errno);
+++	}
+++      if (errdes != STDERR_FILE_NO)
+++	{
+++	  if (dup2 (errdes, STDERR_FILE_NO) < 0)
+++	    pex_child_error (obj, executable, "dup2", errno);
+++	  if (close (errdes) < 0)
+++	    pex_child_error (obj, executable, "close", errno);
+++	}
+++      if (toclose >= 0)
+++	{
+++	  if (close (toclose) < 0)
+++	    pex_child_error (obj, executable, "close", errno);
+++	}
+++      if ((flags & PEX_STDERR_TO_STDOUT) != 0)
+++	{
+++	  if (dup2 (STDOUT_FILE_NO, STDERR_FILE_NO) < 0)
+++	    pex_child_error (obj, executable, "dup2", errno);
+++	}
+++
+++      if (env)
+++        environ = (char**) env;
+++
+++      if ((flags & PEX_SEARCH) != 0)
+++	{
+++	  execvp (executable, argv);
+++	  pex_child_error (obj, executable, "execvp", errno);
+++	}
+++      else
+++	{
+++	  execv (executable, argv);
+++	  pex_child_error (obj, executable, "execv", errno);
+++	}
+++
+++      /* NOTREACHED */
+++      return -1;
+++
+++    default:
+++      /* Parent process.  */
+++      if (in != STDIN_FILE_NO)
+++	{
+++	  if (close (in) < 0)
+++	    {
+++	      *err = errno;
+++	      *errmsg = "close";
+++	      return -1;
+++	    }
+++	}
+++      if (out != STDOUT_FILE_NO)
+++	{
+++	  if (close (out) < 0)
+++	    {
+++	      *err = errno;
+++	      *errmsg = "close";
+++	      return -1;
+++	    }
+++	}
+++      if (errdes != STDERR_FILE_NO)
+++	{
+++	  if (close (errdes) < 0)
+++	    {
+++	      *err = errno;
+++	      *errmsg = "close";
+++	      return -1;
+++	    }
+++	}
+++
+++      return (long) pid;
+++    }
+++}
+++
+++/* Wait for a child process to complete.  */
+++
+++static int
+++pex_unix_wait (struct pex_obj *obj, long pid, int *status,
+++	       struct pex_time *time, int done, const char **errmsg,
+++	       int *err)
+++{
+++  /* If we are cleaning up when the caller didn't retrieve process
+++     status for some reason, encourage the process to go away.  */
+++  if (done)
+++    kill (pid, SIGTERM);
+++
+++  if (pex_wait (obj, pid, status, time) < 0)
+++    {
+++      *err = errno;
+++      *errmsg = "wait";
+++      return -1;
+++    }
+++
+++  return 0;
+++}
+++
+++/* Create a pipe.  */
+++
+++static int
+++pex_unix_pipe (struct pex_obj *obj ATTRIBUTE_UNUSED, int *p,
+++	       int binary ATTRIBUTE_UNUSED)
+++{
+++  return pipe (p);
+++}
+++
+++/* Get a FILE pointer to read from a file descriptor.  */
+++
+++static FILE *
+++pex_unix_fdopenr (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd,
+++		  int binary ATTRIBUTE_UNUSED)
+++{
+++  return fdopen (fd, "r");
+++}
+++
+++static FILE *
+++pex_unix_fdopenw (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd,
+++		  int binary ATTRIBUTE_UNUSED)
+++{
+++  if (fcntl (fd, F_SETFD, FD_CLOEXEC) < 0)
+++    return NULL;
+++  return fdopen (fd, "w");
+++}
+++
+++static void
+++pex_unix_cleanup (struct pex_obj *obj ATTRIBUTE_UNUSED)
+++{
+++#if !defined (HAVE_WAIT4) && !defined (HAVE_WAITPID)
+++  while (obj->sysdep != NULL)
+++    {
+++      struct status_list *this;
+++      struct status_list *next;
+++
+++      this = (struct status_list *) obj->sysdep;
+++      next = this->next;
+++      free (this);
+++      obj->sysdep = (void *) next;
+++    }
+++#endif
+++}
++diff -urN eglibc-2_18.orig/sunrpc/pex-win32.c eglibc-2_18/sunrpc/pex-win32.c
++--- eglibc-2_18.orig/sunrpc/pex-win32.c	1970-01-01 01:00:00.000000000 +0100
+++++ eglibc-2_18/sunrpc/pex-win32.c	2013-12-14 02:58:28.773478000 +0000
++@@ -0,0 +1,888 @@
+++/* Utilities to execute a program in a subprocess (possibly linked by pipes
+++   with other subprocesses), and wait for it.  Generic Win32 specialization.
+++   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005
+++   Free Software Foundation, Inc.
+++
+++This file is part of the libiberty library.
+++Libiberty is free software; you can redistribute it and/or
+++modify it under the terms of the GNU Library General Public
+++License as published by the Free Software Foundation; either
+++version 2 of the License, or (at your option) any later version.
+++
+++Libiberty is distributed in the hope that it will be useful,
+++but WITHOUT ANY WARRANTY; without even the implied warranty of
+++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+++Library General Public License for more details.
+++
+++You should have received a copy of the GNU Library General Public
+++License along with libiberty; see the file COPYING.LIB.  If not,
+++write to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
+++Boston, MA 02110-1301, USA.  */
+++
+++#include "pex-common.h"
+++
+++#include <windows.h>
+++
+++#ifdef HAVE_STDLIB_H
+++#include <stdlib.h>
+++#endif
+++#ifdef HAVE_STRING_H
+++#include <string.h>
+++#endif
+++#ifdef HAVE_UNISTD_H
+++#include <unistd.h>
+++#endif
+++#ifdef HAVE_SYS_WAIT_H
+++#include <sys/wait.h>
+++#endif
+++
+++#include <assert.h>
+++#include <process.h>
+++#include <io.h>
+++#include <fcntl.h>
+++#include <signal.h>
+++#include <sys/stat.h>
+++#include <errno.h>
+++#include <ctype.h>
+++
+++/* mingw32 headers may not define the following.  */
+++
+++#ifndef _P_WAIT
+++#  define _P_WAIT	0
+++#  define _P_NOWAIT	1
+++#  define _P_OVERLAY	2
+++#  define _P_NOWAITO	3
+++#  define _P_DETACH	4
+++
+++#  define WAIT_CHILD		0
+++#  define WAIT_GRANDCHILD	1
+++#endif
+++
+++#define MINGW_NAME "Minimalist GNU for Windows"
+++#define MINGW_NAME_LEN (sizeof(MINGW_NAME) - 1)
+++
+++extern char *stpcpy (char *dst, const char *src);
+++
+++/* Ensure that the executable pathname uses Win32 backslashes. This
+++   is not necessary on NT, but on W9x, forward slashes causes
+++   failure of spawn* and exec* functions (and probably any function
+++   that calls CreateProcess) *iff* the executable pathname (argv[0])
+++   is a quoted string.  And quoting is necessary in case a pathname
+++   contains embedded white space.  You can't win.  */
+++static void
+++backslashify (char *s)
+++{
+++  while ((s = strchr (s, '/')) != NULL)
+++    *s = '\\';
+++  return;
+++}
+++
+++static int pex_win32_open_read (struct pex_obj *, const char *, int);
+++static int pex_win32_open_write (struct pex_obj *, const char *, int);
+++static long pex_win32_exec_child (struct pex_obj *, int, const char *,
+++				  char * const *, char * const *,
+++                                  int, int, int, int,
+++				  const char **, int *);
+++static int pex_win32_close (struct pex_obj *, int);
+++static int pex_win32_wait (struct pex_obj *, long, int *,
+++			   struct pex_time *, int, const char **, int *);
+++static int pex_win32_pipe (struct pex_obj *, int *, int);
+++static FILE *pex_win32_fdopenr (struct pex_obj *, int, int);
+++static FILE *pex_win32_fdopenw (struct pex_obj *, int, int);
+++
+++/* The list of functions we pass to the common routines.  */
+++
+++const struct pex_funcs funcs =
+++{
+++  pex_win32_open_read,
+++  pex_win32_open_write,
+++  pex_win32_exec_child,
+++  pex_win32_close,
+++  pex_win32_wait,
+++  pex_win32_pipe,
+++  pex_win32_fdopenr,
+++  pex_win32_fdopenw,
+++  NULL /* cleanup */
+++};
+++
+++/* Return a newly initialized pex_obj structure.  */
+++
+++struct pex_obj *
+++pex_init (int flags, const char *pname, const char *tempbase)
+++{
+++  return pex_init_common (flags, pname, tempbase, &funcs);
+++}
+++
+++/* Open a file for reading.  */
+++
+++static int
+++pex_win32_open_read (struct pex_obj *obj ATTRIBUTE_UNUSED, const char *name,
+++		     int binary)
+++{
+++  return _open (name, _O_RDONLY | (binary ? _O_BINARY : _O_TEXT));
+++}
+++
+++/* Open a file for writing.  */
+++
+++static int
+++pex_win32_open_write (struct pex_obj *obj ATTRIBUTE_UNUSED, const char *name,
+++		      int binary)
+++{
+++  /* Note that we can't use O_EXCL here because gcc may have already
+++     created the temporary file via make_temp_file.  */
+++  return _open (name,
+++		(_O_WRONLY | _O_CREAT | _O_TRUNC
+++		 | (binary ? _O_BINARY : _O_TEXT)),
+++		_S_IREAD | _S_IWRITE);
+++}
+++
+++/* Close a file.  */
+++
+++static int
+++pex_win32_close (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd)
+++{
+++  return _close (fd);
+++}
+++
+++#ifdef USE_MINGW_MSYS
+++static const char *mingw_keys[] = {"SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Uninstall", NULL};
+++
+++/* Tack the executable on the end of a (possibly slash terminated) buffer
+++   and convert everything to \. */
+++static const char *
+++tack_on_executable (char *buf, const char *executable)
+++{
+++  char *p = strchr (buf, '\0');
+++  if (p > buf && (p[-1] == '\\' || p[-1] == '/'))
+++    p[-1] = '\0';
+++  backslashify (strcat (buf, executable));
+++  return buf;
+++}
+++
+++/* Walk down a registry hierarchy until the end.  Return the key. */
+++static HKEY
+++openkey (HKEY hStart, const char *keys[])
+++{
+++  HKEY hKey, hTmp;
+++  for (hKey = hStart; *keys; keys++)
+++    {
+++      LONG res;
+++      hTmp = hKey;
+++      res = RegOpenKey (hTmp, *keys, &hKey);
+++
+++      if (hTmp != HKEY_LOCAL_MACHINE)
+++	RegCloseKey (hTmp);
+++
+++      if (res != ERROR_SUCCESS)
+++	return NULL;
+++    }
+++  return hKey;
+++}
+++
+++/* Return the "mingw root" as derived from the mingw uninstall information. */
+++static const char *
+++mingw_rootify (const char *executable)
+++{
+++  HKEY hKey, hTmp;
+++  DWORD maxlen;
+++  char *namebuf, *foundbuf;
+++  DWORD i;
+++  LONG res;
+++
+++  /* Open the uninstall "directory". */
+++  hKey = openkey (HKEY_LOCAL_MACHINE, mingw_keys);
+++
+++  /* Not found. */
+++  if (!hKey)
+++    return executable;
+++
+++  /* Need to enumerate all of the keys here looking for one the most recent
+++     one for MinGW. */
+++  if (RegQueryInfoKey (hKey, NULL, NULL, NULL, NULL, &maxlen, NULL, NULL,
+++		       NULL, NULL, NULL, NULL) != ERROR_SUCCESS)
+++    {
+++      RegCloseKey (hKey);
+++      return executable;
+++    }
+++  namebuf = XNEWVEC (char, ++maxlen);
+++  foundbuf = XNEWVEC (char, maxlen);
+++  foundbuf[0] = '\0';
+++  if (!namebuf || !foundbuf)
+++    {
+++      RegCloseKey (hKey);
+++      if (namebuf)
+++	free (namebuf);
+++      if (foundbuf)
+++	free (foundbuf);
+++      return executable;
+++    }
+++
+++  /* Look through all of the keys for one that begins with Minimal GNU...
+++     Try to get the latest version by doing a string compare although that
+++     string never really works with version number sorting. */
+++  for (i = 0; RegEnumKey (hKey, i, namebuf, maxlen) == ERROR_SUCCESS; i++)
+++    {
+++      int match = strcasecmp (namebuf, MINGW_NAME);
+++      if (match < 0)
+++	continue;
+++      if (match > 0 && strncasecmp (namebuf, MINGW_NAME, MINGW_NAME_LEN) > 0)
+++	continue;
+++      if (strcasecmp (namebuf, foundbuf) > 0)
+++	strcpy (foundbuf, namebuf);
+++    }
+++  free (namebuf);
+++
+++  /* If foundbuf is empty, we didn't find anything.  Punt. */
+++  if (!foundbuf[0])
+++    {
+++      free (foundbuf);
+++      RegCloseKey (hKey);
+++      return executable;
+++    }
+++
+++  /* Open the key that we wanted */
+++  res = RegOpenKey (hKey, foundbuf, &hTmp);
+++  RegCloseKey (hKey);
+++  free (foundbuf);
+++
+++  /* Don't know why this would fail, but you gotta check */
+++  if (res != ERROR_SUCCESS)
+++    return executable;
+++
+++  maxlen = 0;
+++  /* Get the length of the value pointed to by InstallLocation */
+++  if (RegQueryValueEx (hTmp, "InstallLocation", 0, NULL, NULL,
+++		       &maxlen) != ERROR_SUCCESS || maxlen == 0)
+++    {
+++      RegCloseKey (hTmp);
+++      return executable;
+++    }
+++
+++  /* Allocate space for the install location */
+++  foundbuf = XNEWVEC (char, maxlen + strlen (executable));
+++  if (!foundbuf)
+++    {
+++      free (foundbuf);
+++      RegCloseKey (hTmp);
+++    }
+++
+++  /* Read the install location into the buffer */
+++  res = RegQueryValueEx (hTmp, "InstallLocation", 0, NULL, (LPBYTE) foundbuf,
+++			 &maxlen);
+++  RegCloseKey (hTmp);
+++  if (res != ERROR_SUCCESS)
+++    {
+++      free (foundbuf);
+++      return executable;
+++    }
+++
+++  /* Concatenate the install location and the executable, turn all slashes
+++     to backslashes, and return that. */
+++  return tack_on_executable (foundbuf, executable);
+++}
+++
+++/* Read the install location of msys from it's installation file and
+++   rootify the executable based on that. */
+++static const char *
+++msys_rootify (const char *executable)
+++{
+++  size_t bufsize = 64;
+++  size_t execlen = strlen (executable) + 1;
+++  char *buf;
+++  DWORD res = 0;
+++  for (;;)
+++    {
+++      buf = XNEWVEC (char, bufsize + execlen);
+++      if (!buf)
+++	break;
+++      res = GetPrivateProfileString ("InstallSettings", "InstallPath", NULL,
+++				     buf, bufsize, "msys.ini");
+++      if (!res)
+++	break;
+++      if (strlen (buf) < bufsize)
+++	break;
+++      res = 0;
+++      free (buf);
+++      bufsize *= 2;
+++      if (bufsize > 65536)
+++	{
+++	  buf = NULL;
+++	  break;
+++	}
+++    }
+++
+++  if (res)
+++    return tack_on_executable (buf, executable);
+++
+++  /* failed */
+++  if (buf)
+++    free (buf);
+++  return executable;
+++}
+++#endif
+++
+++/* Return a Windows command-line from ARGV.  It is the caller's
+++   responsibility to free the string returned.  */
+++
+++static char *
+++argv_to_cmdline (char *const *argv)
+++{
+++  char *cmdline;
+++  char *p;
+++  size_t cmdline_len;
+++  int i, j, k;
+++
+++  cmdline_len = 0;
+++  for (i = 0; argv[i]; i++)
+++    {
+++      /* We quote every last argument.  This simplifies the problem;
+++	 we need only escape embedded double-quotes and immediately
+++	 preceeding backslash characters.  A sequence of backslach characters
+++	 that is not follwed by a double quote character will not be
+++	 escaped.  */
+++      for (j = 0; argv[i][j]; j++)
+++	{
+++	  if (argv[i][j] == '"')
+++	    {
+++	      /* Escape preceeding backslashes.  */
+++	      for (k = j - 1; k >= 0 && argv[i][k] == '\\'; k--)
+++		cmdline_len++;
+++	      /* Escape the qote character.  */
+++	      cmdline_len++;
+++	    }
+++	}
+++      /* Trailing backslashes also need to be escaped because they will be
+++         followed by the terminating quote.  */
+++      for (k = j - 1; k >= 0 && argv[i][k] == '\\'; k--)
+++	cmdline_len++;
+++      cmdline_len += j;
+++      cmdline_len += 3;  /* for leading and trailing quotes and space */
+++    }
+++  cmdline = xmalloc (cmdline_len);
+++  p = cmdline;
+++  for (i = 0; argv[i]; i++)
+++    {
+++      *p++ = '"';
+++      for (j = 0; argv[i][j]; j++)
+++	{
+++	  if (argv[i][j] == '"')
+++	    {
+++	      for (k = j - 1; k >= 0 && argv[i][k] == '\\'; k--)
+++		*p++ = '\\';
+++	      *p++ = '\\';
+++	    }
+++	  *p++ = argv[i][j];
+++	}
+++      for (k = j - 1; k >= 0 && argv[i][k] == '\\'; k--)
+++	*p++ = '\\';
+++      *p++ = '"';
+++      *p++ = ' ';
+++    }
+++  p[-1] = '\0';
+++  return cmdline;
+++}
+++
+++static const char *const
+++std_suffixes[] = {
+++  ".com",
+++  ".exe",
+++  ".bat",
+++  ".cmd",
+++  0
+++};
+++static const char *const
+++no_suffixes[] = {
+++  "",
+++  0
+++};
+++
+++/* Returns the full path to PROGRAM.  If SEARCH is true, look for
+++   PROGRAM in each directory in PATH.  */
+++
+++static char *
+++find_executable (const char *program, BOOL search)
+++{
+++  char *full_executable;
+++  char *e;
+++  size_t fe_len;
+++  const char *path = 0;
+++  const char *const *ext;
+++  const char *p, *q;
+++  size_t proglen = strlen (program);
+++  int has_extension = !!strchr (program, '.');
+++  int has_slash = (strchr (program, '/') || strchr (program, '\\'));
+++  HANDLE h;
+++
+++  if (has_slash)
+++    search = FALSE;
+++
+++  if (search)
+++    path = getenv ("PATH");
+++  if (!path)
+++    path = "";
+++
+++  fe_len = 0;
+++  for (p = path; *p; p = q)
+++    {
+++      q = p;
+++      while (*q != ';' && *q != '\0')
+++	q++;
+++      if ((size_t)(q - p) > fe_len)
+++	fe_len = q - p;
+++      if (*q == ';')
+++	q++;
+++    }
+++  fe_len = fe_len + 1 + proglen + (has_extension ? 1 : 5);
+++  full_executable = xmalloc (fe_len);
+++
+++  p = path;
+++  do
+++    {
+++      q = p;
+++      while (*q != ';' && *q != '\0')
+++	q++;
+++
+++      e = full_executable;
+++      memcpy (e, p, q - p);
+++      e += (q - p);
+++      if (q - p)
+++	*e++ = '\\';
+++      strcpy (e, program);
+++
+++      if (*q == ';')
+++	q++;
+++
+++      for (e = full_executable; *e; e++)
+++	if (*e == '/')
+++	  *e = '\\';
+++
+++      /* At this point, e points to the terminating NUL character for
+++         full_executable.  */
+++      for (ext = has_extension ? no_suffixes : std_suffixes; *ext; ext++)
+++	{
+++	  /* Remove any current extension.  */
+++	  *e = '\0';
+++	  /* Add the new one.  */
+++	  strcat (full_executable, *ext);
+++
+++	  /* Attempt to open this file.  */
+++	  h = CreateFile (full_executable, GENERIC_READ,
+++			  FILE_SHARE_READ | FILE_SHARE_WRITE,
+++			  0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+++	  if (h != INVALID_HANDLE_VALUE)
+++	    goto found;
+++	}
+++      p = q;
+++    }
+++  while (*p);
+++  free (full_executable);
+++  return 0;
+++
+++ found:
+++  CloseHandle (h);
+++  return full_executable;
+++}
+++
+++/* Low-level process creation function and helper.  */
+++
+++static int
+++env_compare (const void *a_ptr, const void *b_ptr)
+++{
+++  const char *a;
+++  const char *b;
+++  unsigned char c1;
+++  unsigned char c2;
+++
+++  a = *(const char **) a_ptr;
+++  b = *(const char **) b_ptr;
+++
+++  /* a and b will be of the form: VAR=VALUE
+++     We compare only the variable name part here using a case-insensitive
+++     comparison algorithm.  It might appear that in fact strcasecmp () can
+++     take the place of this whole function, and indeed it could, save for
+++     the fact that it would fail in cases such as comparing A1=foo and
+++     A=bar (because 1 is less than = in the ASCII character set).
+++     (Environment variables containing no numbers would work in such a
+++     scenario.)  */
+++
+++  do
+++    {
+++      c1 = (unsigned char) tolower (*a++);
+++      c2 = (unsigned char) tolower (*b++);
+++
+++      if (c1 == '=')
+++        c1 = '\0';
+++
+++      if (c2 == '=')
+++        c2 = '\0';
+++    }
+++  while (c1 == c2 && c1 != '\0');
+++
+++  return c1 - c2;
+++}
+++
+++static long
+++win32_spawn (const char *executable,
+++	     BOOL search,
+++	     char *const *argv,
+++             char *const *env, /* array of strings of the form: VAR=VALUE */
+++	     DWORD dwCreationFlags,
+++	     LPSTARTUPINFO si,
+++	     LPPROCESS_INFORMATION pi)
+++{
+++  char *full_executable;
+++  char *cmdline;
+++  char **env_copy;
+++  char *env_block = NULL;
+++
+++  full_executable = NULL;
+++  cmdline = NULL;
+++
+++  if (env)
+++    {
+++      int env_size;
+++
+++      /* Count the number of environment bindings supplied.  */
+++      for (env_size = 0; env[env_size]; env_size++)
+++        continue;
+++    
+++      /* Assemble an environment block, if required.  This consists of
+++         VAR=VALUE strings juxtaposed (with one null character between each
+++         pair) and an additional null at the end.  */
+++      if (env_size > 0)
+++        {
+++          int var;
+++          int total_size = 1; /* 1 is for the final null.  */
+++          char *bufptr;
+++    
+++          /* Windows needs the members of the block to be sorted by variable
+++             name.  */
+++          env_copy = alloca (sizeof (char *) * env_size);
+++          memcpy (env_copy, env, sizeof (char *) * env_size);
+++          qsort (env_copy, env_size, sizeof (char *), env_compare);
+++    
+++          for (var = 0; var < env_size; var++)
+++            total_size += strlen (env[var]) + 1;
+++    
+++          env_block = malloc (total_size);
+++          bufptr = env_block;
+++          for (var = 0; var < env_size; var++)
+++            bufptr = stpcpy (bufptr, env_copy[var]) + 1;
+++    
+++          *bufptr = '\0';
+++        }
+++    }
+++
+++  full_executable = find_executable (executable, search);
+++  if (!full_executable)
+++    goto error;
+++  cmdline = argv_to_cmdline (argv);
+++  if (!cmdline)
+++    goto error;
+++    
+++  /* Create the child process.  */  
+++  if (!CreateProcess (full_executable, cmdline, 
+++		      /*lpProcessAttributes=*/NULL,
+++		      /*lpThreadAttributes=*/NULL,
+++		      /*bInheritHandles=*/TRUE,
+++		      dwCreationFlags,
+++		      (LPVOID) env_block,
+++		      /*lpCurrentDirectory=*/NULL,
+++		      si,
+++		      pi))
+++    {
+++      if (env_block)
+++        free (env_block);
+++
+++      free (full_executable);
+++
+++      return -1;
+++    }
+++
+++  /* Clean up.  */
+++  CloseHandle (pi->hThread);
+++  free (full_executable);
+++  if (env_block)
+++    free (env_block);
+++
+++  return (long) pi->hProcess;
+++
+++ error:
+++  if (env_block)
+++    free (env_block);
+++  if (cmdline)
+++    free (cmdline);
+++  if (full_executable)
+++    free (full_executable);
+++
+++  return -1;
+++}
+++
+++static long
+++spawn_script (const char *executable, char *const *argv,
+++              char* const *env,
+++	      DWORD dwCreationFlags,
+++	      LPSTARTUPINFO si,
+++	      LPPROCESS_INFORMATION pi)
+++{
+++  int pid = -1;
+++  int save_errno = errno;
+++  int fd = _open (executable, _O_RDONLY);
+++
+++  if (fd >= 0)
+++    {
+++      char buf[MAX_PATH + 5];
+++      int len = _read (fd, buf, sizeof (buf) - 1);
+++      _close (fd);
+++      if (len > 3)
+++	{
+++	  char *eol;
+++	  buf[len] = '\0';
+++	  eol = strchr (buf, '\n');
+++	  if (eol && strncmp (buf, "#!", 2) == 0)
+++	    {
+++	      char *executable1;
+++	      const char ** avhere = (const char **) --argv;
+++	      do
+++		*eol = '\0';
+++	      while (*--eol == '\r' || *eol == ' ' || *eol == '\t');
+++	      for (executable1 = buf + 2; *executable1 == ' ' || *executable1 == '\t'; executable1++)
+++		continue;
+++
+++	      backslashify (executable1);
+++	      *avhere = executable1;
+++#ifndef USE_MINGW_MSYS
+++	      executable = strrchr (executable1, '\\') + 1;
+++	      if (!executable)
+++		executable = executable1;
+++	      pid = win32_spawn (executable, TRUE, argv, env,
+++				 dwCreationFlags, si, pi);
+++#else
+++	      if (strchr (executable1, '\\') == NULL)
+++		pid = win32_spawn (executable1, TRUE, argv, env,
+++				   dwCreationFlags, si, pi);
+++	      else if (executable1[0] != '\\')
+++		pid = win32_spawn (executable1, FALSE, argv, env,
+++				   dwCreationFlags, si, pi);
+++	      else
+++		{
+++		  const char *newex = mingw_rootify (executable1);
+++		  *avhere = newex;
+++		  pid = win32_spawn (newex, FALSE, argv, env,
+++				     dwCreationFlags, si, pi);
+++		  if (executable1 != newex)
+++		    free ((char *) newex);
+++		  if (pid < 0)
+++		    {
+++		      newex = msys_rootify (executable1);
+++		      if (newex != executable1)
+++			{
+++			  *avhere = newex;
+++			  pid = win32_spawn (newex, FALSE, argv, env,
+++					     dwCreationFlags, si, pi);
+++			  free ((char *) newex);
+++			}
+++		    }
+++		}
+++#endif
+++	    }
+++	}
+++    }
+++  if (pid < 0)
+++    errno = save_errno;
+++  return pid;
+++}
+++
+++/* Execute a child.  */
+++
+++static long
+++pex_win32_exec_child (struct pex_obj *obj ATTRIBUTE_UNUSED, int flags,
+++		      const char *executable, char * const * argv,
+++                      char* const* env,
+++		      int in, int out, int errdes,
+++		      int toclose ATTRIBUTE_UNUSED,
+++		      const char **errmsg,
+++		      int *err)
+++{
+++  long pid;
+++  HANDLE stdin_handle;
+++  HANDLE stdout_handle;
+++  HANDLE stderr_handle;
+++  DWORD dwCreationFlags;
+++  OSVERSIONINFO version_info;
+++  STARTUPINFO si;
+++  PROCESS_INFORMATION pi;
+++
+++  stdin_handle = INVALID_HANDLE_VALUE;
+++  stdout_handle = INVALID_HANDLE_VALUE;
+++  stderr_handle = INVALID_HANDLE_VALUE;
+++
+++  stdin_handle = (HANDLE) _get_osfhandle (in);
+++  stdout_handle = (HANDLE) _get_osfhandle (out);
+++  if (!(flags & PEX_STDERR_TO_STDOUT))
+++    stderr_handle = (HANDLE) _get_osfhandle (errdes);
+++  else
+++    stderr_handle = stdout_handle;
+++
+++  /* Determine the version of Windows we are running on.  */
+++  version_info.dwOSVersionInfoSize = sizeof (version_info); 
+++  GetVersionEx (&version_info);
+++  if (version_info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+++    /* On Windows 95/98/ME the CREATE_NO_WINDOW flag is not
+++       supported, so we cannot avoid creating a console window.  */
+++    dwCreationFlags = 0;
+++  else
+++    {
+++      HANDLE conout_handle;
+++
+++      /* Determine whether or not we have an associated console.  */
+++      conout_handle = CreateFile("CONOUT$", 
+++				 GENERIC_WRITE,
+++				 FILE_SHARE_WRITE,
+++				 /*lpSecurityAttributes=*/NULL,
+++				 OPEN_EXISTING,
+++				 FILE_ATTRIBUTE_NORMAL,
+++				 /*hTemplateFile=*/NULL);
+++      if (conout_handle == INVALID_HANDLE_VALUE)
+++	/* There is no console associated with this process.  Since
+++	   the child is a console process, the OS would normally
+++	   create a new console Window for the child.  Since we'll be
+++	   redirecting the child's standard streams, we do not need
+++	   the console window.  */ 
+++	dwCreationFlags = CREATE_NO_WINDOW;
+++      else 
+++	{
+++	  /* There is a console associated with the process, so the OS
+++	     will not create a new console.  And, if we use
+++	     CREATE_NO_WINDOW in this situation, the child will have
+++	     no associated console.  Therefore, if the child's
+++	     standard streams are connected to the console, the output
+++	     will be discarded.  */
+++	  CloseHandle(conout_handle);
+++	  dwCreationFlags = 0;
+++	}
+++    }
+++
+++  /* Since the child will be a console process, it will, by default,
+++     connect standard input/output to its console.  However, we want
+++     the child to use the handles specifically designated above.  In
+++     addition, if there is no console (such as when we are running in
+++     a Cygwin X window), then we must redirect the child's
+++     input/output, as there is no console for the child to use.  */
+++  memset (&si, 0, sizeof (si));
+++  si.cb = sizeof (si);
+++  si.dwFlags = STARTF_USESTDHANDLES;
+++  si.hStdInput = stdin_handle;
+++  si.hStdOutput = stdout_handle;
+++  si.hStdError = stderr_handle;
+++
+++  /* Create the child process.  */  
+++  pid = win32_spawn (executable, (flags & PEX_SEARCH) != 0,
+++		     argv, env, dwCreationFlags, &si, &pi);
+++  if (pid == -1)
+++    pid = spawn_script (executable, argv, env, dwCreationFlags,
+++                        &si, &pi);
+++  if (pid == -1)
+++    {
+++      *err = ENOENT;
+++      *errmsg = "CreateProcess";
+++    }
+++
+++  /* Close the standard output and standard error handles in the
+++     parent.  */ 
+++  if (out != STDOUT_FILENO)
+++    obj->funcs->close (obj, out);
+++  if (errdes != STDERR_FILENO)
+++    obj->funcs->close (obj, errdes);
+++
+++  return pid;
+++}
+++
+++/* Wait for a child process to complete.  MS CRTDLL doesn't return
+++   enough information in status to decide if the child exited due to a
+++   signal or not, rather it simply returns an integer with the exit
+++   code of the child; eg., if the child exited with an abort() call
+++   and didn't have a handler for SIGABRT, it simply returns with
+++   status == 3.  We fix the status code to conform to the usual WIF*
+++   macros.  Note that WIFSIGNALED will never be true under CRTDLL. */
+++
+++static int
+++pex_win32_wait (struct pex_obj *obj ATTRIBUTE_UNUSED, long pid,
+++		int *status, struct pex_time *time, int done ATTRIBUTE_UNUSED,
+++		const char **errmsg, int *err)
+++{
+++  DWORD termstat;
+++  HANDLE h;
+++
+++  if (time != NULL)
+++    memset (time, 0, sizeof *time);
+++
+++  h = (HANDLE) pid;
+++
+++  /* FIXME: If done is non-zero, we should probably try to kill the
+++     process.  */
+++  if (WaitForSingleObject (h, INFINITE) != WAIT_OBJECT_0)
+++    {
+++      CloseHandle (h);
+++      *err = ECHILD;
+++      *errmsg = "WaitForSingleObject";
+++      return -1;
+++    }
+++
+++  GetExitCodeProcess (h, &termstat);
+++  CloseHandle (h);
+++ 
+++  /* A value of 3 indicates that the child caught a signal, but not
+++     which one.  Since only SIGABRT, SIGFPE and SIGINT do anything, we
+++     report SIGABRT.  */
+++  if (termstat == 3)
+++    *status = SIGABRT;
+++  else
+++    *status = (termstat & 0xff) << 8;
+++
+++  return 0;
+++}
+++
+++/* Create a pipe.  */
+++
+++static int
+++pex_win32_pipe (struct pex_obj *obj ATTRIBUTE_UNUSED, int *p,
+++		int binary)
+++{
+++  return _pipe (p, 256, binary ? _O_BINARY : _O_TEXT);
+++}
+++
+++/* Get a FILE pointer to read from a file descriptor.  */
+++
+++static FILE *
+++pex_win32_fdopenr (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd,
+++		   int binary)
+++{
+++  return fdopen (fd, binary ? "rb" : "r");
+++}
+++
+++static FILE *
+++pex_win32_fdopenw (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd,
+++		   int binary)
+++{
+++  HANDLE h = (HANDLE) _get_osfhandle (fd);
+++  if (h == INVALID_HANDLE_VALUE)
+++    return NULL;
+++  if (! SetHandleInformation (h, HANDLE_FLAG_INHERIT, 0))
+++    return NULL;
+++  return fdopen (fd, binary ? "wb" : "w");
+++}
+++
+++#ifdef MAIN
+++#include <stdio.h>
+++
+++int
+++main (int argc ATTRIBUTE_UNUSED, char **argv)
+++{
+++  char const *errmsg;
+++  int err;
+++  argv++;
+++  printf ("%ld\n", pex_win32_exec_child (NULL, PEX_SEARCH, argv[0], argv, NULL, 0, 0, 1, 2, &errmsg, &err));
+++  exit (0);
+++}
+++#endif
+-- 
+1.8.5.1
+

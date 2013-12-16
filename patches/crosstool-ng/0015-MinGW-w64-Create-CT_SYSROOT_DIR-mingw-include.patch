@@ -1,4 +1,4 @@
-From 9101bd4d028b966131ac882f6a4816674e525e50 Mon Sep 17 00:00:00 2001
+From 4c55308974275770a964fdc958002b0fcbf787bf Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 16 Dec 2013 19:43:40 +0000
 Subject: [PATCH 15/15] MinGW-w64: Create ${CT_SYSROOT_DIR}/mingw/include
@@ -10,7 +10,7 @@ the build will deliberately fail.
  1 file changed, 9 insertions(+)
 
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index 26ffc7f..4a09957 100644
+index 26ffc7f..f022553 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
 @@ -379,6 +379,15 @@ do_gcc_core_backend() {
@@ -24,7 +24,7 @@ index 26ffc7f..4a09957 100644
 +        # mingw32 and mingw64 as MinGW-w64 itself does now-a-days so until
 +        # I decide on these issues this workaround will suffice.
 +        if [ ! -d ${CT_SYSROOT_DIR}/mingw/include ]; then
-+            mkdir -p ${CT_SYSROOT_DIR}/mingw/include
++            CT_DoExecLog ALL mkdir -p ${CT_SYSROOT_DIR}/mingw/include
 +        fi
      fi
  

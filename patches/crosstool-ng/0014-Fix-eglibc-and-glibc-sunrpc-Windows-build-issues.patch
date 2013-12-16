@@ -1,4 +1,4 @@
-From c48aa0f7fe368492e5b59557134fb4955bc0266d Mon Sep 17 00:00:00 2001
+From 4fbe153c74ba20c13d9635973d7cb69188230e8c Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 14 Dec 2013 03:18:53 +0000
 Subject: [PATCH 14/15] Fix eglibc and glibc sunrpc Windows build issues

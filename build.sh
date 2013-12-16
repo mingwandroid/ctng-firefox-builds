@@ -61,6 +61,11 @@ VENDOR_OSES_windows="x86_64-w64-mingw32"
 VENDOR_OSES_linux="unknown-linux-gnu"
 VENDOR_OSES_raspi="unknown-linux-gnu"
 
+# Defaults ..
+BUILD_DEBUGGABLE_osx="no"
+BUILD_DEBUGGABLE_windows="yes"
+BUILD_DEBUGGABLE_linux="no"
+
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="4.8.2"
 TARGET_GCC_VERSIONS_linux="4.8.2"
@@ -73,11 +78,11 @@ TARGET_LLVM_VERSIONS_linux="3.3"
 TARGET_LLVM_VERSIONS_ps3="none"
 TARGET_LLVM_VERSIONS_raspi="none"
 
-TARGET_IS_LINUX_osx="n"
-TARGET_IS_LINUX_windows="n"
-TARGET_IS_LINUX_linux="y"
-TARGET_IS_LINUX_ps3="n"
-TARGET_IS_LINUX_raspi="y"
+TARGET_IS_LINUX_osx="no"
+TARGET_IS_LINUX_windows="no"
+TARGET_IS_LINUX_linux="yes"
+TARGET_IS_LINUX_ps3="no"
+TARGET_IS_LINUX_raspi="yes"
 
 TARGET_IS_DARWIN_osx="y"
 TARGET_IS_DARWIN_windows="n"
@@ -172,7 +177,7 @@ To restart the build you can use:
 
 To see all steps:
  ct-ng list-steps"
-option CTNG_DEBUGGABLE     no \
+option CTNG_DEBUGGABLE     default \
 "Do you want the toolchain build with crosstool-ng
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
@@ -297,7 +302,19 @@ else
   BITS=64
 fi
 
-# Sanitise options and lookup per-target defaults.
+BUILD_OS=
+if [ "$OSTYPE" = "linux-gnu" ]; then
+  BUILD_OS=linux
+elif [ "$OSTYPE" = "msys" ]; then
+  BUILD_OS=windows
+elif [ "$OSTYPE" = "darwin" ]; then
+BUILD_OS=darwin
+else
+  echo "Error: I don't know what Operating System you are using."
+  exit 1
+fi
+
+# Sanitise options and lookup per-target/per-build defaults.
 VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
 if [ "$GCC_VERSION" = "default" ]; then
   GCC_VERSION=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
@@ -310,6 +327,10 @@ if [ "$LLVM_VERSION" = "none" ]; then
 fi
 GCC_VERS_=$(echo $GCC_VERSION  | tr '.' '_')
 LLVM_VERS_=$(echo $LLVM_VERSION | tr '.' '_')
+
+if [ "$CTNG_DEBUGGABLE" = "default" ]; then
+  CTNG_DEBUGGABLE=$(_al BUILD_DEBUGGABLE ${BUILD_OS})
+fi
 
 # Error checking
 if [ "${MOZ_TARGET_ARCH}" = "i686" -a "${TARGET_OS}" = "osx" ]; then
@@ -748,7 +769,12 @@ else
   export PYTHON=python2
 fi
 
-BUILD_PREFIX=${LLVM_VERS_}-${GCC_VERS_}-${HOST_ARCH}${MINGW_W64_HASH}
+if [ "$CTNG_DEBUGGABLE" = "yes" ]; then
+  DEBUG_PREFIX="-d"
+else
+  DEBUG_PREFIX=""
+fi
+BUILD_PREFIX=${LLVM_VERS_}-${GCC_VERS_}-${HOST_ARCH}${MINGW_W64_HASH}${DEBUG_PREFIX}
 if [ "$COMPILER_RT" = "yes" ]; then
   BUILD_PREFIX="${BUILD_PREFIX}-rt"
 fi
@@ -1951,3 +1977,176 @@ x86_64-build_w64-mingw32-gcc $SUNRPC_CFLAGS  -I/c/ctng-build-x-r-none-4_8_2-x86_
 x86_64-build_w64-mingw32-gcc $SUNRPC_CFLAGS  -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/include/ -D_GNU_SOURCE -DIS_IN_build -include /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/config.h rpc_tblout.c 	-o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_tblout.o -MMD -MP -MF /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_tblout.o.dt -MT /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_tblout.o -c
 x86_64-build_w64-mingw32-gcc $SUNRPC_CFLAGS  -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/include/ -D_GNU_SOURCE -DIS_IN_build -include /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/config.h rpc_sample.c 	-o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_sample.o -MMD -MP -MF /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_sample.o.dt -MT /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_sample.o -c
 x86_64-build_w64-mingw32-gcc /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_main.o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_hout.o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_cout.o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_parse.o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_scan.o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_util.o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_svcout.o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_clntout.o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_tblout.o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpc_sample.o -L/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib  -Wl,-Bstatic -lintl -Wl,-Bdynamic -o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/sunrpc/cross-rpcgen
+
+
+
+
+# Next up:
+[ALL  ]    /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/./gcc/ -B/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/bin/ -B/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/lib/ -isystem /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/include -isystem /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/sys-include    -g -Os -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fPIC -fno-inline -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector   -fPIC -fno-inline -I. -I. -I../.././gcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/. -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/../gcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/../include  -DHAVE_CC_TLS  -o _clear_cache.o -MT _clear_cache.o -MD -MP -MF _clear_cache.dep -DL_clear_cache -xassembler-with-cpp -c /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/config/arm/lib1funcs.S -include _clear_cache.vis
+[ALL  ]    /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/./gcc/ -B/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/bin/ -B/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/lib/ -isystem /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/include -isystem /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/sys-include    -g -Os -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fPIC -fno-inline -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector   -fPIC -fno-inline -I. -I. -I../.././gcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/. -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/../gcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/../include  -DHAVE_CC_TLS  -o _muldi3.o -MT _muldi3.o -MD -MP -MF _muldi3.dep -DL_muldi3 -c /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/libgcc2.c -fvisibility=hidden -DHIDE_EXPORTS
+[ALL  ]    In file included from C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/libgcc2.c:27:0:
+[ERROR]    C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/../gcc/tsystem.h:87:19: fatal error: stdio.h: No such file or directory
+[ALL  ]     #include <stdio.h>
+[ALL  ]                       ^
+[ALL  ]    compilation terminated.
+[ALL  ]    Makefile:465: recipe for target '_muldi3.o' failed
+[ERROR]    make[2]: *** [_muldi3.o] Error 1
+[ALL  ]    make[2]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/armv6hl-unknown-linux-gnueabi/libgcc'
+
+
+
+# Still the problems with gettext persist!
+# '-O0 -ggdb' fails:
+[ALL  ]    ../woe32dll/.libs/c++term-styled-ostream.o: In function `term_styled_ostream__write_mem':
+[ALL  ]    C:ctng-build-x-r-none-4_8_2-x86_64-235295c4-d.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:89: undefined reference to `term_ostream_set_color(any_ostream_representation*, int)'
+[ALL  ]    C:ctng-build-x-r-none-4_8_2-x86_64-235295c4-d.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:90: undefined reference to `term_ostream_set_bgcolor(any_ostream_representation*, int)'
+[ALL  ]    C:ctng-build-x-r-none-4_8_2-x86_64-235295c4-d.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:91: undefined reference to `term_ostream_set_weight(any_ostream_representation*, term_weight_t)'
+[ALL  ]    C:ctng-build-x-r-none-4_8_2-x86_64-235295c4-d.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:92: undefined reference to `term_ostream_set_posture(any_ostream_representation*, term_posture_t)'
+[ALL  ]    C:ctng-build-x-r-none-4_8_2-x86_64-235295c4-d.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:93: undefined reference to `term_ostream_set_underline(any_ostream_representation*, term_underline_t)'
+[ALL  ]    ../woe32dll/.libs/c++term-styled-ostream.o: In function `term_styled_ostream_create':
+[ALL  ]    C:ctng-build-x-r-none-4_8_2-x86_64-235295c4-d.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:615: undefined reference to `term_ostream_free(any_ostream_representation*)'
+[ALL  ]    ../woe32dll/.libs/c++term-styled-ostream.o: In function `term_styled_ostream__flush':
+[ALL  ]    C:ctng-build-x-r-none-4_8_2-x86_64-235295c4-d.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:101: undefined reference to `term_ostream_flush(any_ostream_representation*)'
+[ALL  ]    ../woe32dll/.libs/c++term-styled-ostream.o: In function `term_styled_ostream__write_mem':
+[ALL  ]    C:ctng-build-x-r-none-4_8_2-x86_64-235295c4-d.buildarmv6hl-unknown-linux-gnueabibuildbuild-gettext-build-x86_64-build_w64-mingw32gettext-toolsgnulib-lib/term-styled-ostream.oo.c:95: undefined reference to `term_ostream_write_mem(any_ostream_representation*, void const*, unsigned long long)'
+[ERROR]    collect2.exe: error: ld returned 1 exit status
+[ALL  ]    Makefile:2507: recipe for target 'libgettextlib.la' failed
+[ERROR]    make[5]: *** [libgettextlib.la] Error 1
+[ALL  ]    make[5]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-gettext-build-x86_64-build_w64-mingw32/gettext-tools/gnulib-lib'
+[ALL  ]    Makefile:2262: recipe for target 'all' failed
+[ERROR]    make[4]: *** [all] Error 2
+[ALL  ]    make[4]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-gettext-build-x86_64-build_w64-mingw32/gettext-tools/gnulib-lib'
+[ALL  ]    Makefile:1711: recipe for target 'all-recursive' failed
+[ERROR]    make[3]: *** [all-recursive] Error 1
+[ALL  ]    make[3]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-gettext-build-x86_64-build_w64-mingw32/gettext-tools'
+[ALL  ]    Makefile:1576: recipe for target 'all' failed
+[ERROR]    make[2]: *** [all] Error 2
+[ALL  ]    make[2]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-gettext-build-x86_64-build_w64-mingw32/gettext-tools'
+[ALL  ]    Makefile:364: recipe for target 'all-recursive' failed
+[ERROR]    make[1]: *** [all-recursive] Error 1
+[ALL  ]    make[1]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-gettext-build-x86_64-build_w64-mingw32'
+# Ignoring, -O2 is now forced instead.
+
+export PATH=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"$PATH"
+C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/cc1.exe -quiet -v -v -iprefix c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi../lib/gccarmv6hl-unknown-linux-gnueabi/4.8.2/ -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/include -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295ueabi/build/build-cc-gcc-core-pass-2/gcc/include-fixed -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/include C:/msys64/home/ray/Dropbox/a.c -quietrm1176jzf-s -mfloat-abi=hard -mfpu=vfp -mtls-dialect=gnu -auxbase a -version -o C:/msys64/tmp/ccwAYgUx.s
+
+C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/cc1.exe -quiet -v -v -v -iprefix c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/ -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/include -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/include-fixed -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/include C:/msys64/home/ray/Dropbox/a.c -quiet -dumpbase a.c -march=armv6 -mtune=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp -mtls-dialect=gnu -auxbase a -version -o C:/msys64/tmp/cccsYj8S.s
+
+
+# What's -iprefix about? it's got a value of c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/
+
+
+The exact line that fails is:
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/./gcc/ -B/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/bin/ -B/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/lib/ -isystem /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/include -isystem /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/sys-include    -g -Os -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fPIC -fno-inline -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector   -fPIC -fno-inline -I. -I. -I../.././gcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/. -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/../gcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/../include  -DHAVE_CC_TLS  -o _muldi3.o -MT _muldi3.o -MD -MP -MF _muldi3.dep -DL_muldi3 -c /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/libgcc2.c -fvisibility=hidden -DHIDE_EXPORTS
+adding -v to it gives CC1 execution as of:
+C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/cc1.exe -quiet -v -I . -I . -I ../.././gcc -I C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc -I C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc -I C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/../gcc -I C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/../include -iprefix c:\ctng-build-x-r-none-4_8_2-x86_64-235295c4\.build\armv6hl-unknown-linux-gnueabi\build\build-cc-gcc-core-pass-2\gcc\../lib/gccarmv6hl-unknown-linux-gnueabi/4.8.2/ -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/include -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/include-fixed -MD _muldi3.d -MF _muldi3.dep -MP -MT _muldi3.o -D IN_GCC -D CROSS_DIRECTORY_STRUCTURE -D IN_LIBGCC2 -D HAVE_CC_TLS -D L_muldi3 -D HIDE_EXPORTS -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/include -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/armv6hl-unknown-linux-gnueabi/sys-include -isystem ./include C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/src/gcc-4.8.2/libgcc/libgcc2.c -quiet -dumpbase libgcc2.c -march=armv6 -mtune=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp -mtls-dialect=gnu -auxbase-strip _muldi3.o -g -g -Os -O2 -Wextra -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition -version -fbuilding-libgcc -fno-stack-protector -fPIC -fno-inline -fvisibility=hidden -o C:\msys64\tmp\cczvo1dq.s
+
+which has -iprefix c:\ctng-build-x-r-none-4_8_2-x86_64-235295c4\.build\armv6hl-unknown-linux-gnueabi\build\build-cc-gcc-core-pass-2\gcc\../lib/gccarmv6hl-unknown-linux-gnueabi/4.8.2/
+.. c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/../lib/gccarmv6hl-unknown-linux-gnueabi/4.8.2/
+
+which does not exist ..
+
+.. I think the problem is:
+
+C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/cppdefault.c
+
+#ifdef CROSS_INCLUDE_DIR
+    /* One place the target system's headers might be.  */
+    { CROSS_INCLUDE_DIR, "GCC", 0, 0, 0, 0 },
+#endif
+#ifdef TOOL_INCLUDE_DIR
+    /* Another place the target system's headers might be.  */
+    { TOOL_INCLUDE_DIR, "BINUTILS", 0, 1, 0, 0 },
+#endif
+#ifdef NATIVE_SYSTEM_HEADER_DIR
+    /* /usr/include comes dead last.  */
+    { NATIVE_SYSTEM_HEADER_DIR, NATIVE_SYSTEM_HEADER_COMPONENT, 0, 0, 1, 2 },
+    { NATIVE_SYSTEM_HEADER_DIR, NATIVE_SYSTEM_HEADER_COMPONENT, 0, 0, 1, 0 },
+#endif
+
+
+
+.. NATIVE_SYSTEM_HEADER_DIR is probably C:/msys64/include ..
+.. even though we are building cross compilers == badness.
+
+C:\ctng-build-x-r-none-4_8_2-x86_64-235295c4-d\.build\armv6hl-unknown-linux-gnueabi\build\build-cc-gcc-core-pass-2
+
+Seems that:
+C:\ctng-build-x-r-none-4_8_2-x86_64-235295c4-d\.build\armv6hl-unknown-linux-gnueabi\build\build-cc-gcc-core-pass-2\gcc\Makefile
+
+Has:
+
+# Default native SYSTEM_HEADER_DIR, to be overridden by targets.
+NATIVE_SYSTEM_HEADER_DIR = /usr/include
+# Default cross SYSTEM_HEADER_DIR, to be overridden by targets.
+CROSS_SYSTEM_HEADER_DIR = $(TARGET_SYSTEM_ROOT)$${sysroot_headers_suffix}$(NATIVE_SYSTEM_HEADER_DIR)
+
+# autoconf sets SYSTEM_HEADER_DIR to one of the above.
+# Purge it of unnecessary internal relative paths
+# to directories that might not exist yet.
+# The sed idiom for this is to repeat the search-and-replace until it doesn't match, using :a ... ta.
+# Use single quotes here to avoid nested double- and backquotes, this
+# macro is also used in a double-quoted context.
+SYSTEM_HEADER_DIR = `echo $(CROSS_SYSTEM_HEADER_DIR) | sed -e :a -e 's,[^/]*/\.\.\/,,' -e ta`
+
+C:\ctng-build-x-r-none-4_8_2-x86_64-235295c4-d\.build\armv6hl-unknown-linux-gnueabi\build\build-cc-gcc-core-pass-2\gcc\Makefile
+  -DCROSS_INCLUDE_DIR=\"$(CROSS_SYSTEM_HEADER_DIR)\" \
+
+.. so the gist of it is:
+The follwing has 1 == add_sysroot (i.e. prefix this with sysroot) and 2 == multilib
+    { NATIVE_SYSTEM_HEADER_DIR, NATIVE_SYSTEM_HEADER_COMPONENT, 0, 0, 1, 2 },
+.. which works OK natively on Linux since /usr/include is prepended to /blah/blah/sysroot to make a good sysroot.
+
+.. However this falls down due to MSYS path translation (as usual)
+
+.. Now, CROSS_SYSTEM_HEADER_DIR would be the thing that you would think would avoid all this nonsense ...
+
+CROSS_SYSTEM_HEADER_DIR = $(TARGET_SYSTEM_ROOT)$${sysroot_headers_suffix}$(NATIVE_SYSTEM_HEADER_DIR)
+TARGET_SYSTEM_ROOT='/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot'
+
+There could be some issue with $${sysroot_headers_suffix} as the only place that references it in GCC source-code is:
+for ml in `cat ${itoolsdatadir}/fixinc_list`; do
+  sysroot_headers_suffix=`echo ${ml} | sed -e 's/;.*$//'`
+
+.. so if fixincludes is broken (likely) then sysroot_headers_suffix may be too.
+
+Seems like they are being passed in OK: -DCROSS_INCLUDE_DIR="/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot${sysroot_headers_suffix}/usr/include"
+cpp_include_defaults[6] = FIXED_INCLUDE_DIR, so
+cpp_include_defaults[7] = CROSS_INCLUDE_DIR .. but it isn't, it's "BINUTILS".
+
+.. back to cppdefault.c
+
+#if defined (CROSS_DIRECTORY_STRUCTURE) && !defined (TARGET_SYSTEM_ROOT)
+# undef LOCAL_INCLUDE_DIR
+# undef NATIVE_SYSTEM_HEADER_DIR
+#else
+# undef CROSS_INCLUDE_DIR
+#endif
+
+# Which means we *MUST* be taking the # undef CROSS_INCLUDE_DIR path .. hmm
+# -DCROSS_DIRECTORY_STRUCTURE is passed in and ..
+# TARGET_SYSTEM_ROOT = /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot
+# .. so it does enter the undef CROSS_INCLUDE_DIR block ..
+
+See also email from Ian Lance Taylor: http://gcc.gnu.org/ml/gcc-patches/2011-10/msg02380.html
+
+x86_64-build_w64-mingw32-g++ -c  -DGCC_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include" -DFIXED_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed" -DGPLUSPLUS_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/include/c++/4.8.2" -DGPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT=0 -DGPLUSPLUS_TOOL_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/include/c++/4.8.2/armv6hl-unknown-linux-gnueabi" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/include/c++/4.8.2/backward" -DLOCAL_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../..`echo /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools | sed -e 's|^/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools||' -e 's|/[^/]*|/..|g'`/include" -DCROSS_INCLUDE_DIR="/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot${sysroot_headers_suffix}/usr/include" -DTOOL_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/include" -DNATIVE_SYSTEM_HEADER_DIR="/usr/include" -DPREFIX="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/" -DSTANDARD_EXEC_PREFIX="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/" -DTARGET_SYSTEM_ROOT="/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot" -DBASEVER=""4.8.2"" -O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -fno-exceptions -fno-rtti -fasynchronous-unwind-tables -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wmissing-format-attribute -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings   -DHAVE_CONFIG_H -I. -I. -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/. -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../libcpp/include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include  -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../libdecnumber -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../libdecnumber/dpd -I../libdecnumber -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../libbacktrace -DCLOOG_INT_GMP -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include  /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/cppbuiltin.c -o cppbuiltin.o
+
+x86_64-build_w64-mingw32-g++ -c  -DGCC_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include" -DFIXED_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed" -DGPLUSPLUS_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/include/c++/4.8.2" -DGPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT=0 -DGPLUSPLUS_TOOL_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/include/c++/4.8.2/armv6hl-unknown-linux-gnueabi" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/include/c++/4.8.2/backward" -DLOCAL_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../..`echo /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools | sed -e 's|^/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools||' -e 's|/[^/]*|/..|g'`/include" -DCROSS_INCLUDE_DIR="/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot${sysroot_headers_suffix}/usr/include" -DTOOL_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/include" -DNATIVE_SYSTEM_HEADER_DIR="/usr/include" -DPREFIX="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/" -DSTANDARD_EXEC_PREFIX="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/" -DTARGET_SYSTEM_ROOT="/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot" -O0 -ggdb -pipe  -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -fno-exceptions -fno-rtti -fasynchronous-unwind-tables -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wmissing-format-attribute -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings   -DHAVE_CONFIG_H -I. -I. -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/. -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../libcpp/include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include  -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../libdecnumber -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../libdecnumber/dpd -I../libdecnumber -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/../libbacktrace -DCLOOG_INT_GMP -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include  /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/gcc/cppdefault.c -o cppdefault.o
+
+.. potential fixinclude problems anyway ..
+[ALL  ]     Searching /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include/.
+[ALL  ]    Fixing directory /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include into /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-cc-gcc-core-pass-2/gcc/include-fixed
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/exynos_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/i810_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/i915_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/mga_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/nouveau_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/r128_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/radeon_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/savage_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/sis_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/tegra_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'drm/via_drm.h' as stdin
+[ALL  ]    FS error 2 (No such file or directory) reopening 'linux/agpgart.h' as stdin

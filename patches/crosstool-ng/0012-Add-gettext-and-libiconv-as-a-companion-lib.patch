@@ -1,4 +1,4 @@
-From 2d33b5796b37c76076b178a0d0aca6a71adc04b1 Mon Sep 17 00:00:00 2001
+From 0ab2499a341b0dd33c405959eb9328cf2c22e064 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 21:10:56 +0000
 Subject: [PATCH 12/14] Add gettext and libiconv as a companion lib
@@ -15,9 +15,9 @@ Subject: [PATCH 12/14] Add gettext and libiconv as a companion lib
  ...-Woe32-link-errors-when-compiling-with-O0.patch | 372 +++++++++++++++++++++
  ...rclib_stdio.in.h-remove-gets-declarations.patch |  30 ++
  scripts/build/companion_libs/320-libiconv.sh       |  95 ++++++
- scripts/build/companion_libs/330-gettext.sh        | 116 +++++++
+ scripts/build/companion_libs/330-gettext.sh        | 119 +++++++
  scripts/build/libc/glibc-eglibc.sh-common          |  18 +-
- 12 files changed, 758 insertions(+), 4 deletions(-)
+ 12 files changed, 761 insertions(+), 4 deletions(-)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
@@ -750,10 +750,10 @@ index 0000000..60cb78f
 +fi
 diff --git a/scripts/build/companion_libs/330-gettext.sh b/scripts/build/companion_libs/330-gettext.sh
 new file mode 100644
-index 0000000..2ec2c5f
+index 0000000..168235f
 --- /dev/null
 +++ b/scripts/build/companion_libs/330-gettext.sh
-@@ -0,0 +1,116 @@
+@@ -0,0 +1,119 @@
 +# Build script for gettext
 +
 +do_gettext_get() { :; }
@@ -836,6 +836,8 @@ index 0000000..2ec2c5f
 +    # but gettext configure doesn't see this flag when it checks for that. An
 +    # alternative may be to use CC="${host}-gcc ${cflags}" but that didn't
 +    # work.
++    # -O2 works around bug at http://savannah.gnu.org/bugs/?36443
++    # gettext needs some fixing for MinGW-w64 it would seem.
 +    case "${host}" in
 +        *mingw*)
 +            case "${cflags}" in
@@ -843,6 +845,7 @@ index 0000000..2ec2c5f
 +                    extra_config+=( --disable-libasprintf )
 +                    ;;
 +            esac
++            cflags=$cflags" -O2"
 +        ;;
 +    esac
 +

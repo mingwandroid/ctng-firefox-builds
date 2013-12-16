@@ -1,4 +1,4 @@
-From 4c55308974275770a964fdc958002b0fcbf787bf Mon Sep 17 00:00:00 2001
+From 532560a989ec103d6cbfa84a7df8be8815a4b831 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 16 Dec 2013 19:43:40 +0000
 Subject: [PATCH 15/15] MinGW-w64: Create ${CT_SYSROOT_DIR}/mingw/include
@@ -6,17 +6,18 @@ Subject: [PATCH 15/15] MinGW-w64: Create ${CT_SYSROOT_DIR}/mingw/include
 .. if it doesn't exist before building GCC as otherwise
 the build will deliberately fail.
 ---
- scripts/build/cc/100-gcc.sh | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ scripts/build/cc/100-gcc.sh | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index 26ffc7f..f022553 100644
+index 26ffc7f..ce92937 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
-@@ -379,6 +379,15 @@ do_gcc_core_backend() {
+@@ -393,6 +393,18 @@ do_gcc_core_backend() {
+         extra_config+=("--with-lipo=${CT_PREFIX_DIR}/bin/${CT_TARGET}-lipo${exeext}")
+     fi
  
-     if [ ! "${host/mingw/}" = "${host}" -o ! "${host/cygwin/}" = "${host}" ]; then
-         exeext=".exe"
++    if [ ! "${CT_TARGET/mingw/}" = "${CT_TARGET}" -o ! "${CT_TARGET/cygwin/}" = "${CT_TARGET}" ]; then
 +        # This folder must exist otherwise you get an error:
 +        # The directory that should contain system headers does not exist:
 +        # ${CT_SYSROOT_DIR}/mingw/include
@@ -26,9 +27,11 @@ index 26ffc7f..f022553 100644
 +        if [ ! -d ${CT_SYSROOT_DIR}/mingw/include ]; then
 +            CT_DoExecLog ALL mkdir -p ${CT_SYSROOT_DIR}/mingw/include
 +        fi
-     fi
++    fi
++
+     CT_DoLog DEBUG "Extra config passed: '${extra_config[*]}'"
  
-     if [ "${CT_TARGET_VENDOR}" = "apple" ]; then
+     # Use --with-local-prefix so older gccs don't look in /usr/local (http://gcc.gnu.org/PR10532)
 -- 
 1.8.5.1
 

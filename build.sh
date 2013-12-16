@@ -78,17 +78,23 @@ TARGET_LLVM_VERSIONS_linux="3.3"
 TARGET_LLVM_VERSIONS_ps3="none"
 TARGET_LLVM_VERSIONS_raspi="none"
 
+TARGET_COMPILER_RT_osx="yes"
+TARGET_COMPILER_RT_windows="no"
+TARGET_COMPILER_RT_linux="yes"
+TARGET_COMPILER_RT_ps3="no"
+TARGET_COMPILER_RT_raspi="yes"
+
 TARGET_IS_LINUX_osx="no"
 TARGET_IS_LINUX_windows="no"
 TARGET_IS_LINUX_linux="yes"
 TARGET_IS_LINUX_ps3="no"
 TARGET_IS_LINUX_raspi="yes"
 
-TARGET_IS_DARWIN_osx="y"
-TARGET_IS_DARWIN_windows="n"
-TARGET_IS_DARWIN_linux="n"
-TARGET_IS_DARWIN_ps3="n"
-TARGET_IS_DARWIN_raspi="n"
+TARGET_IS_DARWIN_osx="yes"
+TARGET_IS_DARWIN_windows="no"
+TARGET_IS_DARWIN_linux="no"
+TARGET_IS_DARWIN_ps3="no"
+TARGET_IS_DARWIN_raspi="no"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
@@ -191,7 +197,7 @@ option COPY_SDK            yes \
 "Do you want the MacOSX10.6.sdk copied from
 \$HOME/MacOSX10.6.sdk to the sysroot of the
 built toolchain?"
-option COMPILER_RT         yes \
+option COMPILER_RT         default \
 "Compiler-rt allows for profiling, address
 sanitization, coverage reporting and other
 such runtime nicities, mostly un-tested, and
@@ -322,9 +328,13 @@ fi
 if [ "$LLVM_VERSION" = "default" ]; then
   LLVM_VERSION=$(_al TARGET_LLVM_VERSIONS ${TARGET_OS})
 fi
+if [ "$COMPILER_RT" = "default" ]; then
+  COMPILER_VERSION=$(_al TARGET_COMPILER_RT ${TARGET_OS})
+fi
 if [ "$LLVM_VERSION" = "none" ]; then
   COMPILER_RT="no"
 fi
+
 GCC_VERS_=$(echo $GCC_VERSION  | tr '.' '_')
 LLVM_VERS_=$(echo $LLVM_VERSION | tr '.' '_')
 
@@ -576,7 +586,7 @@ cross_clang_build()
       DUMPEDMACHINE=$(${MINGW_W64_PATH}/gcc -dumpmachine)
       echo "CT_BUILD=\"${DUMPEDMACHINE}\""     >> ${CTNG_SAMPLE_CONFIG}
     fi
-    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "y" ]; then
+    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "yes" ]; then
       if [ "$COPY_SDK" = "yes" ]; then
         echo "CT_DARWIN_COPY_SDK_TO_SYSROOT=y" >> ${CTNG_SAMPLE_CONFIG}
       else
@@ -584,7 +594,7 @@ cross_clang_build()
       fi
     fi
 
-    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "y" ]; then
+    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "yes" ]; then
       echo "CT_BINUTILS_cctools=y"             >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CCTOOLS_V_809=y"                >> ${CTNG_SAMPLE_CONFIG}
       if [ ! "$GCC_VERSION" = "none" ]; then
@@ -642,7 +652,7 @@ cross_clang_build()
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}
 
     if [ "$OSTYPE" = "darwin" ]; then
-#    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "y" ]; then
+#    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "yes" ]; then
       # Darwin always fails with:
       # "Checking that gcc can compile a trivial statically linked program (CT_WANTS_STATIC_LINK)"
       # We definitely don't want to be forcing CT_CC_GCC_STATIC_LIBSTDCXX=n so this needs to be

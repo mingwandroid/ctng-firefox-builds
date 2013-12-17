@@ -9,6 +9,7 @@
 #    https://bugzilla.mozilla.org/show_bug.cgi?id=912371
 #
 # 2. On Windows, x86_64 must not use SEH exceptions (in fact it probably must use Dwarf-2 exceptions):
+#  2.1.
 #    Release+Asserts/lib/libLLVMExecutionEngine.a(RTDyldMemoryManager.o): In function `llvm::RTDyldMemoryManager::registerEHFrames(unsigned char*, unsigned long long, unsigned long long)':
 #    lib/ExecutionEngine/RTDyldMemoryManager.cpp:129: undefined reference to `__register_frame'
 #    Release+Asserts/lib/libLLVMExecutionEngine.a(RTDyldMemoryManager.o): In function `llvm::RTDyldMemoryManager::deregisterEHFrames(unsigned char*, unsigned long long, unsigned long long)':
@@ -17,6 +18,13 @@
 #    Reid Kleckner:
 #    "__register_frame is for registering DWARF unwind info.  It's currently under __GNUC__, since that usually implies linkage of libgcc, which provides that symbol.
 #     Patches and bugs for avoiding this under mingw when libgcc is using SEH for unwinding are welcome."
+#  2.2
+#    http://lists.cs.uiuc.edu/pipermail/llvmdev/2012-August/052339.html (Charles Davis did some work on SEH via DW2, but didn't finish. Wouldn't have worked for MSVC though .. Kai Tietz
+#    may have hacked on it some more since then).
+#  2.3
+#    My recent (17/12/2013) query on #llvm (thanks ki9a) turned up:
+#    2.3.1:  [build] http://lists.cs.uiuc.edu/pipermail/llvm-commits/Week-of-Mon-20131209/198327.html  ..  applied already
+#    2.3.2: [target] http://lists.cs.uiuc.edu/pipermail/llvm-commits/Week-of-Mon-20131216/198988.html  ..  http://redstar.de/ldc/win64eh_all_20131117.diff .. added to patches/llvm/head
 #
 # .. I am currently enabling Linux builds, and have run into:
 # 3. Clang needs sysroot passing to it as per Darwin (probably; can't find crti.o or some such)
@@ -64,7 +72,7 @@ VENDOR_OSES_raspi="unknown-linux-gnu"
 # Defaults ..
 BUILD_DEBUGGABLE_osx="no"
 BUILD_DEBUGGABLE_windows="yes"
-BUILD_DEBUGGABLE_linux="no"
+BUILD_DEBUGGABLE_linux="yes"
 
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="4.8.2"
@@ -73,8 +81,8 @@ TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="4.8.2"
 
 TARGET_LLVM_VERSIONS_osx="head"
-#TARGET_LLVM_VERSIONS_windows="head"
-TARGET_LLVM_VERSIONS_windows="none"
+TARGET_LLVM_VERSIONS_windows="head"
+#TARGET_LLVM_VERSIONS_windows="none"
 TARGET_LLVM_VERSIONS_linux="none"
 #TARGET_LLVM_VERSIONS_linux="head"
 TARGET_LLVM_VERSIONS_ps3="none"
@@ -2163,3 +2171,10 @@ x86_64-build_w64-mingw32-g++ -c  -DGCC_INCLUDE_DIR="/c/ctng-build-x-r-none-4_8_2
 [ALL  ]    FS error 2 (No such file or directory) reopening 'drm/tegra_drm.h' as stdin
 [ALL  ]    FS error 2 (No such file or directory) reopening 'drm/via_drm.h' as stdin
 [ALL  ]    FS error 2 (No such file or directory) reopening 'linux/agpgart.h' as stdin
+
+
+pushd /home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/x86_64-unknown-mingw32/build/build-mingw-w64-crt
+export PATH=/home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/x86_64-unknown-mingw32/buildtools/bin:"$PATH"
+x86_64-unknown-mingw32-gcc -DHAVE_CONFIG_H -I. -I/home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/src/mingw-w64-v3.0.0/mingw-w64-crt  -m64 -I/home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/src/mingw-w64-v3.0.0/mingw-w64-crt/include -D_CRTBLD -I/usr/include  -pipe -std=gnu99 -Wall -Wextra -Wformat -Wstrict-aliasing -Wshadow -Wpacked -Winline -Wimplicit-function-declaration -Wmissing-noreturn -Wmissing-prototypes -g -O2 -MT intrincs/lib64_libkernel32_a-__movsb.o -MD -MP -MF intrincs/.deps/lib64_libkernel32_a-__movsb.Tpo -c -o intrincs/lib64_libkernel32_a-__movsb.o `test -f 'intrincs/__movsb.c' || echo '/home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/src/mingw-w64-v3.0.0/mingw-w64-crt/'`intrincs/__movsb.c
+
+/home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/src/mingw-w64-v3.0.0/mingw-w64-crt/configure --prefix=/mingw --build=x86_64-build_unknown-linux-gnu --host=x86_64-unknown-mingw32

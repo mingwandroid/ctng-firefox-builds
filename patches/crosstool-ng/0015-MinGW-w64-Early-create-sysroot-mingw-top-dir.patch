@@ -1,4 +1,4 @@
-From 34a5dbbbed5c1c24fdcd2d11e03c9e8ee7149f7a Mon Sep 17 00:00:00 2001
+From 448c351a442e71ece0d92c529b9e077606d41a78 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 16 Dec 2013 19:43:40 +0000
 Subject: [PATCH 15/15] MinGW-w64: Early create sysroot/mingw top dir
@@ -17,8 +17,8 @@ else          -> mingw32
 ---
  scripts/build/cc/100-gcc.sh     | 12 ++++++++++++
  scripts/build/kernel/windows.sh | 16 ++++++++++++++++
- scripts/build/libc/mingw.sh     | 13 ++++---------
- 3 files changed, 32 insertions(+), 9 deletions(-)
+ scripts/build/libc/mingw.sh     | 15 +++++----------
+ 3 files changed, 33 insertions(+), 10 deletions(-)
 
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
 index 26ffc7f..c50c0f6 100644
@@ -71,7 +71,7 @@ index 5e34420..24911aa 100644
  
  do_kernel_get() {
 diff --git a/scripts/build/libc/mingw.sh b/scripts/build/libc/mingw.sh
-index 63d1ae9..bfccf8f 100644
+index 63d1ae9..dda6b24 100644
 --- a/scripts/build/libc/mingw.sh
 +++ b/scripts/build/libc/mingw.sh
 @@ -33,11 +33,11 @@ do_libc_start_files() {
@@ -101,6 +101,15 @@ index 63d1ae9..bfccf8f 100644
 -
      CT_EndStep
  }
+ 
+@@ -65,7 +60,7 @@ do_libc() {
+ 
+     CT_DoExecLog CFG                                                        \
+     "${CT_SRC_DIR}/mingw-w64-v${CT_WINAPI_VERSION}/mingw-w64-crt/configure" \
+-        --prefix=/usr                                                       \
++        --prefix=/${CT_TARGET_MINGW_SYSROOT_TOP}                            \
+         --build=${CT_BUILD}                                                 \
+         --host=${CT_TARGET}                                                 \
  
 -- 
 1.8.5.1

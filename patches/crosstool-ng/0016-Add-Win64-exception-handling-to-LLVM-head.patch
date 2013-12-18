@@ -1,12 +1,19 @@
-From 235d03941dd383bd0fe6dbad8937dd0d4b74b639 Mon Sep 17 00:00:00 2001
+From ea48ffd8617d34a68724074c70f5f68a4cf69334 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 17 Dec 2013 14:16:36 +0000
 Subject: [PATCH 16/16] Add Win64 exception handling to LLVM head
 
+Also apply it to X86MCAsmInfoGNUCOFF too, not just MS.
+.. and emit reg. names not numbers for SEH in MCAsmStreamer since
+gas doesn't like numbers.
 ---
  .../head/160-Add-Win64-exception-handling.patch    | 426 +++++++++++++++++++++
- 1 file changed, 426 insertions(+)
+ ...-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch |  55 +++
+ ...0-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch |  57 +++
+ 3 files changed, 538 insertions(+)
  create mode 100644 patches/llvm/head/160-Add-Win64-exception-handling.patch
+ create mode 100644 patches/llvm/head/170-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch
+ create mode 100644 patches/llvm/head/180-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch
 
 diff --git a/patches/llvm/head/160-Add-Win64-exception-handling.patch b/patches/llvm/head/160-Add-Win64-exception-handling.patch
 new file mode 100644
@@ -437,6 +444,130 @@ index 0000000..b5327c7
 ++; CHECK: ret
 ++; CHECK: .seh_handlerdata
 ++; CHECK: .seh_endproc
++-- 
++1.8.5.1
++
+diff --git a/patches/llvm/head/170-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch b/patches/llvm/head/170-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch
+new file mode 100644
+index 0000000..1520b99
+--- /dev/null
++++ b/patches/llvm/head/170-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch
+@@ -0,0 +1,55 @@
++From f88a47b7ae47352391b5d6cbcdcd4e35f96b11f0 Mon Sep 17 00:00:00 2001
++From: Ray Donnelly <mingw.android@gmail.com>
++Date: Wed, 18 Dec 2013 00:56:02 +0000
++Subject: [PATCH 1/2] Use SEH for Win64 in X86MCAsmInfoGNUCOFF
++
++---
++ lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp | 15 ++++++++++++---
++ 1 file changed, 12 insertions(+), 3 deletions(-)
++
++diff --git a/lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp b/lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp
++index 93c4e3f..dce5737 100644
++--- a/lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp
+++++ b/lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp
++@@ -131,7 +131,8 @@ getNonexecutableStackSection(MCContext &Ctx) const {
++ void X86MCAsmInfoMicrosoft::anchor() { }
++ 
++ X86MCAsmInfoMicrosoft::X86MCAsmInfoMicrosoft(const Triple &Triple) {
++-  if (Triple.getArch() == Triple::x86_64) {
+++  bool is64Bit = Triple.getArch() == Triple::x86_64;
+++  if (is64Bit) {
++     GlobalPrefix = '\0';
++     PrivateGlobalPrefix = ".L";
++     HasMicrosoftFastStdCallMangling = false;
++@@ -142,12 +143,17 @@ X86MCAsmInfoMicrosoft::X86MCAsmInfoMicrosoft(const Triple &Triple) {
++   TextAlignFillValue = 0x90;
++ 
++   AllowAtInName = true;
+++
+++  // Exceptions handling
+++  if (is64Bit)
+++    ExceptionsType = ExceptionHandling::Win64;
++ }
++ 
++ void X86MCAsmInfoGNUCOFF::anchor() { }
++ 
++ X86MCAsmInfoGNUCOFF::X86MCAsmInfoGNUCOFF(const Triple &Triple) {
++-  if (Triple.getArch() == Triple::x86_64) {
+++  bool is64Bit = Triple.getArch() == Triple::x86_64;
+++  if (is64Bit) {
++     GlobalPrefix = '\0';
++     PrivateGlobalPrefix = ".L";
++     HasMicrosoftFastStdCallMangling = false;
++@@ -158,5 +164,8 @@ X86MCAsmInfoGNUCOFF::X86MCAsmInfoGNUCOFF(const Triple &Triple) {
++   TextAlignFillValue = 0x90;
++ 
++   // Exceptions handling
++-  ExceptionsType = ExceptionHandling::DwarfCFI;
+++  if (is64Bit)
+++    ExceptionsType = ExceptionHandling::Win64;
+++  else
+++    ExceptionsType = ExceptionHandling::DwarfCFI;
++ }
++-- 
++1.8.5.1
++
+diff --git a/patches/llvm/head/180-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch b/patches/llvm/head/180-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch
+new file mode 100644
+index 0000000..639cefa
+--- /dev/null
++++ b/patches/llvm/head/180-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch
+@@ -0,0 +1,57 @@
++From 441f87d87b81d38adb2f2cf479b24b0263af1feb Mon Sep 17 00:00:00 2001
++From: Ray Donnelly <mingw.android@gmail.com>
++Date: Wed, 18 Dec 2013 00:56:44 +0000
++Subject: [PATCH 2/2] Emit reg names for SEH in MCAsmStreamer
++
++---
++ lib/MC/MCAsmStreamer.cpp | 15 +++++++++++----
++ 1 file changed, 11 insertions(+), 4 deletions(-)
++
++diff --git a/lib/MC/MCAsmStreamer.cpp b/lib/MC/MCAsmStreamer.cpp
++index ca49f8f..5de19b38 100644
++--- a/lib/MC/MCAsmStreamer.cpp
+++++ b/lib/MC/MCAsmStreamer.cpp
++@@ -1172,14 +1172,17 @@ void MCAsmStreamer::EmitWin64EHHandlerData() {
++ void MCAsmStreamer::EmitWin64EHPushReg(unsigned Register) {
++   MCStreamer::EmitWin64EHPushReg(Register);
++ 
++-  OS << "\t.seh_pushreg " << Register;
+++  OS << "\t.seh_pushreg ";
+++  EmitRegisterName(Register);
++   EmitEOL();
++ }
++ 
++ void MCAsmStreamer::EmitWin64EHSetFrame(unsigned Register, unsigned Offset) {
++   MCStreamer::EmitWin64EHSetFrame(Register, Offset);
++ 
++-  OS << "\t.seh_setframe " << Register << ", " << Offset;
+++  OS << "\t.seh_setframe ";
+++  EmitRegisterName(Register);
+++  OS << ", " << Offset;
++   EmitEOL();
++ }
++ 
++@@ -1193,14 +1196,18 @@ void MCAsmStreamer::EmitWin64EHAllocStack(unsigned Size) {
++ void MCAsmStreamer::EmitWin64EHSaveReg(unsigned Register, unsigned Offset) {
++   MCStreamer::EmitWin64EHSaveReg(Register, Offset);
++ 
++-  OS << "\t.seh_savereg " << Register << ", " << Offset;
+++  OS << "\t.seh_savereg ";
+++  EmitRegisterName(Register);
+++  OS << ", " << Offset;
++   EmitEOL();
++ }
++ 
++ void MCAsmStreamer::EmitWin64EHSaveXMM(unsigned Register, unsigned Offset) {
++   MCStreamer::EmitWin64EHSaveXMM(Register, Offset);
++ 
++-  OS << "\t.seh_savexmm " << Register << ", " << Offset;
+++  OS << "\t.seh_savexmm ";
+++  EmitRegisterName(Register);
+++  OS << ", " << Offset;
++   EmitEOL();
++ }
++ 
 +-- 
 +1.8.5.1
 +

@@ -1,4 +1,4 @@
-From 2fb77143f2d282c701727e0355af5892231bf0a2 Mon Sep 17 00:00:00 2001
+From 43b63be6af133c38be81445e2c9ccd7a0204aaaf Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 16 Dec 2013 19:43:40 +0000
 Subject: [PATCH 15/16] MinGW-w64: Early create sysroot/mingw top dir

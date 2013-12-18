@@ -1,4 +1,4 @@
-From ea48ffd8617d34a68724074c70f5f68a4cf69334 Mon Sep 17 00:00:00 2001
+From 975ce9744ee15bb31cc3fbc87194a2c207e51c2c Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 17 Dec 2013 14:16:36 +0000
 Subject: [PATCH 16/16] Add Win64 exception handling to LLVM head
@@ -8,9 +8,9 @@ Also apply it to X86MCAsmInfoGNUCOFF too, not just MS.
 gas doesn't like numbers.
 ---
  .../head/160-Add-Win64-exception-handling.patch    | 426 +++++++++++++++++++++
- ...-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch |  55 +++
+ ...-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch |  36 ++
  ...0-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch |  57 +++
- 3 files changed, 538 insertions(+)
+ 3 files changed, 519 insertions(+)
  create mode 100644 patches/llvm/head/160-Add-Win64-exception-handling.patch
  create mode 100644 patches/llvm/head/170-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch
  create mode 100644 patches/llvm/head/180-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch
@@ -449,43 +449,24 @@ index 0000000..b5327c7
 +
 diff --git a/patches/llvm/head/170-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch b/patches/llvm/head/170-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch
 new file mode 100644
-index 0000000..1520b99
+index 0000000..7a0a8d3
 --- /dev/null
 +++ b/patches/llvm/head/170-Use-SEH-for-Win64-in-X86MCAsmInfoGNUCOFF.patch
-@@ -0,0 +1,55 @@
-+From f88a47b7ae47352391b5d6cbcdcd4e35f96b11f0 Mon Sep 17 00:00:00 2001
+@@ -0,0 +1,36 @@
++From 8bcfa03ec1b51d758bf93c513201e36db7a9bb72 Mon Sep 17 00:00:00 2001
 +From: Ray Donnelly <mingw.android@gmail.com>
-+Date: Wed, 18 Dec 2013 00:56:02 +0000
++Date: Wed, 18 Dec 2013 02:23:51 +0000
 +Subject: [PATCH 1/2] Use SEH for Win64 in X86MCAsmInfoGNUCOFF
 +
 +---
-+ lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp | 15 ++++++++++++---
-+ 1 file changed, 12 insertions(+), 3 deletions(-)
++ lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp | 8 ++++++--
++ 1 file changed, 6 insertions(+), 2 deletions(-)
 +
 +diff --git a/lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp b/lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp
-+index 93c4e3f..dce5737 100644
++index 93c4e3f..dde5613 100644
 +--- a/lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp
 ++++ b/lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp
-+@@ -131,7 +131,8 @@ getNonexecutableStackSection(MCContext &Ctx) const {
-+ void X86MCAsmInfoMicrosoft::anchor() { }
-+ 
-+ X86MCAsmInfoMicrosoft::X86MCAsmInfoMicrosoft(const Triple &Triple) {
-+-  if (Triple.getArch() == Triple::x86_64) {
-++  bool is64Bit = Triple.getArch() == Triple::x86_64;
-++  if (is64Bit) {
-+     GlobalPrefix = '\0';
-+     PrivateGlobalPrefix = ".L";
-+     HasMicrosoftFastStdCallMangling = false;
-+@@ -142,12 +143,17 @@ X86MCAsmInfoMicrosoft::X86MCAsmInfoMicrosoft(const Triple &Triple) {
-+   TextAlignFillValue = 0x90;
-+ 
-+   AllowAtInName = true;
-++
-++  // Exceptions handling
-++  if (is64Bit)
-++    ExceptionsType = ExceptionHandling::Win64;
-+ }
-+ 
++@@ -147,7 +147,8 @@ X86MCAsmInfoMicrosoft::X86MCAsmInfoMicrosoft(const Triple &Triple) {
 + void X86MCAsmInfoGNUCOFF::anchor() { }
 + 
 + X86MCAsmInfoGNUCOFF::X86MCAsmInfoGNUCOFF(const Triple &Triple) {
@@ -495,7 +476,7 @@ index 0000000..1520b99
 +     GlobalPrefix = '\0';
 +     PrivateGlobalPrefix = ".L";
 +     HasMicrosoftFastStdCallMangling = false;
-+@@ -158,5 +164,8 @@ X86MCAsmInfoGNUCOFF::X86MCAsmInfoGNUCOFF(const Triple &Triple) {
++@@ -158,5 +159,8 @@ X86MCAsmInfoGNUCOFF::X86MCAsmInfoGNUCOFF(const Triple &Triple) {
 +   TextAlignFillValue = 0x90;
 + 
 +   // Exceptions handling
@@ -510,13 +491,13 @@ index 0000000..1520b99
 +
 diff --git a/patches/llvm/head/180-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch b/patches/llvm/head/180-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch
 new file mode 100644
-index 0000000..639cefa
+index 0000000..8a5a6c6
 --- /dev/null
 +++ b/patches/llvm/head/180-Emit-reg-names-for-SEH-in-MCAsmStreamer.patch
 @@ -0,0 +1,57 @@
-+From 441f87d87b81d38adb2f2cf479b24b0263af1feb Mon Sep 17 00:00:00 2001
++From 167889effdd5a8870160b134e11b49407457380a Mon Sep 17 00:00:00 2001
 +From: Ray Donnelly <mingw.android@gmail.com>
-+Date: Wed, 18 Dec 2013 00:56:44 +0000
++Date: Wed, 18 Dec 2013 02:24:40 +0000
 +Subject: [PATCH 2/2] Emit reg names for SEH in MCAsmStreamer
 +
 +---

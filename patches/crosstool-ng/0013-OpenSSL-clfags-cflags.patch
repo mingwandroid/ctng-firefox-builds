@@ -1,7 +1,7 @@
-From 30e7cc0e25b2b5c1c21ca0014a6f841bd7f1af2d Mon Sep 17 00:00:00 2001
+From 8f164bd77fe81f1fbcd789dfae0f3271e35dfd31 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 01:52:18 +0000
-Subject: [PATCH 13/16] OpenSSL: clfags -> cflags
+Subject: [PATCH 13/17] OpenSSL: clfags -> cflags
 
 ---
  scripts/build/companion_libs/310-openssl.sh | 2 +-
@@ -21,5 +21,5 @@ index e2ce37d..774f932 100644
      "./Configure"                              \
          --prefix="${prefix}"                   \
 -- 
-1.8.5.1
+1.8.5.2
 

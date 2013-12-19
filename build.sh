@@ -324,6 +324,10 @@ if [ "$OSTYPE" = "linux-gnu" ]; then
   BUILD_OS=linux
 elif [ "$OSTYPE" = "msys" ]; then
   BUILD_OS=windows
+  # I put a hack into MSYS2 in the interests of pragmatism
+  # to allow arguments to be blacklisted from being converted
+  # between their MSYS2 and Windows representations:
+  export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR="
 elif [ "$OSTYPE" = "darwin" ]; then
 BUILD_OS=darwin
 else
@@ -438,11 +442,15 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     # .. he has split packages up more than Arch does, so there is not a 1:1
     #    relationship between them anymore.
     if [ -f /etc/arch-release ]; then
-      PACKAGES=$PACKAGES" ncurses gcc-ada${HOST_MULTILIB}"
+      PACKAGES=$PACKAGES" ncurses gcc-ada${HOST_MULTILIB} automake"
     else
       PACKAGES=$PACKAGES" ncurses-devel base-devel perl-ack"
     fi
-    ${SUDO} pacman -S --force --noconfirm --needed $PACKAGES
+    echo "Force intalling $PACKAGES"
+    echo "disabling errors as 'automake and automake-wrapper are in conflict' - remove this ASAP."
+    set +e
+    ${SUDO} pacman -S --force --needed --noconfirm $PACKAGES
+    set -e
     GROUP=$(id --group --name)
     if ! which autoconf2.13; then
      (

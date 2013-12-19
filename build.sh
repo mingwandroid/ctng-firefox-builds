@@ -218,7 +218,12 @@ symbolic link to be made from ..
 .. to ..
 \${HOME}/MacOSX10.6.sdk/usr/lib/gcc/x86_64-apple-darwin10
 before running this script."
-
+option STATIC_TOOLCHAIN    no \
+"Do you want a statically linked toolchain?
+Plugins are not available if you say 'yes'.
+Also crosstool-ng can't be built on OSX
+if you say 'yes' here, though that needs
+to be fixed, clearly!"
 #################################################
 # This set of options are for the Firefox build #
 #################################################
@@ -329,7 +334,7 @@ elif [ "$OSTYPE" = "msys" ]; then
   # between their MSYS2 and Windows representations:
   export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR="
 elif [ "$OSTYPE" = "darwin" ]; then
-BUILD_OS=darwin
+  BUILD_OS=darwin
 else
   echo "Error: I don't know what Operating System you are using."
   exit 1
@@ -348,6 +353,14 @@ if [ "$COMPILER_RT" = "default" ]; then
 fi
 if [ "$LLVM_VERSION" = "none" ]; then
   COMPILER_RT="no"
+fi
+
+if [ "$STATIC_TOOLCHAIN" = "yes" -a "$BUILD_OS" = "darwin" ]; then
+  echo "Error: Crosstool-ng can't be built statically on OSX"
+  echo "       You will get the following error message:"
+  echo "       Checking that gcc can compile a trivial statically linked program (CT_WANTS_STATIC_LINK)"
+  echo "       Fixing this is somewhere on my TODO list."
+  exit 1
 fi
 
 GCC_VERS_=$(echo $GCC_VERSION  | tr '.' '_')
@@ -620,8 +633,13 @@ cross_clang_build()
         echo "CT_CC_GCC_APPLE=y"               >> ${CTNG_SAMPLE_CONFIG}
       fi
     else
-      echo "CT_BINUTILS_V_2_22=y"              >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_V_2_24=y"              >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_BINUTILS_FOR_TARGET=y"          >> ${CTNG_SAMPLE_CONFIG}
+      # The following may only work correctly for non-cross builds, but
+      # actually it's in GCC that PLUGINS are likely to fail with cross.
+      if [ "$STATIC_TOOLCHAIN" = "no" ]; then
+        echo "CT_BINUTILS_PLUGINS=y"             >> ${CTNG_SAMPLE_CONFIG}
+      fi
     fi
 
     if [ ! "$GCC_VERSION" = "none" ]; then
@@ -631,6 +649,9 @@ cross_clang_build()
       echo "CT_CC_LANG_CXX=y"                  >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_OBJC=y"                 >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_OBJCXX=y"               >> ${CTNG_SAMPLE_CONFIG}
+      if [ "$STATIC_TOOLCHAIN" = "no" ]; then
+        echo "CT_CC_GCC_ENABLE_PLUGINS=y"      >> ${CTNG_SAMPLE_CONFIG}
+      fi
     fi
 
     echo "CT_LIBC_${LIBC_}=y"                  >> ${CTNG_SAMPLE_CONFIG}
@@ -670,15 +691,14 @@ cross_clang_build()
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}
 
-    if [ "$OSTYPE" = "darwin" ]; then
-#    if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "yes" ]; then
-      # Darwin always fails with:
-      # "Checking that gcc can compile a trivial statically linked program (CT_WANTS_STATIC_LINK)"
-      # We definitely don't want to be forcing CT_CC_GCC_STATIC_LIBSTDCXX=n so this needs to be
-      #  fixed properly.
+    if [ "$STATIC_TOOLCHAIN" = "no" ]; then
       echo "CT_WANTS_STATIC_LINK=n"        >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_STATIC_TOOLCHAIN=n"         >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_GCC_STATIC_LIBSTDCXX=n"  >> ${CTNG_SAMPLE_CONFIG}
+    else
+      echo "CT_WANTS_STATIC_LINK=y"        >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_STATIC_TOOLCHAIN=y"         >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_GCC_STATIC_LIBSTDCXX=y"  >> ${CTNG_SAMPLE_CONFIG}
     fi
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}

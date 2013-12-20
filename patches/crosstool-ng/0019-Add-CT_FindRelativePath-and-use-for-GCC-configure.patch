@@ -1,15 +1,15 @@
-From 5c0b29b283cce2bb19407923d4d04492fb2afe84 Mon Sep 17 00:00:00 2001
+From c160f62a6979cce22e0d61884c52884b60187693 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 20 Dec 2013 18:48:25 +0000
 Subject: [PATCH 19/19] Add CT_FindRelativePath and use for GCC configure
 
 ---
- scripts/build/cc/100-gcc.sh |  3 ++-
+ scripts/build/cc/100-gcc.sh |  7 +++--
  scripts/functions           | 62 +++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 64 insertions(+), 1 deletion(-)
+ 2 files changed, 67 insertions(+), 2 deletions(-)
 
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index c50c0f6..059b7c2 100644
+index c50c0f6..acf53fa 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
 @@ -407,6 +407,7 @@ do_gcc_core_backend() {
@@ -24,6 +24,24 @@ index c50c0f6..059b7c2 100644
      CFLAGS="${cflags}"                              \
      CXXFLAGS="${cflags}"                            \
      LDFLAGS="${core_LDFLAGS[*]}"                    \
+-    "${CT_SRC_DIR}/gcc-${CT_CC_GCC_VERSION}/configure"  \
++    "${relpath}/configure"                          \
+         --build=${CT_BUILD}                         \
+         --host=${host}                              \
+         --target=${CT_TARGET}                       \
+@@ -870,6 +871,8 @@ do_gcc_backend() {
+ 
+     CT_DoLog DEBUG "Extra config passed: '${extra_config[*]}'"
+ 
++    local relpath="$(CT_FindRelativePath "${PWD}" "${CT_SRC_DIR}/gcc-${CT_CC_GCC_VERSION}")"
++
+     CT_DoExecLog CFG                                \
+     CC_FOR_BUILD="${CT_BUILD}-gcc"                  \
+     CFLAGS_FOR_BUILD="${CT_EXTRA_CFLAGS_FOR_BUILD-${cflags}}" \
+@@ -879,7 +882,7 @@ do_gcc_backend() {
+     CFLAGS_FOR_TARGET="${CT_TARGET_CFLAGS}"         \
+     CXXFLAGS_FOR_TARGET="${CT_TARGET_CFLAGS}"       \
+     LDFLAGS_FOR_TARGET="${CT_TARGET_LDFLAGS}"       \
 -    "${CT_SRC_DIR}/gcc-${CT_CC_GCC_VERSION}/configure"  \
 +    "${relpath}/configure"                          \
          --build=${CT_BUILD}                         \

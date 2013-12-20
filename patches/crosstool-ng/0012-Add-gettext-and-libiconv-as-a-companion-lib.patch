@@ -1,9 +1,11 @@
-From 5f7e35e2553336c730cfcb3957033d4cf60f5ab5 Mon Sep 17 00:00:00 2001
+From f6df2017c589931d533d2b7712c78ed1208aff38 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 21:10:56 +0000
 Subject: [PATCH 12/17] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
+
+Building this is excluded on Darwin and Windows.
 ---
  config/companion_libs.in                           |  27 ++
  config/companion_libs/gettext.in                   |  19 ++
@@ -14,10 +16,10 @@ Subject: [PATCH 12/17] Add gettext and libiconv as a companion lib
  ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++
  ...-Woe32-link-errors-when-compiling-with-O0.patch | 372 +++++++++++++++++++++
  ...rclib_stdio.in.h-remove-gets-declarations.patch |  30 ++
- scripts/build/companion_libs/320-libiconv.sh       |  95 ++++++
- scripts/build/companion_libs/330-gettext.sh        | 119 +++++++
+ scripts/build/companion_libs/320-libiconv.sh       | 107 ++++++
+ scripts/build/companion_libs/330-gettext.sh        | 131 ++++++++
  scripts/build/libc/glibc-eglibc.sh-common          |  18 +-
- 12 files changed, 761 insertions(+), 4 deletions(-)
+ 12 files changed, 785 insertions(+), 4 deletions(-)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
@@ -649,10 +651,10 @@ index 0000000..382c841
 + 
 diff --git a/scripts/build/companion_libs/320-libiconv.sh b/scripts/build/companion_libs/320-libiconv.sh
 new file mode 100644
-index 0000000..60cb78f
+index 0000000..ca17935
 --- /dev/null
 +++ b/scripts/build/companion_libs/320-libiconv.sh
-@@ -0,0 +1,95 @@
+@@ -0,0 +1,107 @@
 +# Build script for libiconv
 +
 +do_libiconv_get() { :; }
@@ -676,6 +678,12 @@ index 0000000..60cb78f
 +do_libiconv_for_build() {
 +    local -a libiconv_opts
 +
++    case "$CT_BUILD" in
++        *darwin*|*linux*)
++            return 0
++            ;;
++    esac
++
 +    CT_DoStep INFO "Installing libiconv for build"
 +    CT_mkdir_pushd "${CT_BUILD_DIR}/build-libiconv-build-${CT_BUILD}"
 +
@@ -692,6 +700,12 @@ index 0000000..60cb78f
 +# Build libiconv for running on host
 +do_libiconv_for_host() {
 +    local -a libiconv_opts
++
++    case "$CT_HOST" in
++        *darwin*|*linux*)
++            return 0
++            ;;
++    esac
 +
 +    CT_DoStep INFO "Installing libiconv for host"
 +    CT_mkdir_pushd "${CT_BUILD_DIR}/build-libiconv-host-${CT_HOST}"
@@ -750,10 +764,10 @@ index 0000000..60cb78f
 +fi
 diff --git a/scripts/build/companion_libs/330-gettext.sh b/scripts/build/companion_libs/330-gettext.sh
 new file mode 100644
-index 0000000..168235f
+index 0000000..90871df
 --- /dev/null
 +++ b/scripts/build/companion_libs/330-gettext.sh
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,131 @@
 +# Build script for gettext
 +
 +do_gettext_get() { :; }
@@ -777,6 +791,12 @@ index 0000000..168235f
 +do_gettext_for_build() {
 +    local -a gettext_opts
 +
++    case "$CT_BUILD" in
++        *darwin*|*linux*)
++            return 0
++            ;;
++    esac
++
 +    CT_DoStep INFO "Installing gettext for build"
 +    CT_mkdir_pushd "${CT_BUILD_DIR}/build-gettext-build-${CT_BUILD}"
 +
@@ -793,6 +813,12 @@ index 0000000..168235f
 +# Build gettext for running on host
 +do_gettext_for_host() {
 +    local -a gettext_opts
++
++    case "$CT_HOST" in
++        *darwin*|*linux*)
++            return 0
++            ;;
++    esac
 +
 +    CT_DoStep INFO "Installing gettext for host"
 +    CT_mkdir_pushd "${CT_BUILD_DIR}/build-gettext-host-${CT_HOST}"

@@ -1,4 +1,4 @@
-From 41fead7999eb98315d68f8728c266e327344e3c5 Mon Sep 17 00:00:00 2001
+From 7d88c361603f4387a7c7dd0b369c64fb949e47b8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 4 Dec 2013 19:30:02 +0000
 Subject: [PATCH 10/17] linux install_headers: avoid over-long commandlines

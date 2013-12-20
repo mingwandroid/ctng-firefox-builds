@@ -1,7 +1,7 @@
-From 607bd21814dbe455649ede8ffc39a414fc1e0603 Mon Sep 17 00:00:00 2001
+From 8a78bcbd85458e4859317590764641e9731b68a2 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
-Subject: [PATCH 02/17] Fix various multilib build bugs
+Subject: [PATCH 02/18] Fix various multilib build bugs
 
 --host=${CT_TARGET} with eg -m32 is not right.
 The arch part must be correct (i686 for 32-bit

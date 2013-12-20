@@ -74,6 +74,13 @@ BUILD_DEBUGGABLE_osx="no"
 BUILD_DEBUGGABLE_windows="yes"
 BUILD_DEBUGGABLE_linux="yes"
 
+# Could try the dlfcn_win32 project for Windows support.
+# I've not made it error if you try to force the issue
+# in-case someone wants to install dlfcn_win32 manually.
+HOST_SUPPORTS_PLUGINS_osx="yes"
+HOST_SUPPORTS_PLUGINS_windows="no"
+HOST_SUPPORTS_PLUGINS_linux="yes"
+
 TARGET_BINUTILS_VERSIONS_osx="none"
 TARGET_BINUTILS_VERSIONS_windows="2.24"
 TARGET_BINUTILS_VERSIONS_linux="2.24"
@@ -87,8 +94,8 @@ TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="4.8.2"
 
 TARGET_LLVM_VERSIONS_osx="head"
-#TARGET_LLVM_VERSIONS_windows="head"
-TARGET_LLVM_VERSIONS_windows="none"
+TARGET_LLVM_VERSIONS_windows="head"
+#TARGET_LLVM_VERSIONS_windows="none"
 TARGET_LLVM_VERSIONS_linux="none"
 #TARGET_LLVM_VERSIONS_linux="head"
 TARGET_LLVM_VERSIONS_ps3="none"
@@ -187,7 +194,7 @@ option CTNG_CLEAN          no \
 "Remove old crosstool-ng build and artefacts
 before starting the build, otherwise an old
 crosstool-ng may be re-used."
-option CTNG_SAVE_STEPS     yes \
+option CTNG_SAVE_STEPS     no \
 "Save steps so that they can be restarted
 later. This doesn't work well for llvm
 and clang unfortunately, but while iterating
@@ -212,6 +219,9 @@ option BINUTILS_VERSION    default \
 "default, none, head, or a sensible Binutils version number."
 option GCC_VERSION        default \
 "default, none, head, or a sensible GCC version number."
+option GNU_PLUGINS        default \
+"Enable you want Binutils+GCC plugin support? Not available
+on Windows hosts"
 option COPY_SDK            yes \
 "Do you want the MacOSX10.6.sdk copied from
 \$HOME/MacOSX10.6.sdk to the sysroot of the
@@ -348,6 +358,9 @@ else
   exit 1
 fi
 
+# TODO :: Support canadian cross compiles then remove this
+HOST_OS=$BUILD_OS
+
 # Sanitise options and lookup per-target/per-build defaults.
 VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
 if [ "$BINUTILS_VERSION" = "default" ]; then
@@ -361,6 +374,9 @@ if [ "$LLVM_VERSION" = "default" ]; then
 fi
 if [ "$COMPILER_RT" = "default" ]; then
   COMPILER_VERSION=$(_al TARGET_COMPILER_RT ${TARGET_OS})
+fi
+if [ "$GNU_PLUGINS" = "default" ]; then
+  GNU_PLUGINS=$(_al HOST_SUPPORTS_PLUGINS ${HOST_OS})
 fi
 if [ "$LLVM_VERSION" = "none" ]; then
   COMPILER_RT="no"
@@ -650,8 +666,10 @@ cross_clang_build()
       echo "CT_BINUTILS_FOR_TARGET=y"          >> ${CTNG_SAMPLE_CONFIG}
       # The following may only work correctly for non-cross builds, but
       # actually it's in GCC that PLUGINS are likely to fail with cross.
-      if [ "$STATIC_TOOLCHAIN" = "no" ]; then
-        echo "CT_BINUTILS_PLUGINS=y"             >> ${CTNG_SAMPLE_CONFIG}
+      if [ "$STATIC_TOOLCHAIN" = "no" -a "$GNU_PLUGINS" = "yes" ]; then
+        echo "CT_BINUTILS_PLUGINS=y"           >> ${CTNG_SAMPLE_CONFIG}
+      else
+        echo "CT_BINUTILS_PLUGINS=n"           >> ${CTNG_SAMPLE_CONFIG}
       fi
     fi
 
@@ -662,8 +680,10 @@ cross_clang_build()
       echo "CT_CC_LANG_CXX=y"                  >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_OBJC=y"                 >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_OBJCXX=y"               >> ${CTNG_SAMPLE_CONFIG}
-      if [ "$STATIC_TOOLCHAIN" = "no" ]; then
+      if [ "$STATIC_TOOLCHAIN" = "no" -a "$GNU_PLUGINS" = "yes" ]; then
         echo "CT_CC_GCC_ENABLE_PLUGINS=y"      >> ${CTNG_SAMPLE_CONFIG}
+      else
+        echo "CT_CC_GCC_ENABLE_PLUGINS=n"      >> ${CTNG_SAMPLE_CONFIG}
       fi
     fi
 

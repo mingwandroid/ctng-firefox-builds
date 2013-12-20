@@ -1,0 +1,77 @@
+From 714c1a5f26628c0c34815569a7ee15a9af04264c Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Fri, 20 Dec 2013 10:38:58 +0000
+Subject: [PATCH 18/18] Look in CT_LOCAL_TARBALLS_DIR for git repos first
+
+---
+ scripts/functions | 32 ++++++++++++++++++++++++++------
+ 1 file changed, 26 insertions(+), 6 deletions(-)
+
+diff --git a/scripts/functions b/scripts/functions
+index 92b3033..91e818c 100644
+--- a/scripts/functions
++++ b/scripts/functions
+@@ -839,9 +839,10 @@ CT_GetSVN() {
+ # Prerequisites: either the server does not require password,
+ # or the user has already taken any action to authenticate to the server.
+ # The cloned tree will *not* be stored in the local tarballs dir!
+-# Usage: CT_GetGit <basename> <url [url ...]>
+-CT_GetGit() {
++# Usage: CT_GetGitInternal <basename> <tarballs-dir> <url [url ...]>
++CT_GetGitInternal() {
+     local basename="$1"; shift
++    local tarballs_dir="$1"; shift
+     local url
+     local cloned=0
+ 
+@@ -851,17 +852,17 @@ CT_GetGit() {
+     fi
+ 
+     # Do we have it in our tarballs dir?
+-    if [ -d "${CT_TARBALLS_DIR}/${basename}/.git" ]; then
++    if [ -d "${tarballs_dir}/${basename}/.git" ]; then
+         CT_DoLog EXTRA "Updating git tree '${basename}'"
+-        CT_Pushd "${CT_TARBALLS_DIR}/${basename}"
++        CT_Pushd "${tarballs_dir}/${basename}"
+         CT_DoExecLog ALL git pull
+         CT_Popd
+     else
+         CT_DoLog EXTRA "Retrieving git tree '${basename}'"
+         for url in "${@}"; do
+             CT_DoLog ALL "Trying to clone from '${url}'"
+-            CT_DoForceRmdir "${CT_TARBALLS_DIR}/${basename}"
+-            if git clone "${url}" "${CT_TARBALLS_DIR}/${basename}" 2>&1 |CT_DoLog ALL; then
++            CT_DoForceRmdir "${tarballs_dir}/${basename}"
++            if git clone "${url}" "${tarballs_dir}/${basename}" 2>&1 |CT_DoLog ALL; then
+                 cloned=1
+                 break
+             fi
+@@ -870,6 +871,25 @@ CT_GetGit() {
+     fi
+ }
+ 
++# Clone a git tree
++# Tries the given URLs in turn until one can get cloned. No tarball will be created.
++# Prerequisites: either the server does not require password,
++# or the user has already taken any action to authenticate to the server.
++# The cloned tree will *not* be stored in the local tarballs dir, however that dir is
++# searched in for an existing clone first.
++# Usage: CT_GetGit <basename> <url [url ...]>
++CT_GetGit() {
++    local basename="$1"; shift
++
++    # First try locally, then the mirror
++    if CT_GetGitInternal "${basename}" "${CT_LOCAL_TARBALLS_DIR}" "${@}"; then
++        # Got it! Return early! :-)
++        return 0
++    fi
++
++    CT_GetGitInternal "${basename}" "${CT_TARBALLS_DIR}" "${@}"
++}
++
+ # Extract a tarball
+ # Some tarballs need to be extracted in specific places. Eg.: glibc addons
+ # must be extracted in the glibc directory; uCLibc locales must be extracted
+-- 
+1.8.5.2
+

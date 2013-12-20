@@ -1,14 +1,14 @@
-From 714c1a5f26628c0c34815569a7ee15a9af04264c Mon Sep 17 00:00:00 2001
+From 7d2a552c96d9d26313e9d78854fbcbb193391a5e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 20 Dec 2013 10:38:58 +0000
-Subject: [PATCH 18/18] Look in CT_LOCAL_TARBALLS_DIR for git repos first
+Subject: [PATCH 18/19] Look in CT_LOCAL_TARBALLS_DIR for git repos first
 
 ---
- scripts/functions | 32 ++++++++++++++++++++++++++------
- 1 file changed, 26 insertions(+), 6 deletions(-)
+ scripts/functions | 33 +++++++++++++++++++++++++++------
+ 1 file changed, 27 insertions(+), 6 deletions(-)
 
 diff --git a/scripts/functions b/scripts/functions
-index 92b3033..91e818c 100644
+index 92b3033..2add472 100644
 --- a/scripts/functions
 +++ b/scripts/functions
 @@ -839,9 +839,10 @@ CT_GetSVN() {
@@ -46,7 +46,7 @@ index 92b3033..91e818c 100644
                  cloned=1
                  break
              fi
-@@ -870,6 +871,25 @@ CT_GetGit() {
+@@ -870,6 +871,26 @@ CT_GetGit() {
      fi
  }
  
@@ -63,6 +63,7 @@ index 92b3033..91e818c 100644
 +    # First try locally, then the mirror
 +    if CT_GetGitInternal "${basename}" "${CT_LOCAL_TARBALLS_DIR}" "${@}"; then
 +        # Got it! Return early! :-)
++        cp -Rf ${CT_LOCAL_TARBALLS_DIR}/"${basename}" ${CT_TARBALLS_DIR}/"${basename}"
 +        return 0
 +    fi
 +

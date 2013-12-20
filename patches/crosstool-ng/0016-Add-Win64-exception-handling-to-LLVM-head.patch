@@ -1,7 +1,7 @@
-From f27f65a62a5cd6f32e9462ac1ae84cb0bb55f6d8 Mon Sep 17 00:00:00 2001
+From 334a059e6580aa5a00914eba34821496ed945d9a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 17 Dec 2013 14:16:36 +0000
-Subject: [PATCH 16/18] Add Win64 exception handling to LLVM head
+Subject: [PATCH 16/19] Add Win64 exception handling to LLVM head
 
 Also apply it to X86MCAsmInfoGNUCOFF too, not just MS.
 .. and emit reg. names not numbers for SEH in MCAsmStreamer since

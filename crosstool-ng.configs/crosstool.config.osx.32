@@ -22,8 +22,6 @@ CT_DARWIN_MAC_OSX_V_10_6=y
 CT_DARWIN_VERSION="10"
 CT_DARWIN_SDK_PATH="${HOME}/MacOSX10.6.sdk"
 CT_SHARED_LIBS=y
-CT_BINUTILS_cctools=y
-CT_CCTOOLS_V_809=y
 CT_EXPORT_BUILD_TOOLS=y
 # For repeatable builds, must be the -t format
 # because touch on Mac doesn't support --date=

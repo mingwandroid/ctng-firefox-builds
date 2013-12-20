@@ -212,26 +212,6 @@ CT_KERNEL_bare_metal_AVAILABLE=y
 # Binary utilities
 #
 CT_ARCH_BINFMT_ELF=y
-CT_BINUTILS="binutils"
-CT_BINUTILS_binutils=y
-CT_BINUTILS_VERSION="2.23.2"
-
-#
-# GNU binutils
-#
-CT_BINUTILS_V_2_23_2=y
-# CT_BINUTILS_V_2_23_1 is not set
-# CT_BINUTILS_V_2_22 is not set
-# CT_BINUTILS_V_2_21_53 is not set
-# CT_BINUTILS_V_2_21_1a is not set
-# CT_BINUTILS_V_2_20_1a is not set
-# CT_BINUTILS_V_2_19_1a is not set
-# CT_BINUTILS_V_2_18a is not set
-# CT_BINUTILS_CUSTOM is not set
-CT_BINUTILS_LINKER_LD=y
-CT_BINUTILS_LINKERS_LIST="ld"
-CT_BINUTILS_LINKER_DEFAULT="bfd"
-CT_BINUTILS_EXTRA_CONFIG_ARRAY=""
 
 #
 # binutils other options

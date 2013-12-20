@@ -74,6 +74,12 @@ BUILD_DEBUGGABLE_osx="no"
 BUILD_DEBUGGABLE_windows="yes"
 BUILD_DEBUGGABLE_linux="yes"
 
+TARGET_BINUTILS_VERSIONS_osx="none"
+TARGET_BINUTILS_VERSIONS_windows="2.24"
+TARGET_BINUTILS_VERSIONS_linux="2.24"
+TARGET_BINUTILS_VERSIONS_ps3="2.23.2"
+TARGET_BINUTILS_VERSIONS_raspi="2.24"
+
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="4.8.2"
 TARGET_GCC_VERSIONS_linux="4.8.2"
@@ -81,8 +87,8 @@ TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="4.8.2"
 
 TARGET_LLVM_VERSIONS_osx="head"
-TARGET_LLVM_VERSIONS_windows="head"
-#TARGET_LLVM_VERSIONS_windows="none"
+#TARGET_LLVM_VERSIONS_windows="head"
+TARGET_LLVM_VERSIONS_windows="none"
 TARGET_LLVM_VERSIONS_linux="none"
 #TARGET_LLVM_VERSIONS_linux="head"
 TARGET_LLVM_VERSIONS_ps3="none"
@@ -202,6 +208,8 @@ about a year ago."
 option LLVM_VERSION        default \
 "default, none, head, 3.3, 3.2, 3.1 or 3.0 (I test with 3.3 most,
 then next, then the others hardly at all)."
+option BINUTILS_VERSION    default \
+"default, none, head, or a sensible Binutils version number."
 option GCC_VERSION        default \
 "default, none, head, or a sensible GCC version number."
 option COPY_SDK            yes \
@@ -342,6 +350,9 @@ fi
 
 # Sanitise options and lookup per-target/per-build defaults.
 VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
+if [ "$BINUTILS_VERSION" = "default" ]; then
+  BINUTILS_VERSION=$(_al TARGET_BINUTILS_VERSIONS ${TARGET_OS})
+fi
 if [ "$GCC_VERSION" = "default" ]; then
   GCC_VERSION=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
 fi
@@ -363,6 +374,7 @@ if [ "$STATIC_TOOLCHAIN" = "yes" -a "$BUILD_OS" = "darwin" ]; then
   exit 1
 fi
 
+BINUTILS_VERS_=$(echo $BINUTILS_VERSION  | tr '.' '_')
 GCC_VERS_=$(echo $GCC_VERSION  | tr '.' '_')
 LLVM_VERS_=$(echo $LLVM_VERSION | tr '.' '_')
 
@@ -633,7 +645,8 @@ cross_clang_build()
         echo "CT_CC_GCC_APPLE=y"               >> ${CTNG_SAMPLE_CONFIG}
       fi
     else
-      echo "CT_BINUTILS_V_2_24=y"              >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_binutils=y"            >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_V_${BINUTILS_VERS_}=y" >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_BINUTILS_FOR_TARGET=y"          >> ${CTNG_SAMPLE_CONFIG}
       # The following may only work correctly for non-cross builds, but
       # actually it's in GCC that PLUGINS are likely to fail with cross.
@@ -2206,3 +2219,20 @@ export PATH=/home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.buil
 x86_64-unknown-mingw32-gcc -DHAVE_CONFIG_H -I. -I/home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/src/mingw-w64-v3.0.0/mingw-w64-crt  -m64 -I/home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/src/mingw-w64-v3.0.0/mingw-w64-crt/include -D_CRTBLD -I/usr/include  -pipe -std=gnu99 -Wall -Wextra -Wformat -Wstrict-aliasing -Wshadow -Wpacked -Winline -Wimplicit-function-declaration -Wmissing-noreturn -Wmissing-prototypes -g -O2 -MT intrincs/lib64_libkernel32_a-__movsb.o -MD -MP -MF intrincs/.deps/lib64_libkernel32_a-__movsb.Tpo -c -o intrincs/lib64_libkernel32_a-__movsb.o `test -f 'intrincs/__movsb.c' || echo '/home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/src/mingw-w64-v3.0.0/mingw-w64-crt/'`intrincs/__movsb.c
 
 /home/ray/ctng-firefox-builds/ctng-build-x-w-none-4_8_2-x86_64/.build/src/mingw-w64-v3.0.0/mingw-w64-crt/configure --prefix=/mingw --build=x86_64-build_unknown-linux-gnu --host=x86_64-unknown-mingw32
+
+
+# ... may want to build fixdeps.exe with debugging info.
+PATH=$HOME/ctng-firefox-builds/mingw64-235295c4/bin:$PATH gcc -Wp,-MD,scripts/basic/.fixdep.d -Iscripts/basic -Wall -Wmissing-prototypes -Wstrict-prototypes -O0 -g -fomit-frame-pointer -o scripts/basic/fixdep /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/linux-3.10.19/scripts/basic/fixdep.c  
+
+pushd $HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers/
+$HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers/scripts/basic/fixdep.exe scripts/basic/.fixdep.d scripts/basic/fixdep "gcc -Wp,-MD,scripts/basic/.fixdep.d -Iscripts/basic -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -o scripts/basic/fixdep $HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/linux-3.10.19/scripts/basic/fixdep.c  "
+$HOME/ctng-firefox-builds/mingw64-235295c4/bin/gdb $HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers/scripts/basic/fixdep.exe scripts/basic/.fixdep.d scripts/basic/fixdep "gcc -Wp,-MD,scripts/basic/.fixdep.d -Iscripts/basic -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -o scripts/basic/fixdep $HOME/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/linux-3.10.19/scripts/basic/fixdep.c  "
+
+
+No idea why it fails to build on Windows now .. something to do with the final build ..
+export PATH=/home/ray/ctng-firefox-builds/x-w-head-4_8_2-x86_64-235295c4-d/bin:/c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/x86_64-unknown-mingw32/buildtools/bin:/c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-235295c4/bin:"${PATH}"
+pushd /c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/x86_64-unknown-mingw32/build/build-cc-gcc-final
+/c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/src/gcc-4.8.2/configure --build=x86_64-build_w64-mingw32 --host=x86_64-build_w64-mingw32 --target=x86_64-unknown-mingw32 --prefix=/home/ray/ctng-firefox-builds/x-w-head-4_8_2-x86_64-235295c4-d --with-sysroot=/home/ray/ctng-firefox-builds/x-w-head-4_8_2-x86_64-235295c4-d/x86_64-unknown-mingw32/sysroot --enable-languages=c,c++,objc,obj-c++ --disable-shared --with-pkgversion=crosstool-NG hg+unknown-20131219.194205 --enable-__cxa_atexit --disable-libmudflap --disable-libgomp --disable-libssp --disable-libquadmath --disable-libquadmath-support --with-gmp=/c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/x86_64-unknown-mingw32/buildtools --with-mpfr=/c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/x86_64-unknown-mingw32/buildtools --with-mpc=/c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/x86_64-unknown-mingw32/buildtools --with-isl=/c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/x86_64-unknown-mingw32/buildtools --with-cloog=/c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/x86_64-unknown-mingw32/buildtools --with-libelf=/c/ctng-build-x-w-head-4_8_2-x86_64-235295c4-d/.build/x86_64-unknown-mingw32/buildtools --enable-threads=win32 --disable-win32-registry --enable-target-optspace --enable-plugin --disable-nls --disable-multilib --with-local-prefix=/home/ray/ctng-firefox-builds/x-w-head-4_8_2-x86_64-235295c4-d/x86_64-unknown-mingw32/sysroot --enable-c99 --enable-long-long
+
+
+also, builds for raspi are using binutils 2.22 instead of 2.24 for some reason?

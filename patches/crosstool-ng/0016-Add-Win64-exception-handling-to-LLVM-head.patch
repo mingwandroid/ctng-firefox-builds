@@ -1,4 +1,4 @@
-From 334a059e6580aa5a00914eba34821496ed945d9a Mon Sep 17 00:00:00 2001
+From 6b6b5b83c6da8fcd975d9451be64eed109e4591b Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 17 Dec 2013 14:16:36 +0000
 Subject: [PATCH 16/19] Add Win64 exception handling to LLVM head

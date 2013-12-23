@@ -1,7 +1,7 @@
-From c16aee980172908fa960a1a58ecd0cdbf2373154 Mon Sep 17 00:00:00 2001
+From 3e08f084afeb82d14ede2ab0eeac1efd708810e6 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 16 Dec 2013 19:43:40 +0000
-Subject: [PATCH 15/21] MinGW-w64: Early create sysroot/mingw top dir
+Subject: [PATCH 15/22] MinGW-w64: Early create sysroot/mingw top dir
 
 .. it must exist before building GCC as otherwise
 the build will deliberately fail.

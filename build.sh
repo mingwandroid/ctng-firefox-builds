@@ -2491,3 +2491,117 @@ From Windows:
 
 
 #include <sysdeps/../nptl/pthread_spin_lock.c>
+
+
+Then it fails again at:
+[ALL  ]    armv6hl-unknown-linux-gnueabi-gcc       -nostdlib -nostartfiles -r -o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map.o '-Wl,-(' /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/dl-allobjs.os /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/libc_pic.a -lgcc '-Wl,-)' -Wl,-Map,/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mapT
+[ALL  ]    rm -f /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map.o
+[ALL  ]    mv -f /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mapT /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map
+[ALL  ]    LC_ALL=C sed -n 's@^/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/([^(]*)(([^)]*.os)) *.*$@1 2@p'     /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map | while read lib file; do   case $lib in   libc_pic.a)     LC_ALL=C fgrep -l /$file 	  /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/stamp.os /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/*/stamp.os |     LC_ALL=C     sed 's@^/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/([^/]*)/stamp.os$@rtld-1'" +=$file@"    ;;   */*.a)     echo rtld-${lib%%/*} += $file ;;   *) echo "Wasn't expecting $lib($file)" >&2; exit 1 ;;   esac; done > /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT
+[ALL  ]    echo rtld-subdirs = `LC_ALL=C sed 's/^rtld-([^ ]*).*$/1/' /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT 		     | LC_ALL=C sort -u` >> /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT
+[ALL  ]    mv -f /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mk
+[ALL  ]    /usr/bin/make -f /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mk -f rtld-Rules
+[ALL  ]    make[4]: Entering directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/elf'
+[ALL  ]    rtld-Rules:40: *** missing separator (did you mean TAB instead of 8 spaces?).  Stop.
+[ALL  ]    make[4]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/elf'
+[ALL  ]    Makefile:310: recipe for target '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/rtld-libc.a' failed
+[ERROR]    make[3]: *** [/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/rtld-libc.a] Error 2
+[ALL  ]    make[3]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/elf'
+[ALL  ]    Makefile:256: recipe for target 'elf/subdir_lib' failed
+[ERROR]    make[2]: *** [elf/subdir_lib] Error 2
+[ALL  ]    make[2]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18'
+[ALL  ]    Makefile:9: recipe for target 'all' failed
+[ERROR]    make[1]: *** [all] Error 2
+[ALL  ]    make[1]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final'
+
+Problem is that:
+C:\ctng-build-x-r-none-4_8_2-x86_64-235295c4-d\.build\armv6hl-unknown-linux-gnueabi\build\build-libc-final\elf\librtld.mk
+Contains only:
+rtld-subdirs =
+
+while on Linux it contains:rtld-csu +=check_fds.os
+rtld-csu +=errno.os
+rtld-csu +=divdi3.os
+rtld-setjmp +=setjmp.os
+rtld-setjmp +=__longjmp.os
+rtld-string +=strchr.os
+rtld-string +=strcmp.os
+rtld-string +=strcpy.os
+..
+..
+..
+..
+rtld-subdirs = csu dirent gmon io misc nptl posix setjmp signal stdlib string time
+
+
+
+On Linux:
+[ALL  ]    armv6hl-unknown-linux-gnueabi-gcc       -nostdlib -nostartfiles -r -o /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map.o '-Wl,-(' /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/dl-allobjs.os /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/libc_pic.a -lgcc '-Wl,-)' -Wl,-Map,/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mapT
+[ALL  ]    rm -f /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map.o
+[ALL  ]    mv -f /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mapT /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map
+[ALL  ]    LC_ALL=C sed -n 's@^/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/([^(]*)(([^)]*.os)) *.*$@1 2@p'     /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map | while read lib file; do   case $lib in   libc_pic.a)     LC_ALL=C fgrep -l /$file 	  /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/stamp.os /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/*/stamp.os |     LC_ALL=C     sed 's@^/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/([^/]*)/stamp.os$@rtld-1'" +=$file@"    ;;   */*.a)     echo rtld-${lib%%/*} += $file ;;   *) echo "Wasn't expecting $lib($file)" >&2; exit 1 ;;   esac; done > /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT
+[ALL  ]    echo rtld-subdirs = `LC_ALL=C sed 's/^rtld-([^ ]*).*$/1/' /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT 		     | LC_ALL=C sort -u` >> /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT
+[ALL  ]    mv -f /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mk
+[ALL  ]    /usr/bin/make -f /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mk -f rtld-Rules
+
+On Windows:
+[ALL  ]    armv6hl-unknown-linux-gnueabi-gcc       -nostdlib -nostartfiles -r -o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map.o '-Wl,-(' /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/dl-allobjs.os /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/libc_pic.a -lgcc '-Wl,-)' -Wl,-Map,/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mapT
+[ALL  ]    rm -f /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map.o
+[ALL  ]    mv -f /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mapT /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map
+[ALL  ]    LC_ALL=C sed -n 's@^/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/([^(]*)(([^)]*.os)) *.*$@1 2@p'     /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map | while read lib file; do   case $lib in   libc_pic.a)     LC_ALL=C fgrep -l /$file 	  /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/stamp.os /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/*/stamp.os |     LC_ALL=C     sed 's@^/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/([^/]*)/stamp.os$@rtld-1'" +=$file@"    ;;   */*.a)     echo rtld-${lib%%/*} += $file ;;   *) echo "Wasn't expecting $lib($file)" >&2; exit 1 ;;   esac; done > /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT
+[ALL  ]    echo rtld-subdirs = `LC_ALL=C sed 's/^rtld-([^ ]*).*$/1/' /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT 		     | LC_ALL=C sort -u` >> /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT
+[ALL  ]    mv -f /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mk
+[ALL  ]    /usr/bin/make -f /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mk -f rtld-Rules
+
+
+LC_ALL=C sed -n 's@^/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/([^(]*)(([^)]*.os)) *.*$@1 2@p'     /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.map | while read lib file; do   case $lib in   libc_pic.a)     LC_ALL=C fgrep -l /$file 	  /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/stamp.os /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/*/stamp.os |     LC_ALL=C     sed 's@^/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/([^/]*)/stamp.os$@rtld-1'" +=$file@"    ;;   */*.a)     echo rtld-${lib%%/*} += $file ;;   *) echo "Wasn't expecting $lib($file)" >&2; exit 1 ;;   esac; done > /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/librtld.mkT
+The map file above ( C:\ctng-build-x-r-none-4_8_2-x86_64-235295c4-d\.build\armv6hl-unknown-linux-gnueabi\build\build-libc-final\elf\librtld.map ) has Windows paths, the SED command is expecting MSYS2 paths .. hmm.
+.. also, those Windows paths are of form:
+C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/libc_pic.a(setitimer.os)
+                              C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/libc_pic.a(profil.os) (__setitimer)
+c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2\libgcc.a(_udivsi3.o)
+
+.. ie both C: and c: are present .. the /..lib/ ones are all c:/
+
+.. there are two problems with this:
+1. c:/ is no good.
+2. ../lib/ is no good.
+If both those were fixed and the sed used Windows paths we'd get further. actually just the sed path needs fixing really.
+
+mkdir /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new
+export PATH=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-235295c4/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"$PATH"
+pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new
+# --cache-file=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/config.cache
+BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE  -mlittle-endian -march=armv6   -mtune=arm1176jzf-s -mfpu=vfp -mhard-float  -O2" CC=armv6hl-unknown-linux-gnueabi-gcc AR=armv6hl-unknown-linux-gnueabi-ar RANLIB=armv6hl-unknown-linux-gnueabi-ranlib /usr/bin/bash /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/configure --prefix=/usr --build=x86_64-build_w64-mingw32 --host=armv6hl-unknown-linux-gnueabi --without-cvs --disable-profile --without-gd --with-headers=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include --libdir=/usr/lib/. --enable-obsolete-rpc --enable-kernel=3.10.19 --with-__thread --with-tls --enable-shared --with-fp --enable-add-ons=nptl,ports --with-pkgversion=crosstool-NG hg+unknown-20131223.134916
+make -j 10
+
+# Okay it is time to normalise all GCC paths.
+
+Some GCC paths are C: and full of /, these are good.
+armv6hl-unknown-linux-gnueabi-gcc -print-search-dirs | tr ';' '\n' | grep 'C:'
+C:/msys64/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/armv6hl-unknown-linux-gnueabi/4.8.2/
+C:/msys64/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/
+C:/msys64/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/lib/armv6hl-unknown-linux-gnueabi/4.8.2/
+C:/msys64/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/lib/
+
+Some GCC paths are c: and mixed with / and \ these are not good.
+armv6hl-unknown-linux-gnueabi-gcc -print-search-dirs | tr ';' '\n' | grep 'c:'
+install: c:\ctng-build-x-r-none-4_8_2-x86_64-235295c4-d\.build\armv6hl-unknown-linux-gnueabi\buildtools\bin\../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/
+programs: =c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../libexec/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/
+c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../libexec/gcc/
+c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/bin/armv6hl-unknown-linux-gnueabi/4.8.2/
+c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/bin/
+libraries: =c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/
+c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/
+c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/lib/armv6hl-unknown-linux-gnueabi/4.8.2/
+c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/../../../../armv6hl-unknown-linux-gnueabi/lib/
+
+.. We got:
+-DSTANDARD_EXEC_PREFIX="/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/"
+
+
+.. first problem is:
+C:\ctng-build-x-r-none-4_8_2-x86_64-235295c4-d\.build\src\gcc-4.8.2\libiberty\make-relative-prefix.c
+if (resolve_links)
+  full_progname = lrealpath (progname);
+lrealpath turns a nice path - C:/ into horrible - c:\

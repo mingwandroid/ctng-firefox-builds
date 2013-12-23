@@ -2367,3 +2367,127 @@ mkdir -p ports/sysdeps/arm/nptl
 echo -e "#include <sysdeps/../nptl/test.c>\n" > test.c
 echo -e "#error \"good\"" > ports/sysdeps/nptl/test.c
 gcc -Iports/sysdeps/arm -Iports/sysdeps test.c
+
+
+# The error was:
+pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/nptl
+export PATH=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"$PATH"
+armv6hl-unknown-linux-gnueabi-gcc     ../ports/sysdeps/arm/nptl/pthread_spin_lock.c -c -std=gnu99 -fgnu89-inline  -O2 -U_FORTIFY_SOURCE -Wall -Winline -Wwrite-strings -fmerge-all-constants -frounding-math -march=armv6 -mfpu=vfp -mhard-float -mlittle-endian -mtune=arm1176jzf-s -Wstrict-prototypes         -I../include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl  -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final  -I../ports/sysdeps/unix/sysv/linux/arm/nptl  -I../ports/sysdeps/unix/sysv/linux/arm  -I../nptl/sysdeps/unix/sysv/linux  -I../nptl/sysdeps/pthread  -I../sysdeps/pthread  -I../ports/sysdeps/unix/sysv/linux  -I../sysdeps/unix/sysv/linux  -I../sysdeps/gnu  -I../sysdeps/unix/inet  -I../nptl/sysdeps/unix/sysv  -I../ports/sysdeps/unix/sysv  -I../sysdeps/unix/sysv  -I../ports/sysdeps/unix/arm  -I../nptl/sysdeps/unix  -I../ports/sysdeps/unix  -I../sysdeps/unix  -I../sysdeps/posix  -I../ports/sysdeps/arm/armv6  -I../ports/sysdeps/arm/nptl  -I../ports/sysdeps/arm/include -I../ports/sysdeps/arm  -I../ports/sysdeps/arm/soft-fp  -I../sysdeps/wordsize-32  -I../sysdeps/ieee754/flt-32  -I../sysdeps/ieee754/dbl-64  -I../sysdeps/ieee754  -I../sysdeps/generic  -I../nptl  -I../ports  -I.. -I../libio -I. -nostdinc -isystem c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include -isystem c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed -isystem /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include  -D_LIBC_REENTRANT -include ../include/libc-symbols.h   -DNOT_IN_libc=1 -DIS_IN_libpthread=1 -DIN_LIB=libpthread    -o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl/pthread_spin_lock.o -MD -MP -MF /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl/pthread_spin_lock.o.dt -MT /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl/pthread_spin_lock.o
+
+
+# On Windows, adding -v 2>&1 | less gives:
+ignoring duplicate directory "."
+#include "..." search starts here:
+#include <...> search starts here:
+ ../include
+ C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl
+ C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final
+ ../ports/sysdeps/unix/sysv/linux/arm/nptl
+ ../ports/sysdeps/unix/sysv/linux/arm
+ ../nptl/sysdeps/unix/sysv/linux
+ ../nptl/sysdeps/pthread
+ ../sysdeps/pthread
+ ../ports/sysdeps/unix/sysv/linux
+ ../sysdeps/unix/sysv/linux
+ ../sysdeps/gnu
+ ../sysdeps/unix/inet
+ ../nptl/sysdeps/unix/sysv
+ ../ports/sysdeps/unix/sysv
+ ../sysdeps/unix/sysv
+ ../ports/sysdeps/unix/arm
+ ../nptl/sysdeps/unix
+ ../ports/sysdeps/unix
+ ../sysdeps/unix
+ ../sysdeps/posix
+ ../ports/sysdeps/arm/armv6
+ ../ports/sysdeps/arm/nptl
+ ../ports/sysdeps/arm/include
+ ../ports/sysdeps/arm
+ ../ports/sysdeps/arm/soft-fp
+ ../sysdeps/wordsize-32
+ ../sysdeps/ieee754/flt-32
+ ../sysdeps/ieee754/dbl-64
+ ../sysdeps/ieee754
+ ../sysdeps/generic
+ ../nptl
+ ../ports
+ ..
+ ../libio
+ c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include
+ c:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed
+ C:/msys64/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include
+
+# .. So over to Linux:
+pushd ~/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/src/eglibc-2_18/nptl
+export PATH=/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"$PATH"
+# Attempting to translate the Windows path directly to linux failed. The only difference is that Linux baked down bin/../lib to /lib whilst Windows hasn't done that .. maybe should fix this to gain more commandline characters?
+# armv6hl-unknown-linux-gnueabi-gcc     ../ports/sysdeps/arm/nptl/pthread_spin_lock.c -c -std=gnu99 -fgnu89-inline  -O2 -U_FORTIFY_SOURCE -Wall -Winline -Wwrite-strings -fmerge-all-constants -frounding-math -march=armv6 -mfpu=vfp -mhard-float -mlittle-endian -mtune=arm1176jzf-s -Wstrict-prototypes         -I../include -I/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl  -I/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final  -I../ports/sysdeps/unix/sysv/linux/arm/nptl  -I../ports/sysdeps/unix/sysv/linux/arm  -I../nptl/sysdeps/unix/sysv/linux  -I../nptl/sysdeps/pthread  -I../sysdeps/pthread  -I../ports/sysdeps/unix/sysv/linux  -I../sysdeps/unix/sysv/linux  -I../sysdeps/gnu  -I../sysdeps/unix/inet  -I../nptl/sysdeps/unix/sysv  -I../ports/sysdeps/unix/sysv  -I../sysdeps/unix/sysv  -I../ports/sysdeps/unix/arm  -I../nptl/sysdeps/unix  -I../ports/sysdeps/unix  -I../sysdeps/unix  -I../sysdeps/posix  -I../ports/sysdeps/arm/armv6  -I../ports/sysdeps/arm/nptl  -I../ports/sysdeps/arm/include -I../ports/sysdeps/arm  -I../ports/sysdeps/arm/soft-fp  -I../sysdeps/wordsize-32  -I../sysdeps/ieee754/flt-32  -I../sysdeps/ieee754/dbl-64  -I../sysdeps/ieee754  -I../sysdeps/generic  -I../nptl  -I../ports  -I.. -I../libio -I. -nostdinc -isystem /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin/../lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed -isystem /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include  -D_LIBC_REENTRANT -include ../include/libc-symbols.h   -DNOT_IN_libc=1 -DIS_IN_libpthread=1 -DIN_LIB=libpthread    -o /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl/pthread_spin_lock.o -MD -MP -MF /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl/pthread_spin_lock.o.dt -MT /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl/pthread_spin_lock.o
+# A working Linux commandline is:
+armv6hl-unknown-linux-gnueabi-gcc     ../ports/sysdeps/arm/nptl/pthread_spin_lock.c -c -std=gnu99 -fgnu89-inline  -O2 -U_FORTIFY_SOURCE -Wall -Winline -Wwrite-strings -fmerge-all-constants -frounding-math -march=armv6 -mfpu=vfp -mhard-float -mlittle-endian -mtune=arm1176jzf-s -Wstrict-prototypes         -I../include -I/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl  -I/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final  -I../ports/sysdeps/unix/sysv/linux/arm/nptl  -I../ports/sysdeps/unix/sysv/linux/arm  -I../nptl/sysdeps/unix/sysv/linux  -I../nptl/sysdeps/pthread  -I../sysdeps/pthread  -I../ports/sysdeps/unix/sysv/linux  -I../sysdeps/unix/sysv/linux  -I../sysdeps/gnu  -I../sysdeps/unix/inet  -I../nptl/sysdeps/unix/sysv  -I../ports/sysdeps/unix/sysv  -I../sysdeps/unix/sysv  -I../ports/sysdeps/unix/arm  -I../nptl/sysdeps/unix  -I../ports/sysdeps/unix  -I../sysdeps/unix  -I../sysdeps/posix  -I../ports/sysdeps/arm/armv6  -I../ports/sysdeps/arm/nptl  -I../ports/sysdeps/arm/include -I../ports/sysdeps/arm  -I../ports/sysdeps/arm/soft-fp  -I../sysdeps/wordsize-32  -I../sysdeps/ieee754/flt-32  -I../sysdeps/ieee754/dbl-64  -I../sysdeps/ieee754  -I../sysdeps/generic  -I../nptl  -I../ports  -I.. -I../libio -I. -nostdinc -isystem /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include        -isystem /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed        -isystem /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include  -D_LIBC_REENTRANT -include ../include/libc-symbols.h   -DNOT_IN_libc=1 -DIS_IN_libpthread=1 -DIN_LIB=libpthread    -o /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl/pthread_spin_lock.o -MD -MP -MF /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl/pthread_spin_lock.o.dt -MT /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl/pthread_spin_lock.o
+
+ignoring duplicate directory "."
+#include "..." search starts here:
+#include <...> search starts here:
+ ../include
+ /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl
+ /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final
+ ../ports/sysdeps/unix/sysv/linux/arm/nptl
+ ../ports/sysdeps/unix/sysv/linux/arm
+ ../nptl/sysdeps/unix/sysv/linux
+ ../nptl/sysdeps/pthread
+ ../sysdeps/pthread
+ ../ports/sysdeps/unix/sysv/linux
+ ../sysdeps/unix/sysv/linux
+ ../sysdeps/gnu
+ ../sysdeps/unix/inet
+ ../nptl/sysdeps/unix/sysv
+ ../ports/sysdeps/unix/sysv
+ ../sysdeps/unix/sysv
+ ../ports/sysdeps/unix/arm
+ ../nptl/sysdeps/unix
+ ../ports/sysdeps/unix
+ ../sysdeps/unix
+ ../sysdeps/posix
+ ../ports/sysdeps/arm/armv6
+ ../ports/sysdeps/arm/nptl
+ ../ports/sysdeps/arm/include
+ ../ports/sysdeps/arm
+ ../ports/sysdeps/arm/soft-fp
+ ../sysdeps/wordsize-32
+ ../sysdeps/ieee754/flt-32
+ ../sysdeps/ieee754/dbl-64
+ ../sysdeps/ieee754
+ ../sysdeps/generic
+ ../nptl
+ ../ports
+ ..
+ ../libio
+ /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include
+ /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed
+ /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include
+ 
+
+
+.. So the include dirs are pretty similar.
+--save-temps gives some more info.
+From Linux:
+# 1 "<command-line>" 2
+# 1 "../ports/sysdeps/arm/nptl/pthread_spin_lock.c"
+# 23 "../ports/sysdeps/arm/nptl/pthread_spin_lock.c"
+# 1 "../sysdeps/../nptl/pthread_spin_lock.c" 1
+# 19 "../sysdeps/../nptl/pthread_spin_lock.c"
+# 1 "../include/atomic.h" 1
+# 48 "../include/atomic.h"
+# 1 "../include/stdlib.h" 1
+
+From Windows:
+# 1 "<command-line>" 2
+# 1 "../ports/sysdeps/arm/nptl/pthread_spin_lock.c"
+# 23 "../ports/sysdeps/arm/nptl/pthread_spin_lock.c"
+# 1 "../ports/sysdeps/arm/sysdeps/../nptl/pthread_spin_lock.c" 1
+# 23 "../ports/sysdeps/arm/sysdeps/../nptl/pthread_spin_lock.c"
+# 1 "../ports/sysdeps/arm/sysdeps/../nptl/pthread_spin_lock.c" 1
+# 23 "../ports/sysdeps/arm/sysdeps/../nptl/pthread_spin_lock.c"
+
+
+#include <sysdeps/../nptl/pthread_spin_lock.c>

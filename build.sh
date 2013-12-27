@@ -2605,3 +2605,73 @@ C:\ctng-build-x-r-none-4_8_2-x86_64-235295c4-d\.build\src\gcc-4.8.2\libiberty\ma
 if (resolve_links)
   full_progname = lrealpath (progname);
 lrealpath turns a nice path - C:/ into horrible - c:\
+
+
+
+# From Linux headers:
++cc_machine := $(shell $(CC) -dumpmachine)
++ifneq (, $(findstring linux, $(cc_machine)))
++  ifneq (, $(findstring mingw, $(cc_machine)))
++  endif
++endif
+
+C:\ctng-build-x-r-none-4_8_2-x86_64-235295c4-d\.build\src\eglibc-2_18\elf\Makefile
+uname_o := $(shell $(uname -o))
+ifneq (, $(findstring Msys, $(uname_o))
+endif
+
+
+
+.. 
+
+The core shell script that fails (masaged enough to work!) is:
+pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new
+
+INPUT=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/elf/librtld.map
+common_objpfxh=C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/
+LC_ALL=C sed -n 's@^'${common_objpfxh}'\([^(]*\)(\([^)]*\.os\)) *.*$@\1 \2@p' ${INPUT} | \
+while read lib file; do
+    case $lib in
+        libc_pic.a)
+#            echo LC_ALL=C fgrep -l $file ${common_objpfxh}stamp.os ${common_objpfxh}*/stamp.os \| LC_ALL=C sed 's@^'${common_objpfxh}'\([^.]*\)/stamp\.os$@rtld-\1'
+            LC_ALL=C fgrep -l $file ${common_objpfxh}stamp.os ${common_objpfxh}*/stamp.os | LC_ALL=C sed 's@^'${common_objpfxh}'\([^/]*\)/stamp\.os$@rtld-\1'" +=$file@"
+            ;;
+        */*.a)
+            echo rtld-${lib%/*} += $file
+            ;;
+        *) echo "Wasn't expecting $lib($file)"
+    esac;
+done
+
+
+# A working example:
+LC_ALL=C fgrep -l munmap.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/argp/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/assert/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/catgets/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/conform/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/crypt/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/csu/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/ctype/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/debug/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/dirent/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/dlfcn/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/elf/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/gmon/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/gnulib/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/grp/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/gshadow/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/hesiod/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/iconv/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/iconvdata/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/inet/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/intl/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/io/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/libio/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/locale/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/localedata/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/login/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/malloc/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/manual/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/math/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/misc/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/nis/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/nptl/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/nptl_db/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/nscd/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/nss/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/po/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/posix/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/pwd/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/resolv/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/resource/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/rt/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/setjmp/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/shadow/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/signal/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/socket/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/stdio-common/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/stdlib/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/streams/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/string/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/sunrpc/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/sysvipc/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/termios/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/time/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/timezone/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/wcsmbs/stamp.os C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/wctype/stamp.os | LC_ALL=C sed 's@^C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/\([^.]*\)/stamp\.os$@rtld-\1'"@"
+
+
+# Latest is:
+
+$(objpfx)librtld.mk: $(objpfx)librtld.map Makefile
+	LC_ALL=C \
+	sed -n 's@^$(common-objpfxh)\([^(]*\)(\([^)]*\.os\)) *.*$$@\1 \2@p' \
+	    $< | \
+	while read lib file; do \
+	  case $$lib in \
+	  libc_pic.a) \
+	    LC_ALL=C fgrep -l /$$file \
+		  $(common-objpfxh)stamp.os $(common-objpfxh)*/stamp.os | \
+	    LC_ALL=C \
+	    sed 's@^$(common-objpfxh)\([^/]*\)/stamp\.os$$@rtld-\1'" +=$$file@"\
+	    ;; \
+	  */*.a) \
+	    echo rtld-$${lib%%/*} += $$file ;; \
+	  *) echo "Wasn't expecting $$lib($$file)" >&2; exit 1 ;; \
+	  esac; \
+	done > $@T
+	echo rtld-subdirs = `LC_ALL=C sed 's/^rtld-\([^ ]*\).*$$/\1/' $@T \
+			     | LC_ALL=C sort -u` >> $@T
+	mv -f $@T $@
+
+
+$(objpfx)rtld-libc.a: $(objpfx)librtld.mk FORCE
+	$(MAKE) -f $< -f rtld-Rules
+

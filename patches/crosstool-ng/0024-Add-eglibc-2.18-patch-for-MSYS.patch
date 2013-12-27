@@ -1,0 +1,60 @@
+From 717d856429e21d7f90c83f5150d87c198788ef50 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Fri, 27 Dec 2013 22:16:08 +0000
+Subject: [PATCH 24/24] Add eglibc 2.18 patch for MSYS*
+
+.. Path differences between MSYS*'s gnumake and the host tools
+causes various sed operations to not behave as expected. So
+use pwd -W to bodge around this. Note, this should not be applied
+if the host tools are being built for MSYS*, and this patch ignores
+this distinction and happily breaks making MSYS hosted tools.
+---
+ .../2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch    | 36 ++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+ create mode 100644 patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
+
+diff --git a/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch b/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
+new file mode 100644
+index 0000000..3289b90
+--- /dev/null
++++ b/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
+@@ -0,0 +1,36 @@
++--- eglibc-2_18/elf/Makefile.orig	2013-06-15 18:37:04.000000000 +0100
+++++ eglibc-2_18/elf/Makefile	2013-12-27 21:44:06.625816100 +0000
++@@ -63,6 +63,14 @@
++ ld-map		= $(common-objpfx)ld.map
++ # eglibc: endif
++ 
+++# Hack for building on MSYS2 but using native host (e.g. MinGW-w64) compilers.
+++uname_o := $(shell uname -o)
+++ifneq (, $(findstring Msys, $(uname_o)))
+++common-objpfxh = $(shell cd $(common-objpfx); pwd -W)/
+++else
+++common-objpfxh = $(common-objpfx)
+++endif
+++
++ ifeq (yes,$(build-shared))
++ extra-objs	= $(all-rtld-routines:%=%.os) soinit.os sofini.os interp.os
++ generated	+= librtld.os dl-allobjs.os ld.so ldd
++@@ -287,15 +295,15 @@
++ 
++ $(objpfx)librtld.mk: $(objpfx)librtld.map Makefile
++ 	LC_ALL=C \
++-	sed -n 's@^$(common-objpfx)\([^(]*\)(\([^)]*\.os\)) *.*$$@\1 \2@p' \
+++	sed -n 's@^$(common-objpfxh)\([^(]*\)(\([^)]*\.os\)) *.*$$@\1 \2@p' \
++ 	    $< | \
++ 	while read lib file; do \
++ 	  case $$lib in \
++ 	  libc_pic.a) \
++ 	    LC_ALL=C fgrep -l /$$file \
++-		  $(common-objpfx)stamp.os $(common-objpfx)*/stamp.os | \
+++		  $(common-objpfxh)stamp.os $(common-objpfxh)*/stamp.os | \
++ 	    LC_ALL=C \
++-	    sed 's@^$(common-objpfx)\([^/]*\)/stamp\.os$$@rtld-\1'" +=$$file@"\
+++	    sed 's@^$(common-objpfxh)\([^/]*\)/stamp\.os$$@rtld-\1'" +=$$file@"\
++ 	    ;; \
++ 	  */*.a) \
++ 	    echo rtld-$${lib%%/*} += $$file ;; \
+-- 
+1.8.5.2
+

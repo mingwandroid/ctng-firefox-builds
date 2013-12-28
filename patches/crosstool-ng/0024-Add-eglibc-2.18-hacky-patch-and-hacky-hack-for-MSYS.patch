@@ -1,16 +1,21 @@
-From 717d856429e21d7f90c83f5150d87c198788ef50 Mon Sep 17 00:00:00 2001
+From 6ad2ea3c9ca5cf3a9d2e471e82fbe41084c3ce32 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 27 Dec 2013 22:16:08 +0000
-Subject: [PATCH 24/24] Add eglibc 2.18 patch for MSYS*
+Subject: [PATCH 24/24] Add eglibc 2.18 hacky patch and hacky hack for MSYS*
 
 .. Path differences between MSYS*'s gnumake and the host tools
 causes various sed operations to not behave as expected. So
 use pwd -W to bodge around this. Note, this should not be applied
 if the host tools are being built for MSYS*, and this patch ignores
 this distinction and happily breaks making MSYS hosted tools.
+
+Also, set env. var MSYS2_ARG_CONV_EXCL="-DNLSPATH=" when calling
+make to prevent MSYS from transforming it to the Windows host
+equivalent value.
 ---
  .../2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch    | 36 ++++++++++++++++++++++
- 1 file changed, 36 insertions(+)
+ scripts/build/libc/glibc-eglibc.sh-common          |  1 +
+ 2 files changed, 37 insertions(+)
  create mode 100644 patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
 
 diff --git a/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch b/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
@@ -55,6 +60,18 @@ index 0000000..3289b90
 + 	    ;; \
 + 	  */*.a) \
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
+diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
+index 2976192..4cdc13e 100644
+--- a/scripts/build/libc/glibc-eglibc.sh-common
++++ b/scripts/build/libc/glibc-eglibc.sh-common
+@@ -485,6 +485,7 @@ do_libc_backend_once() {
+ 
+     if [ "${libc_full}" = "y" ]; then
+         CT_DoLog EXTRA "Building C library"
++        MSYS2_ARG_CONV_EXCL="-DNLSPATH="                \
+         CT_DoExecLog ALL make ${JOBSFLAGS}              \
+                               "${extra_make_args[@]}"   \
+                               all
 -- 
 1.8.5.2
 

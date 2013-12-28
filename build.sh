@@ -2675,3 +2675,90 @@ $(objpfx)librtld.mk: $(objpfx)librtld.map Makefile
 $(objpfx)rtld-libc.a: $(objpfx)librtld.mk FORCE
 	$(MAKE) -f $< -f rtld-Rules
 
+
+
+push /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new
+export PATH=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-235295c4/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"$PATH"
+
+# Windows:
+
+armv6hl-unknown-linux-gnueabi-gcc \
+-nostdlib -nostartfiles -o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/iconv/iconvconfig    \
+-Wl,-z,combreloc -Wl,-z,relro -Wl,--hash-style=both /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/csu/crt1.o \
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/csu/crti.o \
+`armv6hl-unknown-linux-gnueabi-gcc --print-file-name=crtbegin.o` \
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/iconv/iconvconfig.o \
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/iconv/strtab.o \
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/iconv/xmalloc.o \
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/iconv/hash-string.o  \
+-Wl,-dynamic-linker=/lib/ld-linux-armhf.so.3 \
+-Wl,-rpath-link=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/math:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/elf:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/dlfcn:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/nss:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/nis:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/rt:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/resolv:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/crypt:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/nptl \
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/libc.so.6 \
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/libc_nonshared.a \
+-Wl,--as-needed /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/elf/ld.so -Wl,--no-as-needed \
+-lgcc \
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/elf/libgcc-stubs.a \
+`armv6hl-unknown-linux-gnueabi-gcc  --print-file-name=crtend.o` \
+/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final-new/csu/crtn.o
+
+
+# Linux:
+
+armv6hl-unknown-linux-gnueabi-gcc     \
+-nostdlib -nostartfiles -o /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/iconv/iconvconfig    \
+-Wl,-z,combreloc -Wl,-z,relro -Wl,--hash-style=both /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/csu/crt1.o \
+/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/csu/crti.o \
+`armv6hl-unknown-linux-gnueabi-gcc --print-file-name=crtbegin.o` \
+/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/iconv/iconvconfig.o \
+/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/iconv/strtab.o \
+/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/iconv/xmalloc.o \
+/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/iconv/hash-string.o  \
+-Wl,-dynamic-linker=/lib/ld-linux-armhf.so.3 \
+-Wl,-rpath-link=/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/math:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/dlfcn:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nss:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nis:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/rt:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/resolv:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/crypt:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/nptl \
+/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/libc.so.6 \
+/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/libc_nonshared.a \
+-Wl,--as-needed /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/ld.so -Wl,--no-as-needed \
+-lgcc \
+/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/libgcc-stubs.a \
+`armv6hl-unknown-linux-gnueabi-gcc      --print-file-name=crtend.o` \
+/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/csu/crtn.o
+
+
+probably want to figure out the catgets.c warnings:
+Windows:
+pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/catgets
+export PATH=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-235295c4/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:"$PATH"
+armv6hl-unknown-linux-gnueabi-gcc     catgets.c -c -std=gnu99 -fgnu89-inline  -O2 -U_FORTIFY_SOURCE -Wall -Winline -Wwrite-strings -fmerge-all-constants -frounding-math -march=armv6 -mfpu=vfp -mhard-float -mlittle-endian -mtune=arm1176jzf-s -Wstrict-prototypes        -DNLSPATH='"/usr/share/locale/%L/%N:/usr/share/locale/%L/LC_MESSAGES/%N:/usr/share/locale/%l/%N:/usr/share/locale/%l/LC_MESSAGES/%N:"' -DHAVE_CONFIG_H -I../include -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/catgets  -I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final  -I../ports/sysdeps/unix/sysv/linux/arm/nptl  -I../ports/sysdeps/unix/sysv/linux/arm  -I../nptl/sysdeps/unix/sysv/linux  -I../nptl/sysdeps/pthread  -I../sysdeps/pthread  -I../ports/sysdeps/unix/sysv/linux  -I../sysdeps/unix/sysv/linux  -I../sysdeps/gnu  -I../sysdeps/unix/inet  -I../nptl/sysdeps/unix/sysv  -I../ports/sysdeps/unix/sysv  -I../sysdeps/unix/sysv  -I../ports/sysdeps/unix/arm  -I../nptl/sysdeps/unix  -I../ports/sysdeps/unix  -I../sysdeps/unix  -I../sysdeps/posix  -I../ports/sysdeps/arm/armv6  -I../ports/sysdeps/arm/nptl  -I../ports/sysdeps/arm/include -I../ports/sysdeps/arm  -I../ports/sysdeps/arm/soft-fp  -I../sysdeps/wordsize-32  -I../sysdeps/ieee754/flt-32  -I../sysdeps/ieee754/dbl-64  -I../sysdeps/ieee754  -I../sysdeps/generic  -I../nptl  -I../ports  -I.. -I../libio -I. -nostdinc -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include -isystem C:/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed -isystem /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include  -D_LIBC_REENTRANT -include ../include/libc-symbols.h       -o /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/catgets/catgets.o -MD -MP -MF /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/catgets/catgets.o.dt -MT /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/catgets/catgets.o --save-temps
+mv catgets.i ~/Dropbox/catgets.windows.i
+popd
+
+
+Linux:
+pushd /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/src/eglibc-2_18/catgets
+export PATH=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/bin:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/tools/bin:"${PATH}"
+armv6hl-unknown-linux-gnueabi-gcc     catgets.c -c -std=gnu99 -fgnu89-inline  -O2 -U_FORTIFY_SOURCE -Wall -Winline -Wwrite-strings -fmerge-all-constants -frounding-math -march=armv6 -mfpu=vfp -mhard-float -mlittle-endian -mtune=arm1176jzf-s -Wstrict-prototypes        -DNLSPATH='"/usr/share/locale/%L/%N:/usr/share/locale/%L/LC_MESSAGES/%N:/usr/share/locale/%l/%N:/usr/share/locale/%l/LC_MESSAGES/%N:"' -DHAVE_CONFIG_H -I../include -I/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/catgets  -I/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final  -I../ports/sysdeps/unix/sysv/linux/arm/nptl  -I../ports/sysdeps/unix/sysv/linux/arm  -I../nptl/sysdeps/unix/sysv/linux  -I../nptl/sysdeps/pthread  -I../sysdeps/pthread  -I../ports/sysdeps/unix/sysv/linux  -I../sysdeps/unix/sysv/linux  -I../sysdeps/gnu  -I../sysdeps/unix/inet  -I../nptl/sysdeps/unix/sysv  -I../ports/sysdeps/unix/sysv  -I../sysdeps/unix/sysv  -I../ports/sysdeps/unix/arm  -I../nptl/sysdeps/unix  -I../ports/sysdeps/unix  -I../sysdeps/unix  -I../sysdeps/posix  -I../ports/sysdeps/arm/armv6  -I../ports/sysdeps/arm/nptl  -I../ports/sysdeps/arm/include -I../ports/sysdeps/arm  -I../ports/sysdeps/arm/soft-fp  -I../sysdeps/wordsize-32  -I../sysdeps/ieee754/flt-32  -I../sysdeps/ieee754/dbl-64  -I../sysdeps/ieee754  -I../sysdeps/generic  -I../nptl  -I../ports  -I.. -I../libio -I. -nostdinc -isystem /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include -isystem /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed -isystem /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include  -D_LIBC_REENTRANT -include ../include/libc-symbols.h       -o /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/catgets/catgets.o -MD -MP -MF /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/catgets/catgets.o.dt -MT /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/catgets/catgets.o --save-temps
+mv catgets.i ~/Dropbox/catgets.linux.i
+
+
+.. the difference is:
+Linux:
+size_t len = strlen (nlspath) + 1 + sizeof "/usr/share/locale/%L/%N:/usr/share/locale/%L/LC_MESSAGES/%N:/usr/share/locale/%l/%N:/usr/share/locale/%l/LC_MESSAGES/%N:";
+char *tmp = __builtin_alloca (len);
+
+__builtin_stpcpy (__builtin_stpcpy (__builtin_stpcpy (tmp, nlspath), ":"), "/usr/share/locale/%L/%N:/usr/share/locale/%L/LC_MESSAGES/%N:/usr/share/locale/%l/%N:/usr/share/locale/%l/LC_MESSAGES/%N:");
+nlspath = tmp;
+}
+   else
+nlspath = "/usr/share/locale/%L/%N:/usr/share/locale/%L/LC_MESSAGES/%N:/usr/share/locale/%l/%N:/usr/share/locale/%l/LC_MESSAGES/%N:";
+ }
+
+Windows:
+size_t len = strlen (nlspath) + 1 + sizeof "C:\msys64\share\locale\%L\%N;C:\msys64\share\locale\%L\LC_MESSAGES\%N;C:\msys64\share\locale\%l\%N;C:\msys64\share\locale\%l\LC_MESSAGES\%N";
+char *tmp = __builtin_alloca (len);
+
+__builtin_stpcpy (__builtin_stpcpy (__builtin_stpcpy (tmp, nlspath), ":"), "C:\msys64\share\locale\%L\%N;C:\msys64\share\locale\%L\LC_MESSAGES\%N;C:\msys64\share\locale\%l\%N;C:\msys64\share\locale\%l\LC_MESSAGES\%N");
+nlspath = tmp;
+}
+   else
+nlspath = "C:\msys64\share\locale\%L\%N;C:\msys64\share\locale\%L\LC_MESSAGES\%N;C:\msys64\share\locale\%l\%N;C:\msys64\share\locale\%l\LC_MESSAGES\%N";
+ }

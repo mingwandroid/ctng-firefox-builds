@@ -1,4 +1,4 @@
-From e91de0bf3004f0f4ed1eff577efe31dbb201ae5e Mon Sep 17 00:00:00 2001
+From 47e4e210adb9d2571f284cfb7dcf324e1a311051 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 14 Dec 2013 03:18:53 +0000
 Subject: [PATCH 14/25] Fix eglibc and glibc sunrpc Windows build issues
@@ -8,8 +8,8 @@ Win32 API is used, also some missing string functions
 were added.
 ---
  .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 251 +++++++++++++++++++++
- scripts/build/libc/glibc-eglibc.sh-common          |   2 +-
- 2 files changed, 252 insertions(+), 1 deletion(-)
+ scripts/build/libc/glibc-eglibc.sh-common          |  21 +-
+ 2 files changed, 262 insertions(+), 10 deletions(-)
  create mode 100644 patches/eglibc/2_18/110-Fix-crossrpc-to-build-on-non-Linux.patch
 
 diff --git a/patches/eglibc/2_18/110-Fix-crossrpc-to-build-on-non-Linux.patch b/patches/eglibc/2_18/110-Fix-crossrpc-to-build-on-non-Linux.patch
@@ -270,18 +270,49 @@ index 0000000..71e9765
 + /* valid tirpc nettypes */
 + static const char *valid_ti_nettypes[] =
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index 8a8f776..2976192 100644
+index 8a8f776..3215172 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
-@@ -409,7 +409,7 @@ do_libc_backend_once() {
-                 # cross-rpcgen.
-                 # used to parse the output of the C-preprocessor.
-                 extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
--                extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -lintl" )
-+                extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib  -Wl,-Bstatic -lintl -Wl,-Bdynamic" )
-                 ;;
-         esac
+@@ -398,21 +398,21 @@ do_libc_backend_once() {
+             ;;
+     esac
  
++    case "$CT_BUILD" in
++        *mingw*)
++            # When installing headers on MinGW-w64, sunrpc needs gettext for building
++            # cross-rpcgen.
++            # used to parse the output of the C-preprocessor.
++            extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
++            extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" )
++            ;;
++    esac
++
+     if [ "${libc_headers}" = "y" ]; then
+         CT_DoLog EXTRA "Installing C library headers"
+ 
+         # use the 'install-headers' makefile target to install the
+         # headers
+-        case "$CT_BUILD" in
+-            *mingw*)
+-                # When installing headers on MinGW-w64, sunrpc needs gettext for building
+-                # cross-rpcgen.
+-                # used to parse the output of the C-preprocessor.
+-                extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
+-                extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -lintl" )
+-                ;;
+-        esac
+-
+         CT_DoExecLog ALL make ${JOBSFLAGS}                                        \
+                          install_root="${install_root}"                           \
+                          install-bootstrap-headers=yes                            \
+@@ -484,6 +484,7 @@ do_libc_backend_once() {
+     fi # libc_headers == y
+ 
+     if [ "${libc_full}" = "y" ]; then
++
+         CT_DoLog EXTRA "Building C library"
+         CT_DoExecLog ALL make ${JOBSFLAGS}              \
+                               "${extra_make_args[@]}"   \
 -- 
 1.8.5.2
 

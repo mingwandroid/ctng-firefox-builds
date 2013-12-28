@@ -1,4 +1,4 @@
-From 7def6bd9ba38c02e5e34e1cb65fefdefe78b956e Mon Sep 17 00:00:00 2001
+From 7a3de61bcf085630b362f87d6fcd59917f272fd3 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 19 Dec 2013 07:18:57 +0000
 Subject: [PATCH 17/25] Add binutils 2.24

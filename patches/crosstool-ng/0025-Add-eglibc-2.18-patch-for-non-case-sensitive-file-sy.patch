@@ -1,4 +1,4 @@
-From 978b09c91fb41486d67e3bf420c4bac619afb16f Mon Sep 17 00:00:00 2001
+From 143d132be2e430e981cd769bae23d7149db08302 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 28 Dec 2013 18:30:54 +0000
 Subject: [PATCH 25/25] Add eglibc 2.18 patch for non case-sensitive file

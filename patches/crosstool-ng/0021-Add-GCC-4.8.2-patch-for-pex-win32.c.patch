@@ -1,7 +1,7 @@
-From eb7b902125d02e2c9f401343e7549c88d448a3aa Mon Sep 17 00:00:00 2001
+From 70b1274eec429c6b7b7289ed34b51a9083d61215 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 22 Dec 2013 03:00:07 +0000
-Subject: [PATCH 21/24] Add GCC 4.8.2 patch for pex-win32.c
+Subject: [PATCH 21/25] Add GCC 4.8.2 patch for pex-win32.c
 
 .. it always quoted all arguments, irrespective of whether
 there was a need to. This meant the 32k limit was being

@@ -2762,3 +2762,45 @@ nlspath = tmp;
    else
 nlspath = "C:\msys64\share\locale\%L\%N;C:\msys64\share\locale\%L\LC_MESSAGES\%N;C:\msys64\share\locale\%l\%N;C:\msys64\share\locale\%l\LC_MESSAGES\%N";
  }
+
+
+
+Still missing in build-libc-final/elf/librtld.mk :
+
+rtld-csu +=check_fds.os
+rtld-csu +=errno.os
+rtld-csu +=divdi3.os
+
+rtld-io +=xstat64.os
+rtld-io +=fxstat64.os
+rtld-io +=lxstat64.os
+rtld-io +=open.os
+rtld-io +=read.os
+rtld-io +=write.os
+rtld-io +=lseek.os
+rtld-io +=access.os
+rtld-io +=fcntl.os
+rtld-io +=close.os
+
+rtld-nptl +=libc-cancellation.os
+rtld-nptl +=libc_multiple_threads.os
+rtld-csu +=sysdep.os
+
+rtld-nptl +=forward.os
+rtld-stdlib +=exit.os
+rtld-stdlib +=cxa_atexit.os
+rtld-stdlib +=cxa_thread_atexit_impl.os
+
+and finally subdirs:
+rtld-subdirs = csu dirent gmon io misc nptl posix setjmp signal stdlib string time (Linux)
+rtld-subdirs =     dirent gmon    misc nptl posix setjmp signal        string time (Windows - missing is csu, io, stdlib)
+
+
+Linux:
+[ALL  ]    /usr/bin/make subdir=stdlib -C ../stdlib ..=../ objdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final -f Makefile -f ../elf/rtld-Rules rtld-all rtld-modules='rtld-exit.os rtld-cxa_atexit.os rtld-cxa_thread_atexit_impl.os'
+[ALL  ]    /usr/bin/make subdir=stdlib -C ../stdlib ..=../ objdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final -f Makefile -f ../elf/rtld-Rules rtld-all rtld-modules='rtld-exit.os rtld-cxa_atexit.os rtld-cxa_thread_atexit_impl.os'
+[ALL  ]    /usr/bin/make subdir=stdlib -C ../stdlib ..=../ objdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final -f Makefile -f ../elf/rtld-Rules rtld-all rtld-modules='rtld-exit.os rtld-cxa_atexit.os rtld-cxa_thread_atexit_impl.os'
+[ALL  ]    /usr/bin/make subdir=stdlib -C ../stdlib ..=../ objdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final -f Makefile -f ../elf/rtld-Rules rtld-all rtld-modules='rtld-exit.os rtld-cxa_atexit.os rtld-cxa_thread_atexit_impl.os'
+[ALL  ]    /usr/bin/make subdir=stdlib -C ../stdlib ..=../ objdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final -f Makefile -f ../elf/rtld-Rules rtld-all rtld-modules='rtld-exit.os rtld-cxa_atexit.os rtld-cxa_thread_atexit_impl.os'
+
+Windows:

@@ -1,7 +1,7 @@
-From e989163e876a93b91471a3612ad89b632794b8ee Mon Sep 17 00:00:00 2001
+From 349b2e836a91f81f4f55156fa799308d7008d0b9 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 4 Dec 2013 00:30:02 +0000
-Subject: [PATCH 09/25] Fix for xgcc not finding cc1 on Windows
+Subject: [PATCH 09/26] Fix for xgcc not finding cc1 on Windows
 
 ---
  .../110-mingw-find_executable-look-in-cwd.patch    | 45 ++++++++++++++++++++++
@@ -60,5 +60,5 @@ index 0000000..97c035d
 + }
 + 
 -- 
-1.8.5.2
+1.8.5.1
 

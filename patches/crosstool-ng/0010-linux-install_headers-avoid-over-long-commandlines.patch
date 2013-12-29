@@ -1,7 +1,7 @@
-From d4e859cc64cbe8de6bf34b748588f009e32f7c4b Mon Sep 17 00:00:00 2001
+From 6f001778c538cda5aee0742005c5f57254be84ac Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 4 Dec 2013 19:30:02 +0000
-Subject: [PATCH 10/25] linux install_headers: avoid over-long commandlines
+Subject: [PATCH 10/26] linux install_headers: avoid over-long commandlines
 
 ---
  ...efile.headersinst-install-headers-from-sc.patch | 59 ++++++++++++++++++++++
@@ -74,5 +74,5 @@ index 0000000..7eb7def
 + else
 + __headerscheck: $(subdirs) $(check-file)
 -- 
-1.8.5.2
+1.8.5.1
 

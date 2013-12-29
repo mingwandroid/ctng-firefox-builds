@@ -70,7 +70,7 @@ VENDOR_OSES_linux="unknown-linux-gnu"
 VENDOR_OSES_raspi="unknown-linux-gnu"
 
 # Defaults ..
-BUILD_DEBUGGABLE_osx="no"
+BUILD_DEBUGGABLE_darwin="yes"
 BUILD_DEBUGGABLE_windows="yes"
 BUILD_DEBUGGABLE_linux="yes"
 
@@ -595,11 +595,10 @@ download_build_compilers()
 {
   if [ "$OSTYPE" = "msys" ]; then
     . ${THISDIR}/mingw-w64-toolchain.sh --arch=$HOST_ARCH --root=$PWD --path-out=MINGW_W64_PATH --hash-out=MINGW_W64_HASH --enable-verbose --enable-hash-in-path
-  else
-    # To make Beyond Compare comparisons as clean as possible!
-    MINGW_W64_HASH="235295c4"
+    # I'd like to get a hash for all other compilers too.
+    test -n "$MINGW_W64_HASH" && MINGW_W64_HASH=-${MINGW_W64_HASH}
+    # MinGW compilers must be found before MSYS2 compilers, so add them to the front of PATH. STILL NOT WORKING. WANTS TO BUILD FOR MSYS2.
   fi
-  test -n "$MINGW_W64_HASH" && MINGW_W64_HASH=-${MINGW_W64_HASH}
 }
 
 cross_clang_build()
@@ -869,8 +868,7 @@ if [ "$OSTYPE" = "msys" ]; then
   # 263.
   BUILDDIR=/c/ctng-build-${STUB}-${BUILD_PREFIX}
 else
-#  BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
-  BUILDDIR=/c/ctng-build-${STUB}-${BUILD_PREFIX}
+  BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
 fi
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
@@ -2849,3 +2847,20 @@ pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/elf
 SOURCE=`../scripts/rellns-sh -p /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3`
 DEST=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3
 cp -p $SOURCE $DEST
+
+
+pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final
+make -j1 -l BUILD_CPPFLAGS=-I/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/include/ BUILD_LDFLAGS="-L/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" install_root=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot install
+
+# --cache-file=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/config.cache 
+# Seems as if if "ln -s" was determined to be ok to use then it would work.
+
+export PATH=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:$HOME/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/bin:"$PATH"
+
+export PATH=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-235295c4/bin:"${PATH}"
+
+BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE  -mlittle-endian -march=armv6   -mtune=arm1176jzf-s -mfpu=vfp -mhard-float  -O" \
+  CC=armv6hl-unknown-linux-gnueabi-gcc AR=armv6hl-unknown-linux-gnueabi-ar RANLIB=armv6hl-unknown-linux-gnueabi-ranlib /usr/bin/bash /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/configure \
+  --prefix=/usr --build=x86_64-build_w64-mingw32 --host=armv6hl-unknown-linux-gnueabi \
+  --without-cvs --disable-profile --without-gd --with-headers=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include \
+  --libdir=/usr/lib/. --enable-obsolete-rpc --enable-kernel=3.10.19 --with-__thread --with-tls --enable-shared --with-fp --enable-add-ons=nptl,ports --with-pkgversion=crosstool-NG hg+unknown-20131228.211220

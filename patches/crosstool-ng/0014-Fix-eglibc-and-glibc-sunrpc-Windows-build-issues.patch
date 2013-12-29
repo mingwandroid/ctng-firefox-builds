@@ -1,7 +1,7 @@
-From 6b8bb148c856bf87205b6afaea909e3e163b2fe3 Mon Sep 17 00:00:00 2001
+From 5f55211a64cf2a842a388d2afa60a46e7dfcc54a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 14 Dec 2013 03:18:53 +0000
-Subject: [PATCH 14/25] Fix eglibc and glibc sunrpc Windows build issues
+Subject: [PATCH 14/26] Fix eglibc and glibc sunrpc Windows build issues
 
 .. fork, exec were being used. Now, on Windows the
 Win32 API is used, also some missing string functions
@@ -314,5 +314,5 @@ index 8a8f776..3215172 100644
          CT_DoExecLog ALL make ${JOBSFLAGS}              \
                                "${extra_make_args[@]}"   \
 -- 
-1.8.5.2
+1.8.5.1
 

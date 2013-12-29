@@ -2803,4 +2803,47 @@ Linux:
 [ALL  ]    /usr/bin/make subdir=stdlib -C ../stdlib ..=../ objdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final -f Makefile -f ../elf/rtld-Rules rtld-all rtld-modules='rtld-exit.os rtld-cxa_atexit.os rtld-cxa_thread_atexit_impl.os'
 [ALL  ]    /usr/bin/make subdir=stdlib -C ../stdlib ..=../ objdir=/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final -f Makefile -f ../elf/rtld-Rules rtld-all rtld-modules='rtld-exit.os rtld-cxa_atexit.os rtld-cxa_thread_atexit_impl.os'
 
-Windows:
+.. well, that was case sensitivity between .os (shared object) files and .oS (static object) files. Renamed .oS to .oSTATIC
+
+Next failure is:
+[ALL  ]    /usr/bin/install -c /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/ld.so /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so.new
+[ALL  ]    mv -f /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so.new /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so
+[ALL  ]    /usr/bin/install -c /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/libc.so /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/libc-2.18.so.new
+[ALL  ]    mv -f /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/libc-2.18.so.new /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/libc-2.18.so
+[ALL  ]    rm -f /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3
+[ALL  ]    cp -p `../scripts/rellns-sh -p /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3` /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3
+[ALL  ]    cp: cannot stat 'ld-2.18.so': No such file or directory
+[ALL  ]    Makefile:376: recipe for target '/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3' failed
+[ERROR]    make[3]: *** [/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3] Error 1
+[ALL  ]    make[3]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/elf'
+[ALL  ]    Makefile:104: recipe for target 'elf/ldso_install' failed
+[ERROR]    make[2]: *** [elf/ldso_install] Error 2
+[ALL  ]    make[2]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18'
+[ALL  ]    Makefile:12: recipe for target 'install' failed
+[ERROR]    make[1]: *** [install] Error 2
+[ALL  ]    make[1]: Leaving directory '/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final'
+[ERROR]  
+[ERROR]  >>
+[ERROR]  >>  Build failed in step 'Installing C library'
+[ERROR]  >>        called in step '(top-level)'
+[ERROR]  >>
+[ERROR]  >>  Error happened in: CT_DoExecLog[scripts/functions@257]
+[ERROR]  >>        called from: do_libc_backend_once[scripts/build/libc/glibc-eglibc.sh-common@495]
+[ERROR]  >>        called from: do_libc_backend[scripts/build/libc/glibc-eglibc.sh-common@158]
+[ERROR]  >>        called from: do_libc[scripts/build/libc/glibc-eglibc.sh-common@65]
+[ERROR]  >>        called from: main[scripts/crosstool-NG.sh@686]
+
+On Linux we got:
+[ALL  ]    /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/tools/bin/install -c /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/elf/ld.so /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so.new
+[ALL  ]    mv -f /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so.new /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so
+[ALL  ]    /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/tools/bin/install -c /home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-final/libc.so /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/libc-2.18.so.new
+[ALL  ]    mv -f /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/libc-2.18.so.new /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/libc-2.18.so
+[ALL  ]    rm -f /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3
+[ALL  ]    ln -s `../scripts/rellns-sh -p /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3` /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3
+[ALL  ]    make[3]: Leaving directory '/home/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64-d/.build/src/eglibc-2_18/elf'
+
+.. .. .. 
+pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/eglibc-2_18/elf
+SOURCE=`../scripts/rellns-sh -p /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-2.18.so /home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3`
+DEST=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/lib/ld-linux-armhf.so.3
+cp -p $SOURCE $DEST

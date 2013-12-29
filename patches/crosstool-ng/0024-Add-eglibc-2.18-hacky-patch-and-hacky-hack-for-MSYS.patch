@@ -1,4 +1,4 @@
-From 7671f17034baad84b785d745bf03b749bbc3d86a Mon Sep 17 00:00:00 2001
+From 42e89767e4a007da477052c115330fe85c9c44df Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 27 Dec 2013 22:16:08 +0000
 Subject: [PATCH 24/25] Add eglibc 2.18 hacky patch and hacky hack for MSYS*
@@ -14,8 +14,8 @@ make to prevent MSYS from transforming it to the Windows host
 equivalent value.
 ---
  .../2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch    | 36 ++++++++++++++++++++++
- scripts/build/libc/glibc-eglibc.sh-common          |  1 +
- 2 files changed, 37 insertions(+)
+ scripts/build/libc/glibc-eglibc.sh-common          |  5 +--
+ 2 files changed, 39 insertions(+), 2 deletions(-)
  create mode 100644 patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
 
 diff --git a/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch b/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
@@ -61,17 +61,21 @@ index 0000000..3289b90
 + 	  */*.a) \
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index 3215172..24345b3 100644
+index 3215172..0826ef3 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
-@@ -486,6 +486,7 @@ do_libc_backend_once() {
+@@ -486,8 +486,9 @@ do_libc_backend_once() {
      if [ "${libc_full}" = "y" ]; then
  
          CT_DoLog EXTRA "Building C library"
-+        MSYS2_ARG_CONV_EXCL="-DNLSPATH="                \
-         CT_DoExecLog ALL make ${JOBSFLAGS}              \
-                               "${extra_make_args[@]}"   \
+-        CT_DoExecLog ALL make ${JOBSFLAGS}              \
+-                              "${extra_make_args[@]}"   \
++        MSYS2_ARG_CONV_EXCL="-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" \
++        CT_DoExecLog ALL make ${JOBSFLAGS}                                 \
++                              "${extra_make_args[@]}"                      \
                                all
+ 
+         CT_DoLog EXTRA "Installing C library"
 -- 
 1.8.5.2
 

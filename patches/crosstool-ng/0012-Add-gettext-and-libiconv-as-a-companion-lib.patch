@@ -1,11 +1,12 @@
-From ca0769a71e6e8ecfc83d03bcedb2a4f91e62ea86 Mon Sep 17 00:00:00 2001
+From 5dd8c8cea83995acbe9708b5df1a9bdaec92029e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 21:10:56 +0000
 Subject: [PATCH 12/26] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
 
-Building this is excluded on Darwin and Windows.
+Building both is avoided on Linux and building
+iconv is avoided on Darwin.
 ---
  config/companion_libs.in                           |  27 ++
  config/companion_libs/gettext.in                   |  19 ++
@@ -764,7 +765,7 @@ index 0000000..ca17935
 +fi
 diff --git a/scripts/build/companion_libs/330-gettext.sh b/scripts/build/companion_libs/330-gettext.sh
 new file mode 100644
-index 0000000..90871df
+index 0000000..f8c4ce2
 --- /dev/null
 +++ b/scripts/build/companion_libs/330-gettext.sh
 @@ -0,0 +1,131 @@
@@ -792,7 +793,7 @@ index 0000000..90871df
 +    local -a gettext_opts
 +
 +    case "$CT_BUILD" in
-+        *darwin*|*linux*)
++        *linux*)
 +            return 0
 +            ;;
 +    esac
@@ -815,7 +816,7 @@ index 0000000..90871df
 +    local -a gettext_opts
 +
 +    case "$CT_HOST" in
-+        *darwin*|*linux*)
++        *linux*)
 +            return 0
 +            ;;
 +    esac
@@ -856,7 +857,7 @@ index 0000000..90871df
 +
 +    CT_DoLog EXTRA "Configuring gettext"
 +
-+    CT_DoExecLog ALL cp -aT "${CT_SRC_DIR}/gettext-${CT_GETTEXT_VERSION}" "."
++    CT_DoExecLog ALL cp -av "${CT_SRC_DIR}/gettext-${CT_GETTEXT_VERSION}/"/* .
 +
 +    # A bit ugly. D__USE_MINGW_ANSI_STDIO=1 has its own {v}asprintf functions
 +    # but gettext configure doesn't see this flag when it checks for that. An

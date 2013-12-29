@@ -1,4 +1,4 @@
-From 5f55211a64cf2a842a388d2afa60a46e7dfcc54a Mon Sep 17 00:00:00 2001
+From b8e33cc7998d415b22a5d2969d5a8a9db96968e7 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 14 Dec 2013 03:18:53 +0000
 Subject: [PATCH 14/26] Fix eglibc and glibc sunrpc Windows build issues
@@ -314,5 +314,5 @@ index 8a8f776..3215172 100644
          CT_DoExecLog ALL make ${JOBSFLAGS}              \
                                "${extra_make_args[@]}"   \
 -- 
-1.8.5.1
+1.8.5.2
 

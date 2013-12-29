@@ -1,4 +1,4 @@
-From acb6acc335c69c0f423adf2e76fd42fc6ef67621 Mon Sep 17 00:00:00 2001
+From fd73f3e8877527700da1a14347fcb7c677a0f9ab Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 29 Dec 2013 04:52:41 +0000
 Subject: [PATCH 26/26] Add eglibc 2.18 patch for MSYS2 forcing ln -s
@@ -12,7 +12,7 @@ better than cp -p which would otherwise be used as a substitute.
 
 diff --git a/patches/eglibc/2_18/140-MSYS-Hack-force-ln-s.patch b/patches/eglibc/2_18/140-MSYS-Hack-force-ln-s.patch
 new file mode 100644
-index 0000000..a00a50c
+index 0000000..162fc96
 --- /dev/null
 +++ b/patches/eglibc/2_18/140-MSYS-Hack-force-ln-s.patch
 @@ -0,0 +1,39 @@
@@ -25,8 +25,8 @@ index 0000000..a00a50c
 + 
 ++# Even though 'ln -s' doesn't work right in MSYS2, it works enough for
 ++# eglibc, whereas cp -r doesn't.
-++case "$build" in
-++mingw*)
+++case "$build_os" in
+++*mingw*)
 ++  as_ln_s='ln -s'
 ++  LN_S=$as_ln_s
 ++  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Hacked as_ln_s and LN_S to 'ln -s' for MSYS2" >&5
@@ -45,8 +45,8 @@ index 0000000..a00a50c
 + AC_PROG_LN_S
 ++# Even though 'ln -s' doesn't work right in MSYS2, it works enough for
 ++# eglibc, whereas cp -r doesn't.
-++case "$build" in
-++mingw*)
+++case "$build_os" in
+++*mingw*)
 ++  as_ln_s='ln -s'
 ++  LN_S=$as_ln_s
 ++  AC_MSG_WARN(Hacked as_ln_s and LN_S to 'ln -s' for MSYS2)
@@ -56,5 +56,5 @@ index 0000000..a00a50c
 + LIBC_PROG_BINUTILS
 + 
 -- 
-1.8.5.1
+1.8.5.2
 

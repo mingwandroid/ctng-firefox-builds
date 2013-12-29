@@ -1,4 +1,4 @@
-From c36273de800e1f8866128229d9bc4ce0fbf8b827 Mon Sep 17 00:00:00 2001
+From 4f0bd703a62c8199a1e7a7d768f505a50dab7767 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 21 Dec 2013 20:08:06 +0000
 Subject: [PATCH 20/26] Add GCC 4.8.2 patch for crtstuff.c
@@ -41,5 +41,5 @@ index 0000000..6b0e058
 + #undef rlim_t
 + #undef ssize_t
 -- 
-1.8.5.1
+1.8.5.2
 

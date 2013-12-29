@@ -1,4 +1,4 @@
-From 5e5a2632c461ce580fadee7ed20e973f4674982f Mon Sep 17 00:00:00 2001
+From 187d9946e3a5964c1d44890ec4bdd8a549d856d8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 21:10:56 +0000
 Subject: [PATCH 12/26] Add gettext and libiconv as a companion lib
@@ -929,5 +929,5 @@ index d339a49..8a8f776 100644
  
          # For glibc, a few headers need to be manually installed
 -- 
-1.8.5.1
+1.8.5.2
 

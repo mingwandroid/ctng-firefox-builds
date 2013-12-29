@@ -1,4 +1,4 @@
-From e5951789ac3dfe932fbc6c7532742191091e22b8 Mon Sep 17 00:00:00 2001
+From 7e5ebc070a930d2f122843ccaa1937183ed9343f Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 20 Dec 2013 10:38:58 +0000
 Subject: [PATCH 18/26] Look in CT_LOCAL_TARBALLS_DIR for git repos first
@@ -74,5 +74,5 @@ index 92b3033..2add472 100644
  # Some tarballs need to be extracted in specific places. Eg.: glibc addons
  # must be extracted in the glibc directory; uCLibc locales must be extracted
 -- 
-1.8.5.1
+1.8.5.2
 

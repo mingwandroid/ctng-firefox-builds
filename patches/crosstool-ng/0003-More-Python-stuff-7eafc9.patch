@@ -1,4 +1,4 @@
-From 70523008cf1f97298108e3c3729a2c5b22e3aa90 Mon Sep 17 00:00:00 2001
+From 27a8ba5c79ab5cf2f22cb3381a6a416eabfcb70a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 23:51:16 +0000
 Subject: [PATCH 03/26] More Python stuff (7eafc9)
@@ -125,5 +125,5 @@ index fea75bb..e85d24d 100644
 +1.8.4.2
  
 -- 
-1.8.5.1
+1.8.5.2
 

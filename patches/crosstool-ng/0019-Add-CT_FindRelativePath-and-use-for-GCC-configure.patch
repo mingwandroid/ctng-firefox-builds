@@ -1,4 +1,4 @@
-From 8078c4bfdd5a439b4fbf9849e5f0ba13635a5430 Mon Sep 17 00:00:00 2001
+From 42629cb67e2468dcdb7ac2fa85f9127c2391d563 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 20 Dec 2013 18:48:25 +0000
 Subject: [PATCH 19/26] Add CT_FindRelativePath and use for GCC configure
@@ -118,5 +118,5 @@ index 2add472..ecbbbfd 100644
 +    return 0
 +}
 -- 
-1.8.5.1
+1.8.5.2
 

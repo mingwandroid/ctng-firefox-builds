@@ -1,4 +1,4 @@
-From 2e56e1b930380918f5ea176da6edcfa9983bda69 Mon Sep 17 00:00:00 2001
+From 067acc5bd890ada0a5b37c84d69b289cb07ec4dd Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 19 Dec 2013 07:18:57 +0000
 Subject: [PATCH 17/26] Add binutils 2.24
@@ -46,5 +46,5 @@ index 43cf6d9..fab3c81 100644
      bool
      select BINUTILS_2_22_or_later
 -- 
-1.8.5.1
+1.8.5.2
 

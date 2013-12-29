@@ -451,9 +451,6 @@ if [ "${OSTYPE}" = "darwin" ]; then
   GNUFIX=$BREWFIX/bin/g
   CC=clang
   CXX=clang++
-  # Without this, "echo -n" doesn't work.
-  # see: https://developer.apple.com/library/mac/releasenotes/Darwin/RN-Unix03Conformance/
-  export COMMAND_MODE=legacy
 #  CC=llvm-gcc
 #  CXX=llvm-g++
   # To install gperf 3.0.4 I did:
@@ -598,10 +595,11 @@ download_build_compilers()
 {
   if [ "$OSTYPE" = "msys" ]; then
     . ${THISDIR}/mingw-w64-toolchain.sh --arch=$HOST_ARCH --root=$PWD --path-out=MINGW_W64_PATH --hash-out=MINGW_W64_HASH --enable-verbose --enable-hash-in-path
-    # I'd like to get a hash for all other compilers too.
-    test -n "$MINGW_W64_HASH" && MINGW_W64_HASH=-${MINGW_W64_HASH}
-    # MinGW compilers must be found before MSYS2 compilers, so add them to the front of PATH. STILL NOT WORKING. WANTS TO BUILD FOR MSYS2.
+  else
+     # I'd like to get a hash for all other compilers too .. for now, just so my BeyondCompare sessions are less noisy, pretend they all have the hash I use most often.
+     MINGW_W64_HASH=235295c4
   fi
+  test -n "$MINGW_W64_HASH" && MINGW_W64_HASH=-${MINGW_W64_HASH}
 }
 
 cross_clang_build()
@@ -874,6 +872,7 @@ if [ "$OSTYPE" = "msys" ]; then
 else
   BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
 fi
+BUILDDIR=/c/ctng-build-${STUB}-${BUILD_PREFIX}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
 
@@ -2872,5 +2871,23 @@ BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE  -mlittle-endian
 # Back to Darwin kernel-headers failure.
 export PATH=/Users/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64/bin:/Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/tools/bin:"$PATH"
 
+# Bug is that sh is being used by gnumake, but why, I am not sure.
+
+# Getting this to repeat is not so easy!
 pushd /Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
-make -C /Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/src/linux-3.10.19 O=/Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=/Users/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install
+export PATH=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/tools/bin:$HOME/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/bin:"$PATH"
+pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src
+if [ -d linux-3.10.19 ]; then
+rm -rf linux-3.10.19
+fi
+tar -xf ~/src/linux-3.10.19.tar.xz
+popd
+make -C /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/src/linux-3.10.19 O=/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=/Users/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install
+
+
+
+
+strncpy seems to already exist on OSX
+export PATH=/Users/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/tools/bin:"$PATH"
+pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles
+make -j1 -l install_root=/Users/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot install-bootstrap-headers=yes install-headers

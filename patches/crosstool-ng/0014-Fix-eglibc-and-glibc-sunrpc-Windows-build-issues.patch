@@ -1,4 +1,4 @@
-From b8e33cc7998d415b22a5d2969d5a8a9db96968e7 Mon Sep 17 00:00:00 2001
+From 638cf277b97beecb5beabcad6ffe9e69d3eb13b2 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 14 Dec 2013 03:18:53 +0000
 Subject: [PATCH 14/26] Fix eglibc and glibc sunrpc Windows build issues
@@ -8,13 +8,13 @@ Win32 API is used, also some missing string functions
 were added.
 ---
  .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 251 +++++++++++++++++++++
- scripts/build/libc/glibc-eglibc.sh-common          |  21 +-
- 2 files changed, 262 insertions(+), 10 deletions(-)
+ scripts/build/libc/glibc-eglibc.sh-common          |  26 ++-
+ 2 files changed, 267 insertions(+), 10 deletions(-)
  create mode 100644 patches/eglibc/2_18/110-Fix-crossrpc-to-build-on-non-Linux.patch
 
 diff --git a/patches/eglibc/2_18/110-Fix-crossrpc-to-build-on-non-Linux.patch b/patches/eglibc/2_18/110-Fix-crossrpc-to-build-on-non-Linux.patch
 new file mode 100644
-index 0000000..71e9765
+index 0000000..9a0440e
 --- /dev/null
 +++ b/patches/eglibc/2_18/110-Fix-crossrpc-to-build-on-non-Linux.patch
 @@ -0,0 +1,251 @@
@@ -85,7 +85,7 @@ index 0000000..71e9765
 ++}
 ++#endif /* _WIN32 */
 ++
-++#if defined(_WIN32) || defined(__APPLE__) || defined(__BSD__)
+++#if defined(_WIN32) || defined(__BSD__)
 ++
 ++char* __cdecl stpncpy(char* __restrict__ dest, char const* __restrict__ src, size_t len);
 ++
@@ -97,7 +97,7 @@ index 0000000..71e9765
 ++  return strncpy(dest, src, len) + min_len;
 ++}
 ++
-++#endif /* defined(_WIN32) || defined(__APPLE__) || defined(__BSD__) */
+++#endif /* defined(_WIN32) || defined(__BSD__) */
 ++
 + #define EXTEND	1		/* alias for TRUE */
 + #define DONT_EXTEND	0	/* alias for FALSE */
@@ -270,10 +270,10 @@ index 0000000..71e9765
 + /* valid tirpc nettypes */
 + static const char *valid_ti_nettypes[] =
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index 8a8f776..3215172 100644
+index 8a8f776..16edbfc 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
-@@ -398,21 +398,21 @@ do_libc_backend_once() {
+@@ -398,21 +398,26 @@ do_libc_backend_once() {
              ;;
      esac
  
@@ -284,6 +284,11 @@ index 8a8f776..3215172 100644
 +            # used to parse the output of the C-preprocessor.
 +            extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
 +            extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" )
++            ;;
++        *darwin*)
++            # .. same goes for Darwin.
++            extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
++            extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -lintl" )
 +            ;;
 +    esac
 +
@@ -305,7 +310,7 @@ index 8a8f776..3215172 100644
          CT_DoExecLog ALL make ${JOBSFLAGS}                                        \
                           install_root="${install_root}"                           \
                           install-bootstrap-headers=yes                            \
-@@ -484,6 +484,7 @@ do_libc_backend_once() {
+@@ -484,6 +489,7 @@ do_libc_backend_once() {
      fi # libc_headers == y
  
      if [ "${libc_full}" = "y" ]; then

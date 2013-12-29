@@ -1,4 +1,4 @@
-From 4a37475bf0913e57937db1e389b067809e3f115e Mon Sep 17 00:00:00 2001
+From 6afb2cf204db5fb5e615017dc4624172bfd5176c Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 01:52:18 +0000
 Subject: [PATCH 13/26] OpenSSL: clfags -> cflags

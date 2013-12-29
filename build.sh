@@ -595,10 +595,11 @@ download_build_compilers()
 {
   if [ "$OSTYPE" = "msys" ]; then
     . ${THISDIR}/mingw-w64-toolchain.sh --arch=$HOST_ARCH --root=$PWD --path-out=MINGW_W64_PATH --hash-out=MINGW_W64_HASH --enable-verbose --enable-hash-in-path
-    # I'd like to get a hash for all other compilers too.
-    test -n "$MINGW_W64_HASH" && MINGW_W64_HASH=-${MINGW_W64_HASH}
-    # MinGW compilers must be found before MSYS2 compilers, so add them to the front of PATH. STILL NOT WORKING. WANTS TO BUILD FOR MSYS2.
+  else
+    # To make Beyond Compare comparisons as clean as possible!
+    MINGW_W64_HASH="235295c4"
   fi
+  test -n "$MINGW_W64_HASH" && MINGW_W64_HASH=-${MINGW_W64_HASH}
 }
 
 cross_clang_build()
@@ -868,7 +869,8 @@ if [ "$OSTYPE" = "msys" ]; then
   # 263.
   BUILDDIR=/c/ctng-build-${STUB}-${BUILD_PREFIX}
 else
-  BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
+#  BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
+  BUILDDIR=/c/ctng-build-${STUB}-${BUILD_PREFIX}
 fi
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}

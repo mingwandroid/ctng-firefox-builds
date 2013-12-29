@@ -451,6 +451,9 @@ if [ "${OSTYPE}" = "darwin" ]; then
   GNUFIX=$BREWFIX/bin/g
   CC=clang
   CXX=clang++
+  # Without this, "echo -n" doesn't work.
+  # see: https://developer.apple.com/library/mac/releasenotes/Darwin/RN-Unix03Conformance/
+  export COMMAND_MODE=legacy
 #  CC=llvm-gcc
 #  CXX=llvm-g++
   # To install gperf 3.0.4 I did:
@@ -856,6 +859,7 @@ if [ "$CTNG_DEBUGGABLE" = "yes" ]; then
 else
   DEBUG_PREFIX=""
 fi
+
 BUILD_PREFIX=${LLVM_VERS_}-${GCC_VERS_}-${HOST_ARCH}${MINGW_W64_HASH}${DEBUG_PREFIX}
 if [ "$COMPILER_RT" = "yes" ]; then
   BUILD_PREFIX="${BUILD_PREFIX}-rt"
@@ -2864,3 +2868,9 @@ BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE  -mlittle-endian
   --prefix=/usr --build=x86_64-build_w64-mingw32 --host=armv6hl-unknown-linux-gnueabi \
   --without-cvs --disable-profile --without-gd --with-headers=/home/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include \
   --libdir=/usr/lib/. --enable-obsolete-rpc --enable-kernel=3.10.19 --with-__thread --with-tls --enable-shared --with-fp --enable-add-ons=nptl,ports --with-pkgversion=crosstool-NG hg+unknown-20131228.211220
+
+# Back to Darwin kernel-headers failure.
+export PATH=/Users/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64/bin:/Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/tools/bin:"$PATH"
+
+pushd /Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers
+make -C /Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/src/linux-3.10.19 O=/Users/ray/ctng-firefox-builds/ctng-build-x-r-none-4_8_2-x86_64/.build/armv6hl-unknown-linux-gnueabi/build/build-kernel-headers ARCH=arm INSTALL_HDR_PATH=/Users/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64/armv6hl-unknown-linux-gnueabi/sysroot/usr V=1 headers_install

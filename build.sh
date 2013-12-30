@@ -70,9 +70,9 @@ VENDOR_OSES_linux="unknown-linux-gnu"
 VENDOR_OSES_raspi="unknown-linux-gnu"
 
 # Defaults ..
-BUILD_DEBUGGABLE_darwin="yes"
-BUILD_DEBUGGABLE_windows="yes"
-BUILD_DEBUGGABLE_linux="yes"
+BUILD_DEBUGGABLE_darwin="no"
+BUILD_DEBUGGABLE_windows="no"
+BUILD_DEBUGGABLE_linux="no"
 
 # Could try the dlfcn_win32 project for Windows support.
 # I've not made it error if you try to force the issue
@@ -208,10 +208,13 @@ To restart the build you can use:
 To see all steps:
  ct-ng list-steps"
 option CTNG_DEBUGGABLE     default \
-"Do you want the toolchain build with crosstool-ng
+"Do you want the toolchain built with crosstool-ng
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
 about a year ago."
+option CTNG_DEBUGGERS      yes \
+"Do you want the toolchain built with crosstool-ng
+to include debuggers?"
 option LLVM_VERSION        default \
 "default, none, head, 3.3, 3.2, 3.1 or 3.0 (I test with 3.3 most,
 then next, then the others hardly at all)."
@@ -724,6 +727,13 @@ cross_clang_build()
     echo "CT_gettext=y"                    >> ${CTNG_SAMPLE_CONFIG}
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}
+
+    if [ "$CTNG_DEBUGGERS" = "yes" ]; then
+      echo "CT_DEBUG_gdb=y"                >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_GDB_CROSS=y"                >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_GDB_CROSS_PYTHON=y"         >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_GDB_V_7_6_1=y"              >> ${CTNG_SAMPLE_CONFIG}
+    fi
 
     if [ "$STATIC_TOOLCHAIN" = "no" ]; then
       echo "CT_WANTS_STATIC_LINK=n"        >> ${CTNG_SAMPLE_CONFIG}

@@ -212,6 +212,12 @@ option CTNG_DEBUGGABLE     default \
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
 about a year ago."
+option CTNG_LEGACY         yes \
+"Do you want the toolchain built with crosstool-ng
+to be built using stable, old compilers so that they
+might run on older machines? In some cases, this will
+disable 64bit builds - when build/host is OSX. In some
+cases (Windows) it has no effect."
 option CTNG_DEBUGGERS      yes \
 "Do you want the toolchain built with crosstool-ng
 to include debuggers?"
@@ -339,12 +345,6 @@ copy_build_scripts()
   echo "Ray Donnelly <mingw.android@gmail.com>" >> $1/README
 }
 
-if [ "${HOST_ARCH}" = "i686" ]; then
-  BITS=32
-else
-  BITS=64
-fi
-
 BUILD_OS=
 if [ "$OSTYPE" = "linux-gnu" ]; then
   BUILD_OS=linux
@@ -359,6 +359,35 @@ elif [ "$OSTYPE" = "darwin" ]; then
 else
   echo "Error: I don't know what Operating System you are using."
   exit 1
+fi
+
+# Trying to force using old gcc-4.2 on OSX results in:
+# /c/ctng-build-x-o-head-apple_5666_3-x86_64-235295c4/.build/src/gmp-5.1.1/configure --build=i686-build_apple-darwin11 --host=i686-build_apple-darwin11 --prefix=/c/ctng-build-x-o-head-apple_5666_3-x86_64-235295c4/.build/x86_64-apple-darwin10/buildtools --enable-fft --enable-mpbsd --enable-cxx --disable-shared --enable-static ABI=64
+# ..
+# uname -m = x86_64
+# ..
+# /usr/bin/uname -p = i386
+# ..
+# User:
+# ABI=64
+# CC=i686-build_apple-darwin11-gcc
+# CFLAGS=-O2 -g -pipe -m64 -isysroot /Users/ray/MacOSX10.6.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5 -fexceptions
+# CPPFLAGS=(unset)
+# MPN_PATH=
+# GMP:
+# abilist=32
+# cclist=gcc icc cc
+# configure:5707: error: ABI=64 is not among the following valid choices: 32
+# .. so for now, on Darwin
+if [ "${HOST_ARCH}" = "i686" ]; then
+  BITS=32
+else
+  if [ "${CTNG_LEGACY}" = "yes" -a "${BUILD_OS}" = "darwin" ]; then
+    echo "Warning: You set --ctng-legacy=yes and are building on Darwin, due to GMP configure fail 32bit binaries will be built."
+    BITS=32
+  else
+    BITS=64
+  fi
 fi
 
 # TODO :: Support canadian cross compiles then remove this
@@ -594,13 +623,47 @@ download_sdk()
 
 MINGW_W64_HASH=
 MINGW_W64_PATH=
+
+USED_CC=gcc
+USED_CXX=g++
+USED_LD=ld
+USED_LD_FLAGS=
+USED_CPP_FLAGS=
+CT_BUILD_SUFFIX=
+CT_BUILD_PREFIX=
+
 download_build_compilers()
 {
+  USED_CPP_FLAGS="-m${BITS}"
+  USED_LD_FLAGS="-m${BITS}"
+
   if [ "$OSTYPE" = "msys" ]; then
     . ${THISDIR}/mingw-w64-toolchain.sh --arch=$HOST_ARCH --root=$PWD --path-out=MINGW_W64_PATH --hash-out=MINGW_W64_HASH --enable-verbose --enable-hash-in-path
-  else
-     # I'd like to get a hash for all other compilers too .. for now, just so my BeyondCompare sessions are less noisy, pretend they all have the hash I use most often.
-     MINGW_W64_HASH=235295c4
+  elif [ "$OSTYPE" = "darwin" ]; then
+    if [ "${CTNG_LEGACY}" = "yes" ]; then
+#    # I'd like to get a hash for all other compilers too .. for now, just so my BeyondCompare sessions are less noisy, pretend they all have the hash I use most often.
+#    [ -d $PWD/apple-osx ] ||
+#    (
+#      wget -c https://mingw-and-ndk.googlecode.com/files/multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
+#      7za x multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
+#    )
+#    MINGW_W64_PATH=$PWD/apple-osx/bin
+#    USED_CC=i686-apple-darwin11-gcc
+#    USED_CXX=i686-apple-darwin11-g++
+#    USED_LD=i686-apple-darwin11-ld
+#    MINGW_W64_HASH=tc4-gcc-42
+    USED_CC=gcc-4.2
+    USED_CXX=g++-4.2
+    USED_LD=ld
+    CT_BUILD_SUFFIX=-4.2
+    # Homebrew's gcc-4.2 doesn't work with MacOSX10.6.sdk, error is: MacOSX10.6.sdk/usr/include/varargs.h:4:26: error: varargs.h: No such file or directory
+    # it's an include_next thing, so that GCC has no varargs.h I guess. Trying with 10.7 instead.
+    USED_CPP_FLAGS=$USED_CPP_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
+    USED_LD_FLAGS=$USED_LD_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
+#    USED_LD_FLAGS=$USED_LD_FLAGS" -syslibroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5"
+    MINGW_W64_HASH=hb-gcc-42
+    fi
+    MINGW_W64_HASH=235295c4
   fi
   test -n "$MINGW_W64_HASH" && MINGW_W64_HASH=-${MINGW_W64_HASH}
 }
@@ -616,7 +679,7 @@ cross_clang_build()
                 --with-objdump=$OBJDUMP \
                 --with-readelf=$READELF \
                 --with-gperf=$GPERF \
-                CC=${CC} CXX=${CXX}"
+                CC=${USED_CC} CXX=${USED_CXX} LD=${USED_LD}"
 
   CROSSTOOL_CONFIG=${PWD}/${BUILDDIR}/.config
   if [ "${CTNG_CLEAN}" = "yes" ]; then
@@ -646,10 +709,27 @@ cross_clang_build()
     cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${BITS} ${CTNG_SAMPLE_CONFIG}
     LLVM_VERSION_DOT=$(echo $LLVM_VERSION | tr '_' '.')
     echo "CT_LLVM_V_${LLVM_VERSION}"           >> ${CTNG_SAMPLE_CONFIG}
-    if [ "$OSTYPE" = "msys" ]; then
-      DUMPEDMACHINE=$(${MINGW_W64_PATH}/gcc -dumpmachine)
+    if [ -n "$MINGW_W64_PATH" -o -n ${USED_CC} ]; then
+      if [ -n "$MINGW_W64_PATH" ]; then
+        DUMPEDMACHINE=$(${MINGW_W64_PATH}/${USED_CC} -dumpmachine)
+      else
+        DUMPEDMACHINE=$(${USED_CC} -dumpmachine)
+      fi
       echo "CT_BUILD=\"${DUMPEDMACHINE}\""     >> ${CTNG_SAMPLE_CONFIG}
     fi
+    # TODO :: Setting CT_HOST_{PREFIX|SUFFIX} as CT_BUILD_{PREFIX|SUFFIX} here
+    #         breaks Canadian, so shouldn't do this if that is the case. ctng
+    #         overwrites e.g. buildtools/bin/i686-build_apple-darwin11-gcc
+    #         with the host versions immediately when BUILD==HOST
+    if [ -n "$CT_BUILD_PREFIX" ]; then
+      echo "CT_BUILD_PREFIX=\"${CT_BUILD_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_HOST_PREFIX=\"${CT_BUILD_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
+    fi
+    if [ -n "$CT_BUILD_SUFFIX" ]; then
+      echo "CT_BUILD_SUFFIX=\"${CT_BUILD_SUFFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_HOST_SUFFIX=\"${CT_BUILD_SUFFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
+    fi
+
     if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "yes" ]; then
       if [ "$COPY_SDK" = "yes" ]; then
         echo "CT_DARWIN_COPY_SDK_TO_SYSROOT=y" >> ${CTNG_SAMPLE_CONFIG}
@@ -703,6 +783,16 @@ cross_clang_build()
       fi
     fi
 
+    if [ -n "$USED_CPP_FLAGS" ]; then
+      echo "CT_EXTRA_CFLAGS_FOR_HOST=\"${USED_CPP_FLAGS}\""  >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_EXTRA_CFLAGS_FOR_BUILD=\"${USED_CPP_FLAGS}\"" >> ${CTNG_SAMPLE_CONFIG}
+    fi
+
+    if [ -n "$USED_LD_FLAGS" ]; then
+      echo "CT_EXTRA_LDFLAGS_FOR_HOST=\"${USED_LD_FLAGS}\""  >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_EXTRA_LDFLAGS_FOR_BUILD=\"${USED_LD_FLAGS}\"" >> ${CTNG_SAMPLE_CONFIG}
+    fi
+
     # Gettext fails to build on Windows at -O0. One of the patches:
     # gettext/0.18.3.1/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch
     # .. should have fixed this but it still doesn't work ..)
@@ -748,7 +838,7 @@ cross_clang_build()
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 
     ./bootstrap && ./configure ${CTNG_CFG_ARGS} && make clean && make && make install
-    if [ "$OSTYPE" = "msys" ]; then
+    if [ -n "$MINGW_W64_PATH" ]; then
       PATH="${MINGW_W64_PATH}:${PATH}"
     fi
     PATH="${PATH}":$ROOT/${INSTALLDIR}/bin
@@ -767,7 +857,7 @@ cross_clang_build()
     ct-ng build
     popd
   else
-    if [ "$OSTYPE" = "msys" ]; then
+    if [ -n "$MINGW_W64_PATH" ]; then
       PATH="${MINGW_W64_PATH}:${PATH}"
     fi
   fi

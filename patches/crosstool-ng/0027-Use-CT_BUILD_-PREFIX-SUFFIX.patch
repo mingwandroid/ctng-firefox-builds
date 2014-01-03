@@ -1,0 +1,39 @@
+From 3cfa60bd3f1131e1854c600c0c2c33c54298ead3 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Thu, 2 Jan 2014 18:42:43 -0800
+Subject: [PATCH 27/27] Use CT_BUILD_{PREFIX|SUFFIX} ..
+
+.. when not canadian so that the buildtools binaries are the right
+ones. They get overwritten by the CT_HOST versions (nothing) otherwise
+---
+ scripts/crosstool-NG.sh.in | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
+index 5a24439..a0575f4 100644
+--- a/scripts/crosstool-NG.sh.in
++++ b/scripts/crosstool-NG.sh.in
+@@ -408,10 +408,16 @@ if [ -z "${CT_RESTART}" ]; then
+     # cross-tools for those mangled tuples.
+     CT_DoLog DEBUG "Making build system tools available"
+     for m in ${install_build_tools_for}; do
+-        r="CT_REAL_${m}"
+-        v="CT_${m}"
+-        p="CT_${m}_PREFIX"
+-        s="CT_${m}_SUFFIX"
++        # Without CT_CANADIAN, CT_HOST_PREFIX and CT_HOST_SUFFIX cannot
++        # be always contain nothing, in this case, substitute with BUILD
++        BMACH=${m}
++        if [ ! "$CT_CANADIAN" = "y" -a "${m}" = "HOST" ]; then
++            BMACH=BUILD
++        fi
++        r="CT_REAL_${BMACH}"
++        v="CT_${BMACH}"
++        p="CT_${BMACH}_PREFIX"
++        s="CT_${BMACH}_SUFFIX"
+         if [ -n "${!p}" ]; then
+             t="${!p}"
+         else
+-- 
+1.8.5.2
+

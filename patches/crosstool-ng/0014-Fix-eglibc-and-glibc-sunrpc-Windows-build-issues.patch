@@ -1,7 +1,7 @@
-From 3c02f81295ad5a596ae7a1080829a0925ebf63fb Mon Sep 17 00:00:00 2001
+From dd7e6b2f0f4a47d606406518155f1547fab86b6e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 14 Dec 2013 03:18:53 +0000
-Subject: [PATCH 14/26] Fix eglibc and glibc sunrpc Windows build issues
+Subject: [PATCH 14/27] Fix eglibc and glibc sunrpc Windows build issues
 
 .. fork, exec were being used. Now, on Windows the
 Win32 API is used, also some missing string functions

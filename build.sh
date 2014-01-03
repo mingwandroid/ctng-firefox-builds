@@ -717,17 +717,11 @@ cross_clang_build()
       fi
       echo "CT_BUILD=\"${DUMPEDMACHINE}\""     >> ${CTNG_SAMPLE_CONFIG}
     fi
-    # TODO :: Setting CT_HOST_{PREFIX|SUFFIX} as CT_BUILD_{PREFIX|SUFFIX} here
-    #         breaks Canadian, so shouldn't do this if that is the case. ctng
-    #         overwrites e.g. buildtools/bin/i686-build_apple-darwin11-gcc
-    #         with the host versions immediately when BUILD==HOST
     if [ -n "$CT_BUILD_PREFIX" ]; then
       echo "CT_BUILD_PREFIX=\"${CT_BUILD_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_HOST_PREFIX=\"${CT_BUILD_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
     fi
     if [ -n "$CT_BUILD_SUFFIX" ]; then
       echo "CT_BUILD_SUFFIX=\"${CT_BUILD_SUFFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_HOST_SUFFIX=\"${CT_BUILD_SUFFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "yes" ]; then

@@ -356,6 +356,7 @@ elif [ "$OSTYPE" = "msys" ]; then
   export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR="
 elif [ "$OSTYPE" = "darwin" ]; then
   BUILD_OS=darwin
+  ulimit -n 4096
 else
   echo "Error: I don't know what Operating System you are using."
   exit 1

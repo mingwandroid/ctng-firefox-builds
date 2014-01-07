@@ -666,7 +666,9 @@ download_build_compilers()
     fi
     MINGW_W64_HASH=235295c4
   fi
-  test -n "$MINGW_W64_HASH" && MINGW_W64_HASH=-${MINGW_W64_HASH}
+  if [ -n "$MINGW_W64_HASH" ]; then
+     MINGW_W64_HASH=-${MINGW_W64_HASH}
+  fi
 }
 
 cross_clang_build()

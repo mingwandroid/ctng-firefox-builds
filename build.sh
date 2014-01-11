@@ -93,7 +93,7 @@ TARGET_GCC_VERSIONS_linux="4.8.2"
 TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="4.8.2"
 
-TARGET_LLVM_VERSIONS_osx="head"
+TARGET_LLVM_VERSIONS_osx="none"
 TARGET_LLVM_VERSIONS_windows="head"
 #TARGET_LLVM_VERSIONS_windows="none"
 TARGET_LLVM_VERSIONS_linux="none"
@@ -741,6 +741,13 @@ cross_clang_build()
       if [ ! "$GCC_VERSION" = "none" ]; then
         echo "CT_CC_GCC_APPLE=y"               >> ${CTNG_SAMPLE_CONFIG}
       fi
+      # If clang wasn't requested (yeah, LLVM_VERISON is badly named!)
+      # then we need to avoid using clang head as it's often broken.
+      # When Martell updates the 3.4 stuff to use the release, this can
+      # be switched to that version.
+      if [ "$LLVM_VERSION" = "none" ]; then
+        echo "CT_LLVM_V_3_3=y"         >> ${CTNG_SAMPLE_CONFIG}
+      fi
     else
       echo "CT_BINUTILS_binutils=y"            >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_BINUTILS_V_${BINUTILS_VERS_}=y" >> ${CTNG_SAMPLE_CONFIG}
@@ -972,17 +979,6 @@ fi
 BUILDDIR=/c/ctng-build-${STUB}-${BUILD_PREFIX}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
-
-# Because CT_GetGit doesn't download to $HOME/src, but instead into
-# tarballs in the .build folder, and cloning these takes a long
-# time, we only remove what we must ..
-if [ "${LLVM_VERSION}" = "HEAD" ]; then
-  if [ ! -f ${BUILT_XCOMPILER_PREFIX}/bin/${CROSSCC}-clang ]; then
-    set +e
-    rm -rf ${BUILDDIR}/.build/src ${BUILDDIR}/.build/*
-    set -e
-  fi
-fi
 
 ROOT=$PWD
 download_sdk
@@ -2988,3 +2984,26 @@ strncpy seems to already exist on OSX
 export PATH=/Users/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/tools/bin:"$PATH"
 pushd /c/ctng-build-x-r-none-4_8_2-x86_64-235295c4-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles
 make -j1 -l install_root=/Users/ray/ctng-firefox-builds/x-r-none-4_8_2-x86_64-235295c4-d/armv6hl-unknown-linux-gnueabi/sysroot install-bootstrap-headers=yes install-headers
+
+
+
+
+
+
+
+export PATH=/home/ray/ctng-firefox-builds/x-o-none-apple_5666_3-x86_64-235295c4/bin:/c/ctng-build-x-o-none-apple_5666_3-x86_64-235295c4/.build/x86_64-apple-darwin10/buildtools/bin:/c/ctng-build-x-o-none-apple_5666_3-x86_64-235295c4/.build/tools/bin:"$PATH"
+pushd /c/ctng-build-x-o-none-apple_5666_3-x86_64-235295c4/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/fixincludes
+
+[case $host in
+	i?86-*-msdosdjgpp* | \
+	i?86-*-mingw32* | \
+	*-*-beos* )
+		TARGET=twoprocess
+		;;
+
+	* )
+		TARGET=oneprocess
+		;;
+esac])
+
+^ simplify that right down!

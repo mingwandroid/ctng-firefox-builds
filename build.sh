@@ -74,6 +74,10 @@ BUILD_DEBUGGABLE_darwin="no"
 BUILD_DEBUGGABLE_windows="no"
 BUILD_DEBUGGABLE_linux="no"
 
+BUILD_DEBUGGERS_darwin="yes"
+BUILD_DEBUGGERS_windows="no"
+BUILD_DEBUGGERS_linux="yes"
+
 # Could try the dlfcn_win32 project for Windows support.
 # I've not made it error if you try to force the issue
 # in-case someone wants to install dlfcn_win32 manually.
@@ -218,7 +222,7 @@ to be built using stable, old compilers so that they
 might run on older machines? In some cases, this will
 disable 64bit builds - when build/host is OSX. In some
 cases (Windows) it has no effect."
-option CTNG_DEBUGGERS      yes \
+option CTNG_DEBUGGERS      default \
 "Do you want the toolchain built with crosstool-ng
 to include debuggers?"
 option LLVM_VERSION        default \
@@ -431,6 +435,10 @@ if [ "$CTNG_DEBUGGABLE" = "default" ]; then
   CTNG_DEBUGGABLE=$(_al BUILD_DEBUGGABLE ${BUILD_OS})
 fi
 
+if [ "$CTNG_DEBUGGERS" = "default" ]; then
+  CTNG_DEBUGGERS=$(_al BUILD_DEBUGGERS ${BUILD_OS})
+fi
+
 # Error checking
 if [ "${MOZ_TARGET_ARCH}" = "i686" -a "${TARGET_OS}" = "osx" ]; then
   echo "Warning: You set --moz-target-arch=i686, but that's not a valid ${TARGET_OS} arch, changing this to i386 for you."
@@ -518,7 +526,7 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     if [ -f /etc/arch-release ]; then
       PACKAGES=$PACKAGES" ncurses gcc-ada${HOST_MULTILIB} automake"
     else
-      PACKAGES=$PACKAGES" ncurses-devel base-devel perl-ack"
+      PACKAGES=$PACKAGES" ncurses-devel base-devel perl-ack tar"
     fi
     echo "Force intalling $PACKAGES"
     echo "disabling errors as 'automake and automake-wrapper are in conflict' - remove this ASAP."
@@ -743,10 +751,8 @@ cross_clang_build()
       fi
       # If clang wasn't requested (yeah, LLVM_VERISON is badly named!)
       # then we need to avoid using clang head as it's often broken.
-      # When Martell updates the 3.4 stuff to use the release, this can
-      # be switched to that version.
       if [ "$LLVM_VERSION" = "none" ]; then
-        echo "CT_LLVM_V_3_3=y"         >> ${CTNG_SAMPLE_CONFIG}
+        echo "CT_LLVM_V_3_4=y"         >> ${CTNG_SAMPLE_CONFIG}
       fi
     else
       echo "CT_BINUTILS_binutils=y"            >> ${CTNG_SAMPLE_CONFIG}
@@ -816,8 +822,7 @@ cross_clang_build()
     # Verbosity 2 doesn't output anything when installing the kernel headers?!
     echo "CT_KERNEL_LINUX_VERBOSITY_1=y"   >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=1" >> ${CTNG_SAMPLE_CONFIG}
-    echo "CT_JOBS=1"                       >> ${CTNG_SAMPLE_CONFIG}
-    echo "CT_PARALLEL_JOBS=1"              >> ${CTNG_SAMPLE_CONFIG}
+#    echo "CT_PARALLEL_JOBS=1"              >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_gettext=y"                    >> ${CTNG_SAMPLE_CONFIG}
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}

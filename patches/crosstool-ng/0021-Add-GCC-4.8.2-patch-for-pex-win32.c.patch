@@ -1,4 +1,4 @@
-From 1b43301fa864e9d0a87bf9b58d27e023b2a31973 Mon Sep 17 00:00:00 2001
+From b23e6121cda3a7db93ea56cdc1ca2cbcc9fc7766 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 22 Dec 2013 03:00:07 +0000
 Subject: [PATCH 21/27] Add GCC 4.8.2 patch for pex-win32.c

@@ -1,18 +1,16 @@
-From 43d1052ff543439c41f51e5152b1caf57859298a Mon Sep 17 00:00:00 2001
+From f14c40bfbe95b17bdc6b7065a62dc317b7b75c58 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 25 Nov 2013 22:40:03 +0000
 Subject: [PATCH 05/27] Add PS3 patches from Martell
 
 ---
- patches/gcc/4.7.0/000-gcc-4.7.0-PS3.patch          |   542 +
- patches/gcc/4.7.3/000-gcc-4.7.0-PS3.patch          |   542 +
- patches/newlib/1.20.0/000-newlib-1.20.0-PS3.patch  | 12812 +++++++++++++++++++
- .../ppl/0.11.2/000-fix-build-with-gmp-5.1.patch    |    38 +
- 4 files changed, 13934 insertions(+)
+ patches/gcc/4.7.0/000-gcc-4.7.0-PS3.patch         |   542 +
+ patches/gcc/4.7.3/000-gcc-4.7.0-PS3.patch         |   542 +
+ patches/newlib/1.20.0/000-newlib-1.20.0-PS3.patch | 12812 ++++++++++++++++++++
+ 3 files changed, 13896 insertions(+)
  create mode 100644 patches/gcc/4.7.0/000-gcc-4.7.0-PS3.patch
  create mode 100644 patches/gcc/4.7.3/000-gcc-4.7.0-PS3.patch
  create mode 100644 patches/newlib/1.20.0/000-newlib-1.20.0-PS3.patch
- create mode 100644 patches/ppl/0.11.2/000-fix-build-with-gmp-5.1.patch
 
 diff --git a/patches/gcc/4.7.0/000-gcc-4.7.0-PS3.patch b/patches/gcc/4.7.0/000-gcc-4.7.0-PS3.patch
 new file mode 100644
@@ -13928,50 +13926,6 @@ index 0000000..0d92be4
 +   /* Calculate the exponent. */
 +   if (y < 0.0)
 +     N = (int) (y * ONE_OVER_PI - 0.5);
-diff --git a/patches/ppl/0.11.2/000-fix-build-with-gmp-5.1.patch b/patches/ppl/0.11.2/000-fix-build-with-gmp-5.1.patch
-new file mode 100644
-index 0000000..7670b1a
---- /dev/null
-+++ b/patches/ppl/0.11.2/000-fix-build-with-gmp-5.1.patch
-@@ -0,0 +1,38 @@
-+--- ppl-0.11.2/src/mp_std_bits.cc.bero	2013-02-13 00:45:10.866844896 +0100
-++++ ppl-0.11.2/src/mp_std_bits.cc	2013-02-13 00:45:31.066602270 +0100
-+@@ -46,7 +46,9 @@ const bool std::numeric_limits<mpz_class
-+ const bool std::numeric_limits<mpz_class>::is_bounded;
-+ const bool std::numeric_limits<mpz_class>::is_modulo;
-+ const bool std::numeric_limits<mpz_class>::traps;
-++#if __GNU_MP_RELEASE < 50100
-+ const bool std::numeric_limits<mpz_class>::tininess_before;
-++#endif
-+ const std::float_round_style std::numeric_limits<mpz_class>::round_style;
-+ 
-+ const bool std::numeric_limits<mpq_class>::is_specialized;
-+@@ -69,5 +71,7 @@ const bool std::numeric_limits<mpq_class
-+ const bool std::numeric_limits<mpq_class>::is_bounded;
-+ const bool std::numeric_limits<mpq_class>::is_modulo;
-+ const bool std::numeric_limits<mpq_class>::traps;
-++#if __GNU_MP_RELEASE < 50100
-+ const bool std::numeric_limits<mpq_class>::tininess_before;
-++#endif
-+ const std::float_round_style std::numeric_limits<mpq_class>::round_style;
-+--- ppl-0.11.2/src/mp_std_bits.defs.hh.bero	2013-02-13 00:37:49.171976954 +0100
-++++ ppl-0.11.2/src/mp_std_bits.defs.hh	2013-02-13 00:43:00.570394496 +0100
-+@@ -39,6 +39,7 @@ void swap(mpz_class& x, mpz_class& y);
-+ #endif // defined(PPL_DOXYGEN_INCLUDE_IMPLEMENTATION_DETAILS)
-+ void swap(mpq_class& x, mpq_class& y);
-+ 
-++#if __GNU_MP_RELEASE < 50100 // Already defined in gmp++ 5.1
-+ namespace std {
-+ 
-+ #ifdef PPL_DOXYGEN_INCLUDE_IMPLEMENTATION_DETAILS
-+@@ -164,6 +165,7 @@ public:
-+ };
-+ 
-+ } // namespace std
-++#endif
-+ 
-+ #include "mp_std_bits.inlines.hh"
-+ 
 -- 
 1.8.5.2
 

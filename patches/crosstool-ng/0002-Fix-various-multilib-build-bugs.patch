@@ -1,4 +1,4 @@
-From fcedbeec82a3708e25720e291f3c2e9a3a1f6c71 Mon Sep 17 00:00:00 2001
+From ed2a1216851d2d6aaa69cf1e56c96e613e231826 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
 Subject: [PATCH 02/27] Fix various multilib build bugs

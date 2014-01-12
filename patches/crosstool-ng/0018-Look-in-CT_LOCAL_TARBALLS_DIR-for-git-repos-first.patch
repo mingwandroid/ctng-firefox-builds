@@ -1,30 +1,37 @@
-From 192147d88b5f058c726a804cbd2eea48f1fa3b42 Mon Sep 17 00:00:00 2001
+From 98048b97c48434261c5e82ca00cd9ee4f7c5359d Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 20 Dec 2013 10:38:58 +0000
 Subject: [PATCH 18/27] Look in CT_LOCAL_TARBALLS_DIR for git repos first
 
 ---
- scripts/functions | 33 +++++++++++++++++++++++++++------
- 1 file changed, 27 insertions(+), 6 deletions(-)
+ scripts/functions | 35 +++++++++++++++++++++++++----------
+ 1 file changed, 25 insertions(+), 10 deletions(-)
 
 diff --git a/scripts/functions b/scripts/functions
-index 92b3033..2add472 100644
+index fb3e1ea..c376a4f 100644
 --- a/scripts/functions
 +++ b/scripts/functions
-@@ -839,9 +839,10 @@ CT_GetSVN() {
- # Prerequisites: either the server does not require password,
- # or the user has already taken any action to authenticate to the server.
- # The cloned tree will *not* be stored in the local tarballs dir!
--# Usage: CT_GetGit <basename> <url [url ...]>
+@@ -834,16 +834,11 @@ CT_GetSVN() {
+     CT_DoExecLog ALL rm -rf "${tmp_dir}"
+ }
+ 
+-# Clone a git tree
+-# Tries the given URLs in turn until one can get cloned. No tarball will be created.
+-# Prerequisites: either the server does not require password,
+-# or the user has already taken any action to authenticate to the server.
+-# The cloned tree will *not* be stored in the local tarballs dir!
+-# Usage: CT_GetGit <basename> [branch branchname] <url [url ...]> 
 -CT_GetGit() {
-+# Usage: CT_GetGitInternal <basename> <tarballs-dir> <url [url ...]>
++# Usage: CT_GetGitInternal <basename> <tarballs-dir> [branch branchname] <url [url ...]>
 +CT_GetGitInternal() {
      local basename="$1"; shift
 +    local tarballs_dir="$1"; shift
-     local url
-     local cloned=0
- 
-@@ -851,17 +852,17 @@ CT_GetGit() {
+     local branch="";
+-
+     if [ "$1" = "branch" ]; then
+         shift
+         branch="$1"; shift 
+@@ -858,9 +853,9 @@ CT_GetGit() {
      fi
  
      # Do we have it in our tarballs dir?
@@ -36,17 +43,7 @@ index 92b3033..2add472 100644
          CT_DoExecLog ALL git pull
          CT_Popd
      else
-         CT_DoLog EXTRA "Retrieving git tree '${basename}'"
-         for url in "${@}"; do
-             CT_DoLog ALL "Trying to clone from '${url}'"
--            CT_DoForceRmdir "${CT_TARBALLS_DIR}/${basename}"
--            if git clone "${url}" "${CT_TARBALLS_DIR}/${basename}" 2>&1 |CT_DoLog ALL; then
-+            CT_DoForceRmdir "${tarballs_dir}/${basename}"
-+            if git clone "${url}" "${tarballs_dir}/${basename}" 2>&1 |CT_DoLog ALL; then
-                 cloned=1
-                 break
-             fi
-@@ -870,6 +871,26 @@ CT_GetGit() {
+@@ -885,6 +880,26 @@ CT_GetGit() {
      fi
  }
  
@@ -56,7 +53,7 @@ index 92b3033..2add472 100644
 +# or the user has already taken any action to authenticate to the server.
 +# The cloned tree will *not* be stored in the local tarballs dir, however that dir is
 +# searched in for an existing clone first.
-+# Usage: CT_GetGit <basename> <url [url ...]>
++# Usage: CT_GetGit <basename> [branch branchname] <url [url ...]>
 +CT_GetGit() {
 +    local basename="$1"; shift
 +

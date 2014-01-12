@@ -1,4 +1,4 @@
-From 19bb17e2d1c9c30e1dc3ace9cefe49992f2bd34e Mon Sep 17 00:00:00 2001
+From 038315b768c9e80a7d4ee86434a74fffbc4e92d6 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 18 Nov 2013 14:23:10 +0000
 Subject: [PATCH 06/27] VERBOSE=1 for clang
@@ -9,10 +9,10 @@ Subject: [PATCH 06/27] VERBOSE=1 for clang
  2 files changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/scripts/build/cc/200-clang.sh b/scripts/build/cc/200-clang.sh
-index 518588f..ccc66a0 100644
+index cf02d59..f7c5b06 100644
 --- a/scripts/build/cc/200-clang.sh
 +++ b/scripts/build/cc/200-clang.sh
-@@ -160,6 +160,7 @@ do_clang_backend() {
+@@ -175,6 +175,7 @@ do_clang_backend() {
          LDFLAGS="${ldflags}"          \
          ONLY_TOOLS="clang"            \
          ${OPTIM_MAKE_FLAG}            \
@@ -20,7 +20,7 @@ index 518588f..ccc66a0 100644
  
      CT_Pushd "tools/clang/"
  
-@@ -170,7 +171,8 @@ do_clang_backend() {
+@@ -185,7 +186,8 @@ do_clang_backend() {
          LDFLAGS="${ldflags}"          \
          ONLY_TOOLS="clang"            \
          ${OPTIM_MAKE_FLAG}            \
@@ -31,10 +31,10 @@ index 518588f..ccc66a0 100644
  
      # clang > 3.1 creates ${CT_TARGET}- prefixed executables already.
 diff --git a/scripts/build/companion_libs/150-llvm.sh b/scripts/build/companion_libs/150-llvm.sh
-index cb33ac8..7fb322a 100644
+index 1a46998..9233096 100644
 --- a/scripts/build/companion_libs/150-llvm.sh
 +++ b/scripts/build/companion_libs/150-llvm.sh
-@@ -150,10 +150,12 @@ do_llvm_backend() {
+@@ -167,10 +167,12 @@ do_llvm_backend() {
      CXXFLAGS="${cflags}"              \
      LDFLAGS="${ldflags}"              \
      ${OPTIM_MAKE_FLAG}                \

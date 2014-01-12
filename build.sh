@@ -71,7 +71,7 @@ VENDOR_OSES_raspi="unknown-linux-gnu"
 
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
-BUILD_DEBUGGABLE_windows="no"
+BUILD_DEBUGGABLE_windows="yes"
 BUILD_DEBUGGABLE_linux="no"
 
 BUILD_DEBUGGERS_darwin="yes"
@@ -702,7 +702,7 @@ cross_clang_build()
     [ -d "${HOME}"/src ] || mkdir "${HOME}"/src
     [ -d crosstool-ng ] ||
      (
-      git clone git@github.com:diorcety/crosstool-ng.git
+      git clone https://github.com/diorcety/crosstool-ng.git
       pushd crosstool-ng
       if [ -d "${THISDIR}/patches/crosstool-ng" ]; then
         PATCHES=$(find "${THISDIR}/patches/crosstool-ng" -name "*.patch" | sort)

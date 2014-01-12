@@ -1,4 +1,4 @@
-From 5ad4966807524e84b1d4f740e29980c431842b28 Mon Sep 17 00:00:00 2001
+From 32857cc7d39dbca5abbd0767ae95c9285eb97bf7 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 2 Jan 2014 18:42:43 -0800
 Subject: [PATCH 27/27] Use CT_BUILD_{PREFIX|SUFFIX} ..
@@ -10,7 +10,7 @@ ones. They get overwritten by the CT_HOST versions (nothing) otherwise
  1 file changed, 10 insertions(+), 4 deletions(-)
 
 diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
-index 5a24439..a0575f4 100644
+index 5a24439..095f30b 100644
 --- a/scripts/crosstool-NG.sh.in
 +++ b/scripts/crosstool-NG.sh.in
 @@ -408,10 +408,16 @@ if [ -z "${CT_RESTART}" ]; then
@@ -21,8 +21,8 @@ index 5a24439..a0575f4 100644
 -        v="CT_${m}"
 -        p="CT_${m}_PREFIX"
 -        s="CT_${m}_SUFFIX"
-+        # Without CT_CANADIAN, CT_HOST_PREFIX and CT_HOST_SUFFIX cannot
-+        # be always contain nothing, in this case, substitute with BUILD
++        # Without CT_CANADIAN, CT_HOST_PREFIX and CT_HOST_SUFFIX will
++        # always contain nothing, in this case, substitute with BUILD
 +        BMACH=${m}
 +        if [ ! "$CT_CANADIAN" = "y" -a "${m}" = "HOST" ]; then
 +            BMACH=BUILD

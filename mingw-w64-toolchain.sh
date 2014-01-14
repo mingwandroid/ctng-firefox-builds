@@ -56,8 +56,8 @@ download_install_mingw_w64()
   local MINGW_GCC_EXC_VAR64=sjlj
   local MINGW_GCC_EXC_THREADS=win32
   local MINGW_SF_URL="http://sourceforge.net/projects/mingw-w64/files"
-  local   MINGW_GCC_VER32=i686-${MINGW_GCC_SRC_VER}-release-${MINGW_GCC_EXC_THREADS}-${MINGW_GCC_EXC_VAR32}-rt_v3-rev0
-  local MINGW_GCC_VER64=x86_64-${MINGW_GCC_SRC_VER}-release-${MINGW_GCC_EXC_THREADS}-${MINGW_GCC_EXC_VAR64}-rt_v3-rev0
+  local   MINGW_GCC_VER32=i686-${MINGW_GCC_SRC_VER}-release-${MINGW_GCC_EXC_THREADS}-${MINGW_GCC_EXC_VAR32}-rt_v3-rev2
+  local MINGW_GCC_VER64=x86_64-${MINGW_GCC_SRC_VER}-release-${MINGW_GCC_EXC_THREADS}-${MINGW_GCC_EXC_VAR64}-rt_v3-rev2
 
   local BITS=32
   if [ "$ARCH" = "i686" ]; then
@@ -67,7 +67,8 @@ download_install_mingw_w64()
   else
     local MINGW_GCC_URL="${MINGW_SF_URL}/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/${MINGW_GCC_SRC_VER}/threads-${MINGW_GCC_EXC_THREADS}/${MINGW_GCC_EXC_VAR64}/${MINGW_GCC_VER64}.7z"
 #    local MINGW_GCC_SHA1=c935f1e890f9b2e339677a9de381c1fb60438019 # seh
-    local MINGW_GCC_SHA1=77de7cdf6f17de557d0ffd619f13cea0fe98dc71 # sjlj
+#    local MINGW_GCC_SHA1=77de7cdf6f17de557d0ffd619f13cea0fe98dc71 # sjlj
+    local MINGW_GCC_SHA1=98eeccf1e2b1e1a26272b8c654f0476280dfe9aa  # sjlj rev2
     local BITS=64
   fi
   if [ "$ARCH" = "i686" ]; then

@@ -672,7 +672,8 @@ download_build_compilers()
 #    USED_LD_FLAGS=$USED_LD_FLAGS" -syslibroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5"
     MINGW_W64_HASH=hb-gcc-42
     fi
-    MINGW_W64_HASH=235295c4
+  else
+    MINGW_W64_HASH=213be3fb
   fi
   if [ -n "$MINGW_W64_HASH" ]; then
      MINGW_W64_HASH=-${MINGW_W64_HASH}

@@ -1,7 +1,7 @@
 From 6e5f00971da54af4672e9b81cd538ee6ae24492f Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 2 Jan 2014 18:42:43 -0800
-Subject: [PATCH 25/25] Use CT_BUILD_{PREFIX|SUFFIX} ..
+Subject: [PATCH 25/26] Use CT_BUILD_{PREFIX|SUFFIX} ..
 
 .. when not canadian so that the buildtools binaries are the right
 ones. They get overwritten by the CT_HOST versions (nothing) otherwise

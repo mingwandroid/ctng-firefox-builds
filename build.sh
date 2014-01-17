@@ -72,7 +72,7 @@ VENDOR_OSES_raspi="unknown-linux-gnu"
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
 BUILD_DEBUGGABLE_windows="yes"
-BUILD_DEBUGGABLE_linux="no"
+BUILD_DEBUGGABLE_linux="yes"
 
 BUILD_DEBUGGERS_darwin="yes"
 BUILD_DEBUGGERS_windows="no"
@@ -103,7 +103,7 @@ TARGET_LLVM_VERSIONS_windows="head"
 TARGET_LLVM_VERSIONS_linux="none"
 #TARGET_LLVM_VERSIONS_linux="head"
 TARGET_LLVM_VERSIONS_ps3="none"
-TARGET_LLVM_VERSIONS_raspi="none"
+TARGET_LLVM_VERSIONS_raspi="3.3"
 
 TARGET_COMPILER_RT_osx="yes"
 TARGET_COMPILER_RT_windows="no"

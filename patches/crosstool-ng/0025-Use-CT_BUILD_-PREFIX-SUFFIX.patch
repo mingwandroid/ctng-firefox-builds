@@ -1,4 +1,4 @@
-From 6e5f00971da54af4672e9b81cd538ee6ae24492f Mon Sep 17 00:00:00 2001
+From 3facca2aa6fd5be68561c52aecb37edd18d479b4 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 2 Jan 2014 18:42:43 -0800
 Subject: [PATCH 25/26] Use CT_BUILD_{PREFIX|SUFFIX} ..

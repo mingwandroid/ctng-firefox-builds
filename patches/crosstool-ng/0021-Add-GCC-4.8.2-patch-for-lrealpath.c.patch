@@ -1,4 +1,4 @@
-From abde81d72c02d93bd4325a93541972fc331bb194 Mon Sep 17 00:00:00 2001
+From 2084066e0365582d214b2163f82155cb177086a9 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 23 Dec 2013 22:05:54 +0000
 Subject: [PATCH 21/26] Add GCC 4.8.2 patch for lrealpath.c

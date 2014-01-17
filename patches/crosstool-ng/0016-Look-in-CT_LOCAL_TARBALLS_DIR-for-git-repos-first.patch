@@ -1,4 +1,4 @@
-From 77775db96897d53829a17661720883472aee53cc Mon Sep 17 00:00:00 2001
+From 0c3388b79707af358bb120d6b9166bb9a40594f3 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 20 Dec 2013 10:38:58 +0000
 Subject: [PATCH 16/26] Look in CT_LOCAL_TARBALLS_DIR for git repos first

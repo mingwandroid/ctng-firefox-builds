@@ -1,4 +1,4 @@
-From dbe0e33c372bf785a3a75f9f1721ee0e327a71ec Mon Sep 17 00:00:00 2001
+From 916f03d07c3602f400b76364ba263df332fcd05a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 28 Dec 2013 18:30:54 +0000
 Subject: [PATCH 23/26] Add eglibc 2.18 patch for non case-sensitive file
@@ -13,22 +13,22 @@ systems that are not both case sensitive and case preserving.
 
 diff --git a/patches/eglibc/2_18/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch b/patches/eglibc/2_18/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 new file mode 100644
-index 0000000..57a84af
+index 0000000..0868211
 --- /dev/null
 +++ b/patches/eglibc/2_18/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 @@ -0,0 +1,231 @@
 +diff -urN eglibc-2_18.orig/ChangeLog eglibc-2_18/ChangeLog
-+--- eglibc-2_18.orig/ChangeLog	2013-10-18 22:35:25.000000000 +0100
-++++ eglibc-2_18/ChangeLog	2013-12-28 18:25:08.190735900 +0000
++--- eglibc-2_18.orig/ChangeLog	2014-01-17 13:56:21.991750381 +0000
+++++ eglibc-2_18/ChangeLog	2014-01-17 13:56:46.738416874 +0000
 +@@ -1,3 +1,8 @@
 ++2013-12-28  Ray Donnelly  <mingw.android@gmail.com>
 ++
-++	* Rename .oS to .oSTATIC so that builds can be done on file
-++	systems that are not both case sensitive and case preserving.
+++       * Rename .oS to .oSTATIC so that builds can be done on file
+++       systems that are not both case sensitive and case preserving.
 ++
-+ 2013-09-06  David S. Miller  <davem@davemloft.net>
++ 2013-11-11  David S. Miller  <davem@davemloft.net>
 + 
-+ 	* po/zh_TW.po: Update Chinese (traditional) translation from
++ 	[BZ #16150]
 +diff -urN eglibc-2_18.orig/extra-lib.mk eglibc-2_18/extra-lib.mk
 +--- eglibc-2_18.orig/extra-lib.mk	2013-03-18 16:44:23.000000000 +0000
 ++++ eglibc-2_18/extra-lib.mk	2013-12-28 18:20:23.373054900 +0000

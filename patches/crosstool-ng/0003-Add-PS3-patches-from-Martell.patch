@@ -1,7 +1,7 @@
-From 4262f8aa7031ebd394db67ca0f870963b5b70010 Mon Sep 17 00:00:00 2001
+From 3ac7375cb4ce513c58c21f7ef6a4a2b676700c04 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 25 Nov 2013 22:40:03 +0000
-Subject: [PATCH 04/26] Add PS3 patches from Martell
+Subject: [PATCH 03/19] Add PS3 patches from Martell
 
 ---
  patches/gcc/4.7.0/000-gcc-4.7.0-PS3.patch         |   542 +
@@ -13927,5 +13927,5 @@ index 0000000..0d92be4
 +   if (y < 0.0)
 +     N = (int) (y * ONE_OVER_PI - 0.5);
 -- 
-1.8.5.2
+1.8.5.3
 

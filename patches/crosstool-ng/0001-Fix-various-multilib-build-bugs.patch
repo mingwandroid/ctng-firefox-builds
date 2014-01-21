@@ -1,7 +1,7 @@
-From 5af8827d447cc52913700a78a68b0ff49ca0ecdc Mon Sep 17 00:00:00 2001
+From db4765ae717bc38b336a4af4bf2055eafe78e747 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 20 Nov 2013 21:19:23 +0000
-Subject: [PATCH 02/26] Fix various multilib build bugs
+Subject: [PATCH 01/19] Fix various multilib build bugs
 
 --host=${CT_TARGET} with eg -m32 is not right.
 The arch part must be correct (i686 for 32-bit
@@ -69,7 +69,7 @@ index d973594..4a052ad 100644
                  binutils_tools+=( elf2flt flthdr )
              fi
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index 4b99d5d..26ffc7f 100644
+index 9f0e2a4..7204b99 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
 @@ -191,6 +191,7 @@ do_gcc_core_backend() {
@@ -413,7 +413,7 @@ index b9c55cb..d339a49 100644
  
          if [ "${CT_BUILD_MANUALS}" = "y" ]; then
 diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
-index 3c98b8c..5a24439 100644
+index f0b6e68..095f30b 100644
 --- a/scripts/crosstool-NG.sh.in
 +++ b/scripts/crosstool-NG.sh.in
 @@ -338,22 +338,25 @@ if [ -z "${CT_RESTART}" ]; then
@@ -454,5 +454,5 @@ index 3c98b8c..5a24439 100644
      # Determine build system if not set by the user
      if [ -z "${CT_BUILD}" ]; then
 -- 
-1.8.5.2
+1.8.5.3
 

@@ -1,7 +1,7 @@
-From f0b541a2823f70b84f6b93f083899c30365d1886 Mon Sep 17 00:00:00 2001
+From 081d46fbfd3dbb51c668fe23a73d0bbf6a288bf8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 29 Dec 2013 04:52:41 +0000
-Subject: [PATCH 24/26] Add eglibc 2.18 patch for MSYS2 forcing ln -s
+Subject: [PATCH 19/19] Add eglibc 2.18 patch for MSYS2 forcing ln -s
 
 .. although MSYS2 ln -s usually doesn't work right, it still works
 better than cp -p which would otherwise be used as a substitute.
@@ -56,5 +56,5 @@ index 0000000..162fc96
 + LIBC_PROG_BINUTILS
 + 
 -- 
-1.8.5.2
+1.8.5.3
 

@@ -126,9 +126,9 @@ TARGET_IS_DARWIN_raspi="no"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
-TARGET_LIBC_linux="GLIBC_V_2.18"
+TARGET_LIBC_linux="glibc_V_2.15"
 TARGET_LIBC_ps3="newlib"
-TARGET_LIBC_raspi="EGLIBC_V_2.18"
+TARGET_LIBC_raspi="eglibc_V_2.18"
 
 # Stands for associative lookup!
 _al()
@@ -471,7 +471,7 @@ fi
 
 
 
-LIBC_=$(echo $(_al TARGET_LIBC ${TARGET_OS}) | tr '.' '_')
+LIBC=$(_al TARGET_LIBC ${TARGET_OS})
 
 # The first part of CROSSCC is HOST_ARCH and the compilers are
 # built to run on that architecture of the host OS. They will
@@ -782,7 +782,24 @@ cross_clang_build()
       fi
     fi
 
-    echo "CT_LIBC_${LIBC_}=y"                  >> ${CTNG_SAMPLE_CONFIG}
+    # CT_LIBC="eglibc"
+    # CT_LIBC_VERSION="2_18"
+    # CT_LIBC_eglibc=y
+
+    LIBC_FAMILY=${LIBC%%_*}
+    echo "CT_LIBC_${LIBC_FAMILY}=y"                  >> ${CTNG_SAMPLE_CONFIG}
+    if [ "$LIBC_FAMILY" = "eglibc" \
+      -o "$LIBC_FAMILY" = "glibc" ]; then
+      echo "CT_LIBC=\"${LIBC_FAMILY}\""              >> ${CTNG_SAMPLE_CONFIG}
+      LIBC_VERS=${LIBC/${LIBC_FAMILY}_V_/}
+      # For some reason eglibc versions need _'s instead of .'s
+      if [ "$LIBC_FAMILY" = "eglibc" ]; then
+        LIBC_VERS=$(echo ${LIBC_VERS} | tr '.' '_')
+      fi
+      LIBCU_=$(echo ${LIBC} | tr '.' '_' | tr 'a-z' 'A-Z')
+      echo "CT_LIBC_${LIBCU_}=y"                     >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_VERSION=\"${LIBC_VERS}\""        >> ${CTNG_SAMPLE_CONFIG}
+    fi
 
     if [ ! "$LLVM_VERSION" = "none" ]; then
       echo "CT_LLVM_V_${LLVM_VERS_}=y"         >> ${CTNG_SAMPLE_CONFIG}
@@ -868,7 +885,7 @@ cross_clang_build()
     popd
   else
     if [ -n "$MINGW_W64_PATH" ]; then
-      PATH="${MINGW_W64_PATH}:${PATH}"
+      export PATH="${MINGW_W64_PATH}:${PATH}"
     fi
   fi
 }

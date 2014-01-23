@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# ^ /usr/bin/env since we need bash 4 or greater for the associative arrays
-#   and for OS X this is only available from homebrew.
-
 # Problems and related bug reports.
 #
 # 1. ICU cannot be cross compiled atm:
@@ -33,9 +30,14 @@
 #    I may need to adapt that ..
 #    https://gist.github.com/phstc/4121839
 #
-# Restarting at steps:
-#
-# https://sourceware.org/ml/crossgcc/2011-08/msg00119.html
+# 5. I wanted to build Linux -> Linux native compilers but ran into a problem so chatted with Yann Morin:
+#     <y_morin> mingwandroid: Building a native toolchain is not supported in ct-ng.
+#     <y_morin> mingwandroid: A native toolchain is one without a sysroot. In such a toolchain, gcc (and ld) will search in /usr/include (and /lib and /usr/lib), without prefixing those locations with the sysroot path.
+#     <y_morin> mingwandroid: This is a bit complex to set up, so crostool-NG does not support that (for now?)
+#     <mingwandroid> y_morin: yeah, I just can't figure out where the config stuff is determining it not to be native is all, I'd be prepared to try to make the rest work if I can get over this initial hump.
+#     <y_morin> mingwandroid: I don;t want to discourage you, but that's gonna bea quite a bit of work.
+#     <y_morin> mingwandroid: We'd first need to differentiate the build-time sysroot from the runtime sysroot
+#     <y_morin> mingwandroid: Then, we need to diferentiate between PREFIX_DIR and DEST_DIR
 
 # Errors are fatal (occasionally this will be temporarily disabled)
 set -e
@@ -103,7 +105,7 @@ TARGET_LLVM_VERSIONS_windows="head"
 TARGET_LLVM_VERSIONS_linux="none"
 #TARGET_LLVM_VERSIONS_linux="head"
 TARGET_LLVM_VERSIONS_ps3="none"
-TARGET_LLVM_VERSIONS_raspi="head"
+TARGET_LLVM_VERSIONS_raspi="none"
 
 TARGET_COMPILER_RT_osx="yes"
 TARGET_COMPILER_RT_windows="no"

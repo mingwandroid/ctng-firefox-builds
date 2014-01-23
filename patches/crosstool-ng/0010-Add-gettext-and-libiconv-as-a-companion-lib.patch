@@ -1,7 +1,7 @@
-From 1018111eac91001818efb7b629b99c9a8389a406 Mon Sep 17 00:00:00 2001
+From 6dca857fd4ec0017eb9ac100cb82d195276bd779 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 21:10:56 +0000
-Subject: [PATCH 10/20] Add gettext and libiconv as a companion lib
+Subject: [PATCH 10/21] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
 

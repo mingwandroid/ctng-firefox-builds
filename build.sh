@@ -3030,3 +3030,26 @@ pushd /c/ctng-build-x-o-none-apple_5666_3-x86_64-235295c4/.build/x86_64-apple-da
 esac])
 
 ^ simplify that right down!
+
+
+# To quickly iterate installing kernel headers:
+build_for_arch ()
+{
+ARCH=$1 ; shift
+rm -rf linux-3.12
+mkdir -p linux-3.12
+tar --strip-components=1 -C linux-3.12 -x -f ~/src/linux-3.12.tar.xz
+pushd linux-3.12
+patch --no-backup-if-mismatch -g0 -F1 -p1 -f -i ~/ctng-firefox-builds/crosstool-ng/patches/linux/3.12/100-fixdep-fixes-for-Windows.patch
+patch --no-backup-if-mismatch -g0 -F1 -p1 -f -i ~/ctng-firefox-builds/crosstool-ng/patches/linux/3.12/120-Win32-FreeBSD-use-upstream-unifdef.patch
+patch --no-backup-if-mismatch -g0 -F1 -p1 -f -i ~/ctng-firefox-builds/crosstool-ng/patches/linux/3.12/130-disable-archscripts-due-to-elf_h-circular-dep.patch
+popd
+mkdir linux-3.12-builddir-$ARCH
+mkdir linux-3.12-installdir-$ARCH
+pushd linux-3.12-builddir-$ARCH
+MAKEFLAGS="V=1" PATH=/mingw64/bin:$PATH make -C $PWD/../linux-3.12 O=$PWD ARCH=${ARCH} INSTALL_HDR_PATH=$PWD/../linux-3.12-installdir headers_install > build.log 2>&1 
+popd
+}
+
+build_for_arch x86
+build_for_arch arm

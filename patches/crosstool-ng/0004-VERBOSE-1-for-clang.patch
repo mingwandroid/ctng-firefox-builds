@@ -1,7 +1,7 @@
-From bbef94b661424df64e1eb6a95bb9662d8a75249e Mon Sep 17 00:00:00 2001
+From 453ac3eca5ae3329800555523611af4fc8d5a208 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 18 Nov 2013 14:23:10 +0000
-Subject: [PATCH 04/20] VERBOSE=1 for clang
+Subject: [PATCH 04/21] VERBOSE=1 for clang
 
 ---
  scripts/build/cc/200-clang.sh            | 4 +++-

@@ -1,7 +1,7 @@
-From bd7d59da65222c8266411bcc59e028c7adebbe1f Mon Sep 17 00:00:00 2001
+From f129cebf92831dd050d623a130507bd984bc79bc Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 27 Dec 2013 22:16:08 +0000
-Subject: [PATCH 17/21] Add eglibc 2.18 hacky patch and hacky hack for MSYS*
+Subject: [PATCH 17/22] Add eglibc 2.18 hacky patch and hacky hack for MSYS*
 
 .. Path differences between MSYS*'s gnumake and the host tools
 causes various sed operations to not behave as expected. So

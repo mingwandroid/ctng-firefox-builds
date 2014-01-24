@@ -1,7 +1,7 @@
-From 30dd01f89f7bdc5e4e87d203cd1bcf9721aed040 Mon Sep 17 00:00:00 2001
+From cdcd79d372f342d5205dec520f383197ba63301d Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 23 Dec 2013 13:41:25 +0000
-Subject: [PATCH 15/24] Add GCC 4.8.2 patch for files.c
+Subject: [PATCH 15/25] Add GCC 4.8.2 patch for files.c
 
 .. On Windows (MiNGW-w64 and Cygwin) non-existant dirs
 that are stepped out of via '..' are not considered a

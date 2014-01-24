@@ -1,7 +1,7 @@
-From b8cb8f59cac6c64795a8bfe31ad57324d1fdce4b Mon Sep 17 00:00:00 2001
+From 59be7c88035d57757d5909f6c8ffb513b2233a11 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 22 Jan 2014 00:25:39 +0000
-Subject: [PATCH 20/24] Add glibc 2.15 patches as per the eglibc-2.18 patches
+Subject: [PATCH 21/25] Add glibc 2.15 patches as per the eglibc-2.18 patches
 
 ---
  patches/glibc/2.15/100-make-4.patch                |  24 ++

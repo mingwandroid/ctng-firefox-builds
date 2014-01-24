@@ -1,22 +1,22 @@
-From e1cb3b0b0b72ebdc5c1c28fb96dd86e306977d84 Mon Sep 17 00:00:00 2001
+From 58f53e6d6f79086b792a272ac3c50433260b2c24 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 09:21:30 +0000
-Subject: [PATCH 23/24] Add glibc 2.15 patch from OpenWrt for cross compiling
+Subject: [PATCH 24/25] Add glibc 2.15 patch from OpenWrt for cross compiling
 
 Url
 https://dev.openwrt.org/browser/trunk/toolchain/glibc/patches/2.14/100-fix_cpuid_h_check.patch?rev=30478
 
 It's an autoconf issue with an in-complete sysroot.
 ---
- .../160-100-fix_cpuid_h_check-from-OpenWrt.patch   | 22 ++++++++++++++++++++++
+ .../170-100-fix_cpuid_h_check-from-OpenWrt.patch   | 22 ++++++++++++++++++++++
  1 file changed, 22 insertions(+)
- create mode 100644 patches/glibc/2.15/160-100-fix_cpuid_h_check-from-OpenWrt.patch
+ create mode 100644 patches/glibc/2.15/170-100-fix_cpuid_h_check-from-OpenWrt.patch
 
-diff --git a/patches/glibc/2.15/160-100-fix_cpuid_h_check-from-OpenWrt.patch b/patches/glibc/2.15/160-100-fix_cpuid_h_check-from-OpenWrt.patch
+diff --git a/patches/glibc/2.15/170-100-fix_cpuid_h_check-from-OpenWrt.patch b/patches/glibc/2.15/170-100-fix_cpuid_h_check-from-OpenWrt.patch
 new file mode 100644
 index 0000000..255c87f
 --- /dev/null
-+++ b/patches/glibc/2.15/160-100-fix_cpuid_h_check-from-OpenWrt.patch
++++ b/patches/glibc/2.15/170-100-fix_cpuid_h_check-from-OpenWrt.patch
 @@ -0,0 +1,22 @@
 +--- a/sysdeps/i386/configure.in
 ++++ b/sysdeps/i386/configure.in

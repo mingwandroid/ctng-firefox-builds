@@ -1,7 +1,7 @@
-From 20f2e7320dfff604beb364c00394d611af20ea6d Mon Sep 17 00:00:00 2001
+From f704283c0e0151a1d209277eec898325af188b92 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 28 Dec 2013 18:30:54 +0000
-Subject: [PATCH 18/24] Add eglibc 2.18 patch for non case-sensitive file
+Subject: [PATCH 19/25] Add eglibc 2.18 patch for non case-sensitive file
  systems
 
 Rename .oS to .oSTATIC so that builds can be done on file

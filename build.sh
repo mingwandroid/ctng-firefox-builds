@@ -1388,6 +1388,8 @@ if [ ! -f bin/autoconf ]; then
  cd autoconf-${AUTOCONF_VER}
  wget -O config.guess 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
  wget -O config.sub 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' 
+ cp config.guess build-aux/
+ cp config.sub build-aux/
  ./configure --prefix=$PWD/.. && make && make install
  cd ..
 fi

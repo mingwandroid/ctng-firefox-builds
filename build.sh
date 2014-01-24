@@ -74,7 +74,7 @@ VENDOR_OSES_raspi="unknown-linux-gnu"
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
 BUILD_DEBUGGABLE_windows="yes"
-BUILD_DEBUGGABLE_linux="yes"
+BUILD_DEBUGGABLE_linux="no"
 
 BUILD_DEBUGGERS_darwin="yes"
 BUILD_DEBUGGERS_windows="no"
@@ -783,6 +783,17 @@ cross_clang_build()
         echo "CT_CC_GCC_ENABLE_PLUGINS=n"      >> ${CTNG_SAMPLE_CONFIG}
       fi
     fi
+
+    NATURE="CROSS"
+    if [ "${BUILD_OS}" = "linux" -a "${TARGET_OS}" = "linux" ]; then
+      NATURE="NATIVE"
+    elif  [ "${BUILD_OS}" = "windows" -a "${TARGET_OS}" = "windows" ]; then
+      NATURE="NATIVE"
+    elif [ "${BUILD_OS}" = "darwin" -a "${TARGET_OS}" = "osx" ]; then
+      NATURE="NATIVE"
+    fi
+    echo "CT_${NATURE}=y"                      >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_TOOLCHAIN_TYPE=\"$(echo $NATURE | tr 'A-Z' 'a-z')\"" >> ${CTNG_SAMPLE_CONFIG}
 
     # CT_LIBC="eglibc"
     # CT_LIBC_VERSION="2_18"

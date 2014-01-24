@@ -73,7 +73,7 @@ VENDOR_OSES_raspi="unknown-linux-gnu"
 
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
-BUILD_DEBUGGABLE_windows="yes"
+BUILD_DEBUGGABLE_windows="no"
 BUILD_DEBUGGABLE_linux="no"
 
 BUILD_DEBUGGERS_darwin="yes"
@@ -3068,3 +3068,55 @@ popd
 
 build_for_arch x86
 build_for_arch arm
+
+pushd /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/x86_64-unknown-linux-gnu/32/libgcc
+/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc \
+            -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ \
+            -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ \
+            -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ \
+            -isystem /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include \
+            -isystem /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include \
+            -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE \
+            -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include \
+            -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs \
+            -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp \
+            -g -Os -m32 -B./ \
+            _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o \
+            _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o \
+            _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o \
+            _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o \
+            _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o \
+            _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o \
+            fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o \
+            trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc \
+&& rm -f 32/libgcc_s.so \
+&& if [ -f 32/libgcc_s.so.1 ]; then mv -f 32/libgcc_s.so.1 32/libgcc_s.so.1.backup; else true; fi \
+&& mv 32/libgcc_s.so.1.tmp 32/libgcc_s.so.1 \
+&& cp -p libgcc_s.so.1 32/libgcc_s.so
+
+/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc \
+            -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ \
+            -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ \
+            -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ \
+            -isystem /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include \
+            -isystem /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include \
+            -O2  -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE \
+            -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include \
+            -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs \
+            -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp \
+            -g -Os -m32 -B./ \
+            _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o \
+            _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o \
+            _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o \
+            _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o \
+            _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o \
+            _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o \
+            fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o \
+            trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc \
+&& rm -f 32/libgcc_s.so \
+&& if [ -f 32/libgcc_s.so.1 ]; then mv -f 32/libgcc_s.so.1 32/libgcc_s.so.1.backup; else true; fi \
+&& mv 32/libgcc_s.so.1.tmp 32/libgcc_s.so.1 \
+&& ln -s libgcc_s.so.1 32/libgcc_s.so
+
+
+On Linux this creates a link (32/libgcc_s.so) pointing to literally "libgcc_s.so.1". This does not work for us.

@@ -200,7 +200,7 @@ option CTNG_CLEAN          no \
 "Remove old crosstool-ng build and artefacts
 before starting the build, otherwise an old
 crosstool-ng may be re-used."
-option CTNG_SAVE_STEPS     no \
+option CTNG_SAVE_STEPS     default \
 "Save steps so that they can be restarted
 later. This doesn't work well for llvm
 and clang unfortunately, but while iterating
@@ -419,6 +419,12 @@ if [ "$GNU_PLUGINS" = "default" ]; then
 fi
 if [ "$LLVM_VERSION" = "none" ]; then
   COMPILER_RT="no"
+fi
+if [ "$CTNG_SAVE_STEPS" = "default" ]; then
+  CTNG_SAVE_STEPS=no
+  if [ "$LLVM_VERSION" = "none" ]; then
+    CTNG_SAVE_STEPS=yes
+  fi
 fi
 
 if [ "$STATIC_TOOLCHAIN" = "yes" -a "$BUILD_OS" = "darwin" ]; then
@@ -3120,3 +3126,237 @@ pushd /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-g
 
 
 On Linux this creates a link (32/libgcc_s.so) pointing to literally "libgcc_s.so.1". This does not work for us.
+
+
+.. segfault: /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-1
+
+PATH=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/bin:/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin:/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH \
+    /usr/bin/make "DESTDIR=" "RPATH_ENVVAR=PATH" "TARGET_SUBDIR=x86_64-unknown-linux-gnu" "bindir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin" "datadir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/share" "exec_prefix=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools" "includedir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/include" "datarootdir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/share" "docdir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/share/doc/" "infodir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/share/info" "pdfdir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/share/doc/" "htmldir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/share/doc/" "libdir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/lib" "libexecdir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/libexec" "lispdir=" "localstatedir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/var" "mandir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/share/man" "oldincludedir=/usr/include" "prefix=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools" "sbindir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/sbin" "sharedstatedir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/com" "sysconfdir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/etc" "tooldir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu" "build_tooldir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu" "target_alias=x86_64-unknown-linux-gnu" "AWK=gawk" "BISON=bison" "CC_FOR_BUILD=x86_64-build_w64-mingw32-gcc" "CFLAGS_FOR_BUILD=-m64" "CXX_FOR_BUILD=x86_64-build_w64-mingw32-g++" "EXPECT=expect" "FLEX=flex" "INSTALL=/usr/bin/install -c" "INSTALL_DATA=/usr/bin/install -c -m 644" "INSTALL_PROGRAM=/usr/bin/install -c" "INSTALL_SCRIPT=/usr/bin/install -c" "LDFLAGS_FOR_BUILD=-m64 -lstdc++ -lm" "LEX=flex" "M4=m4" "MAKE=/usr/bin/make" "RUNTEST=runtest" "RUNTESTFLAGS=" "SED=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/tools/bin/sed" "SHELL=/usr/bin/bash" "YACC=bison -y" "`echo 'ADAFLAGS=' | sed -e s'/[^=][^=]*=$/XFOO=/'`" "ADA_CFLAGS=" "AR_FLAGS=rc" "`echo 'BOOT_ADAFLAGS=-gnatpg' | sed -e s'/[^=][^=]*=$/XFOO=/'`" "BOOT_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format" "BOOT_LDFLAGS= -Wl,--stack,12582912" "CFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -D__USE_MINGW_ACCESS" "CXXFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1" "LDFLAGS=-m64 -lstdc++ -lm -Wl,--stack,12582912" "LIBCFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -D__USE_MINGW_ACCESS" "LIBCXXFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -fno-implicit-templates" "STAGE1_CHECKING=--enable-checking=yes,types" "STAGE1_LANGUAGES=c,lto" "GNATBIND=x86_64-build_w64-mingw32-gnatbind" "GNATMAKE=x86_64-build_w64-mingw32-gnatmake" "AR_FOR_TARGET=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ar" "AS_FOR_TARGET=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/as" "CC_FOR_TARGET= $r/./gcc/xgcc -B$r/./gcc/" "CFLAGS_FOR_TARGET=-g -Os" "CPPFLAGS_FOR_TARGET=" "CXXFLAGS_FOR_TARGET=-g -Os" "DLLTOOL_FOR_TARGET=x86_64-unknown-linux-gnu-dlltool" "FLAGS_FOR_TARGET=-B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ -isystem /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include -isystem /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include" "GCJ_FOR_TARGET= x86_64-unknown-linux-gnu-gcj" "GFORTRAN_FOR_TARGET= x86_64-unknown-linux-gnu-gfortran" "GOC_FOR_TARGET= x86_64-unknown-linux-gnu-gccgo" "GOCFLAGS_FOR_TARGET=-O2 -g" "LD_FOR_TARGET=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ld" "LIPO_FOR_TARGET=x86_64-unknown-linux-gnu-lipo" "LDFLAGS_FOR_TARGET=" "LIBCFLAGS_FOR_TARGET=-g -Os" "LIBCXXFLAGS_FOR_TARGET=-g -Os -fno-implicit-templates" "NM_FOR_TARGET=x86_64-unknown-linux-gnu-nm" "OBJDUMP_FOR_TARGET=x86_64-unknown-linux-gnu-objdump" "RANLIB_FOR_TARGET=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ranlib" "READELF_FOR_TARGET=x86_64-unknown-linux-gnu-readelf" "STRIP_FOR_TARGET=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/strip" "WINDRES_FOR_TARGET=x86_64-unknown-linux-gnu-windres" "WINDMC_FOR_TARGET=x86_64-unknown-linux-gnu-windmc" "BUILD_CONFIG=" "`echo 'LANGUAGES=' | sed -e s'/[^=][^=]*=$/XFOO=/'`" "LEAN=false" "STAGE1_CFLAGS=-g" "STAGE1_CXXFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1" "STAGE1_TFLAGS=" "STAGE2_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format" "STAGE2_CXXFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1" "STAGE2_TFLAGS=" "STAGE3_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format" "STAGE3_CXXFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1" "STAGE3_TFLAGS=" "STAGE4_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format" "STAGE4_CXXFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1" "STAGE4_TFLAGS=" "STAGEprofile_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format -fprofile-generate" "STAGEprofile_CXXFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1" "STAGEprofile_TFLAGS=" "STAGEfeedback_CFLAGS=-g -O2 -D__USE_MINGW_ACCESS -Wno-pedantic-ms-format -fprofile-use" "STAGEfeedback_CXXFLAGS=-O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1" "STAGEfeedback_TFLAGS=" "CXX_FOR_TARGET= x86_64-unknown-linux-gnu-c++" "TFLAGS=" "CONFIG_SHELL=/usr/bin/bash" "MAKEINFO=makeinfo --split-size=5000000" 'AR=x86_64-build_w64-mingw32-ar' 'AS=x86_64-build_w64-mingw32-as' 'CC=x86_64-build_w64-mingw32-gcc' 'CXX=x86_64-build_w64-mingw32-g++' 'DLLTOOL=x86_64-build_w64-mingw32-dlltool' 'GCJ=' 'GFORTRAN=' 'GOC=' 'LD=c:/msys64/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin/../lib/gcc/x86_64-w64-mingw32/4.8.2/../../../../x86_64-w64-mingw32/bin/ld.exe' 'LIPO=lipo' 'NM=x86_64-build_w64-mingw32-nm' 'OBJDUMP=x86_64-build_w64-mingw32-objdump' 'RANLIB=x86_64-build_w64-mingw32-ranlib' 'READELF=readelf' 'STRIP=x86_64-build_w64-mingw32-strip' 'WINDRES=x86_64-build_w64-mingw32-windres' 'WINDMC=windmc' LDFLAGS="${LDFLAGS}" HOST_LIBS="${HOST_LIBS}" "GCC_FOR_TARGET= $r/./gcc/xgcc -B$r/./gcc/" "`echo 'STMP_FIXPROTO=' | sed -e s'/[^=][^=]*=$/XFOO=/'`" "`echo 'LIMITS_H_TEST=' | sed -e s'/[^=][^=]*=$/XFOO=/'`" all
+
+
+
+.. Ok, seems /usr/bin/locale has been overwritten by a build somewhere along the line!
+
+$ file /usr/bin/locale
+/usr/bin/locale: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 3.12.0, not stripped
+
+ray@l702x ~
+$ ls -l /usr/bin/locale
+-rw-r--r-- 1 ray None 46653 Jan 25 03:07 /usr/bin/locale
+ok make install of eglibc-2.18, it may be because I did it from the command line without a DESTDIR though, need to check!
+
+Seems MSYS2 does not have locale program:
+$ pacman -Qo /usr/bin/locale
+error: No package owns /usr/bin/locale
+
+(localedef also is from eglibc-2.18!)
+
+
+
+pushd /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32
+make -j1 -l BUILD_CPPFLAGS=-I/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/include/ BUILD_LDFLAGS="-L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" install_root=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot install
+
+cd build-libc-final_32
+make -j1 -l BUILD_CPPFLAGS=-I/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/include/ BUILD_LDFLAGS="-L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" install_root=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot install
+
+
+MAKEFLAGS were rw MAKECMDGOALS ware subdir_install
+
+Makefile:32: SHELLFLAGS are
+
+pushd /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/eglibc-2_18/nis
+
+Makefile:34: BUILD_LDFLAGS is -L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic
+Makefile:35: install_root is /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot
+Makefile:36: subdir is nis
+Makefile:37: OUTPUT_OPTION is -o
+Makefile:38: MAKEFILE_LIST is  Makefile
+Makefile:39: MAKE_HOST is x86_64-pc-msys
+Makefile:40: sysdep_dir is sysdeps
+Makefile:41: objdir is /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32
+Makefile:42: SYSTEMROOT is C:\Windows
+Makefile:43: MFLAGS is -rw
+Makefile:44: MAKEFILES is
+
+
+pushd /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/eglibc-2_18
+make -j1 -l install_root=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot subdir=nis \
+  sysdep_dir=sysdeps \
+  objdir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32 \
+  BUILD_LDFLAGS="-L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" \
+  -C nis ..=../ subdir_install 
+popd
+
+.. --always-make will force reconfigure and the lot.
+
+pushd /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/eglibc-2_18
+PATH=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/bin:/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin:/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH \
+build_alias=x86_64-build_w64-mingw32 \
+host_alias=i686-unknown-linux-gnu \
+CC="x86_64-unknown-linux-gnu-gcc -m32" \
+CFLAGS="-U_FORTIFY_SOURCE -O2" \
+make -j1 -l install_root=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot subdir=nis \
+  sysdep_dir=sysdeps \
+  objdir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32 \
+  BUILD_LDFLAGS="-L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" \
+  -C nis ..=../ subdir_install
+popd
+
+
+// To get flags passed above, I edited:
+
+C:\ctng-build-x-l-none-4_8_2-x86_64-213be3fb\.build\src\eglibc-2_18\nis\Makefile
+
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning MAKEFLAGS were $(MAKEFLAGS) MAKECMDGOALS ware $(MAKECMDGOALS))
+$(warning VARIABLES are $(.VARIABLES))
+$(warning SHELLFLAGS are $(SHELLFLAGS))
+$(warning CURDIR is $(CURDIR))
+$(warning BUILD_LDFLAGS is $(BUILD_LDFLAGS))
+$(warning install_root is $(install_root))
+$(warning subdir is $(subdir))
+$(warning OUTPUT_OPTION is $(OUTPUT_OPTION))
+$(warning MAKEFILE_LIST is $(MAKEFILE_LIST))
+$(warning MAKE_HOST is $(MAKE_HOST))
+$(warning sysdep_dir is $(sysdep_dir))
+$(warning objdir is $(objdir))
+$(warning SYSTEMROOT is $(SYSTEMROOT))
+$(warning MFLAGS is $(MFLAGS))
+$(warning MAKEFILES is $(MAKEFILES))
+
+.. putting those prints in cause the coredump to go away ..
+
+.. so the full repro for this gnumake bug is:
+
+rm -rf ~/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/lib/{libnss_compat.so.2,libnss_compat-2.18.so,libnss_nisplus.so.2}
+pushd /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/eglibc-2_18
+make -j1 -l install_root=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot subdir=nis \
+  sysdep_dir=sysdeps \
+  objdir=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32 \
+  BUILD_LDFLAGS="-L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" \
+  -C nis ..=../ subdir_install 
+popd
+
+# Debugging this in QtCreator..
+set directories C:/repo-MSYS2/make/src/make;C:/repo-MSYS2/msys2-runtime/src/msys2-runtime/winsup/cygwin/lib
+b cygwin_exception::open_stackdumpfile
+
+
+# Crash in gnumake is at:
+"bt\n"
+"#0  cygwin_exception::open_stackdumpfile (this=this@entry=0x227360) at ../../../../msys2-runtime/winsup/cygwin/exceptions.cc:127\n"
+"#1  0x000000018006ee40 in cygwin_exception::dumpstack (this=0x227360) at ../../../../msys2-runtime/winsup/cygwin/exceptions.cc:351\n"
+"#2  0x000000018006f547 in signal_exit (sig=134, si=<optimized out>) at ../../../../msys2-runtime/winsup/cygwin/exceptions.cc:1236\n"
+"#3  0x0000000180070aba in _cygtls::call_signal_handler (this=0x22ce00) at ../../../../msys2-runtime/winsup/cygwin/exceptions.cc:1454\n"
+"#4  0x0000000180119e28 in sig_send (p=0x0, p@entry=0x180000000, si=..., tls=tls@entry=0x0) at ../../../../msys2-runtime/winsup/cygwin/sigproc.cc:687\n"
+"#5  0x0000000180116f1e in _pinfo::kill (this=0x180000000, si=...) at ../../../../msys2-runtime/winsup/cygwin/signal.cc:248\n"
+"#6  0x00000001801173eb in kill0 (pid=9120, si=...) at ../../../../msys2-runtime/winsup/cygwin/signal.cc:299\n"
+"#7  0x00000001801175bc in kill (sig=6, pid=<optimized out>) at ../../../../msys2-runtime/winsup/cygwin/signal.cc:308\n"
+"#8  raise (sig=sig@entry=6) at ../../../../msys2-runtime/winsup/cygwin/signal.cc:284\n"
+"#9  0x000000018011787f in abort () at ../../../../msys2-runtime/winsup/cygwin/signal.cc:371\n"
+"#10 0x00000001801473b5 in internal_realloc (m=0x1802b6e40 <_gm_>, bytes=1248, oldmem=0x600101ab0) at ../../../../msys2-runtime/winsup/cygwin/malloc.cc:3779\n"
+"#11 dlrealloc (oldmem=0x600101ab0, bytes=1248) at ../../../../msys2-runtime/winsup/cygwin/malloc.cc:4292\n"
+"#12 0x00000001800bf7bf in realloc (p=0x600101ab0, size=1248) at ../../../../msys2-runtime/winsup/cygwin/malloc_wrapper.cc:77\n"
+"#13 0x000000018011300b in _sigfe () from C:\\msys64\\bin\\msys-2.0.dll\n"
+"#14 0x0000000600502720 in ?? ()\n"
+"#15 0x00000001800bf6f3 in free (p=0x1a4) at ../../../../msys2-runtime/winsup/cygwin/malloc_wrapper.cc:47\n"
+"#16 0x000000018011300b in _sigfe () from C:\\msys64\\bin\\msys-2.0.dll\n"
+"#17 0x0000000000000184 in ?? ()\n"
+"#18 0x00000001004125e8 in message (prefix=prefix@entry=0, len=420, fmt=fmt@entry=0x100427506 <__FUNCTION__.5266+2604> \"%s\") at output.c:615\n"
+"#19 0x000000010040de7c in start_job_command (child=child@entry=0x600502370) at job.c:1311\n"
+"#20 0x000000010040e71e in reap_children (block=block@entry=1, err=err@entry=0) at job.c:915\n"
+"#21 0x000000010040f001 in new_job (file=<optimized out>) at job.c:2050\n"
+"#22 0x0000000100419ae8 in remake_file (file=0x6002eb9c0) at remake.c:1211\n"
+"#23 update_file_1 (depth=<optimized out>, file=0x6002eb9c0) at remake.c:822\n"
+"#24 update_file (file=file@entry=0x6002eb9c0, depth=depth@entry=10) at remake.c:316\n"
+"#25 0x00000001004188b5 in check_dep (file=0x6002eb9c0, depth=10, depth@entry=9, this_mtime=this_mtime@entry=1493220499318761419, must_make_ptr=must_make_ptr@entry=0x22841c) at remake.c:1011\n"
+"#26 0x000000010041908b in update_file_1 (depth=<optimized out>, file=0x6002eb8a0) at remake.c:565\n"
+"#27 update_file (file=file@entry=0x6002eb8a0, depth=depth@entry=8) at remake.c:316\n"
+"#28 0x00000001004188b5 in check_dep (file=0x6002eb8a0, depth=8, depth@entry=7, this_mtime=this_mtime@entry=1, must_make_ptr=must_make_ptr@entry=0x2285fc) at remake.c:1011\n"
+"#29 0x000000010041908b in update_file_1 (depth=<optimized out>, file=0x6002ebc00) at remake.c:565\n"
+"#30 update_file (file=file@entry=0x6002ebc00, depth=depth@entry=6) at remake.c:316\n"
+"#31 0x00000001004188b5 in check_dep (file=0x6002ebc00, depth=6, depth@entry=5, this_mtime=this_mtime@entry=1, must_make_ptr=must_make_ptr@entry=0x2287dc) at remake.c:1011\n"
+"#32 0x000000010041908b in update_file_1 (depth=<optimized out>, file=0x6004c6b50) at remake.c:565\n"
+"#33 update_file (file=file@entry=0x6004c6b50, depth=depth@entry=4) at remake.c:316\n"
+"#34 0x00000001004188b5 in check_dep (file=0x6004c6b50, depth=4, depth@entry=3, this_mtime=this_mtime@entry=1, must_make_ptr=must_make_ptr@entry=0x2289bc) at remake.c:1011\n"
+"#35 0x000000010041908b in update_file_1 (depth=<optimized out>, file=0x6000bb090) at remake.c:565\n"
+"#36 update_file (file=file@entry=0x6000bb090, depth=depth@entry=2) at remake.c:316\n"
+"#37 0x00000001004188b5 in check_dep (file=0x6000bb090, depth=2, depth@entry=1, this_mtime=this_mtime@entry=1, must_make_ptr=must_make_ptr@entry=0x228b9c) at remake.c:1011\n"
+"#38 0x000000010041908b in update_file_1 (depth=<optimized out>, file=0x60006b9a0) at remake.c:565\n"
+"#39 update_file (file=file@entry=0x60006b9a0, depth=<optimized out>) at remake.c:316\n"
+"#40 0x0000000100419ff3 in update_goal_chain (goals=<optimized out>) at remake.c:155\n"
+"#41 0x00000001004232b1 in main (argc=<optimized out>, argv=<optimized out>, envp=<optimized out>) at main.c:2498\n"
+
+
+"print args\n"
+"$1 = (va_list) 0x6004fe68d \"ln -s `../scripts/rellns-sh -p /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/lib/libnss_nisplus-2.18.so /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/lib/libnss_nisplus.so.2` /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/lib/libnss_nisplus.so.2\""
+"print fmt\n"
+"$2 = 0x100427506 <__FUNCTION__.5266+2604> \"%s\""
+
+  len += strlen (fmt) + strlen (program) + INTSTR_LENGTH + 4 + 1 + 1;
+  p = get_buffer (len);
+
+Initial len passed in was 0
+
+
+// From C:\repo-MSYS2\msys2-runtime\src\msys2-runtime\winsup\cygwin\malloc.cc
+
+DEBUG                    default: NOT defined
+  The DEBUG setting is mainly intended for people trying to modify
+  this code or diagnose problems when porting to new platforms.
+  However, it may also be able to better isolate user errors than just
+  using runtime checks.  The assertions in the check routines spell
+  out in more detail the assumptions and invariants underlying the
+  algorithms.  The checking is fairly extensive, and will slow down
+  execution noticeably. Calling malloc_stats or mallinfo with DEBUG
+  set will attempt to check every non-mmapped allocated and free chunk
+  in the course of computing the summaries.
+
+.. sounds like I want to define DEBUG and call mallinfo everywhere?
+
+Also -DABORT_ON_ASSERT_FAILURE=0
+
+
+We go wrong when:
+p == 0x600101ab0
+p->head = 419
+p->prev_foot = 48
+assert(next_pinuse(p));
+#define next_pinuse(p)  ((next_chunk(p)->head) & PINUSE_BIT)
+assert( ((next_chunk(p)->head) & PINUSE_BIT) );
+#define next_chunk(p) ((mchunkptr)( ((char*)(p)) + ((p)->head & ~INUSE_BITS)))
+assert( ((((mchunkptr)( ((char*)(p)) + ((p)->head & ~INUSE_BITS)))->head) & PINUSE_BIT) );
+Address thus: (((mchunkptr)( ((char*)(p)) + ((p)->head & ~INUSE_BITS)))->head)
+INUSE_BITS = 3
+
+(mchunkptr)(0x600101ab0+418)
+
+so the invalid mchunkptr is 0x6000101c52
+ ->head = 10511120055306027008?
+
+mchunkptr = malloc_chunk*
+
+struct malloc_chunk {
+  size_t               prev_foot;  /* Size of previous chunk (if free).  */
+  size_t               head;       /* Size and inuse bits. */
+  struct malloc_chunk* fd;         /* double links -- used only if free. */
+  struct malloc_chunk* bk;
+};
+
+bad address is  0x600101c5A
+
+print *(size_t*)0x600101c5A == 10511120055306027008
+
+To get the size of fmtbuf->buffer it is:
+((mchunkptr)(fmtbuf->buffer-0x10))->head&~3
+
+To get the next_mchunkptr it is then:
+(mchunkptr)(fmtbuf->buffer-0x10+(((mchunkptr)(fmtbuf->buffer-0x10))->head&~3))

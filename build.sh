@@ -128,7 +128,7 @@ TARGET_IS_DARWIN_raspi="no"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
-TARGET_LIBC_linux="glibc_V_2.15"
+TARGET_LIBC_linux="eglibc_V_2.18"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
 
@@ -3360,3 +3360,65 @@ To get the size of fmtbuf->buffer it is:
 
 To get the next_mchunkptr it is then:
 (mchunkptr)(fmtbuf->buffer-0x10+(((mchunkptr)(fmtbuf->buffer-0x10))->head&~3))
+
+# eglibc-2.18 (64 bit)
+[EXTRA]    Configuring C library
+[DEBUG]    Using gcc for target     : '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin/x86_64-unknown-linux-gnu-gcc'
+[DEBUG]    Configuring with addons  : 'nptl'
+[DEBUG]    Extra config args passed : '--enable-obsolete-rpc --enable-kernel=3.12.0 --with-__thread --with-tls --enable-shared --enable-add-ons=nptl --with-pkgversion=crosstool-NG hg+unknown-20140124.200549'
+[DEBUG]    Extra CC args passed     : ' -U_FORTIFY_SOURCE          -O2 '
+[DEBUG]    Extra flags (multilib)   : ''
+[DEBUG]    Multilib os dir          : '/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/lib/../lib64'
+[DEBUG]    Configuring with --host  : 'x86_64-unknown-linux-gnu'
+[DEBUG]    Configuring with --libdir: '/usr/lib/../lib64'
+[DEBUG]    ==> Executing: 'BUILD_CC=x86_64-build_unknown-linux-gnu-gcc' 'CFLAGS= -U_FORTIFY_SOURCE          -O2 ' 'CC=x86_64-unknown-linux-gnu-gcc    ' 'AR=x86_64-unknown-linux-gnu-ar' 'RANLIB=x86_64-unknown-linux-gnu-ranlib' '/usr/bin/bash' '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/eglibc-2_18/configure' '--prefix=/usr' '--build=x86_64-build_unknown-linux-gnu' '--host=x86_64-unknown-linux-gnu' '--cache-file=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final/config.cache' '--without-cvs' '--disable-profile' '--without-gd' '--with-headers=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include' '--libdir=/usr/lib/../lib64' '--enable-obsolete-rpc' '--enable-kernel=3.12.0' '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=nptl' '--with-pkgversion=crosstool-NG hg+unknown-20140124.200549'
+[CFG  ]    configure: loading cache /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final/config.cache
+[CFG  ]    checking build system type... x86_64-build_unknown-linux-gnu
+[CFG  ]    checking host system type... x86_64-unknown-linux-gnu
+
+# eglibc-2.18 (32 bit)
+[EXTRA]      Configuring C library
+[DEBUG]      Using gcc for target     : '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin/x86_64-unknown-linux-gnu-gcc'
+[DEBUG]      Configuring with addons  : 'nptl'
+[DEBUG]      Extra config args passed : '--enable-obsolete-rpc --enable-kernel=3.12.0 --with-__thread --with-tls --enable-shared --enable-add-ons=nptl --with-pkgversion=crosstool-NG hg+unknown-20140124.200549'
+[DEBUG]      Extra CC args passed     : ' -U_FORTIFY_SOURCE          -O2 '
+[DEBUG]      Extra flags (multilib)   : ' -m32'
+[DEBUG]      Multilib os dir          : '/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/lib/../lib'
+[DEBUG]      Configuring with --host  : 'i686-unknown-linux-gnu'
+[DEBUG]      Configuring with --libdir: '/usr/lib/../lib'
+[DEBUG]      ==> Executing: 'BUILD_CC=x86_64-build_unknown-linux-gnu-gcc' 'CFLAGS= -U_FORTIFY_SOURCE          -O2 ' 'CC=x86_64-unknown-linux-gnu-gcc     -m32' 'AR=x86_64-unknown-linux-gnu-ar' 'RANLIB=x86_64-unknown-linux-gnu-ranlib' '/usr/bin/bash' '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/eglibc-2_18/configure' '--prefix=/usr' '--build=x86_64-build_unknown-linux-gnu' '--host=i686-unknown-linux-gnu' '--cache-file=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache' '--without-cvs' '--disable-profile' '--without-gd' '--with-headers=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include' '--libdir=/usr/lib/../lib' '--enable-obsolete-rpc' '--enable-kernel=3.12.0' '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=nptl' '--with-pkgversion=crosstool-NG hg+unknown-20140124.200549'
+[CFG  ]      configure: loading cache /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache
+
+
+# glibc-2.15 (64 bit):
+[INFO ]  Installing C library
+[DEBUG]    Entering '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final'
+[EXTRA]    Configuring C library
+[DEBUG]    Using gcc for target     : '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin/x86_64-unknown-linux-gnu-gcc'
+[DEBUG]    Configuring with addons  : 'nptl'
+[DEBUG]    Extra config args passed : '--disable-debug --disable-sanity-checks --enable-kernel=3.12.0 --with-__thread --with-tls --enable-shared --enable-add-ons=nptl --with-pkgversion=crosstool-NG hg+unknown-20140126.225515'
+[DEBUG]    Extra CC args passed     : ' -U_FORTIFY_SOURCE          -O2 '
+[DEBUG]    Extra flags (multilib)   : ''
+[DEBUG]    Multilib os dir          : '/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/lib/../lib64'
+[DEBUG]    Configuring with --host  : 'x86_64-unknown-linux-gnu'
+[DEBUG]    Configuring with --libdir: '/usr/lib/../lib64'
+[DEBUG]    ==> Executing: 'BUILD_CC=x86_64-build_unknown-linux-gnu-gcc' 'CFLAGS= -U_FORTIFY_SOURCE          -O2 ' 'CC=x86_64-unknown-linux-gnu-gcc    ' 'AR=x86_64-unknown-linux-gnu-ar' 'RANLIB=x86_64-unknown-linux-gnu-ranlib' '/usr/bin/bash' '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/glibc-2.15/configure' '--prefix=/usr' '--build=x86_64-build_unknown-linux-gnu' '--host=x86_64-unknown-linux-gnu' '--cache-file=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final/config.cache' '--without-cvs' '--disable-profile' '--without-gd' '--with-headers=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include' '--libdir=/usr/lib/../lib64' '--disable-debug' '--disable-sanity-checks' '--enable-kernel=3.12.0' '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=nptl' '--with-pkgversion=crosstool-NG hg+unknown-20140126.225515'
+[CFG  ]    configure: loading cache /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final/config.cache
+
+# glibc-2.15 (32 bit):
+[INFO ]    Building for multilib subdir='32'
+[DEBUG]      Entering '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32'
+[EXTRA]      Configuring C library
+[DEBUG]      Using gcc for target     : '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin/x86_64-unknown-linux-gnu-gcc'
+[DEBUG]      Configuring with addons  : 'nptl'
+[DEBUG]      Extra config args passed : '--disable-debug --disable-sanity-checks --enable-kernel=3.12.0 --with-__thread --with-tls --enable-shared --enable-add-ons=nptl --with-pkgversion=crosstool-NG hg+unknown-20140126.225515'
+[DEBUG]      Extra CC args passed     : ' -U_FORTIFY_SOURCE          -O2 '
+[DEBUG]      Extra flags (multilib)   : ' -m32'
+[DEBUG]      Multilib os dir          : '/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/lib/../lib'
+[DEBUG]      Configuring with --host  : 'i686-unknown-linux-gnu'
+[DEBUG]      Configuring with --libdir: '/usr/lib/../lib'
+[DEBUG]      ==> Executing: 'BUILD_CC=x86_64-build_unknown-linux-gnu-gcc' 'CFLAGS= -U_FORTIFY_SOURCE          -O2 ' 'CC=x86_64-unknown-linux-gnu-gcc     -m32' 'AR=x86_64-unknown-linux-gnu-ar' 'RANLIB=x86_64-unknown-linux-gnu-ranlib' '/usr/bin/bash' '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/glibc-2.15/configure' '--prefix=/usr' '--build=x86_64-build_unknown-linux-gnu' '--host=i686-unknown-linux-gnu' '--cache-file=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/config.cache' '--without-cvs' '--disable-profile' '--without-gd' '--with-headers=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include' '--libdir=/usr/lib/../lib' '--disable-debug' '--disable-sanity-checks' '--enable-kernel=3.12.0' '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=nptl' '--with-pkgversion=crosstool-NG hg+unknown-20140126.225515'
+[CFG  ]      configure: loading cache /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/config.cache
+
+
+

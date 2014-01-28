@@ -128,7 +128,8 @@ TARGET_IS_DARWIN_raspi="no"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
-TARGET_LIBC_linux="eglibc_V_2.18"
+#TARGET_LIBC_linux="eglibc_V_2.18"
+TARGET_LIBC_linux="glibc_V_2.15"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
 
@@ -3420,5 +3421,80 @@ To get the next_mchunkptr it is then:
 [DEBUG]      ==> Executing: 'BUILD_CC=x86_64-build_unknown-linux-gnu-gcc' 'CFLAGS= -U_FORTIFY_SOURCE          -O2 ' 'CC=x86_64-unknown-linux-gnu-gcc     -m32' 'AR=x86_64-unknown-linux-gnu-ar' 'RANLIB=x86_64-unknown-linux-gnu-ranlib' '/usr/bin/bash' '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/glibc-2.15/configure' '--prefix=/usr' '--build=x86_64-build_unknown-linux-gnu' '--host=i686-unknown-linux-gnu' '--cache-file=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/config.cache' '--without-cvs' '--disable-profile' '--without-gd' '--with-headers=/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include' '--libdir=/usr/lib/../lib' '--disable-debug' '--disable-sanity-checks' '--enable-kernel=3.12.0' '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=nptl' '--with-pkgversion=crosstool-NG hg+unknown-20140126.225515'
 [CFG  ]      configure: loading cache /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/config.cache
 
+# And now for my next problem:
+[ALL  ]    libtool: compile:  /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -shared-libgcc -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc -nostdinc++ -L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src -L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs -B/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include -I/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/include/x86_64-unknown-linux-gnu -I/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/include -I/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/gcc-4.8.2/libstdc++-v3/libsupc++ -fPIC -DPIC -Wall -Wextra -Wwrite-strings -Wcast-qual -Wabi -fdiagnostics-show-location=once -ffunction-sections -fdata-sections -frandom-seed=compatibility-atomic-c++0x.lo -g -Os -std=gnu++11 -c ../../../../../../src/gcc-4.8.2/libstdc++-v3/src/c++11/compatibility-atomic-c++0x.cc  -fPIC -DPIC -D_GLIBCXX_SHARED -o .libs/compatibility-atomic-c++0x.o
+[ALL  ]    ../../../../../../src/gcc-4.8.2/libstdc++-v3/src/c++11/compatibility-atomic-c++0x.cc: In function 'std::__atomic_flag_base* std::__atomic_flag_for_address(const volatile void*)':
+[ERROR]    ../../../../../../src/gcc-4.8.2/libstdc++-v3/src/c++11/compatibility-atomic-c++0x.cc:122:52: error: cast from 'const volatile void*' to 'uintptr_t {aka unsigned int}' loses precision [-fpermissive]
+[ALL  ]         uintptr_t __u = reinterpret_cast<uintptr_t>(__z);
+[ALL  ]                                                        ^
+[ALL  ]    Makefile:843: recipe for target 'compatibility-atomic-c++0x.lo' failed
+[ERROR]    make[6]: *** [compatibility-atomic-c++0x.lo] Error 1
+[ALL  ]    make[6]: Leaving directory '/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src'
+# ^ while that looks like a basic problem, investigation turned up what looks like a libc headers mismatch, testing for sizeof long gives different results on eglibc 2.18 vs glibc 2.15. Test code is (~/Dropbox/ctng-firefox-builds/conftest.cpp)
+#include <stdint.h>
+	template<typename, typename> struct same { enum { value = -1 }; };
+	template<typename Tp> struct same<Tp, Tp> { enum { value = 1 }; };
+	int array[same<int64_t, long>::value];
+int
+main ()
+{
+
+  ;
+  return 0;
+}
 
 
+# eglibc-2.18:
+# From C:\ctng-build-x-l-none-4_8_2-x86_64-213be3fb-eglibc-2.18-good\.build\x86_64-unknown-linux-gnu\build\build-cc-gcc-final\x86_64-unknown-linux-gnu\libstdc++-v3\config.log
+configure:18110: checking for int64_t as long
+configure:18130:  /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -shared-libgcc -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc -nostdinc++ -L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src -L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs -B/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -c -g -Os  conftest.cpp >&5
+configure:18130: $? = 0
+configure:18144: result: yes
+configure:18148: checking for int64_t as long long
+configure:18168:  /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -shared-libgcc -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc -nostdinc++ -L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src -L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs -B/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -c -g -Os  conftest.cpp >&5
+conftest.cpp:71:43: error: size of array 'array' is negative
+  int array[same<int64_t, long long>::value];
+                                           ^
+configure:18168: $? = 1
+
+# glibc-2.15:
+# From C:\ctng-build-x-l-none-4_8_2-x86_64-213be3fb\.build\x86_64-unknown-linux-gnu\build\build-cc-gcc-final\x86_64-unknown-linux-gnu\libstdc++-v3\config.log
+configure:18110: checking for int64_t as long
+configure:18130:  /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -shared-libgcc -B/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc -nostdinc++ -L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src -L/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs -B/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -c -g -Os  conftest.cpp >&5
+conftest.cpp:70:38: error: size of array 'array' is negative
+  int array[same<int64_t, long>::value];
+                                      ^
+configure:18130: $? = 1
+
+.. code is in ~/Dropbox/ctng-firefox-builds/conftest.cpp
+
+EGLIBC_BUILD=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb-eglibc-2.18-good
+EGLIBC_INST=~/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb-eglibc-2.18-good
+PATH=$EGLIBC_BUILD/bin:$EGLIBC_BUILD/.build/x86_64-unknown-linux-gnu/buildtools/bin:$EGLIBC_BUILD/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH \
+ $EGLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -shared-libgcc -B$EGLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc -nostdinc++ -L$EGLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src -L$EGLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs -B$EGLIBC_INST/x86_64-unknown-linux-gnu/bin/ -B$EGLIBC_INST/x86_64-unknown-linux-gnu/lib/ -isystem $EGLIBC_INST/x86_64-unknown-linux-gnu/include -isystem $EGLIBC_INST/x86_64-unknown-linux-gnu/sys-include    -c -g -Os  ~/Dropbox/ctng-firefox-builds/conftest.cpp
+
+GLIBC_BUILD=/c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb
+GLIBC_INST=~/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb
+PATH=$GLIBC_BUILD/bin:$GLIBC_BUILD/.build/x86_64-unknown-linux-gnu/buildtools/bin:$GLIBC_BUILD/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH \
+ $GLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -shared-libgcc -B$GLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc -nostdinc++ -L$GLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src -L$GLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs -B$GLIBC_INST/x86_64-unknown-linux-gnu/bin/ -B$GLIBC_INST/x86_64-unknown-linux-gnu/lib/ -isystem $GLIBC_INST/x86_64-unknown-linux-gnu/include -isystem $GLIBC_INST/x86_64-unknown-linux-gnu/sys-include    -c -g -Os  ~/Dropbox/ctng-firefox-builds/conftest.cpp
+
+echo "" | PATH=$GLIBC_BUILD/bin:$GLIBC_BUILD/.build/x86_64-unknown-linux-gnu/buildtools/bin:$GLIBC_BUILD/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$GLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc:$PATH $GLIBC_BUILD/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -E -dM - | grep 64
+
+... turns out the problem is glibc-2.15:
+C:\msys64\home\ray\ctng-firefox-builds\x-l-none-4_8_2-x86_64-213be3fb.215\x86_64-unknown-linux-gnu\sysroot\usr\include\bits\wordsize.h
+#define __WORDSIZE	32
+
+vs eglibc-2.15:
+C:\msys64\home\ray\ctng-firefox-builds\x-l-none-4_8_2-x86_64-213be3fb\x86_64-unknown-linux-gnu\sysroot\usr\include\bits\wordsize.h
+#if defined __x86_64__ && !defined __ILP32__
+# define __WORDSIZE	64
+#else
+# define __WORDSIZE	32
+#endif
+#ifdef __x86_64__
+# define __WORDSIZE_TIME64_COMPAT32	1
+/* Both x86-64 and x32 use the 64-bit system call interface.  */
+# define __SYSCALL_WORDSIZE		64
+#endif
+
+.. hmm!?!

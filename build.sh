@@ -132,7 +132,7 @@ TARGET_LIBC_windows="none"
 #TARGET_LIBC_linux="glibc_V_2.15"
 # This works ok:
 #TARGET_LIBC_linux="glibc_V_2.18"
-TARGET_LIBC_linux="glibc_V_2.17"
+TARGET_LIBC_linux="glibc_V_2.15"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
 

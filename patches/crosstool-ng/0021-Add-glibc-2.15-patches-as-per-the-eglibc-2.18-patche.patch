@@ -1,4 +1,4 @@
-From 1ab50e4070f9b135226148bce4edce92074b799b Mon Sep 17 00:00:00 2001
+From b7f81c509ffd74fba65dad26aed35c5533c61f87 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 22 Jan 2014 00:25:39 +0000
 Subject: [PATCH 21/27] Add glibc 2.15 patches as per the eglibc-2.18 patches
@@ -344,22 +344,22 @@ index 0000000..34011ff
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
 diff --git a/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch b/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 new file mode 100644
-index 0000000..1a522b9
+index 0000000..562590a
 --- /dev/null
 +++ b/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 @@ -0,0 +1,182 @@
 +diff -urN a/ChangeLog b/ChangeLog
-+--- a/ChangeLog	2014-01-21 23:57:21.288869100 +0000
-++++ b/ChangeLog	2014-01-22 00:05:05.643334700 +0000
++--- a/ChangeLog	2014-01-29 19:03:39.363304449 +0000
+++++ b/ChangeLog	2014-01-29 19:08:16.643300874 +0000
 +@@ -1,3 +1,8 @@
 ++2014-01-22  Ray Donnelly  <mingw.android@gmail.com>
 ++
-++	* Rename .oS to .oSTATIC so that builds can be done on file
-++	systems that are not both case sensitive and case preserving.
+++        * Rename .oS to .oSTATIC so that builds can be done on file
+++        systems that are not both case sensitive and case preserving.
 ++
-+ 2012-01-01  Ulrich Drepper  <drepper@gmail.com>
-+ 
-+ 	* posix/getconf.c: Update copyright year.
++ 2013-01-25  Thomas Schwinge  <thomas@codesourcery.com>
++
++         * configure.in (AC_PROG_CPP): New definition.
 +diff -urN a/extra-lib.mk b/extra-lib.mk
 +--- a/extra-lib.mk	2014-01-21 23:57:21.583406500 +0000
 ++++ b/extra-lib.mk	2014-01-21 23:59:13.371101800 +0000

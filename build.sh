@@ -1049,6 +1049,8 @@ else
   BUILDDIRSUFFIX=${BUILDSUFFIX}
 fi
 
+exit 0
+
 echo "About to download Firefox ($MOZ_VERSION)"
 SRC=$(firefox_download)
 echo "About to patch Firefox ($MOZ_VERSION)"

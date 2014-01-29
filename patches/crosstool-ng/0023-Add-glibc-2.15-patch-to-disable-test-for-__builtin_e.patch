@@ -1,7 +1,7 @@
-From ab7b3602a9d3fd5c0835ca92eb51a83f3f860791 Mon Sep 17 00:00:00 2001
+From b86748ce2424c4b162b9392fe73b98e0ee65a06d Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 00:50:24 +0000
-Subject: [PATCH 23/25] Add glibc 2.15 patch to disable test for
+Subject: [PATCH 23/27] Add glibc 2.15 patch to disable test for
  __builtin_expect
 
 ---

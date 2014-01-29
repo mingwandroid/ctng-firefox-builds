@@ -129,7 +129,10 @@ TARGET_IS_DARWIN_raspi="no"
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
 #TARGET_LIBC_linux="eglibc_V_2.18"
-TARGET_LIBC_linux="glibc_V_2.15"
+#TARGET_LIBC_linux="glibc_V_2.15"
+# This works ok:
+#TARGET_LIBC_linux="glibc_V_2.18"
+TARGET_LIBC_linux="glibc_V_2.17"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
 
@@ -1005,7 +1008,9 @@ else
   DEBUG_PREFIX=""
 fi
 
-BUILD_PREFIX=${LLVM_VERS_}-${GCC_VERS_}-${HOST_ARCH}${MINGW_W64_HASH}${DEBUG_PREFIX}
+#BUILD_PREFIX=${LLVM_VERS_}-${GCC_VERS_}-${HOST_ARCH}${MINGW_W64_HASH}${DEBUG_PREFIX}
+# While I'm figuring out glibc 2.15 problems with multiarch / stubs installation ..
+BUILD_PREFIX=${LIBC}-${HOST_ARCH}${MINGW_W64_HASH}${DEBUG_PREFIX}
 if [ "$COMPILER_RT" = "yes" ]; then
   BUILD_PREFIX="${BUILD_PREFIX}-rt"
 fi
@@ -3498,3 +3503,34 @@ C:\msys64\home\ray\ctng-firefox-builds\x-l-none-4_8_2-x86_64-213be3fb\x86_64-unk
 #endif
 
 .. hmm!?!
+
+File missing at glibc-2.15 on Windows compared to Linux:
+[STATE]      ./x86_64-unknown-linux-gnu/include/include/linux/netfilter/xt_connmark.h
+[STATE]      ./x86_64-unknown-linux-gnu/include/include/linux/netfilter/xt_dscp.h
+[STATE]      ./x86_64-unknown-linux-gnu/include/include/linux/netfilter/xt_mark.h
+[STATE]      ./x86_64-unknown-linux-gnu/include/include/linux/netfilter/xt_rateest.h
+[STATE]      ./x86_64-unknown-linux-gnu/include/include/linux/netfilter/xt_tcpmss.h
+[STATE]      ./x86_64-unknown-linux-gnu/include/include/linux/netfilter_ipv4/ipt_ecn.h
+[STATE]      ./x86_64-unknown-linux-gnu/include/include/linux/netfilter_ipv4/ipt_ttl.h
+[STATE]      ./x86_64-unknown-linux-gnu/include/include/linux/netfilter_ipv6/ip6t_hl.h
+
+[STATE]      ./x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_connmark.h
+[STATE]      ./x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_dscp.h
+[STATE]      ./x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_mark.h
+[STATE]      ./x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_rateest.h
+[STATE]      ./x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_tcpmss.h
+[STATE]      ./x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter_ipv4/ipt_ecn.h
+[STATE]      ./x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter_ipv4/ipt_ttl.h
+[STATE]      ./x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter_ipv6/ip6t_hl.h
+
+
+.. On Linux, it does not run the make in /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/src/glibc-2.15/manual :
+/usr/bin/make  subdir=manual -C manual ..=../ subdir_install
+
+.. So this does not happen :
+[ALL  ]      touch /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/manual/stubs
+
+[ALL  ]      (sed '/^@/d' include/stubs-prologue.h; LC_ALL=C sort /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/csu/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/iconv/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/locale/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/localedata/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/iconvdata/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/assert/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/ctype/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/intl/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/catgets/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/math/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/setjmp/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/signal/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/stdlib/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/stdio-common/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/libio/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/dlfcn/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/malloc/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/string/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/wcsmbs/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/timezone/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/time/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/dirent/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/grp/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/pwd/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/posix/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/io/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/termios/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/resource/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/misc/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/socket/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sysvipc/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/gmon/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/gnulib/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/wctype/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-
+final_32/manual/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/shadow/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/gshadow/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/po/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/argp/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/crypt/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/nptl/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/resolv/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/nss/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/rt/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/conform/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/debug/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/nptl_db/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/inet/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/hesiod/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/nis/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/nscd/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/streams/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/login/stubs /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/elf/stubs) > /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/stubs.h
+[ALL  ]      if test -r /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include/gnu/stubs-32.h && cmp -s /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/stubs.h /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include/gnu/stubs-32.h; then echo 'stubs.h unchanged'; else /usr/bin/install -c -m 644 /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/stubs.h /home/ray/ctng-firefox-builds/x-l-none-4_8_2-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include/gnu/stubs-32.h; fi
+[ALL  ]      rm -f /c/ctng-build-x-l-none-4_8_2-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/stubs.h

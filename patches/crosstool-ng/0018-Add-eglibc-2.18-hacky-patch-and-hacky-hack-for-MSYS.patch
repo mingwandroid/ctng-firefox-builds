@@ -1,4 +1,4 @@
-From 0a6a62ab472f37258c880b0b63fcf1619e88504e Mon Sep 17 00:00:00 2001
+From 68f16f01c57f7e28374b45db643130319f0d7fe8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 27 Dec 2013 22:16:08 +0000
 Subject: [PATCH 18/28] Add eglibc 2.18 hacky patch and hacky hack for MSYS*

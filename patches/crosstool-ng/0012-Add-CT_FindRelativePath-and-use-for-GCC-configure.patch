@@ -1,7 +1,7 @@
-From 83e49b457c029ba083fc865525df93733a414589 Mon Sep 17 00:00:00 2001
+From 2cdba22880815b75bd0d66f1a39e6f4b20f7810d Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 20 Dec 2013 18:48:25 +0000
-Subject: [PATCH 12/28] Add CT_FindRelativePath and use for GCC configure
+Subject: [PATCH 12/30] Add CT_FindRelativePath and use for GCC configure
 
 ---
  scripts/build/cc/100-gcc.sh |  7 +++--

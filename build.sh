@@ -3547,3 +3547,54 @@ popd
 pushd /c/ctng-build-x-l-glibc_V_2.17-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libatomic
 /c/ctng-build-x-l-glibc_V_2.17-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -B/c/ctng-build-x-l-glibc_V_2.17-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/ -B/home/ray/ctng-firefox-builds/x-l-glibc_V_2.17-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/home/ray/ctng-firefox-builds/x-l-glibc_V_2.17-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /home/ray/ctng-firefox-builds/x-l-glibc_V_2.17-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /home/ray/ctng-firefox-builds/x-l-glibc_V_2.17-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -DHAVE_CONFIG_H -I../../../../../src/gcc-4.8.2/libatomic/config/x86 -I../../../../../src/gcc-4.8.2/libatomic/config/posix -I../../../../../src/gcc-4.8.2/libatomic -I.    -Wall -Werror  -pthread -g -Os -MT gexch.lo -MD -MP -MF .deps/gexch.Tpo -c -o gexch.lo ../../../../../src/gcc-4.8.2/libatomic/gexch.c --save-temps
 popd
+
+want to see a byteswap-16.h
+
+export PATH=/home/ray/ctng-firefox-builds/x-l-glibc_V_2.15-x86_64-213be3fb/bin:/c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin:/c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH
+
+build_glibc()
+{
+VERSION=$1; shift
+PTRSIZE=$1; shift
+BUILDDIR=$1; shift
+[ -d glibc-${VERSION} ] && rm -rf glibc-${VERSION}
+tar -xf ~/src/glibc-${VERSION}.tar.xz
+SRCDIR=$PWD/glibc-${VERSION}
+pushd $SRCDIR
+PATCHES=$(find ~/ctng-firefox-builds/crosstool-ng/patches/glibc/${VERSION} -name "*.patch" | sort)
+for PATCH in $PATCHES; do
+  echo Patching with $PATCH
+  patch -Np1 -i $PATCH
+done
+popd
+export BUILD_CC=x86_64-build_unknown-linux-gnu-gcc
+export CFLAGS=" -U_FORTIFY_SOURCE          -O2 "
+export AR=x86_64-unknown-linux-gnu-ar
+export RANLIB=x86_64-unknown-linux-gnu-ranlib
+if [ "$PTRSIZE" = "32" ]; then
+  LIBDIR=/usr/lib/../lib
+  export CC="x86_64-unknown-linux-gnu-gcc -m32"
+  HARCHPREFIX=i686
+else
+  LIBDIR=/usr/lib/../lib64
+  export CC="x86_64-unknown-linux-gnu-gcc"
+  HARCHPREFIX=x86_64
+fi
+[ -d $BUILDDIR ] && rm -rf $BUILDDIR
+mkdir $BUILDDIR
+pushd $BUILDDIR
+$SRCDIR/configure --prefix=/usr --build=x86_64-build_w64-mingw32 --host=$HARCHPREFIX-unknown-linux-gnu \
+   --without-cvs --disable-profile --without-gd \
+   --with-headers=/home/ray/ctng-firefox-builds/x-l-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include \
+   --libdir=$LIBDIR \
+   --disable-debug \
+   --disable-sanity-checks \
+   --enable-kernel=3.12.0 \
+   --with-__thread --with-tls --enable-shared --enable-add-ons=nptl
+popd
+}
+
+pushd /tmp
+build_glibc 2.15 32 $PWD/build_32
+build_glibc 2.15 64 $PWD/build_64
+popd

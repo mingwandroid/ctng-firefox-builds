@@ -134,7 +134,7 @@ TARGET_LIBC_windows="none"
 #TARGET_LIBC_linux="glibc_V_2.18"
 #TARGET_LIBC_linux="glibc_V_2.17"
 TARGET_LIBC_linux="glibc_V_2.16.0"
-TARGET_LIBC_linux="eglibc_V_2.18"
+#TARGET_LIBC_linux="eglibc_V_2.18"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
 
@@ -3560,7 +3560,11 @@ VERSION=$1; shift
 PTRSIZE=$1; shift
 BUILDDIR=$1; shift
 [ -d glibc-${VERSION} ] && rm -rf glibc-${VERSION}
-tar -xf ~/src/glibc-${VERSION}.tar.xz
+if [ -f ~/src/glibc-${VERSION}.tar.xz ]; then
+  tar -xf ~/src/glibc-${VERSION}.tar.xz
+elif [ -f ~/src/glibc-${VERSION}.tar.bz2 ]; then
+  tar -xf ~/src/glibc-${VERSION}.tar.bz2
+fi
 SRCDIR=$PWD/glibc-${VERSION}
 pushd $SRCDIR
 PATCHES=$(find ~/ctng-firefox-builds/crosstool-ng/patches/glibc/${VERSION} -name "*.patch" | sort)
@@ -3587,7 +3591,7 @@ mkdir $BUILDDIR
 pushd $BUILDDIR
 $SRCDIR/configure --prefix=/usr --build=x86_64-build_w64-mingw32 --host=$HARCHPREFIX-unknown-linux-gnu \
    --without-cvs --disable-profile --without-gd \
-   --with-headers=/home/ray/ctng-firefox-builds/x-l-glibc_V_${VERSION}-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include \
+   --with-headers=/home/ray/ctng-firefox-builds/x-l-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include \
    --libdir=$LIBDIR \
    --disable-debug \
    --disable-sanity-checks \
@@ -3595,11 +3599,12 @@ $SRCDIR/configure --prefix=/usr --build=x86_64-build_w64-mingw32 --host=$HARCHPR
    --with-__thread --with-tls --enable-shared --enable-add-ons=nptl > configure.log 2>&1
 
 make -j1 > make.log 2>&1
-make install DESTDIR=$PWD/../install_${PTRSIZE}
+make install DESTDIR=$PWD/../install_${VERSION}_${PTRSIZE} > install.log 2>&1
 popd
 }
 
 pushd /tmp
-build_glibc 2.15 32 $PWD/build_32
+build_glibc 2.15 32 $PWD/build_2.15_32
+build_glibc 2.16.0 32 $PWD/build_2.16.0_32
 build_glibc 2.15 64 $PWD/build_64
 popd

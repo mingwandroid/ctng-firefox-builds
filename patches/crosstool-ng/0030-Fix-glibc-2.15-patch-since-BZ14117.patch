@@ -1,11 +1,12 @@
-From 585e618282bd0229b50abc541264d75e9877801e Mon Sep 17 00:00:00 2001
+From 7113b24f145dbce4dd1fe54073e61a8dd184d5d8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 31 Jan 2014 12:58:17 +0000
 Subject: [PATCH 30/30] Fix glibc-2.15 patch since BZ14117
 
 ---
  .../2.15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch   | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ .../glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/patches/glibc/2.15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch b/patches/glibc/2.15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
 index a94e8c5..38d46d0 100644
@@ -23,6 +24,22 @@ index a94e8c5..38d46d0 100644
  diff -urN a/configure b/configure
  --- a/configure	2014-01-29 18:29:26.329997600 +0000
  +++ b/configure	2014-01-29 18:29:40.449997483 +0000
+diff --git a/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch b/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
+index 562590a..f68532f 100644
+--- a/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
++++ b/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
+@@ -7,9 +7,9 @@ diff -urN a/ChangeLog b/ChangeLog
+ +        * Rename .oS to .oSTATIC so that builds can be done on file
+ +        systems that are not both case sensitive and case preserving.
+ +
+- 2013-01-25  Thomas Schwinge  <thomas@codesourcery.com>
++ 2012-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+ 
+-         * configure.in (AC_PROG_CPP): New definition.
++        [BZ #14117]
+ diff -urN a/extra-lib.mk b/extra-lib.mk
+ --- a/extra-lib.mk	2014-01-21 23:57:21.583406500 +0000
+ +++ b/extra-lib.mk	2014-01-21 23:59:13.371101800 +0000
 -- 
 1.8.5.3
 

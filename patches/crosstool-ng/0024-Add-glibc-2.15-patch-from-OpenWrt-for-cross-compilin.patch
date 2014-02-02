@@ -1,4 +1,4 @@
-From d8aa9a4884e7014c3c3bbd95e3c760c5570adf55 Mon Sep 17 00:00:00 2001
+From 9c494ae7ec351dc9e8b1fc029d8777193f3dd4f0 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 09:21:30 +0000
 Subject: [PATCH 24/30] Add glibc 2.15 patch from OpenWrt for cross compiling

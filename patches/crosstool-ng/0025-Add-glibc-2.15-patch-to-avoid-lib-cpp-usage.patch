@@ -1,7 +1,7 @@
-From 81f42a819806755983f8b8413373cc9cdc082ffc Mon Sep 17 00:00:00 2001
+From a7f778d084be436b4a8acf0caea3005de8b908bb Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 29 Jan 2014 18:50:20 +0000
-Subject: [PATCH 25/30] Add glibc 2.15 patch to avoid /lib/cpp usage
+Subject: [PATCH 25/28] Add glibc 2.15 patch to avoid /lib/cpp usage
 
 ---
  ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 +++++++++++++++++++++

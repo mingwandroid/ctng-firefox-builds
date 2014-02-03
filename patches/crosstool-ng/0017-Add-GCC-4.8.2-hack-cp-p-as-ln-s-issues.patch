@@ -1,7 +1,7 @@
-From 1a6fc0d6fff5030cb6ac3252a685df62737ce1c8 Mon Sep 17 00:00:00 2001
+From 69c4742399b103c52c3a18b49699e6cd6d1d8322 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 18:22:19 +0000
-Subject: [PATCH 17/30] Add GCC 4.8.2 hack cp -p as ln -s issues
+Subject: [PATCH 17/28] Add GCC 4.8.2 hack cp -p as ln -s issues
 
 When building a multilib libgcc on Windows, cp -p is used
 but the semantics are quite different from those of ln -s

@@ -1,7 +1,7 @@
-From bdae0fc3639de21ad5121aca4d9e8548ff0fccd4 Mon Sep 17 00:00:00 2001
+From 423c87aafbab4f0f617fcba10429b6c8d09cd5fe Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 30 Jan 2014 00:47:27 +0000
-Subject: [PATCH 26/30] Add glibc 2.16 patches
+Subject: [PATCH 26/28] Add glibc 2.16 patches
 
 ---
  patches/glibc/2.16.0/100-make-4.patch              |  24 ++

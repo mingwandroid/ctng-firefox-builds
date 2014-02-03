@@ -1,7 +1,7 @@
-From 7a27cab7b4ee67789d6bba9be9a5b391f4e02d09 Mon Sep 17 00:00:00 2001
+From 5ec7d25c0aabee55d432eb8fc389559ac7a479c0 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 29 Jan 2014 18:52:56 +0000
-Subject: [PATCH 28/30] Linux header install hack for elf.h circular dependency
+Subject: [PATCH 28/28] Linux header install hack for elf.h circular dependency
 
 Fix from Arnaud Dovi:
 

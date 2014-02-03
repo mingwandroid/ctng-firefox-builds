@@ -1,4 +1,4 @@
-From 2b83a6f27f41e2c90cdade38ed44a7e37027b69f Mon Sep 17 00:00:00 2001
+From b7a35260d80f65f08aee5ab04a3b27cbe2b635e9 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 31 Jan 2014 12:58:17 +0000
 Subject: [PATCH 30/30] Fix glibc-2.15 patch since BZ14117 and renumber

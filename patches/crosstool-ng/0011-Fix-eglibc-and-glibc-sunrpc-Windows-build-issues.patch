@@ -1,4 +1,4 @@
-From b0eeb5301661c85139f463cec53d11673e32ed64 Mon Sep 17 00:00:00 2001
+From 3492b63f88995a5dfba469a9d37747274e38b92e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 14 Dec 2013 03:18:53 +0000
 Subject: [PATCH 11/30] Fix eglibc and glibc sunrpc Windows build issues
@@ -270,10 +270,10 @@ index 0000000..9a0440e
 + /* valid tirpc nettypes */
 + static const char *valid_ti_nettypes[] =
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index 8a8f776..16edbfc 100644
+index 7612b3b..0392d9c 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
-@@ -398,21 +398,26 @@ do_libc_backend_once() {
+@@ -405,21 +405,26 @@ do_libc_backend_once() {
              ;;
      esac
  
@@ -310,7 +310,7 @@ index 8a8f776..16edbfc 100644
          CT_DoExecLog ALL make ${JOBSFLAGS}                                        \
                           install_root="${install_root}"                           \
                           install-bootstrap-headers=yes                            \
-@@ -484,6 +489,7 @@ do_libc_backend_once() {
+@@ -491,6 +496,7 @@ do_libc_backend_once() {
      fi # libc_headers == y
  
      if [ "${libc_full}" = "y" ]; then

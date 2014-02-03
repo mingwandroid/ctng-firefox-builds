@@ -129,11 +129,11 @@ TARGET_IS_DARWIN_raspi="no"
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
 #TARGET_LIBC_linux="eglibc_V_2.18"
-#TARGET_LIBC_linux="glibc_V_2.15"
+TARGET_LIBC_linux="glibc_V_2.15"
 # This works ok:
 #TARGET_LIBC_linux="glibc_V_2.18"
 #TARGET_LIBC_linux="glibc_V_2.17"
-TARGET_LIBC_linux="glibc_V_2.16.0"
+#TARGET_LIBC_linux="glibc_V_2.16.0"
 #TARGET_LIBC_linux="eglibc_V_2.18"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
@@ -3606,5 +3606,5 @@ popd
 pushd /tmp
 build_glibc 2.15 32 $PWD/build_2.15_32
 build_glibc 2.16.0 32 $PWD/build_2.16.0_32
-build_glibc 2.15 64 $PWD/build_64
+bcompare /tmp/build_2.15_32 /tmp/build_2.16.0_32 &
 popd

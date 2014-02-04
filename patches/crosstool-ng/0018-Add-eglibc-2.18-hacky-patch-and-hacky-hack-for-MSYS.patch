@@ -1,4 +1,4 @@
-From 723e2eb1377c093aba358b1c8d9dee86067fb363 Mon Sep 17 00:00:00 2001
+From af68a21facf8589e49f069b85107c4b91287a627 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 27 Dec 2013 22:16:08 +0000
 Subject: [PATCH 18/28] Add eglibc 2.18 hacky patch and hacky hack for MSYS*
@@ -61,10 +61,10 @@ index 0000000..3289b90
 + 	  */*.a) \
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index 2cf1a3d..3695c94 100644
+index 07cf024..0b2456a 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
-@@ -549,8 +549,9 @@ do_libc_backend_once() {
+@@ -547,8 +547,9 @@ do_libc_backend_once() {
      if [ "${libc_full}" = "y" ]; then
  
          CT_DoLog EXTRA "Building C library"

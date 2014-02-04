@@ -1,7 +1,7 @@
-From a0ffdc5c88a82fa31d298c35c4d6e0136b1fcfa7 Mon Sep 17 00:00:00 2001
+From b866b6df10597b334dd0b8c5610a075b67ac082a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
-Date: Tue, 4 Feb 2014 13:37:55 +0000
-Subject: [PATCH] Fix various multilib build bugs
+Date: Wed, 20 Nov 2013 21:19:23 +0000
+Subject: [PATCH 01/28] Fix various multilib build bugs
 
 --host=${CT_TARGET} with eg -m32 is not right.
 The arch part must be correct (i686 for 32-bit
@@ -39,11 +39,15 @@ libgcc_s.so fails since GCC "cannot find -lc".
 ranlib was added to binutils tools list to make
 available to the core C compiler because static
 libraries are built and ranlib is used on them.
+
+sort -r used to fudge the {e}glibc build order.
 ---
  scripts/build/binutils/binutils.sh        |   6 +-
  scripts/build/cc/100-gcc.sh               |  21 ++++--
+ scripts/build/cc/llvmgcc.sh               |  20 ++++--
  scripts/build/libc/glibc-eglibc.sh-common | 116 +++++++++++++++++++-----------
- 3 files changed, 92 insertions(+), 51 deletions(-)
+ scripts/crosstool-NG.sh.in                |  25 ++++---
+ 5 files changed, 119 insertions(+), 69 deletions(-)
 
 diff --git a/scripts/build/binutils/binutils.sh b/scripts/build/binutils/binutils.sh
 index d973594..4a052ad 100644
@@ -67,17 +71,17 @@ index d973594..4a052ad 100644
                  binutils_tools+=( elf2flt flthdr )
              fi
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index 9f0e2a4..08bbb26 100644
+index 9f0e2a4..7204b99 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
-@@ -190,6 +190,7 @@ do_gcc_core_backend() {
-     local -a core_LDFLAGS
+@@ -191,6 +191,7 @@ do_gcc_core_backend() {
      local -a core_targets
      local arg
-+    local sysroot_dirs
      local exeext
++    local sysroot_dirs
  
      for arg in "$@"; do
+         eval "${arg// /\\ }"
 @@ -203,18 +204,18 @@ do_gcc_core_backend() {
              extra_config+=("--with-newlib")
              extra_config+=("--enable-threads=no")
@@ -127,8 +131,61 @@ index 9f0e2a4..08bbb26 100644
      else
          extra_config+=("--disable-multilib")
      fi
+diff --git a/scripts/build/cc/llvmgcc.sh b/scripts/build/cc/llvmgcc.sh
+index 6d82a7d..3c3348c 100644
+--- a/scripts/build/cc/llvmgcc.sh
++++ b/scripts/build/cc/llvmgcc.sh
+@@ -161,6 +161,7 @@ do_llvmgcc_core_backend() {
+     local -a core_targets
+     local arg
+     local exeext
++    local sysroot_dirs
+ 
+     for arg in "$@"; do
+         eval "${arg// /\\ }"
+@@ -173,18 +174,18 @@ do_llvmgcc_core_backend() {
+             extra_config+=("--with-newlib")
+             extra_config+=("--enable-threads=no")
+             extra_config+=("--disable-shared")
+-            copy_headers=y  # For baremetal, as there's no headers to copy,
+-                            # we copy an empty directory. So, who cares?
++            copy_minimal_sysroot=y  # For baremetal, as there's no minimal sysroot to copy,
++                                    # we copy some empty directories. So, who cares?
+             ;;
+         shared)
+             extra_config+=("--enable-shared")
+-            copy_headers=y
++            copy_minimal_sysroot=y
+             ;;
+         baremetal)
+             extra_config+=("--with-newlib")
+             extra_config+=("--enable-threads=no")
+             extra_config+=("--disable-shared")
+-            copy_headers=n
++            copy_minimal_sysroot=n
+             ;;
+         *)
+             CT_Abort "Internal Error: 'mode' must be one of: 'static', 'shared' or 'baremetal', not '${mode:-(empty)}'"
+@@ -197,9 +198,14 @@ do_llvmgcc_core_backend() {
+         [ -n "${CT_TOOLCHAIN_BUGURL}" ] && extra_config+=("--with-bugurl=${CT_TOOLCHAIN_BUGURL}")
+     fi
+ 
+-    if [ "${copy_headers}" = "y" ]; then
+-        CT_DoLog DEBUG "Copying headers to install area of bootstrap gcc, so it can build libgcc2"
+-        CT_DoExecLog ALL cp -a "${CT_HEADERS_DIR}" "${prefix}/${CT_TARGET}/include"
++    if [ "${copy_minimal_sysroot}" = "y" ]; then
++        CT_DoLog DEBUG "Copying headers and libs to install area of bootstrap gcc, so it can build libgcc2"
++        CT_Pushd "${CT_SYSROOT_DIR}"
++        sysroot_dirs=$(find -mindepth 1 -maxdepth 1 -type d \( -name "lib*" -or -name "include" \) -printf '%f\n')
++        for sysroot_dir in $sysroot_dirs; do
++          CT_DoExecLog ALL cp -a "${CT_SYSROOT_DIR}/${sysroot_dir}" "${prefix}/${CT_TARGET}/${sysroot_dir}"
++        done
++        CT_Popd
+     fi
+ 
+     for tmp in ARCH ABI CPU TUNE FPU FLOAT; do
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index b9c55cb..76ef174 100644
+index b9c55cb..8caa6bb 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
 @@ -76,6 +76,9 @@ do_libc_backend() {
@@ -361,12 +418,53 @@ index b9c55cb..76ef174 100644
 -        CT_DoExecLog ALL make ${JOBSFLAGS}                                  \
 -                              "${extra_make_args[@]}"                       \
 -                              install_root="${CT_SYSROOT_DIR}${extra_dir}"  \
-+        CT_DoExecLog ALL make ${JOBSFLAGS}                    \
-+                              "${extra_make_args[@]}"         \
-+                              install_root="${install_root}"  \
++        CT_DoExecLog ALL make ${JOBSFLAGS}                       \
++                              "${extra_make_args[@]}"            \
++                              install_root="${install_root}"     \
                                install
  
          if [ "${CT_BUILD_MANUALS}" = "y" ]; then
+diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
+index f0b6e68..095f30b 100644
+--- a/scripts/crosstool-NG.sh.in
++++ b/scripts/crosstool-NG.sh.in
+@@ -338,22 +338,25 @@ if [ -z "${CT_RESTART}" ]; then
+         CT_Popd
+     fi
+ 
+-    # Since we're *not* multilib on the target side, we want all the
+-    # libraries to end up in "lib".  We create "lib64" (for 64-bit
++    # If we are *not* multilib on the target side, we want all the
++    # libraries to end up in "lib".  So create "lib64" (for 64-bit
+     # build or host architectures) and "lib32" (for 32-bit emulation
+     # on 64-bit) as symlinks to "lib".
+     #
+     # Not all of these symlinks are necessary, but better safe than
+     # sorry. They are summarily removed by build/internals.sh:do_finish.
+-    for d in                            \
+-        "${CT_PREFIX_DIR}"              \
+-        "${CT_SYSROOT_DIR}"             \
+-        "${CT_SYSROOT_DIR}/usr"         \
+-        "${CT_PREFIX_DIR}/${CT_TARGET}" \
+-    ; do
+-        CT_DoExecLog ALL ln -sf "lib" "${d}/lib32"
+-        CT_DoExecLog ALL ln -sf "lib" "${d}/lib64"
+-    done
++    if [ "${CT_MULTILIB}" = "n" ]; then
++        for d in                            \
++            "${CT_PREFIX_DIR}"              \
++            "${CT_SYSROOT_DIR}"             \
++            "${CT_SYSROOT_DIR}/usr"         \
++            "${CT_PREFIX_DIR}/${CT_TARGET}" \
++        ; do
++            CT_DoExecLog ALL ln -sf "lib" "${d}/lib32"
++            CT_DoExecLog ALL ln -sf "lib" "${d}/lib64"
++        done
++    fi
++
+ 
+     # Determine build system if not set by the user
+     if [ -z "${CT_BUILD}" ]; then
 -- 
 1.8.5.3
 

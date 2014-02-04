@@ -157,7 +157,7 @@ index b9c55cb..dfcfdf6 100644
  
 +            # If more substitutions are needed then they
 +            # should be added here, AArch64 for example?
-+            target = $(get_multilib_target "${extra_flags}")
++            target=$(get_multilib_target "${extra_flags}")
 +
              # glibc install its files in ${extra_dir}/{usr/,}lib
              # while gcc expects them in {,usr/}lib/${extra_dir}.

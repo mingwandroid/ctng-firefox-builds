@@ -1,4 +1,4 @@
-From fd140268f31c61e6d3d68fb0d3a68883b21acb51 Mon Sep 17 00:00:00 2001
+From 33c41a07fb6ad141b7ffd1828f94fe661e4d41b3 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 22 Jan 2014 00:25:39 +0000
 Subject: [PATCH 21/28] Add glibc 2.15 patches as per the eglibc-2.18 patches

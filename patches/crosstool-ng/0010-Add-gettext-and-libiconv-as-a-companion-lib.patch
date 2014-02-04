@@ -1,4 +1,4 @@
-From 7ef588f94cdf11de0b717a64aed07dcad7845dc1 Mon Sep 17 00:00:00 2001
+From 19209a98bf58e292b5858c576a308a873256db76 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 21:10:56 +0000
 Subject: [PATCH 10/28] Add gettext and libiconv as a companion lib
@@ -901,10 +901,10 @@ index 0000000..f8c4ce2
 +
 +fi
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index 8caa6bb..7612b3b 100644
+index dfcfdf6..25bbb28 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
-@@ -410,10 +410,20 @@ do_libc_backend_once() {
+@@ -461,10 +461,20 @@ do_libc_backend_once() {
  
          # use the 'install-headers' makefile target to install the
          # headers

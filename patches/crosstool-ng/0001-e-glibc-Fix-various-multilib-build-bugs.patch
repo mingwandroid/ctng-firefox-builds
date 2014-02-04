@@ -1,7 +1,7 @@
-From a0ffdc5c88a82fa31d298c35c4d6e0136b1fcfa7 Mon Sep 17 00:00:00 2001
+From b4fcc60d0df19ecf02c23b1c7fa59adfaddd4a41 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
-Date: Tue, 4 Feb 2014 13:37:55 +0000
-Subject: [PATCH] Fix various multilib build bugs
+Date: Tue, 4 Feb 2014 08:08:40 +0000
+Subject: [PATCH 01/28] {e}glibc: Fix various multilib build bugs
 
 --host=${CT_TARGET} with eg -m32 is not right.
 The arch part must be correct (i686 for 32-bit
@@ -28,98 +28,26 @@ that it is made inplace in the multilib-os dir
 and 'Fixing up multilib location' is no longer
 required.
 
-Before starting the build of the 2nd stage GCC,
-as well as copying the headers, it is necessary
-to also copy the start libraries and stub libc.
-copy_headers is renamed to copy_minimal_sysroot
-and find is used to copy ${CT_SYSROOT_DIR}/lib*
-and ${CT_SYSROOT_DIR}/include otherwise linking
-libgcc_s.so fails since GCC "cannot find -lc".
+The multilib directories are sorted in reverse
+order so that x86_64 is built finally. This is
+because x86_64 headers are multilib-capable as
+far back as glibc-2.15 (at least) whereas i686
+headers were not multilib-capable until 2.16.
 
-ranlib was added to binutils tools list to make
-available to the core C compiler because static
-libraries are built and ranlib is used on them.
+Utilizes get_multilib_target by Cody P Schafer
+
+Signed-off-by: Ray Donnelly <mingw.android@gmail.com>
+Signed-off-by: Cody P Schafer <dev@codyps.com>
 ---
- scripts/build/binutils/binutils.sh        |   6 +-
- scripts/build/cc/100-gcc.sh               |  21 ++++--
- scripts/build/libc/glibc-eglibc.sh-common | 116 +++++++++++++++++++-----------
- 3 files changed, 92 insertions(+), 51 deletions(-)
+ scripts/build/cc/100-gcc.sh               |   1 +
+ scripts/build/libc/glibc-eglibc.sh-common | 167 ++++++++++++++++++++++--------
+ 2 files changed, 127 insertions(+), 41 deletions(-)
 
-diff --git a/scripts/build/binutils/binutils.sh b/scripts/build/binutils/binutils.sh
-index d973594..4a052ad 100644
---- a/scripts/build/binutils/binutils.sh
-+++ b/scripts/build/binutils/binutils.sh
-@@ -106,13 +106,13 @@ do_binutils_for_host() {
-     fi
- 
-     # Make those new tools available to the core C compilers to come.
--    # Note: some components want the ${TARGET}-{ar,as,ld,strip} commands as
--    # well. Create that.
-+    # Note: some components want the ${TARGET}-{ar,as,ld,ranlib,strip} commands
-+    # as well. Create that.
-     # Don't do it for canadian or cross-native, because the binutils
-     # are not executable on the build machine.
-     case "${CT_TOOLCHAIN_TYPE}" in
-         cross|native)
--            binutils_tools=( ar as ld strip )
-+            binutils_tools=( ar as ld ranlib strip )
-             if [ -n "${CT_ARCH_BINFMT_FLAT}" ]; then
-                 binutils_tools+=( elf2flt flthdr )
-             fi
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index 9f0e2a4..08bbb26 100644
+index 9f0e2a4..6d273cb 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
-@@ -190,6 +190,7 @@ do_gcc_core_backend() {
-     local -a core_LDFLAGS
-     local -a core_targets
-     local arg
-+    local sysroot_dirs
-     local exeext
- 
-     for arg in "$@"; do
-@@ -203,18 +204,18 @@ do_gcc_core_backend() {
-             extra_config+=("--with-newlib")
-             extra_config+=("--enable-threads=no")
-             extra_config+=("--disable-shared")
--            copy_headers=y  # For baremetal, as there's no headers to copy,
--                            # we copy an empty directory. So, who cares?
-+            copy_minimal_sysroot=y  # For baremetal, as there's no minimal sysroot to copy,
-+                                    # we copy some empty directories. So, who cares?
-             ;;
-         shared)
-             extra_config+=("--enable-shared")
--            copy_headers=y
-+            copy_minimal_sysroot=y
-             ;;
-         baremetal)
-             extra_config+=("--with-newlib")
-             extra_config+=("--enable-threads=no")
-             extra_config+=("--disable-shared")
--            copy_headers=n
-+            copy_minimal_sysroot=n
-             ;;
-         *)
-             CT_Abort "Internal Error: 'mode' must be one of: 'static', 'shared' or 'baremetal', not '${mode:-(empty)}'"
-@@ -227,9 +228,14 @@ do_gcc_core_backend() {
-         [ -n "${CT_TOOLCHAIN_BUGURL}" ] && extra_config+=("--with-bugurl=${CT_TOOLCHAIN_BUGURL}")
-     fi
- 
--    if [ "${copy_headers}" = "y" ]; then
--        CT_DoLog DEBUG "Copying headers to install area of bootstrap gcc, so it can build libgcc2"
--        CT_DoExecLog ALL cp -a "${CT_HEADERS_DIR}" "${prefix}/${CT_TARGET}/include"
-+    if [ "${copy_minimal_sysroot}" = "y" ]; then
-+        CT_DoLog DEBUG "Copying headers and libs to install area of bootstrap gcc, so it can build libgcc2"
-+        CT_Pushd "${CT_HEADERS_DIR}/.."
-+        sysroot_dirs=$(find . -mindepth 1 -maxdepth 1 -type d \( -name "lib*" -or -name "include" \) -exec basename {} \;)
-+        for sysroot_dir in $sysroot_dirs; do
-+          CT_DoExecLog ALL cp -a "${sysroot_dir}" "${prefix}/${CT_TARGET}/${sysroot_dir}"
-+        done
-+        CT_Popd
-     fi
- 
-     for tmp in ARCH ABI CPU TUNE FPU FLOAT; do
-@@ -366,6 +372,7 @@ do_gcc_core_backend() {
+@@ -366,6 +366,7 @@ do_gcc_core_backend() {
  
      if [ "${CT_MULTILIB}" = "y" ]; then
          extra_config+=("--enable-multilib")
@@ -128,30 +56,84 @@ index 9f0e2a4..08bbb26 100644
          extra_config+=("--disable-multilib")
      fi
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index b9c55cb..76ef174 100644
+index b9c55cb..dfcfdf6 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
-@@ -76,6 +76,9 @@ do_libc_backend() {
+@@ -65,6 +65,64 @@ do_libc() {
+     do_libc_backend libc_mode=final
+ }
+ 
++
++# Usage: get_multilib_target <multilib-flags>
++# Credit: Cody Schafer
++get_multilib_target () {
++    local multi_flags="$1"
++    local target="${CT_TARGET}"
++    local m32=false
++    local m31=false
++    local m64=false
++    local mx32=false
++    local mlittle=false
++    local mbig=flase
++
++    case "$multi_flags" in
++    *-m32*) m32=true;;
++    *-m64*) m64=true;;
++    *-m31*) m31=true;; # s390
++    *-mx32*) mx32=true ;; # x86_64
++
++    # powerpc
++    *-mbig*) mbig=true ;;
++    *-mlittle*) mlittle=true ;;
++
++    # mips
++    *-EL*) mlittle=true ;;
++    *-EB*) mbig=true ;;
++
++    esac
++
++    # TODO: actually run $CC with the multi_flags and check things out
++    # Right now we make some assumptions about bitness based on the target if
++    # _not_ overriden by multiflags. triplets in CT_TARGET that indicate they
++    # 64bit are assumed to not be hiding any funky configure options to change
++    # that. Similar for 32bit.
++
++    case "${CT_TARGET}" in
++    # FIXME: do we need to adjust the target for le vs be?
++    powerpc-*|powerpcle-*)     $m64 && target=${target/powerpc-/powerpc64-} ;;
++    powerpc64-*|powerpc64le-*) $m32 && target=${target/powerpc64-/powerpc-} ;;
++
++    x86_64-*gnux32)     $m64  && target=${target/%-gnux32/-gnu} ;;
++    x86_64-*)           $m32  && target=${target/x86_64-/i686-} ;;
++    x86_64-*)           $mx32 && target=${target/%-gnux32/-gnu} ;;
++
++    i[34567]86-*gnux32) die "Invalid target \"${CT_TARGET}\"" ;; # Nope
++    i[34567]86-*)       $mx32 && {
++                                        target=${target/%-gnu/-gnux32}
++                                        target=${target/i[34567]86-/x86_64-}
++                        } ;; # This is also very questionable (and probably wrong)
++    i[34567]86-*)       $m64 && target=${target/i[34567]86-/x86_64-} ;;
++
++    # TODO: mips, arm, spark
++
++    esac
++
++    echo "$target"
++}
++
+ # This backend builds the C library once for each multilib
+ # variant the compiler gives us
+ # Usage: do_libc_backend param=value [...]
+@@ -76,6 +134,8 @@ do_libc_backend() {
      local multilib
      local multi_dir
      local multi_flags
 +    local multi_arch
-+    local native_arch
-+    local rest_of_triplet
++    local target
      local extra_dir
      local libc_headers libc_startfiles libc_full
      local hdr
-@@ -85,6 +88,9 @@ do_libc_backend() {
-         eval "${arg// /\\ }"
-     done
- 
-+    native_arch=$(echo "${CT_TARGET}" | ${sed} "s,\(^[^\-]*\).*,\1,g")
-+    rest_of_triplet=$(echo "${CT_TARGET}" | ${sed} "s,^[^\-]*\(.*\),\1,g")
-+
-     case "${libc_mode}" in
-         startfiles)
-             CT_DoStep INFO "Installing C library headers & start files"
-@@ -103,8 +109,16 @@ do_libc_backend() {
+@@ -103,8 +163,16 @@ do_libc_backend() {
  
      # If gcc is not configured for multilib, it still prints
      # a single line for the default settings
@@ -169,22 +151,23 @@ index b9c55cb..76ef174 100644
          multi_dir="${multilib%%;*}"
          if [ "${multi_dir}" != "." ]; then
              CT_DoStep INFO "Building for multilib subdir='${multi_dir}'"
-@@ -114,6 +128,14 @@ do_libc_backend() {
+@@ -114,6 +182,10 @@ do_libc_backend() {
                            )"
              extra_dir="/${multi_dir}"
  
 +            # If more substitutions are needed then they
 +            # should be added here, AArch64 for example?
-+            if [ "${extra_flags}" = " -m32" ]; then
-+              multi_arch=${native_arch/x86_64/i686}
-+            elif [ "${extra_flags}" = " -m64" ]; then
-+              multi_arch=${native_arch/i686/x86_64}
-+            fi
++            target = $(get_multilib_target "${extra_flags}")
 +
              # glibc install its files in ${extra_dir}/{usr/,}lib
              # while gcc expects them in {,usr/}lib/${extra_dir}.
              # Prepare some symlinks so glibc installs in fact in
-@@ -140,36 +162,15 @@ do_libc_backend() {
+@@ -136,40 +208,20 @@ do_libc_backend() {
+             extra_dir=
+             extra_flags=
+             libc_headers="${hdr}"
++            target="${CT_TARGET}"
+         fi
  
          CT_mkdir_pushd "${CT_BUILD_DIR}/build-libc-${libc_mode}${extra_dir//\//_}"
  
@@ -192,11 +175,11 @@ index b9c55cb..76ef174 100644
 -                             extra_flags="${extra_flags}"           \
 -                             libc_headers="${libc_headers}"         \
 -                             libc_startfiles="${libc_startfiles}"   \
-+        do_libc_backend_once extra_dir="${extra_dir}"                           \
-+                             extra_flags="${extra_flags}"                       \
-+                             libc_headers="${libc_headers}"                     \
-+                             libc_startfiles="${libc_startfiles}"               \
-+                             libc_triplet="${multi_arch}${rest_of_triplet}"     \
++        do_libc_backend_once extra_dir="${extra_dir}"              \
++                             extra_flags="${extra_flags}"          \
++                             libc_headers="${libc_headers}"        \
++                             libc_startfiles="${libc_startfiles}"  \
++                             libc_triplet="${target}"              \
                               libc_full="${libc_full}"
  
          CT_Popd
@@ -226,7 +209,7 @@ index b9c55cb..76ef174 100644
      done
  
      CT_EndStep
-@@ -180,6 +181,7 @@ do_libc_backend() {
+@@ -180,6 +232,7 @@ do_libc_backend() {
  #   Parameter           : Definition                            : Type      : Default
  #   libc_headers        : Build libc headers                    : bool      : n
  #   libc_startfiles     : Build libc start-files                : bool      : n
@@ -234,7 +217,7 @@ index b9c55cb..76ef174 100644
  #   libc_full           : Build full libc                       : bool      : n
  #   extra_flags         : Extra CFLAGS to use (for multilib)    : string    : (empty)
  #   extra_dir           : Extra subdir for multilib             : string    : (empty)
-@@ -189,6 +191,9 @@ do_libc_backend_once() {
+@@ -189,6 +242,9 @@ do_libc_backend_once() {
      local libc_full
      local extra_flags
      local extra_dir
@@ -244,7 +227,7 @@ index b9c55cb..76ef174 100644
      local src_dir="${CT_SRC_DIR}/${CT_LIBC}-${CT_LIBC_VERSION}"
      local extra_cc_args
      local -a extra_config
-@@ -196,6 +201,7 @@ do_libc_backend_once() {
+@@ -196,6 +252,7 @@ do_libc_backend_once() {
      local glibc_cflags
      local float_extra
      local endian_extra
@@ -252,7 +235,7 @@ index b9c55cb..76ef174 100644
      local arg
  
      for arg in "$@"; do
-@@ -328,6 +334,29 @@ do_libc_backend_once() {
+@@ -328,6 +385,29 @@ do_libc_backend_once() {
      # or even after they get installed...
      echo "ac_cv_path_BASH_SHELL=/bin/bash" >>config.cache
  
@@ -282,7 +265,7 @@ index b9c55cb..76ef174 100644
      # Configure with --prefix the way we want it on the target...
      # There are a whole lot of settings here.  You'll probably want
      # to read up on what they all mean, and customize a bit, possibly by setting GLIBC_EXTRA_CONFIG_ARRAY
-@@ -338,11 +367,14 @@ do_libc_backend_once() {
+@@ -338,11 +418,14 @@ do_libc_backend_once() {
      # Run explicitly through CONFIG_SHELL, or the build breaks badly (loop-of-death)
      # when the shell is not bash... Sigh... :-(
  
@@ -302,7 +285,7 @@ index b9c55cb..76ef174 100644
  
      CT_DoExecLog CFG                                                \
      BUILD_CC="${CT_BUILD}-gcc"                                      \
-@@ -354,12 +386,13 @@ do_libc_backend_once() {
+@@ -354,12 +437,13 @@ do_libc_backend_once() {
      "${src_dir}/configure"                                          \
          --prefix=/usr                                               \
          --build=${CT_BUILD}                                         \
@@ -317,7 +300,7 @@ index b9c55cb..76ef174 100644
          "${extra_config[@]}"                                        \
          "${CT_LIBC_GLIBC_EXTRA_CONFIG_ARRAY[@]}"
  
-@@ -378,7 +411,7 @@ do_libc_backend_once() {
+@@ -378,7 +462,7 @@ do_libc_backend_once() {
          # use the 'install-headers' makefile target to install the
          # headers
          CT_DoExecLog ALL make ${JOBSFLAGS}                          \
@@ -326,7 +309,7 @@ index b9c55cb..76ef174 100644
                           install-bootstrap-headers=yes              \
                           "${extra_make_args[@]}"                    \
                           install-headers
-@@ -427,22 +460,23 @@ do_libc_backend_once() {
+@@ -427,22 +511,23 @@ do_libc_backend_once() {
  
              # there are a few object files needed to link shared libraries,
              # which we build and install by hand
@@ -354,7 +337,7 @@ index b9c55cb..76ef174 100644
          fi # threads == nptl
      fi # libc_headers == y
  
-@@ -453,9 +487,9 @@ do_libc_backend_once() {
+@@ -453,9 +538,9 @@ do_libc_backend_once() {
                                all
  
          CT_DoLog EXTRA "Installing C library"

@@ -1,4 +1,4 @@
-From 847140ac9f8137da87490e824c35c51fc410d36b Mon Sep 17 00:00:00 2001
+From 4c88674d80f25d8c9c93fcb4b82d3b328396d265 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 21 Dec 2013 20:08:06 +0000
 Subject: [PATCH 13/28] Add GCC 4.8.2 patch for crtstuff.c

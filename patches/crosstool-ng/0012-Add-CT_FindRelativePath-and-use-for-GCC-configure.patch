@@ -1,4 +1,4 @@
-From e950acd4a9cc81773400723c573affbc28578e49 Mon Sep 17 00:00:00 2001
+From 14c0cc010f6706681afe6897e76450d9a9bad1ba Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 20 Dec 2013 18:48:25 +0000
 Subject: [PATCH 12/28] Add CT_FindRelativePath and use for GCC configure
@@ -9,10 +9,10 @@ Subject: [PATCH 12/28] Add CT_FindRelativePath and use for GCC configure
  2 files changed, 67 insertions(+), 2 deletions(-)
 
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index 7204b99..1c218de 100644
+index 6d273cb..37ff545 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
-@@ -413,6 +413,7 @@ do_gcc_core_backend() {
+@@ -407,6 +407,7 @@ do_gcc_core_backend() {
  
      CT_DoLog DEBUG "Extra config passed: '${extra_config[*]}'"
  
@@ -20,7 +20,7 @@ index 7204b99..1c218de 100644
      # Use --with-local-prefix so older gccs don't look in /usr/local (http://gcc.gnu.org/PR10532)
      CT_DoExecLog CFG                                \
      CC_FOR_BUILD="${CT_BUILD}-gcc"                  \
-@@ -420,7 +421,7 @@ do_gcc_core_backend() {
+@@ -414,7 +415,7 @@ do_gcc_core_backend() {
      CFLAGS="${cflags}"                              \
      CXXFLAGS="${cflags}"                            \
      LDFLAGS="${core_LDFLAGS[*]}"                    \
@@ -29,7 +29,7 @@ index 7204b99..1c218de 100644
          --build=${CT_BUILD}                         \
          --host=${host}                              \
          --target=${CT_TARGET}                       \
-@@ -876,6 +877,8 @@ do_gcc_backend() {
+@@ -870,6 +871,8 @@ do_gcc_backend() {
  
      CT_DoLog DEBUG "Extra config passed: '${extra_config[*]}'"
  
@@ -38,7 +38,7 @@ index 7204b99..1c218de 100644
      CT_DoExecLog CFG                                \
      CC_FOR_BUILD="${CT_BUILD}-gcc"                  \
      CFLAGS_FOR_BUILD="${CT_EXTRA_CFLAGS_FOR_BUILD-${cflags}}" \
-@@ -885,7 +888,7 @@ do_gcc_backend() {
+@@ -879,7 +882,7 @@ do_gcc_backend() {
      CFLAGS_FOR_TARGET="${CT_TARGET_CFLAGS}"         \
      CXXFLAGS_FOR_TARGET="${CT_TARGET_CFLAGS}"       \
      LDFLAGS_FOR_TARGET="${CT_TARGET_LDFLAGS}"       \

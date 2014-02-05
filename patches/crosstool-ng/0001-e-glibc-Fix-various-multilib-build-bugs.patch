@@ -1,7 +1,7 @@
-From 975a9e0527a1169fee0eb7e82223d11562617301 Mon Sep 17 00:00:00 2001
+From f22d1ced125a60aa5fd9149c676accd9fe2ba03d Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 4 Feb 2014 08:08:40 +0000
-Subject: [PATCH 01/28] {e}glibc: Fix various multilib build bugs
+Subject: [PATCH] {e}glibc: Fix various multilib build bugs
 
 --host=${CT_TARGET} with eg -m32 is not right.
 The arch part must be correct (i686 for 32-bit
@@ -40,8 +40,9 @@ Signed-off-by: Ray Donnelly <mingw.android@gmail.com>
 Signed-off-by: Cody P Schafer <dev@codyps.com>
 ---
  scripts/build/cc/100-gcc.sh               |   1 +
- scripts/build/libc/glibc-eglibc.sh-common | 165 ++++++++++++++++++++++--------
- 2 files changed, 125 insertions(+), 41 deletions(-)
+ scripts/build/libc/glibc-eglibc.sh-common | 163 ++++++++++++++++++++++--------
+ scripts/crosstool-NG.sh.in                |  24 +++--
+ 3 files changed, 136 insertions(+), 52 deletions(-)
 
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
 index 9f0e2a4..6d273cb 100644
@@ -56,7 +57,7 @@ index 9f0e2a4..6d273cb 100644
          extra_config+=("--disable-multilib")
      fi
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index b9c55cb..272cb97 100644
+index b9c55cb..da4f447 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
 @@ -65,6 +65,64 @@ do_libc() {
@@ -124,16 +125,15 @@ index b9c55cb..272cb97 100644
  # This backend builds the C library once for each multilib
  # variant the compiler gives us
  # Usage: do_libc_backend param=value [...]
-@@ -76,6 +134,8 @@ do_libc_backend() {
+@@ -76,6 +134,7 @@ do_libc_backend() {
      local multilib
      local multi_dir
      local multi_flags
-+    local multi_arch
 +    local target
      local extra_dir
      local libc_headers libc_startfiles libc_full
      local hdr
-@@ -103,8 +163,16 @@ do_libc_backend() {
+@@ -103,7 +162,14 @@ do_libc_backend() {
  
      # If gcc is not configured for multilib, it still prints
      # a single line for the default settings
@@ -147,11 +147,9 @@ index b9c55cb..272cb97 100644
 +    # to force x86_64 arch to be last element in the array.
 +    multilibs=( $("${CT_TARGET}-gcc" -print-multi-lib 2>/dev/null | sort -r) )
      for multilib in "${multilibs[@]}"; do
-+        multi_arch="${native_arch}"
          multi_dir="${multilib%%;*}"
          if [ "${multi_dir}" != "." ]; then
-             CT_DoStep INFO "Building for multilib subdir='${multi_dir}'"
-@@ -114,6 +182,8 @@ do_libc_backend() {
+@@ -114,6 +180,8 @@ do_libc_backend() {
                            )"
              extra_dir="/${multi_dir}"
  
@@ -160,7 +158,7 @@ index b9c55cb..272cb97 100644
              # glibc install its files in ${extra_dir}/{usr/,}lib
              # while gcc expects them in {,usr/}lib/${extra_dir}.
              # Prepare some symlinks so glibc installs in fact in
-@@ -136,40 +206,20 @@ do_libc_backend() {
+@@ -136,40 +204,20 @@ do_libc_backend() {
              extra_dir=
              extra_flags=
              libc_headers="${hdr}"
@@ -207,7 +205,7 @@ index b9c55cb..272cb97 100644
      done
  
      CT_EndStep
-@@ -180,6 +230,7 @@ do_libc_backend() {
+@@ -180,6 +228,7 @@ do_libc_backend() {
  #   Parameter           : Definition                            : Type      : Default
  #   libc_headers        : Build libc headers                    : bool      : n
  #   libc_startfiles     : Build libc start-files                : bool      : n
@@ -215,7 +213,7 @@ index b9c55cb..272cb97 100644
  #   libc_full           : Build full libc                       : bool      : n
  #   extra_flags         : Extra CFLAGS to use (for multilib)    : string    : (empty)
  #   extra_dir           : Extra subdir for multilib             : string    : (empty)
-@@ -189,6 +240,9 @@ do_libc_backend_once() {
+@@ -189,6 +238,9 @@ do_libc_backend_once() {
      local libc_full
      local extra_flags
      local extra_dir
@@ -225,7 +223,7 @@ index b9c55cb..272cb97 100644
      local src_dir="${CT_SRC_DIR}/${CT_LIBC}-${CT_LIBC_VERSION}"
      local extra_cc_args
      local -a extra_config
-@@ -196,6 +250,7 @@ do_libc_backend_once() {
+@@ -196,6 +248,7 @@ do_libc_backend_once() {
      local glibc_cflags
      local float_extra
      local endian_extra
@@ -233,7 +231,7 @@ index b9c55cb..272cb97 100644
      local arg
  
      for arg in "$@"; do
-@@ -328,6 +383,29 @@ do_libc_backend_once() {
+@@ -328,6 +381,29 @@ do_libc_backend_once() {
      # or even after they get installed...
      echo "ac_cv_path_BASH_SHELL=/bin/bash" >>config.cache
  
@@ -263,7 +261,7 @@ index b9c55cb..272cb97 100644
      # Configure with --prefix the way we want it on the target...
      # There are a whole lot of settings here.  You'll probably want
      # to read up on what they all mean, and customize a bit, possibly by setting GLIBC_EXTRA_CONFIG_ARRAY
-@@ -338,11 +416,14 @@ do_libc_backend_once() {
+@@ -338,11 +414,14 @@ do_libc_backend_once() {
      # Run explicitly through CONFIG_SHELL, or the build breaks badly (loop-of-death)
      # when the shell is not bash... Sigh... :-(
  
@@ -283,7 +281,7 @@ index b9c55cb..272cb97 100644
  
      CT_DoExecLog CFG                                                \
      BUILD_CC="${CT_BUILD}-gcc"                                      \
-@@ -354,12 +435,13 @@ do_libc_backend_once() {
+@@ -354,12 +433,13 @@ do_libc_backend_once() {
      "${src_dir}/configure"                                          \
          --prefix=/usr                                               \
          --build=${CT_BUILD}                                         \
@@ -298,7 +296,7 @@ index b9c55cb..272cb97 100644
          "${extra_config[@]}"                                        \
          "${CT_LIBC_GLIBC_EXTRA_CONFIG_ARRAY[@]}"
  
-@@ -378,7 +460,7 @@ do_libc_backend_once() {
+@@ -378,7 +458,7 @@ do_libc_backend_once() {
          # use the 'install-headers' makefile target to install the
          # headers
          CT_DoExecLog ALL make ${JOBSFLAGS}                          \
@@ -307,7 +305,7 @@ index b9c55cb..272cb97 100644
                           install-bootstrap-headers=yes              \
                           "${extra_make_args[@]}"                    \
                           install-headers
-@@ -427,22 +509,23 @@ do_libc_backend_once() {
+@@ -427,22 +507,23 @@ do_libc_backend_once() {
  
              # there are a few object files needed to link shared libraries,
              # which we build and install by hand
@@ -335,7 +333,7 @@ index b9c55cb..272cb97 100644
          fi # threads == nptl
      fi # libc_headers == y
  
-@@ -453,9 +536,9 @@ do_libc_backend_once() {
+@@ -453,9 +534,9 @@ do_libc_backend_once() {
                                all
  
          CT_DoLog EXTRA "Installing C library"
@@ -348,6 +346,46 @@ index b9c55cb..272cb97 100644
                                install
  
          if [ "${CT_BUILD_MANUALS}" = "y" ]; then
+diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
+index f0b6e68..28ec7c3 100644
+--- a/scripts/crosstool-NG.sh.in
++++ b/scripts/crosstool-NG.sh.in
+@@ -338,22 +338,24 @@ if [ -z "${CT_RESTART}" ]; then
+         CT_Popd
+     fi
+ 
+-    # Since we're *not* multilib on the target side, we want all the
+-    # libraries to end up in "lib".  We create "lib64" (for 64-bit
++    # If we are *not* multilib on the target side, we want all the
++    # libraries to end up in "lib".  So create "lib64" (for 64-bit
+     # build or host architectures) and "lib32" (for 32-bit emulation
+     # on 64-bit) as symlinks to "lib".
+     #
+     # Not all of these symlinks are necessary, but better safe than
+     # sorry. They are summarily removed by build/internals.sh:do_finish.
+-    for d in                            \
+-        "${CT_PREFIX_DIR}"              \
+-        "${CT_SYSROOT_DIR}"             \
+-        "${CT_SYSROOT_DIR}/usr"         \
+-        "${CT_PREFIX_DIR}/${CT_TARGET}" \
+-    ; do
+-        CT_DoExecLog ALL ln -sf "lib" "${d}/lib32"
+-        CT_DoExecLog ALL ln -sf "lib" "${d}/lib64"
+-    done
++    if [ ! "${CT_MULTILIB}" = "y" ]; then
++        for d in                            \
++            "${CT_PREFIX_DIR}"              \
++            "${CT_SYSROOT_DIR}"             \
++            "${CT_SYSROOT_DIR}/usr"         \
++            "${CT_PREFIX_DIR}/${CT_TARGET}" \
++        ; do
++            CT_DoExecLog ALL ln -sf "lib" "${d}/lib32"
++            CT_DoExecLog ALL ln -sf "lib" "${d}/lib64"
++        done
++    fi
+ 
+     # Determine build system if not set by the user
+     if [ -z "${CT_BUILD}" ]; then
 -- 
 1.8.5.3
 

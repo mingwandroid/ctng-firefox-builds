@@ -361,7 +361,31 @@ BUILD_OS=
 if [ "$OSTYPE" = "linux-gnu" ]; then
   BUILD_OS=linux
 elif [ "$OSTYPE" = "msys" ]; then
+  #GDBPROG=gdbserver.exe
+  GDBPROG=gdb.exe
   BUILD_OS=windows
+  if which $GDBPROG > /dev/null 2>&1; then
+    # weird, works from commandline, but not from within a running shell script.
+    export GDB_PATH="$(cd $(dirname $(which $GDBPROG)) && pwd -W)"/$GDBPROG
+    echo $GDB_PATH
+    MSYS="$MSYS error_start:$GDB_PATH -nw %1 %2"
+    if ! grep "set auto-load safe-path /" ~/.gdbinit > /dev/null 2>&1; then
+      echo "set auto-load safe-path /" >> ~/.gdbinit
+    fi
+# You can use this to check that GDB gets invoked correctly.
+#    echo "int main () { *(int*)3 = 0; }" > test.c
+#    gcc -ggdb -O0 test.c -o test.exe
+#    echo "testing crash - gdb should appear"
+#    ./test.exe
+  else
+    echo "I'm refusing to run since you've not got gdb installed"
+    echo "pacman -S gdb"
+    echo ".. while you're at it, please also grab and install this"
+    echo "gnumake with debugging symbols, so that stack traces can"
+    echo "be gotten from it if/when it crashes again:"
+    echo "https://www.dropbox.com/s/zfr9f7anbml8829/make-4.0-5-x86_64.pkg.tar.xz"
+    echo "pacman -U make-4.0-5-x86_64.pkg.tar.xz"
+  fi
   # I put a hack into MSYS2 in the interests of pragmatism
   # to allow arguments to be blacklisted from being converted
   # between their MSYS2 and Windows representations:
@@ -533,7 +557,7 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     if [ -f /etc/arch-release ]; then
       HOST_MULTILIB="-multilib"
     fi
-    PACKAGES="openssh git python2 tar mercurial gcc${HOST_MULTILIB} libtool${HOST_MULTILIB} wget p7zip unzip zip yasm svn"
+    PACKAGES="openssh git python2 tar mercurial gcc${HOST_MULTILIB} libtool${HOST_MULTILIB} wget p7zip unzip zip yasm svn gdb"
     # ncurses for Arch Linux vs ncurses-devel for MSYS is Alexey's fault ;-)
     # .. he has split packages up more than Arch does, so there is not a 1:1
     #    relationship between them anymore.
@@ -546,6 +570,11 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     echo "disabling errors as 'automake and automake-wrapper are in conflict' - remove this ASAP."
     set +e
     ${SUDO} pacman -S --force --needed --noconfirm $PACKAGES
+    # While I'm debugging the occasional crash in gnumake, force install one with debugging symbols.
+    if [ ! -f /etc/arch-release ]; then
+      wget -c https://www.dropbox.com/s/zfr9f7anbml8829/make-4.0-5-x86_64.pkg.tar.xz
+      ${SUDO} pacman -U --force --needed --noconfirm make-4.0-5-x86_64.pkg.tar.xz
+    fi
     set -e
     GROUP=$(id --group --name)
     if ! which autoconf2.13; then
@@ -865,7 +894,7 @@ cross_clang_build()
     # Verbosity 2 doesn't output anything when installing the kernel headers?!
     echo "CT_KERNEL_LINUX_VERBOSITY_1=y"   >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=1" >> ${CTNG_SAMPLE_CONFIG}
-#    echo "CT_PARALLEL_JOBS=1"              >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_PARALLEL_JOBS=20"              >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_gettext=y"                    >> ${CTNG_SAMPLE_CONFIG}
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}

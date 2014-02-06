@@ -1,4 +1,4 @@
-From b6e75347f0c0fd96fbaf856a71c8a231c481e063 Mon Sep 17 00:00:00 2001
+From e13c6f9bda19b0fe4fbae96056dc3e9573a6f4ab Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 29 Jan 2014 18:50:55 +0000
 Subject: [PATCH 27/28] Add glibc 2.17 patches

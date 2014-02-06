@@ -1,4 +1,4 @@
-From 7e19c85e4d83e63747a909413f5435e62dae2a53 Mon Sep 17 00:00:00 2001
+From e7911e63631190e57a7fd723b0536244885d43b6 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 12 Dec 2013 21:10:56 +0000
 Subject: [PATCH 10/28] Add gettext and libiconv as a companion lib
@@ -652,7 +652,7 @@ index 0000000..382c841
 + 
 diff --git a/scripts/build/companion_libs/320-libiconv.sh b/scripts/build/companion_libs/320-libiconv.sh
 new file mode 100644
-index 0000000..ca17935
+index 0000000..5d8443a
 --- /dev/null
 +++ b/scripts/build/companion_libs/320-libiconv.sh
 @@ -0,0 +1,107 @@
@@ -756,7 +756,7 @@ index 0000000..ca17935
 +        "${extra_config[@]}"                                  \
 + 
 +    CT_DoLog EXTRA "Building libiconv"
-+    CT_DoExecLog ALL make CC="${CT_HOST}-gcc ${cflags}"
++    CT_DoExecLog ALL make CC="${CT_HOST}-gcc ${cflags}" ${JOBSFLAGS}
 +
 +    CT_DoLog EXTRA "Installing libiconv"
 +    CT_DoExecLog ALL make install CC="${CT_HOST}-gcc ${cflags}"
@@ -765,7 +765,7 @@ index 0000000..ca17935
 +fi
 diff --git a/scripts/build/companion_libs/330-gettext.sh b/scripts/build/companion_libs/330-gettext.sh
 new file mode 100644
-index 0000000..f8c4ce2
+index 0000000..e74b877
 --- /dev/null
 +++ b/scripts/build/companion_libs/330-gettext.sh
 @@ -0,0 +1,131 @@
@@ -893,7 +893,7 @@ index 0000000..f8c4ce2
 +        "${extra_config[@]}"
 + 
 +    CT_DoLog EXTRA "Building gettext"
-+    CT_DoExecLog ALL make
++    CT_DoExecLog ALL make ${JOBSFLAGS}
 +
 +    CT_DoLog EXTRA "Installing gettext"
 +    CT_DoExecLog ALL make install
@@ -901,10 +901,10 @@ index 0000000..f8c4ce2
 +
 +fi
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index 272cb97..eb2fa52 100644
+index da4f447..97f5f3f 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
-@@ -459,10 +459,20 @@ do_libc_backend_once() {
+@@ -457,10 +457,20 @@ do_libc_backend_once() {
  
          # use the 'install-headers' makefile target to install the
          # headers

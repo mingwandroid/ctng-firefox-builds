@@ -452,9 +452,9 @@ if [ "$LLVM_VERSION" = "none" ]; then
 fi
 if [ "$CTNG_SAVE_STEPS" = "default" ]; then
   CTNG_SAVE_STEPS=no
-  if [ "$LLVM_VERSION" = "none" ]; then
-    CTNG_SAVE_STEPS=yes
-  fi
+#  if [ "$LLVM_VERSION" = "none" ]; then
+#    CTNG_SAVE_STEPS=yes
+#  fi
 fi
 
 if [ "$STATIC_TOOLCHAIN" = "yes" -a "$BUILD_OS" = "darwin" ]; then

@@ -65,11 +65,13 @@ TARGET_TO_PREFIX_windows="w"
 TARGET_TO_PREFIX_linux="l"
 TARGET_TO_PREFIX_ps3="p"
 TARGET_TO_PREFIX_raspi="r"
+TARGET_TO_PREFIX_aarch64="a"
 
 VENDOR_OSES_osx="apple-darwin10"
 VENDOR_OSES_windows="x86_64-w64-mingw32"
 VENDOR_OSES_linux="unknown-linux-gnu"
 VENDOR_OSES_raspi="unknown-linux-gnu"
+VENDOR_OSES_aarch64="unknown-linux-gnu"
 
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
@@ -92,12 +94,15 @@ TARGET_BINUTILS_VERSIONS_windows="2.24"
 TARGET_BINUTILS_VERSIONS_linux="2.24"
 TARGET_BINUTILS_VERSIONS_ps3="2.23.2"
 TARGET_BINUTILS_VERSIONS_raspi="2.24"
+TARGET_BINUTILS_VERSIONS_aarch64="2.24"
 
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="4.8.2"
 TARGET_GCC_VERSIONS_linux="4.8.2"
 TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="4.8.2"
+TARGET_GCC_VERSIONS_aarch64="4.8.2"
+#TARGET_GCC_VERSIONS_aarch64="4.9.0"
 
 TARGET_LLVM_VERSIONS_osx="none"
 TARGET_LLVM_VERSIONS_windows="head"
@@ -106,6 +111,7 @@ TARGET_LLVM_VERSIONS_linux="none"
 #TARGET_LLVM_VERSIONS_linux="head"
 TARGET_LLVM_VERSIONS_ps3="none"
 TARGET_LLVM_VERSIONS_raspi="none"
+TARGET_LLVM_VERSIONS_aarch64="none"
 
 TARGET_COMPILER_RT_osx="yes"
 TARGET_COMPILER_RT_windows="no"
@@ -113,18 +119,21 @@ TARGET_COMPILER_RT_windows="no"
 TARGET_COMPILER_RT_linux="no"
 TARGET_COMPILER_RT_ps3="no"
 TARGET_COMPILER_RT_raspi="yes"
+TARGET_COMPILER_RT_aarch64="yes"
 
 TARGET_IS_LINUX_osx="no"
 TARGET_IS_LINUX_windows="no"
 TARGET_IS_LINUX_linux="yes"
 TARGET_IS_LINUX_ps3="no"
 TARGET_IS_LINUX_raspi="yes"
+TARGET_IS_LINUX_aarch64="yes"
 
 TARGET_IS_DARWIN_osx="yes"
 TARGET_IS_DARWIN_windows="no"
 TARGET_IS_DARWIN_linux="no"
 TARGET_IS_DARWIN_ps3="no"
 TARGET_IS_DARWIN_raspi="no"
+TARGET_IS_DARWIN_aarch64="no"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
@@ -137,6 +146,7 @@ TARGET_LIBC_linux="glibc_V_2.15"
 #TARGET_LIBC_linux="eglibc_V_2.18"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
+TARGET_LIBC_aarch64="eglibc_V_2.18"
 
 # Stands for associative lookup!
 _al()
@@ -361,31 +371,30 @@ BUILD_OS=
 if [ "$OSTYPE" = "linux-gnu" ]; then
   BUILD_OS=linux
 elif [ "$OSTYPE" = "msys" ]; then
-  #GDBPROG=gdbserver.exe
-  GDBPROG=gdb.exe
   BUILD_OS=windows
-  if which $GDBPROG > /dev/null 2>&1; then
-    # weird, works from commandline, but not from within a running shell script.
-    export GDB_PATH="$(cd $(dirname $(which $GDBPROG)) && pwd -W)"/$GDBPROG
-    echo $GDB_PATH
-    MSYS="$MSYS error_start:$GDB_PATH -nw %1 %2"
-    if ! grep "set auto-load safe-path /" ~/.gdbinit > /dev/null 2>&1; then
-      echo "set auto-load safe-path /" >> ~/.gdbinit
-    fi
+#  GDBPROG=gdb.exe
+#  if which $GDBPROG > /dev/null 2>&1; then
+#    # weird, works from commandline, but not from within a running shell script.
+#    export GDB_PATH="$(cd $(dirname $(which $GDBPROG)) && pwd -W)"/$GDBPROG
+#    echo $GDB_PATH
+#    MSYS="$MSYS error_start:$GDB_PATH -nw %1 %2"
+#    if ! grep "set auto-load safe-path /" ~/.gdbinit > /dev/null 2>&1; then
+#      echo "set auto-load safe-path /" >> ~/.gdbinit
+#    fi
 # You can use this to check that GDB gets invoked correctly.
 #    echo "int main () { *(int*)3 = 0; }" > test.c
 #    gcc -ggdb -O0 test.c -o test.exe
 #    echo "testing crash - gdb should appear"
 #    ./test.exe
-  else
-    echo "I'm refusing to run since you've not got gdb installed"
-    echo "pacman -S gdb"
-    echo ".. while you're at it, please also grab and install this"
-    echo "gnumake with debugging symbols, so that stack traces can"
-    echo "be gotten from it if/when it crashes again:"
-    echo "https://www.dropbox.com/s/zfr9f7anbml8829/make-4.0-5-x86_64.pkg.tar.xz"
-    echo "pacman -U make-4.0-5-x86_64.pkg.tar.xz"
-  fi
+#  else
+#    echo "I'm refusing to run since you've not got gdb installed"
+#    echo "pacman -S gdb"
+#    echo ".. while you're at it, please also grab and install this"
+#    echo "gnumake with debugging symbols, so that stack traces can"
+#    echo "be gotten from it if/when it crashes again:"
+#    echo "https://www.dropbox.com/s/zfr9f7anbml8829/make-4.0-5-x86_64.pkg.tar.xz"
+#    echo "pacman -U make-4.0-5-x86_64.pkg.tar.xz"
+#  fi
   # I put a hack into MSYS2 in the interests of pragmatism
   # to allow arguments to be blacklisted from being converted
   # between their MSYS2 and Windows representations:
@@ -465,9 +474,9 @@ if [ "$STATIC_TOOLCHAIN" = "yes" -a "$BUILD_OS" = "darwin" ]; then
   exit 1
 fi
 
-BINUTILS_VERS_=$(echo $BINUTILS_VERSION  | tr '.' '_')
-GCC_VERS_=$(echo $GCC_VERSION  | tr '.' '_')
-LLVM_VERS_=$(echo $LLVM_VERSION | tr '.' '_')
+BINUTILS_VERS_=$(echo $BINUTILS_VERSION | tr '.' '_')
+GCC_VERS_=$(echo $GCC_VERSION           | tr '.' '_')
+LLVM_VERS_=$(echo $LLVM_VERSION         | tr '.' '_')
 
 if [ "$CTNG_DEBUGGABLE" = "default" ]; then
   CTNG_DEBUGGABLE=$(_al BUILD_DEBUGGABLE ${BUILD_OS})

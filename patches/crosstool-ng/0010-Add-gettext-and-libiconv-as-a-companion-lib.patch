@@ -1,14 +1,18 @@
-From 5c298999280be1a6dad6dcd1ff855eaac366b177 Mon Sep 17 00:00:00 2001
+From 77a11bc84bdd795df6aa718416608a6e556757fc Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 9 Feb 2014 18:44:25 +0000
 Subject: [PATCH 10/28] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
+
+Building both is avoided on Linux and building
+iconv is avoided on Darwin.
 ---
  config/companion_libs.in                           |  27 ++
  config/companion_libs/gettext.in                   |  19 ++
  config/companion_libs/libiconv.in                  |  19 ++
  config/libc/eglibc.in                              |   1 +
+ config/libc/glibc.in                               |   1 +
  ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++
  ...ix-linker-error-redefinition-of-vasprintf.patch |  31 ++
  ...-Woe32-link-errors-when-compiling-with-O0.patch | 372 +++++++++++++++++++++
@@ -16,7 +20,7 @@ Subject: [PATCH 10/28] Add gettext and libiconv as a companion lib
  scripts/build/companion_libs/320-libiconv.sh       | 107 ++++++
  scripts/build/companion_libs/330-gettext.sh        | 131 ++++++++
  scripts/build/libc/glibc-eglibc.sh-common          |  18 +-
- 11 files changed, 782 insertions(+), 4 deletions(-)
+ 12 files changed, 783 insertions(+), 4 deletions(-)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
@@ -140,6 +144,18 @@ index 8dc4e44..cc2e8d1 100644
  ##
  ## help EGLIBC (Embedded GLIBC) is a variant of the standard GNU GLIBC
  ## help that is designed to work well on embedded systems.  EGLIBC strives
+diff --git a/config/libc/glibc.in b/config/libc/glibc.in
+index 3fe7522..36f6dce 100644
+--- a/config/libc/glibc.in
++++ b/config/libc/glibc.in
+@@ -4,6 +4,7 @@
+ ##
+ ## select LIBC_SUPPORT_NPTL
+ ## select CC_CORE_PASSES_NEEDED
++## select GETTEXT_NEEDED
+ ##
+ ## help The de-facto standard for Linux distributions.
+ ## help Feature-rich, but large...  Most usefull for desktop-like systems.
 diff --git a/patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch b/patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
 new file mode 100644
 index 0000000..a5287b3

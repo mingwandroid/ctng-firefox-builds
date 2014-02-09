@@ -1,4 +1,4 @@
-From e13c6f9bda19b0fe4fbae96056dc3e9573a6f4ab Mon Sep 17 00:00:00 2001
+From 5b4c3358b3cca794d6705d3ab2a8ac2083f553ca Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 29 Jan 2014 18:50:55 +0000
 Subject: [PATCH 27/28] Add glibc 2.17 patches
@@ -300,5 +300,5 @@ index 0000000..0650742
 + AC_CONFIG_SUBDIRS()
 + 
 -- 
-1.8.5.3
+1.8.5.4
 

@@ -746,7 +746,7 @@ cross_clang_build()
     [ -d "${HOME}"/src ] || mkdir "${HOME}"/src
     [ -d crosstool-ng ] ||
      (
-      git clone https://github.com/diorcety/crosstool-ng.git
+      git clone https://github.com/diorcety/crosstool-ng.git -b merge-upstream
       pushd crosstool-ng
       if [ -d "${THISDIR}/patches/crosstool-ng" ]; then
         PATCHES=$(find "${THISDIR}/patches/crosstool-ng" -name "*.patch" | sort)

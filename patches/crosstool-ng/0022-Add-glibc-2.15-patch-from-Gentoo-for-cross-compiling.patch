@@ -1,4 +1,4 @@
-From 126a967a5d40e6ce22625881c18fac2a09f293a7 Mon Sep 17 00:00:00 2001
+From 4315d8f9f33809c60a8fdaad36a326d5227f4249 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 23 Jan 2014 20:31:22 +0000
 Subject: [PATCH 22/28] Add glibc 2.15 patch from Gentoo for cross compiling
@@ -70,5 +70,5 @@ index 0000000..02880ca
 + 	{ gsub(/\[ */, "[") }
 + 	$2 == ".ctors" || $2 == ".dtors" {
 -- 
-1.8.5.3
+1.8.5.4
 

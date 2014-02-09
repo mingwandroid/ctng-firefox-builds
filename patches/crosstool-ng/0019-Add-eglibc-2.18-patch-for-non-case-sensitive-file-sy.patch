@@ -1,4 +1,4 @@
-From 6712f09da52c545b53c0d3580b4cde3e9d1a9f99 Mon Sep 17 00:00:00 2001
+From e282df7189da1681d8dd1525ee1e8d66111ee7ff Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 28 Dec 2013 18:30:54 +0000
 Subject: [PATCH 19/28] Add eglibc 2.18 patch for non case-sensitive file
@@ -237,5 +237,5 @@ index 0000000..a9b3245
 ++ASFLAGS-.oSTATIC += -Wa,-Av9d
 + endif
 -- 
-1.8.5.3
+1.8.5.4
 

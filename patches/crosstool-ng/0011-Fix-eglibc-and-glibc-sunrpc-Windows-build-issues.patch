@@ -1,4 +1,4 @@
-From 98d8cc32a87eb5fa3445a68c330eca5d29da7a5d Mon Sep 17 00:00:00 2001
+From c8e81e12b2cbe7495a4d64770b537d1acd23f710 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 14 Dec 2013 03:18:53 +0000
 Subject: [PATCH 11/28] Fix eglibc and glibc sunrpc Windows build issues
@@ -270,7 +270,7 @@ index 0000000..9a0440e
 + /* valid tirpc nettypes */
 + static const char *valid_ti_nettypes[] =
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index 97f5f3f..0964a4a 100644
+index 7cab0f0..9972480 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
 @@ -452,21 +452,26 @@ do_libc_backend_once() {
@@ -319,5 +319,5 @@ index 97f5f3f..0964a4a 100644
          CT_DoExecLog ALL make ${JOBSFLAGS}              \
                                "${extra_make_args[@]}"   \
 -- 
-1.8.5.3
+1.8.5.4
 

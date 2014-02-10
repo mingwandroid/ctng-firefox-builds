@@ -75,7 +75,7 @@ VENDOR_OSES_aarch64="unknown-linux-gnu"
 
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
-BUILD_DEBUGGABLE_windows="no"
+BUILD_DEBUGGABLE_windows="yes"
 BUILD_DEBUGGABLE_linux="no"
 
 BUILD_DEBUGGERS_darwin="yes"
@@ -1066,7 +1066,7 @@ else
   BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
 fi
 #BUILDDIR=/c/ctng-build-${STUB}-${BUILD_PREFIX}
-BUILDDIR=/c/b${STUB}
+BUILDDIR=/c/b${STUB}${DEBUG_PREFIX}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
 
@@ -3681,3 +3681,118 @@ make -j9 -l \
 
 cd /c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb
 /c/Users/ukrdonnell/ctng-firefox-builds/bin/ct-ng libc+
+
+
+
+# Back to Windows x86_64 host/build .. OSX target failure.
+[ALL  ]    { x86_64-apple-darwin10-nm -pg libgcc/i386/_muldi3_s.o libgcc/i386/_negdi2_s.o libgcc/i386/_lshrdi3_s.o libgcc/i386/_ashldi3_s.o libgcc/i386/_ashrdi3_s.o libgcc/i386/_cmpdi2_s.o libgcc/i386/_ucmpdi2_s.o libgcc/i386/_clear_cache_s.o libgcc/i386/_enable_execute_stack_s.o libgcc/i386/_trampoline_s.o libgcc/i386/__main_s.o libgcc/i386/_absvsi2_s.o libgcc/i386/_absvdi2_s.o libgcc/i386/_addvsi3_s.o libgcc/i386/_addvdi3_s.o libgcc/i386/_subvsi3_s.o libgcc/i386/_subvdi3_s.o libgcc/i386/_mulvsi3_s.o libgcc/i386/_mulvdi3_s.o libgcc/i386/_negvsi2_s.o libgcc/i386/_negvdi2_s.o libgcc/i386/_ctors_s.o libgcc/i386/_ffssi2_s.o libgcc/i386/_ffsdi2_s.o libgcc/i386/_clz_s.o libgcc/i386/_clzsi2_s.o libgcc/i386/_clzdi2_s.o libgcc/i386/_ctzsi2_s.o libgcc/i386/_ctzdi2_s.o libgcc/i386/_popcount_tab_s.o libgcc/i386/_popcountsi2_s.o libgcc/i386/_popcountdi2_s.o libgcc/i386/_paritysi2_s.o libgcc/i386/_paritydi2_s.o libgcc/i386/_powisf2_s.o libgcc/i386/_powidf2_s.o libgcc/i386/_powixf2_s.o libgcc/i386/_powitf2_s.o libgcc/i386/_mulsc3_s.o libgcc/i386/_muldc3_s.o libgcc/i386/_mulxc3_s.o libgcc/i386/_multc3_s.o libgcc/i386/_divsc3_s.o libgcc/i386/_divdc3_s.o libgcc/i386/_divxc3_s.o libgcc/i386/_divtc3_s.o libgcc/i386/_bswapsi2_s.o libgcc/i386/_bswapdi2_s.o libgcc/i386/_fixunssfsi_s.o libgcc/i386/_fixunsdfsi_s.o libgcc/i386/_fixunsxfsi_s.o libgcc/i386/_fixsfdi_s.o libgcc/i386/_fixsfti_s.o libgcc/i386/_fixunssfdi_s.o libgcc/i386/_fixunssfti_s.o libgcc/i386/_floatdisf_s.o libgcc/i386/_floattisf_s.o libgcc/i386/_floatundisf_s.o libgcc/i386/_floatuntisf_s.o libgcc/i386/_fixdfdi_s.o libgcc/i386/_fixdfti_s.o libgcc/i386/_fixunsdfdi_s.o libgcc/i386/_fixunsdfti_s.o libgcc/i386/_floatdidf_s.o libgcc/i386/_floattidf_s.o libgcc/i386/_floatundidf_s.o libgcc/i386/_floatuntidf_s.o libgcc/i386/_fixxfdi_s.o libgcc/i386/_fixxfti_s.o libgcc/i386/_fixunsxfdi_s.o libgcc/i386/_fixunsxfti_s.o libgcc/i386/_floatdixf_s.o libgcc/i386/_floattixf_s.o libgcc/i386/_floatundixf_s.o libgcc/i386/_floatuntixf_s.o libgcc/i386/_fixtfdi_s.o libgcc/i386/_fixtfti_s.o libgcc/i386/_fixunstfdi_s.o libgcc/i386/_fixunstfti_s.o libgcc/i386/_floatditf_s.o libgcc/i386/_floattitf_s.o libgcc/i386/_floatunditf_s.o libgcc/i386/_floatuntitf_s.o libgcc/i386/_divdi3_s.o libgcc/i386/_moddi3_s.o libgcc/i386/_udivdi3_s.o libgcc/i386/_umoddi3_s.o libgcc/i386/_udiv_w_sdiv_s.o libgcc/i386/_udivmoddi4_s.o libgcc/i386/darwin-64_s.o libgcc/i386/unwind-dw2_s.o libgcc/i386/unwind-dw2-fde-darwin_s.o libgcc/i386/unwind-sjlj_s.o libgcc/i386/unwind-c_s.o; echo %%;   cat ../../../../src/gcc-5666.3/gcc/libgcc-std.ver     | sed -e '/^[   ]*#/d'           -e 's/^%(if|else|elif|endif|define)/#1/'     | /c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/xgcc -B/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/bin/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/system -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/include -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sys-include  -mmacosx-version-min=10.4 -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE   -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include  -fPIC -pipe -g -DHAVE_GTHR_DEFAULT -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED  -I. -I. -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/. -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber  -m32 -E -xassembler-with-cpp -; } | gawk -f ../../../../src/gcc-5666.3/gcc/mkmap-flat.awk -v leading_underscore=1 > libgcc/i386/tmp-libgcc.map
+
+.. error seems to be in nm:
+x86_64-apple-darwin10-nm -pg libgcc/./_muldi3_s.o libgcc/./_negdi2_s.o libgcc/./_lshrdi3_s.o libgcc/./_ashldi3_s.o libgcc/./_ashrdi3_s.o libgcc/./_cmpdi2_s.o libgcc/./_ucmpdi2_s.o libgcc/./_clear_cache_s.o libgcc/./_enable_execute_stack_s.o libgcc/./_trampoline_s.o libgcc/./__main_s.o libgcc/./_absvsi2_s.o libgcc/./_absvdi2_s.o libgcc/./_addvsi3_s.o libgcc/./_addvdi3_s.o libgcc/./_subvsi3_s.o libgcc/./_subvdi3_s.o libgcc/./_mulvsi3_s.o libgcc/./_mulvdi3_s.o libgcc/./_negvsi2_s.o libgcc/./_negvdi2_s.o libgcc/./_ctors_s.o libgcc/./_ffssi2_s.o libgcc/./_ffsdi2_s.o libgcc/./_clz_s.o libgcc/./_clzsi2_s.o libgcc/./_clzdi2_s.o libgcc/./_ctzsi2_s.o libgcc/./_ctzdi2_s.o libgcc/./_popcount_tab_s.o libgcc/./_popcountsi2_s.o libgcc/./_popcountdi2_s.o libgcc/./_paritysi2_s.o libgcc/./_paritydi2_s.o libgcc/./_powisf2_s.o libgcc/./_powidf2_s.o libgcc/./_powixf2_s.o libgcc/./_powitf2_s.o libgcc/./_mulsc3_s.o libgcc/./_muldc3_s.o libgcc/./_mulxc3_s.o libgcc/./_multc3_s.o libgcc/./_divsc3_s.o libgcc/./_divdc3_s.o libgcc/./_divxc3_s.o libgcc/./_divtc3_s.o libgcc/./_bswapsi2_s.o libgcc/./_bswapdi2_s.o libgcc/./_fixunssfsi_s.o libgcc/./_fixunsdfsi_s.o libgcc/./_fixunsxfsi_s.o libgcc/./_fixsfdi_s.o libgcc/./_fixsfti_s.o libgcc/./_fixunssfdi_s.o libgcc/./_fixunssfti_s.o libgcc/./_floatdisf_s.o libgcc/./_floattisf_s.o libgcc/./_floatundisf_s.o libgcc/./_floatuntisf_s.o libgcc/./_fixdfdi_s.o libgcc/./_fixdfti_s.o libgcc/./_fixunsdfdi_s.o libgcc/./_fixunsdfti_s.o libgcc/./_floatdidf_s.o libgcc/./_floattidf_s.o libgcc/./_floatundidf_s.o libgcc/./_floatuntidf_s.o libgcc/./_fixxfdi_s.o libgcc/./_fixxfti_s.o libgcc/./_fixunsxfdi_s.o libgcc/./_fixunsxfti_s.o libgcc/./_floatdixf_s.o libgcc/./_floattixf_s.o libgcc/./_floatundixf_s.o libgcc/./_floatuntixf_s.o libgcc/./_fixtfdi_s.o libgcc/./_fixtfti_s.o libgcc/./_fixunstfdi_s.o libgcc/./_fixunstfti_s.o libgcc/./_floatditf_s.o libgcc/./_floattitf_s.o libgcc/./_floatunditf_s.o libgcc/./_floatuntitf_s.o libgcc/./_divdi3_s.o libgcc/./_moddi3_s.o libgcc/./_udivdi3_s.o libgcc/./_umoddi3_s.o libgcc/./_udiv_w_sdiv_s.o libgcc/./_udivmoddi4_s.o libgcc/./darwin-64_s.o libgcc/./unwind-dw2_s.o libgcc/./unwind-dw2-fde-darwin_s.o libgcc/./unwind-sjlj_s.o libgcc/./unwind-c_s.o; echo %%;   cat ../../../../src/gcc-5666.3/gcc/libgcc-std.ver     | sed -e '/^[   ]*#/d'           -e 's/^%(if|else|elif|endif|define)/#1/'     | /c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/xgcc -B/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/bin/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/system -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/include -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sys-include  -mmacosx-version-min=10.4 -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE   -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include  -fPIC -pipe -g -DHAVE_GTHR_DEFAULT -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED  -I. -I. -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/. -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber  -E -xassembler-with-cpp -; } | gawk -f ../../../../src/gcc-5666.3/gcc/mkmap-flat.awk -v leading_underscore=1 > libgcc/./tmp-libgcc.map
+
+.. so try the same objects 
+
+# Nope. failing command on Windows x86_64 is:
+pushd /c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/gcc
+PATH=/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/bin:/c/bo/.build/x86_64-apple-darwin10/buildtools/bin:/c/bo/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH \
+/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/xgcc -B/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/bin/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/system -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/include -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sys-include  -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE   -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include  -fPIC -pipe -g -DHAVE_GTHR_DEFAULT -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED  -dynamiclib -nodefaultlibs -install_name /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/libgcc_s`if test i386 = ppc64 ; then echo _i386 ; fi`.1.dylib -single_module -o i386/libgcc_s.1.dylib.tmp -Wl,-exported_symbols_list,libgcc/i386/libgcc.map -compatibility_version 1 -current_version 1.0  -m32 libgcc/i386/_muldi3_s.o libgcc/i386/_negdi2_s.o libgcc/i386/_lshrdi3_s.o libgcc/i386/_ashldi3_s.o libgcc/i386/_ashrdi3_s.o libgcc/i386/_cmpdi2_s.o libgcc/i386/_ucmpdi2_s.o libgcc/i386/_clear_cache_s.o libgcc/i386/_enable_execute_stack_s.o libgcc/i386/_trampoline_s.o libgcc/i386/__main_s.o libgcc/i386/_absvsi2_s.o libgcc/i386/_absvdi2_s.o libgcc/i386/_addvsi3_s.o libgcc/i386/_addvdi3_s.o libgcc/i386/_subvsi3_s.o libgcc/i386/_subvdi3_s.o libgcc/i386/_mulvsi3_s.o libgcc/i386/_mulvdi3_s.o libgcc/i386/_negvsi2_s.o libgcc/i386/_negvdi2_s.o libgcc/i386/_ctors_s.o libgcc/i386/_ffssi2_s.o libgcc/i386/_ffsdi2_s.o libgcc/i386/_clz_s.o libgcc/i386/_clzsi2_s.o libgcc/i386/_clzdi2_s.o libgcc/i386/_ctzsi2_s.o libgcc/i386/_ctzdi2_s.o libgcc/i386/_popcount_tab_s.o libgcc/i386/_popcountsi2_s.o libgcc/i386/_popcountdi2_s.o libgcc/i386/_paritysi2_s.o libgcc/i386/_paritydi2_s.o libgcc/i386/_powisf2_s.o libgcc/i386/_powidf2_s.o libgcc/i386/_powixf2_s.o libgcc/i386/_powitf2_s.o libgcc/i386/_mulsc3_s.o libgcc/i386/_muldc3_s.o libgcc/i386/_mulxc3_s.o libgcc/i386/_multc3_s.o libgcc/i386/_divsc3_s.o libgcc/i386/_divdc3_s.o libgcc/i386/_divxc3_s.o libgcc/i386/_divtc3_s.o libgcc/i386/_bswapsi2_s.o libgcc/i386/_bswapdi2_s.o libgcc/i386/_fixunssfsi_s.o libgcc/i386/_fixunsdfsi_s.o libgcc/i386/_fixunsxfsi_s.o libgcc/i386/_fixsfdi_s.o libgcc/i386/_fixsfti_s.o libgcc/i386/_fixunssfdi_s.o libgcc/i386/_fixunssfti_s.o libgcc/i386/_floatdisf_s.o libgcc/i386/_floattisf_s.o libgcc/i386/_floatundisf_s.o libgcc/i386/_floatuntisf_s.o libgcc/i386/_fixdfdi_s.o libgcc/i386/_fixdfti_s.o libgcc/i386/_fixunsdfdi_s.o libgcc/i386/_fixunsdfti_s.o libgcc/i386/_floatdidf_s.o libgcc/i386/_floattidf_s.o libgcc/i386/_floatundidf_s.o libgcc/i386/_floatuntidf_s.o libgcc/i386/_fixxfdi_s.o libgcc/i386/_fixxfti_s.o libgcc/i386/_fixunsxfdi_s.o libgcc/i386/_fixunsxfti_s.o libgcc/i386/_floatdixf_s.o libgcc/i386/_floattixf_s.o libgcc/i386/_floatundixf_s.o libgcc/i386/_floatuntixf_s.o libgcc/i386/_fixtfdi_s.o libgcc/i386/_fixtfti_s.o libgcc/i386/_fixunstfdi_s.o libgcc/i386/_fixunstfti_s.o libgcc/i386/_floatditf_s.o libgcc/i386/_floattitf_s.o libgcc/i386/_floatunditf_s.o libgcc/i386/_floatuntitf_s.o libgcc/i386/_divdi3_s.o libgcc/i386/_moddi3_s.o libgcc/i386/_udivdi3_s.o libgcc/i386/_umoddi3_s.o libgcc/i386/_udiv_w_sdiv_s.o libgcc/i386/_udivmoddi4_s.o libgcc/i386/darwin-64_s.o libgcc/i386/unwind-dw2_s.o libgcc/i386/unwind-dw2-fde-darwin_s.o libgcc/i386/unwind-sjlj_s.o libgcc/i386/unwind-c_s.o -lc
+
+# Trying to do the same command on Linux crashes ld in a different way, which implies that our objects are different/broken.
+smallest is libgcc/i386/darwin-64_s.o
+
+http://osxbook.com/blog/2009/03/15/crafting-a-tiny-mach-o-executable/
+# The first load command has a different vmaddr or vmlength probably.
+# 7*ints == header
+# then the load command is {1*int==LC_TYPE,c1*int=cmd_size=0x3ac,16*byte=name [0,...0], vmaddr = 0, vmlength = {0x59b=linux,0599=windows}, 
+
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/bin/x86_64-apple-darwin10-otool -D libgcc.linux/__gcc_bcmp.o
+
+# Making it fail:
+pushd /c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/gcc
+cp libgcc.windows/i386/__main_s.o libgcc/i386/
+
+
+
+PATH=/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/bin:/c/bo/.build/x86_64-apple-darwin10/buildtools/bin:/c/bo/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH \
+  /c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/xgcc -B/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/bin/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/system -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/include -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sys-include  -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE   -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include  -fPIC -pipe -g -DHAVE_GTHR_DEFAULT -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED  -dynamiclib -nodefaultlibs -install_name /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/libgcc_s_i386.1.dylib -single_module -o i386/libgcc_s.1.dylib.tmp -Wl,-exported_symbols_list,libgcc/i386/libgcc.map -compatibility_version 1 -current_version 1.0  -m32  libgcc/i386/__main_s.o
+
+PATH=/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/bin:/c/bo/.build/x86_64-apple-darwin10/buildtools/bin:/c/bo/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH \
+  /c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/xgcc \
+  -B/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/ \
+  -o i386/libgcc_s.1.dylib.tmp  -m32  libgcc/i386/__main_s.o -v
+
+
+
+/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/collect2 -dynamic -arch i386 -macosx_version_min 10.4 -syslibroot /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sysroot -weak_reference_mismatches non-weak -o i386/libgcc_s.1.dylib.tmp -lcrt1.o -L/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/i386 -L/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sysroot/lib -L/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sysroot/usr/lib -L/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc libgcc/i386/__main_s.o -lgcc -lSystem
+
+.. which ends up at:
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/bin/x86_64-apple-darwin10-ld -dynamic -arch i386 -macosx_version_min 10.4 -syslibroot /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sysroot -weak_reference_mismatches non-weak -o i386/libgcc_s.1.dylib.tmp -lcrt1.o -L/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/i386 -L/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sysroot/lib -L/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sysroot/usr/lib -L/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc libgcc/i386/__main_s.o -lgcc -lSystem
+
+.. all the way down to:
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/bin/x86_64-apple-darwin10-ld -dynamic -arch i386 libgcc/i386/__main_s.o
+
+
+# So the question is, is it GCC at fault or the assembler?
+/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/xgcc -B/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/bin/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/system -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/include -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sys-include  -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE   -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include  -fPIC -pipe -g -DHAVE_GTHR_DEFAULT -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED  -I. -I. -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/. -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber -DSHARED -m32 -DL__main -c ../../../../src/gcc-5666.3/gcc/libgcc2.c -o libgcc/i386/__main_s.o
+
+# To compile to assembly:
+/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/xgcc -S -B/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/bin/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/system -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/include -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sys-include  -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE   -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include  -fPIC -pipe -g -DHAVE_GTHR_DEFAULT -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED  -I. -I. -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/. -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber -DSHARED -m32 -DL__main -c ../../../../src/gcc-5666.3/gcc/libgcc2.c -o ~/Dropbox/ctng-firefox-builds/windows/libgcc/i386/__main_s.s
+/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/xgcc -S -B/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/./gcc/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/bin/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/ -B/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/lib/system -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/include -isystem /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/x86_64-apple-darwin10/sys-include  -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE   -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include  -fPIC -pipe -g -DHAVE_GTHR_DEFAULT -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED  -I. -I. -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/. -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber -DSHARED -m32 -DL__main -c ../../../../src/gcc-5666.3/gcc/libgcc2.c -o ~/Dropbox/ctng-firefox-builds/linux/libgcc/i386/__main_s.s
+
+# To assemble to object:
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/bin/x86_64-apple-darwin10-as.exe -arch i386 -force_cpusubtype_ALL -o libgcc/i386/__main_s.o ~/Dropbox/ctng-firefox-builds/windows/libgcc/i386/__main_s.s
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/bin/x86_64-apple-darwin10-as.exe -arch i386 -force_cpusubtype_ALL -o libgcc/i386/__main_s.o ~/Dropbox/ctng-firefox-builds/linux/libgcc/i386/__main_s.s
+
+
+# I think that file->_atomsArrayCount is the wrong size in LD64 on Windows, should be 64bit, is 32bit .. nope, not likely.
+# needs a debug version of cctools.
+
+# On Windows:
+pushd /c/bo/.build/x86_64-apple-darwin10/build/build-cctools-host-x86_64-build_w64-mingw32/as/i386
+PATH=/c/bo/.build/x86_64-apple-darwin10/buildtools/bin:$PATH \
+x86_64-build_w64-mingw32-gcc \
+-std=gnu99 -Wno-import -Wno-unused-variable -Wno-unused-but-set-variable -Wno-deprecated-declarations  -DHAVE_CONFIG_H -D__LITTLE_ENDIAN__ -DNeXT_MOD -DASLIBEXECDIR=""/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/libexec/as/"" -DI386 -Di486 -Di586 -Di686  -I. -I/c/bo/.build/src/cctools-809/as/i386/.. -I../../include -I/c/bo/.build/src/cctools-809/include -include ../../include/config.h -I/c/bo/.build/src/cctools-809/include/foreign -O2 -g -pipe -m64 \
+-D__USE_MINGW_ANSI_STDIO=1 \
+-I/c/bo/.build/x86_64-apple-darwin10/buildtools/include/  -D__DARWIN_UNIX03 -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS \
+-D_POSIX -D_POSIX_C_SOURCE -D_GNU_SOURCE \
+-I/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/include -fno-builtin-round -fno-builtin-trunc  -c -o i386.o /c/bo/.build/src/cctools-809/as/i386/../i386.c --save-temps
+cp i386.* ~/Dropbox/ctng-firefox-builds/windows/
+
+# On Linux:
+pushd /c/bo/.build/x86_64-apple-darwin10/build/build-cctools-host-x86_64-build_unknown-linux-gnu/as/i386
+PATH=/c/bo/.build/x86_64-apple-darwin10/buildtools/bin:$PATH \
+x86_64-build_unknown-linux-gnu-gcc \
+-std=gnu99 -Wno-import -Wno-unused-variable -Wno-unused-but-set-variable -Wno-deprecated-declarations  -DHAVE_CONFIG_H -D__LITTLE_ENDIAN__ -DNeXT_MOD -DASLIBEXECDIR=""/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/libexec/as/"" -DI386 -Di486 -Di586 -Di686  -I. -I/c/bo/.build/src/cctools-809/as/i386/.. -I../../include -I/c/bo/.build/src/cctools-809/include -include ../../include/config.h -I/c/bo/.build/src/cctools-809/include/foreign -O2 -g -pipe -m64 \
+-I/c/bo/.build/x86_64-apple-darwin10/buildtools/include/  -D__DARWIN_UNIX03 -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS \
+-I/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/include -fno-builtin-round -fno-builtin-trunc  -c -o i386.o /c/bo/.build/src/cctools-809/as/i386/../i386.c --save-temps
+cp i386.* ~/Dropbox/ctng-firefox-builds/linux/
+
+
+.. also x86_64 is built with i386.c, but with the addition of -DARCH64
+x86_64-build_unknown-linux-gnu-gcc \
+-std=gnu99 -Wno-import -Wno-unused-variable -Wno-unused-but-set-variable -Wno-deprecated-declarations  -DHAVE_CONFIG_H -D__LITTLE_ENDIAN__ -DNeXT_MOD -DASLIBEXECDIR=""/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/libexec/as/"" -DI386 -Di486 -Di586 -Di686 -DARCH64  -I. -I/c/bo/.build/src/cctools-809/as/x86_64/.. -I../../include -I/c/bo/.build/src/cctools-809/include -include ../../include/config.h -I/c/bo/.build/src/cctools-809/include/foreign -O2 -g -pipe -m64 -I/c/bo/.build/x86_64-apple-darwin10/buildtools/include/  -D__DARWIN_UNIX03 -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -I/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb/include -fno-builtin-round -fno-builtin-trunc  -c -o i386.o /c/bo/.build/src/cctools-809/as/x86_64/../i386.c
+
+
+.. a strange difference (though not the thing I am searching for - just a union member dropped on Linux) is:
+Windows has:
+# 58 "C:/bo/.build/src/cctools-809/include/mach-o/ranlib.h"
+struct ranlib {
+    union {
+ uint32_t ran_strx;
+
+ char *ran_name;
+
+    } ran_un;
+    uint32_t ran_off;
+};
+Linux has:
+# 58 "/c/bo/.build/src/cctools-809/include/mach-o/ranlib.h"
+struct ranlib {
+    union {
+ uint32_t ran_strx;
+
+
+
+    } ran_un;
+    uint32_t ran_off;
+};

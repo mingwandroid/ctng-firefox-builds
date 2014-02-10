@@ -45,7 +45,7 @@ CT_ARCH_blackfin_AVAILABLE=y
 #
 # Generic target options
 #
-# CT_MULTILIB is not set
+CT_MULTILIB=y
 CT_ARCH_USE_MMU=y
 CT_ARCH_ENDIAN="little"
 #

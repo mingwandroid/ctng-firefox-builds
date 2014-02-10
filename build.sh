@@ -104,7 +104,7 @@ TARGET_GCC_VERSIONS_raspi="4.8.2"
 TARGET_GCC_VERSIONS_aarch64="4.8.2"
 #TARGET_GCC_VERSIONS_aarch64="4.9.0"
 
-TARGET_LLVM_VERSIONS_osx="none"
+TARGET_LLVM_VERSIONS_osx="head"
 TARGET_LLVM_VERSIONS_windows="head"
 #TARGET_LLVM_VERSIONS_windows="none"
 TARGET_LLVM_VERSIONS_linux="none"
@@ -755,7 +755,7 @@ cross_clang_build()
     [ -d "${HOME}"/src ] || mkdir "${HOME}"/src
     [ -d crosstool-ng ] ||
      (
-      git clone https://github.com/diorcety/crosstool-ng.git -b merge-upstream
+      git clone https://github.com/diorcety/crosstool-ng.git
       pushd crosstool-ng
       if [ -d "${THISDIR}/patches/crosstool-ng" ]; then
         PATCHES=$(find "${THISDIR}/patches/crosstool-ng" -name "*.patch" | sort)

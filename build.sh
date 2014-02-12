@@ -57,6 +57,8 @@ DARWINSDKDIR=MacOSX10.6.sdk
 CROSSTOOL_CONFIG=
 # 2. and Mozilla's .mozconfig
 MOZILLA_CONFIG=
+# If debuggable then temps are saved by default.
+CTNG_SAVE_TEMPS="default"
 
 # I wolud use associative arrays (declare -A) for this
 # but OS X with Bash 3 doesn't support that.
@@ -79,7 +81,7 @@ BUILD_DEBUGGABLE_windows="yes"
 BUILD_DEBUGGABLE_linux="no"
 
 BUILD_DEBUGGERS_darwin="yes"
-BUILD_DEBUGGERS_windows="no"
+BUILD_DEBUGGERS_windows="yes"
 BUILD_DEBUGGERS_linux="yes"
 
 # Could try the dlfcn_win32 project for Windows support.
@@ -118,8 +120,8 @@ TARGET_COMPILER_RT_windows="no"
 #TARGET_COMPILER_RT_linux="yes"
 TARGET_COMPILER_RT_linux="no"
 TARGET_COMPILER_RT_ps3="no"
-TARGET_COMPILER_RT_raspi="yes"
-TARGET_COMPILER_RT_aarch64="yes"
+TARGET_COMPILER_RT_raspi="no"
+TARGET_COMPILER_RT_aarch64="no"
 
 TARGET_IS_LINUX_osx="no"
 TARGET_IS_LINUX_windows="no"
@@ -253,7 +255,7 @@ option GCC_VERSION        default \
 option GNU_PLUGINS        default \
 "Enable you want Binutils+GCC plugin support? Not available
 on Windows hosts"
-option COPY_SDK            yes \
+option COPY_SDK            no \
 "Do you want the MacOSX10.6.sdk copied from
 \$HOME/MacOSX10.6.sdk to the sysroot of the
 built toolchain?"
@@ -441,32 +443,38 @@ HOST_OS=$BUILD_OS
 
 # Sanitise options and lookup per-target/per-build defaults.
 VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
-if [ "$BINUTILS_VERSION" = "default" ]; then
+if [ "${BINUTILS_VERSION}" = "default" ]; then
   BINUTILS_VERSION=$(_al TARGET_BINUTILS_VERSIONS ${TARGET_OS})
 fi
-if [ "$GCC_VERSION" = "default" ]; then
+if [ "${GCC_VERSION}" = "default" ]; then
   GCC_VERSION=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
 fi
-if [ "$LLVM_VERSION" = "default" ]; then
+if [ "${LLVM_VERSION}" = "default" ]; then
   LLVM_VERSION=$(_al TARGET_LLVM_VERSIONS ${TARGET_OS})
 fi
-if [ "$COMPILER_RT" = "default" ]; then
-  COMPILER_VERSION=$(_al TARGET_COMPILER_RT ${TARGET_OS})
+# Because we do not want lack of compiler-rt availability to
+# be an Error unless it was explicitly requested.
+COMPILER_RT_ASKED_FOR="no"
+if [ "${COMPILER_RT}" = "yes" ]; then
+  COMPILER_RT_ASKED_FOR="yes"
 fi
-if [ "$GNU_PLUGINS" = "default" ]; then
-  GNU_PLUGINS=$(_al HOST_SUPPORTS_PLUGINS ${HOST_OS})
+if [ "${COMPILER_RT}" = "default" ]; then
+  COMPILER_RT=$(_al TARGET_COMPILER_RT ${TARGET_OS})
 fi
-if [ "$LLVM_VERSION" = "none" ]; then
+if [ "${LLVM_VERSION}" = "none" ]; then
   COMPILER_RT="no"
 fi
-if [ "$CTNG_SAVE_STEPS" = "default" ]; then
+if [ "${GNU_PLUGINS}" = "default" ]; then
+  GNU_PLUGINS=$(_al HOST_SUPPORTS_PLUGINS ${HOST_OS})
+fi
+if [ "${CTNG_SAVE_STEPS}" = "default" ]; then
   CTNG_SAVE_STEPS=no
 #  if [ "$LLVM_VERSION" = "none" ]; then
 #    CTNG_SAVE_STEPS=yes
 #  fi
 fi
 
-if [ "$STATIC_TOOLCHAIN" = "yes" -a "$BUILD_OS" = "darwin" ]; then
+if [ "${STATIC_TOOLCHAIN}" = "yes" -a "${BUILD_OS}" = "darwin" ]; then
   echo "Error: Crosstool-ng can't be built statically on OSX"
   echo "       You will get the following error message:"
   echo "       Checking that gcc can compile a trivial statically linked program (CT_WANTS_STATIC_LINK)"
@@ -478,11 +486,19 @@ BINUTILS_VERS_=$(echo $BINUTILS_VERSION | tr '.' '_')
 GCC_VERS_=$(echo $GCC_VERSION           | tr '.' '_')
 LLVM_VERS_=$(echo $LLVM_VERSION         | tr '.' '_')
 
-if [ "$CTNG_DEBUGGABLE" = "default" ]; then
+if [ "${CTNG_DEBUGGABLE}" = "default" ]; then
   CTNG_DEBUGGABLE=$(_al BUILD_DEBUGGABLE ${BUILD_OS})
 fi
 
-if [ "$CTNG_DEBUGGERS" = "default" ]; then
+if [ "${CTNG_SAVE_TEMPS}" = "default" ]; then
+  if [ "${CTNG_DEBUGGABLE}" = "yes" ]; then
+    CTNG_SAVE_TEMPS="yes"
+  else
+    CTNG_SAVE_TEMPS="no"
+  fi
+fi
+
+if [ "${CTNG_DEBUGGERS}" = "default" ]; then
   CTNG_DEBUGGERS=$(_al BUILD_DEBUGGERS ${BUILD_OS})
 fi
 
@@ -496,7 +512,7 @@ elif [ "${MOZ_TARGET_ARCH}" = "i386" -a "${TARGET_OS}" != "osx" ]; then
 fi
 
 # Check that compiler-rt can be built if requested.
-if [ "$COMPILER_RT" = "yes" -a "$TARGET_OS" = "osx" ]; then
+if [ "${COMPILER_RT}" = "yes" -a "${TARGET_OS}" = "osx" ]; then
   if [ ! -d $HOME/MacOSX10.6.sdk/usr/lib/gcc/x86_64-apple-darwin10 ]; then
     if [ "${BITS}" = "64" ]; then
       echo -n "Error: You are trying to build x86_64 hosted cross compilers. Due to
@@ -508,15 +524,18 @@ some host/target confusion you need to make a link from ..
       exit 1
     fi
   fi
-  if [ "$COPY_SDK" = "no" -a "$TARGET_OS" = "osx" ]; then
-    echo "Error: You are trying to build compiler-rt but without --copy-sdk=yes. This is currently broken
-as there's no way to pass the SDK's location into the build of compiler-rt."
-    exit 1
+  if [ ! "${COPY_SDK}" = "yes" -a "${TARGET_OS}" = "osx" ]; then
+    if [ "${COMPILER_RT_ASKED_FOR}" = "yes" ]; then
+      echo "Error: You are trying to build compiler-rt but without --copy-sdk=yes. This is currently broken"
+      echo "       as there's no way to pass the SDK's location into the build of compiler-rt."
+      exit 1
+    else
+      echo "Warning: Refusing to build compiler-rt because --copy-sdk=no. This is currently broken"
+      echo "         as there's no way to pass the SDK's location into the build of compiler-rt."
+      COMPILER_RT="no"
+    fi
   fi
 fi
-
-
-
 
 LIBC=$(_al TARGET_LIBC ${TARGET_OS})
 
@@ -679,7 +698,25 @@ OSXSDKURL="https://launchpad.net/~flosoft/+archive/cross-apple/+files/apple-uni-
 
 download_sdk()
 {
-  [ -d "${HOME}"/MacOSX10.6.sdk ] || ( cd "${HOME}"; curl -C - -SLO $OSXSDKURL; tar -xf apple-uni-sdk-10.6_20110407.orig.tar.gz ; mv apple-uni-sdk-10.6.orig/MacOSX10.6.sdk . )
+  if [ "${TARGET_OS}" = "osx" ]; then
+    if [ ! -d "${HOME}"/MacOSX10.6.sdk ]; then
+      if [ "${BUILD_OS}" = "windows" ]; then
+        echo "Error: Due to lack of native symlinks and/or incorrect symlink semantics and/or handling of them by gnutar"
+        echo "       I am refusing to even attempt to un-tar $OSXSDKURL"
+        echo "       Please use a Linux OS to untar this archive, then re-tar it using -h, copy back to Windows, and then"
+        echo "       un-tar to your \$HOME folder (from MSYS2's perspective of course)."
+        exit 1
+      else
+        echo "Warning: Untarring flosoft MacOSX10.6.sdk; it probably contains broken absolute symlinks."
+        pushd "${HOME}"
+        curl -C - -SLO $OSXSDKURL
+        tar -xf apple-uni-sdk-10.6_20110407.orig.tar.gz
+        mv apple-uni-sdk-10.6.orig/MacOSX10.6.sdk .
+        echo "Warning: You may want to fix the following:"
+        for LINK in $(find ${PWD}/MacOSX10.6.sdk -type l); do if [ ! -e "$LINK" ]; then echo "Broken link: $LINK"; fi; done
+      fi
+    fi
+  fi
 }
 
 MINGW_W64_HASH=
@@ -874,6 +911,10 @@ cross_clang_build()
       fi
     fi
 
+    if [ "$CTNG_SAVE_TEMPS" = "yes" ]; then
+      USED_CPP_FLAGS=$USED_CPP_FLAGS" --save-temps "
+    fi
+
     if [ -n "$USED_CPP_FLAGS" ]; then
       echo "CT_EXTRA_CFLAGS_FOR_HOST=\"${USED_CPP_FLAGS}\""  >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_EXTRA_CFLAGS_FOR_BUILD=\"${USED_CPP_FLAGS}\"" >> ${CTNG_SAMPLE_CONFIG}
@@ -903,7 +944,7 @@ cross_clang_build()
     # Verbosity 2 doesn't output anything when installing the kernel headers?!
     echo "CT_KERNEL_LINUX_VERBOSITY_1=y"   >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=1" >> ${CTNG_SAMPLE_CONFIG}
-#    echo "CT_PARALLEL_JOBS=20"              >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_PARALLEL_JOBS=20"              >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_gettext=y"                    >> ${CTNG_SAMPLE_CONFIG}
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}
@@ -3796,3 +3837,165 @@ struct ranlib {
     } ran_un;
     uint32_t ran_off;
 };
+
+
+
+
+The problem is: sizeof(nlist_t)
+Linux: 12
+Windows: 16
+
+C:/bo/.build/src/cctools-809/include/mach-o/nlist.h
+
+struct nlist {
+	union {
+#ifndef __LP64__
+		char *n_name;	/* for use when in-core */
+#endif
+		int32_t n_strx;	/* index into the string table */
+	} n_un;
+	uint8_t n_type;		/* type flag, see below */
+	uint8_t n_sect;		/* section number or NO_SECT */
+	int16_t n_desc;		/* see <mach-o/stab.h> */
+	uint32_t n_value;	/* value of this symbol (or stab offset) */
+};
+
+.. tracking down further instances of this:
+pushd /c/bo/.build/src/cctools-809
+ack __LP64__ -C5 > /c/temp.txt
+
+
+# Full execution of the correct assembler:
+/c/bo/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/gcc
+/c/Users/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/libexec/as/i386/as -arch i386 -force_cpusubtype_ALL -o libgcc/i386/__main_s.o libgcc/i386/__main_s.s 
+
+
+
+
+then look for unions where a pointer is not unioned when __LP64__
+
+finds:
+include/mach-o/loader.h-302-union lc_str {
+include/mach-o/loader.h-303-	uint32_t	offset;	/* offset to the string */
+include/mach-o/loader.h:304:#ifndef __LP64__
+include/mach-o/loader.h-305-	char		*ptr;	/* pointer to the string */
+include/mach-o/loader.h-306-#endif 
+include/mach-o/loader.h-307-};
+
+include/mach-o/nlist.h-75- */
+include/mach-o/nlist.h-76-struct nlist {
+include/mach-o/nlist.h-77-	union {
+include/mach-o/nlist.h:78:#ifndef __LP64__
+include/mach-o/nlist.h-79-		char *n_name;	/* for use when in-core */
+include/mach-o/nlist.h-80-#endif
+include/mach-o/nlist.h-81-		int32_t n_strx;	/* index into the string table */
+include/mach-o/nlist.h-82-	} n_un;
+include/mach-o/nlist.h-83-	uint8_t n_type;		/* type flag, see below */
+
+include/mach-o/ranlib.h-56- * string table whose first byte is numbered 0.
+include/mach-o/ranlib.h-57- */
+include/mach-o/ranlib.h-58-struct	ranlib {
+include/mach-o/ranlib.h-59-    union {
+include/mach-o/ranlib.h-60-	uint32_t	ran_strx;	/* string table index of */
+include/mach-o/ranlib.h:61:#ifndef __LP64__
+include/mach-o/ranlib.h-62-	char		*ran_name;	/* symbol defined by */
+include/mach-o/ranlib.h-63-#endif
+include/mach-o/ranlib.h-64-    } ran_un;
+include/mach-o/ranlib.h-65-    uint32_t		ran_off;	/* library member at this offset */
+include/mach-o/ranlib.h-66-};
+
+
+
+
+.. other things to fix at the same time are:
+include/mach/message.h:308:#if defined(__LP64__)
+include/mach/message.h-309-  mach_msg_size_t		count;
+include/mach/message.h-310-#endif
+include/mach/message.h:311:#if defined(KERNEL) && !defined(__LP64__)
+include/mach/message.h-312-  uint32_t          pad_end;
+include/mach/message.h-313-#endif
+include/mach/message.h-314-} mach_msg_ool_ports_descriptor_t;
+include/mach/message.h-315-
+include/mach/message.h-316-/*
+include/mach/message.h-317- * LP64support - This union definition is not really
+include/mach/message.h-318- * appropriate in LP64 mode because not all descriptors
+include/mach/message.h-319- * are of the same size in that environment.
+include/mach/message.h-320- */
+include/mach/message.h:321:#if defined(__LP64__) && defined(KERNEL)
+include/mach/message.h-322-typedef union
+include/mach/message.h-323-{
+include/mach/message.h-324-  mach_msg_port_descriptor_t		port;
+include/mach/message.h-325-  mach_msg_ool_descriptor32_t		out_of_line;
+
+
+// This one is more tricky, unsigned long is 32bit surely !__LP64__ on Darwin & Linux
+// and unsigned int is always 32bit, so what is the point?
+include/mach/ppc/_structs.h-267-_STRUCT_PPC_VECTOR_STATE
+include/mach/ppc/_structs.h-268-{
+include/mach/ppc/_structs.h:269:#if defined(__LP64__)
+include/mach/ppc/_structs.h-270-	unsigned int	__save_vr[32][4];
+include/mach/ppc/_structs.h-271-	unsigned int	__save_vscr[4];
+include/mach/ppc/_structs.h-272-#else
+include/mach/ppc/_structs.h-273-	unsigned long	__save_vr[32][4];
+include/mach/ppc/_structs.h-274-	unsigned long	__save_vscr[4];
+
+include/objc/objc.h-129-
+include/objc/objc.h:130:#if defined(__LP64__)
+include/objc/objc.h-131-    typedef long arith_t;
+include/objc/objc.h-132-    typedef unsigned long uarith_t;
+include/objc/objc.h-133-#   define ARITH_SHIFT 32
+include/objc/objc.h-134-#else
+include/objc/objc.h-135-    typedef int arith_t;
+
+include/objc/runtime.h-460-struct objc_ivar {
+include/objc/runtime.h-461-    char *ivar_name                                          OBJC2_UNAVAILABLE;
+include/objc/runtime.h-462-    char *ivar_type                                          OBJC2_UNAVAILABLE;
+include/objc/runtime.h-463-    int ivar_offset                                          OBJC2_UNAVAILABLE;
+include/objc/runtime.h:464:#ifdef __LP64__
+include/objc/runtime.h-465-    int space                                                OBJC2_UNAVAILABLE;
+include/objc/runtime.h-466-#endif
+include/objc/runtime.h-467-}                                                            OBJC2_UNAVAILABLE;
+include/objc/runtime.h-468-
+
+
+# More OSX Windows issues:
+mkdir ~/Dropbox/ctng-firefox-builds/$OSTYPE
+(
+IFS=':'
+if [ "$OSTYPE" = "msys" ]; then
+PATHSEP=';'
+fi
+LIBS=$(~/apple-osx/bin/i686-apple-darwin11-g++ --sysroot ~/MacOSX10.6.sdk --print-search-dirs      | grep libraries) ; (for LIB in $LIBS; do echo $LIB; done) > ~/Dropbox/ctng-firefox-builds/$OSTYPE/libs-old-noarch.txt
+LIBS=$(~/apple-osx/bin/i686-apple-darwin11-g++ --sysroot ~/MacOSX10.6.sdk --print-search-dirs -m32 | grep libraries) ; (for LIB in $LIBS; do echo $LIB; done) > ~/Dropbox/ctng-firefox-builds/$OSTYPE/libs-old-m32.txt
+LIBS=$(~/apple-osx/bin/i686-apple-darwin11-g++ --sysroot ~/MacOSX10.6.sdk --print-search-dirs -m64 | grep libraries) ; (for LIB in $LIBS; do echo $LIB; done) > ~/Dropbox/ctng-firefox-builds/$OSTYPE/libs-old-m64.txt
+LIBS=$(~/ctng-firefox-builds/o-none-x86_64-213be3fb/bin/x86_64-apple-darwin10-g++ --sysroot ~/MacOSX10.6.sdk --print-search-dirs      | grep libraries) ; (for LIB in $LIBS; do echo $LIB; done) > ~/Dropbox/ctng-firefox-builds/$OSTYPE/libs-new-noarch.txt
+LIBS=$(~/ctng-firefox-builds/o-none-x86_64-213be3fb/bin/x86_64-apple-darwin10-g++ --sysroot ~/MacOSX10.6.sdk --print-search-dirs -m32 | grep libraries) ; (for LIB in $LIBS; do echo $LIB; done) > ~/Dropbox/ctng-firefox-builds/$OSTYPE/libs-new-m32.txt
+LIBS=$(~/ctng-firefox-builds/o-none-x86_64-213be3fb/bin/x86_64-apple-darwin10-g++ --sysroot ~/MacOSX10.6.sdk --print-search-dirs -m64 | grep libraries) ; (for LIB in $LIBS; do echo $LIB; done) > ~/Dropbox/ctng-firefox-builds/$OSTYPE/libs-new-m64.txt
+)
+
+o-none-x86_64-213be3fb/bin/x86_64-apple-darwin10-g++ ~/Dropbox/darwin-compilers-work/hello-world.cpp --sysroot $HOME/MacOSX10.6.sdk -isysroot $HOME/MacOSX10.6.sdk -mmacosx-version-min=10.5 -DMACOSX_DEPLOYMENT_VERSION=10.5
+
+# ICE building debug darwin on Windows.
+pushd /c/bo-d/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/gcc
+PATH=/c/bo-d/.build/x86_64-apple-darwin10/buildtools/bin:$PATH \
+  x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/decl.c -o cp/decl.o
+  x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/decl.c -o cp/decl.o
+  
+
+
+
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute    -DHAVE_CONFIG_H -I. -I. -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/. -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/ipa-prop.c -o ipa-prop.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute    -DHAVE_CONFIG_H -I. -I. -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/. -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/ipa-cp.c -o ipa-cp.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/cp-lang.c -o cp/cp-lang.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/call.c -o cp/call.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/decl.c -o cp/decl.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/expr.c -o cp/expr.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/pt.c -o cp/pt.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/typeck2.c -o cp/typeck2.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/class.c -o cp/class.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/decl2.c -o cp/decl2.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/error.c -o cp/error.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/lex.c -o cp/lex.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/parser.c -o cp/parser.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/ptree.c -o cp/ptree.o
+x86_64-build_w64-mingw32-gcc -c   -m64 -O0 -ggdb -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -pedantic -Wno-long-long -Wno-variadic-macros -Wno-overlength-strings -Wold-style-definition -Wmissing-format-attribute -Wc++-compat    -DHAVE_CONFIG_H -I. -Icp -I../../../../src/gcc-5666.3/gcc -I../../../../src/gcc-5666.3/gcc/cp -I../../../../src/gcc-5666.3/gcc/../include -I../../../../src/gcc-5666.3/gcc/../libcpp/include  -I../../../../src/gcc-5666.3/gcc/../libdecnumber -I../libdecnumber    ../../../../src/gcc-5666.3/gcc/cp/rtti.c -o cp/rtti.o

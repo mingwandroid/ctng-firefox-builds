@@ -1,4 +1,4 @@
-From 77a11bc84bdd795df6aa718416608a6e556757fc Mon Sep 17 00:00:00 2001
+From 63fb72645bfd99ff60a871d095493b6b5e96ce36 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 9 Feb 2014 18:44:25 +0000
 Subject: [PATCH 10/28] Add gettext and libiconv as a companion lib

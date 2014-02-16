@@ -212,6 +212,8 @@ selected at the toolchain build stage."
 ######################################################
 # This set of options are for the crosstool-ng build #
 ######################################################
+option CTNG_LOCAL_PATCHES  yes \
+"Use local patches?"
 option CTNG_PACKAGE        no \
 "Make a package for the built cross compiler."
 option CTNG_CLEAN          no \
@@ -793,15 +795,17 @@ cross_clang_build()
     [ -d crosstool-ng ] ||
      (
       git clone https://github.com/diorcety/crosstool-ng.git
-      pushd crosstool-ng
-      if [ -d "${THISDIR}/patches/crosstool-ng" ]; then
-        PATCHES=$(find "${THISDIR}/patches/crosstool-ng" -name "*.patch" | sort)
-        for PATCH in $PATCHES; do
-          git am $PATCH
+      if [ "${CTNG_LOCAL_PATCHES}" = "yes" ]; then
+        pushd crosstool-ng
+        if [ -d "${THISDIR}/patches/crosstool-ng" ]; then
+          PATCHES=$(find "${THISDIR}/patches/crosstool-ng" -name "*.patch" | sort)
+          for PATCH in $PATCHES; do
+            git am $PATCH
 #           patch -p1 < $PATCH
-        done
+          done
+        fi
+        popd
       fi
-      popd
      ) || ( echo "Error: Failed to clone/patch crosstool-ng" && exit 1 )
     pushd crosstool-ng
     CTNG_SAMPLE=mozbuild-${TARGET_OS}-${BITS}
@@ -912,7 +916,7 @@ cross_clang_build()
     fi
 
     if [ "$CTNG_SAVE_TEMPS" = "yes" ]; then
-      USED_CPP_FLAGS=$USED_CPP_FLAGS" --save-temps "
+      USED_CPP_FLAGS=$USED_CPP_FLAGS" -save-temps=obj "
     fi
 
     if [ -n "$USED_CPP_FLAGS" ]; then

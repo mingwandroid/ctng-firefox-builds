@@ -1,7 +1,7 @@
-From e7df7688c55e28e0ebf070498edaa16064dea7ec Mon Sep 17 00:00:00 2001
+From 98c55e61038b639bf724b681b22df226d0606180 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 18 Feb 2014 21:26:55 +0000
-Subject: [PATCH 29/29] Add eglibc 2.15 patches
+Subject: [PATCH 29/30] Add eglibc 2.15 patches
 
 ---
  .../100-Remove-test-for-__builtin_expect.patch     |  78 -----

@@ -1,7 +1,7 @@
-From d86a5da44e38c3cfc6bb73979704b6dfdd92e3ac Mon Sep 17 00:00:00 2001
+From 909b2765be638a55af9d3836543fe3c9b7a47d2b Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 21 Dec 2013 20:08:06 +0000
-Subject: [PATCH 13/28] Add GCC 4.8.2 patch for crtstuff.c
+Subject: [PATCH 13/29] Add GCC 4.8.2 patch for crtstuff.c
 
 .. it directly included auto-host.h, it shouldn't, instead
 tconfig.h includes that file, but only after defining
@@ -41,5 +41,5 @@ index 0000000..6b0e058
 + #undef rlim_t
 + #undef ssize_t
 -- 
-1.8.5.4
+1.9.0
 

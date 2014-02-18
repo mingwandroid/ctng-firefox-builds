@@ -64,20 +64,22 @@ CTNG_SAVE_TEMPS="default"
 # but OS X with Bash 3 doesn't support that.
 TARGET_TO_PREFIX_osx="o"
 TARGET_TO_PREFIX_windows="w"
-TARGET_TO_PREFIX_linux="l"
+TARGET_TO_PREFIX_steamsdk="s"
+TARGET_TO_PREFIX_steambox="b"
 TARGET_TO_PREFIX_ps3="p"
 TARGET_TO_PREFIX_raspi="r"
 TARGET_TO_PREFIX_aarch64="a"
 
 VENDOR_OSES_osx="apple-darwin10"
 VENDOR_OSES_windows="x86_64-w64-mingw32"
-VENDOR_OSES_linux="unknown-linux-gnu"
+VENDOR_OSES_steamsdk="unknown-linux-gnu"
+VENDOR_OSES_steambox="unknown-linux-gnu"
 VENDOR_OSES_raspi="unknown-linux-gnu"
 VENDOR_OSES_aarch64="unknown-linux-gnu"
 
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
-BUILD_DEBUGGABLE_windows="yes"
+BUILD_DEBUGGABLE_windows="no"
 BUILD_DEBUGGABLE_linux="no"
 
 BUILD_DEBUGGERS_darwin="yes"
@@ -93,14 +95,16 @@ HOST_SUPPORTS_PLUGINS_linux="yes"
 
 TARGET_BINUTILS_VERSIONS_osx="none"
 TARGET_BINUTILS_VERSIONS_windows="2.24"
-TARGET_BINUTILS_VERSIONS_linux="2.24"
+TARGET_BINUTILS_VERSIONS_steamsdk="2.24"
+TARGET_BINUTILS_VERSIONS_steambox="2.24"
 TARGET_BINUTILS_VERSIONS_ps3="2.23.2"
 TARGET_BINUTILS_VERSIONS_raspi="2.24"
 TARGET_BINUTILS_VERSIONS_aarch64="2.24"
 
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="4.8.2"
-TARGET_GCC_VERSIONS_linux="4.8.2"
+TARGET_GCC_VERSIONS_steamsdk="4.8.2"
+TARGET_GCC_VERSIONS_steambox="4.8.2"
 TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="4.8.2"
 TARGET_GCC_VERSIONS_aarch64="4.8.2"
@@ -109,46 +113,51 @@ TARGET_GCC_VERSIONS_aarch64="4.8.2"
 TARGET_LLVM_VERSIONS_osx="head"
 TARGET_LLVM_VERSIONS_windows="head"
 #TARGET_LLVM_VERSIONS_windows="none"
-TARGET_LLVM_VERSIONS_linux="none"
-#TARGET_LLVM_VERSIONS_linux="head"
+TARGET_LLVM_VERSIONS_steamsdk="none"
+TARGET_LLVM_VERSIONS_steambox="none"
 TARGET_LLVM_VERSIONS_ps3="none"
 TARGET_LLVM_VERSIONS_raspi="none"
 TARGET_LLVM_VERSIONS_aarch64="none"
 
 TARGET_COMPILER_RT_osx="yes"
 TARGET_COMPILER_RT_windows="no"
-#TARGET_COMPILER_RT_linux="yes"
-TARGET_COMPILER_RT_linux="no"
+TARGET_COMPILER_RT_steamsdk="no"
+TARGET_COMPILER_RT_steambox="no"
 TARGET_COMPILER_RT_ps3="no"
 TARGET_COMPILER_RT_raspi="no"
 TARGET_COMPILER_RT_aarch64="no"
 
 TARGET_IS_LINUX_osx="no"
 TARGET_IS_LINUX_windows="no"
-TARGET_IS_LINUX_linux="yes"
+TARGET_IS_LINUX_steamsdk="yes"
+TARGET_IS_LINUX_steambox="yes"
 TARGET_IS_LINUX_ps3="no"
 TARGET_IS_LINUX_raspi="yes"
 TARGET_IS_LINUX_aarch64="yes"
 
 TARGET_IS_DARWIN_osx="yes"
 TARGET_IS_DARWIN_windows="no"
-TARGET_IS_DARWIN_linux="no"
+TARGET_IS_DARWIN_steamsdk="no"
+TARGET_IS_DARWIN_steambox="no"
 TARGET_IS_DARWIN_ps3="no"
 TARGET_IS_DARWIN_raspi="no"
 TARGET_IS_DARWIN_aarch64="no"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
-#TARGET_LIBC_linux="eglibc_V_2.18"
-TARGET_LIBC_linux="glibc_V_2.15"
-# This works ok:
-#TARGET_LIBC_linux="glibc_V_2.18"
-#TARGET_LIBC_linux="glibc_V_2.17"
-#TARGET_LIBC_linux="glibc_V_2.16.0"
-#TARGET_LIBC_linux="eglibc_V_2.18"
+TARGET_LIBC_steamsdk="eglibc_V_2.15"
+TARGET_LIBC_steambox="eglibc_V_2.17"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
 TARGET_LIBC_aarch64="eglibc_V_2.18"
+
+TARGET_LINUX_K_osx="none"
+TARGET_LINUX_K_windows="none"
+TARGET_LINUX_K_steamsdk="3.2.32"
+TARGET_LINUX_K_steambox="3.10-3"
+TARGET_LINUX_K_ps3="none"
+TARGET_LINUX_K_raspi="3.10"
+TARGET_LIBC_aarch64="3.12"
 
 # Stands for associative lookup!
 _al()
@@ -205,13 +214,22 @@ print_help()
 # This set of options are global #
 ##################################
 option TARGET_OS           osx \
-"Target OS for the build, valid values are
-osx, linux or windows. All toolchains built
-are multilib enabled, so the arch is not
-selected at the toolchain build stage."
+"Target OS for the build, valid values are:
+osx, windows, steamsdk, steambox, ps3, raspi, aarch64
+Where applicable multilib is always enabled."
 ######################################################
 # This set of options are for the crosstool-ng build #
 ######################################################
+option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
+"Specify the vcs, url and name suffix for the crosstool-ng to use.
+Should be one of:
+git{diorcety}:https://github.com/diorcety/crosstool-ng.git
+  .. (for Yann Diorcet and my LLVM+Clang fork)
+mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-wip http://crosstool-ng.org/hg/crosstool-ng crosstool-ng.multilib.wip
+  .. (for Bryan Hundven, Copy P Schafer and my multilib patch queue)
+hg{upstream}:http://crosstool-ng.org/hg/crosstool-ng
+  .. (for Yann Morin's upstream project)
+Note: The first letter of the {suffix} is used as part of the build directories name so try to keep those unique."
 option CTNG_LOCAL_PATCHES  yes \
 "Use local patches?"
 option CTNG_PACKAGE        no \
@@ -439,6 +457,12 @@ else
     BITS=64
   fi
 fi
+
+CTNG_VCS_AND_SUFFIX=$(echo "$CTNG_SOURCE_URL" | sed 's/\([^:]*\):.*/\1/')
+CTNG_VCS_URL=${CTNG_SOURCE_URL##${CTNG_VCS_AND_SUFFIX}:}
+CTNG_VCS=$(echo "$CTNG_VCS_AND_SUFFIX" | sed 's/\([^{]*\){.*/\1/')
+CTNG_SUFFIX=$(echo "$CTNG_VCS_AND_SUFFIX" | sed 's/.*{\(.*\)}/\1/')
+CTNG_SUFFIX_1ST=${CTNG_SUFFIX:0:1}
 
 # TODO :: Support canadian cross compiles then remove this
 HOST_OS=$BUILD_OS
@@ -775,16 +799,16 @@ cross_clang_build()
 {
   CTNG_CFG_ARGS=" \
                 --disable-local \
-                --prefix=$PWD/${INSTALLDIR} \
-                --with-libtool=$LIBTOOL \
-                --with-libtoolize=$LIBTOOLIZE \
-                --with-objcopy=$OBJCOPY \
-                --with-objdump=$OBJDUMP \
-                --with-readelf=$READELF \
-                --with-gperf=$GPERF \
+                --prefix=${PWD}/install-ctng.${CTNG_SUFFIX} \
+                --with-libtool=${LIBTOOL} \
+                --with-libtoolize=${LIBTOOLIZE} \
+                --with-objcopy=${OBJCOPY} \
+                --with-objdump=${OBJDUMP} \
+                --with-readelf=${READELF} \
+                --with-gperf=${GPERF} \
                 CC=${USED_CC} CXX=${USED_CXX} LD=${USED_LD}"
 
-  CROSSTOOL_CONFIG=${PWD}/${BUILDDIR}/.config
+  CROSSTOOL_CONFIG=${BUILDDIR}/.config
   if [ "${CTNG_CLEAN}" = "yes" ]; then
     [ -d ${BUILT_XCOMPILER_PREFIX} ] && rm -rf ${BUILT_XCOMPILER_PREFIX}
     [ -d crosstool-ng ]              && rm -rf crosstool-ng
@@ -792,22 +816,36 @@ cross_clang_build()
   fi
   if [ ! -f ${BUILT_XCOMPILER_PREFIX}/bin/${CROSSCC}-clang ]; then
     [ -d "${HOME}"/src ] || mkdir "${HOME}"/src
-    [ -d crosstool-ng ] ||
+    [ -d crosstool-ng.${CTNG_SUFFIX} ] ||
      (
-      git clone https://github.com/diorcety/crosstool-ng.git
+      if [ "$CTNG_VCS" = "git" ]; then
+        git clone $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
+      elif [ "$CTNG_VCS" = "mq" ]; then
+        hg clone $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
+      elif [ "$CTNG_VCS" = "hg" ]; then
+        hg qclone -p $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
+        hg qpush -a
+      else
+        echo "Error: Unknown version control system: $CTNG_VCS"
+        exit 1
+      fi
       if [ "${CTNG_LOCAL_PATCHES}" = "yes" ]; then
-        pushd crosstool-ng
-        if [ -d "${THISDIR}/patches/crosstool-ng" ]; then
-          PATCHES=$(find "${THISDIR}/patches/crosstool-ng" -name "*.patch" | sort)
+        pushd crosstool-ng.${CTNG_SUFFIX}
+        if [ -d "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}" ]; then
+          PATCHES=$(find "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}" -name "*.patch" | sort)
           for PATCH in $PATCHES; do
-            git am $PATCH
-#           patch -p1 < $PATCH
+            if [ "$CTNG_VCS" = "git" ]; then
+              git am $PATCH
+            else
+              # Handle hg and hg-mq better than this.
+              patch -p1 < $PATCH
+            fi
           done
         fi
         popd
       fi
      ) || ( echo "Error: Failed to clone/patch crosstool-ng" && exit 1 )
-    pushd crosstool-ng
+    pushd crosstool-ng.${CTNG_SUFFIX}
     CTNG_SAMPLE=mozbuild-${TARGET_OS}-${BITS}
     CTNG_SAMPLE_CONFIG=samples/${CTNG_SAMPLE}/crosstool.config
     [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
@@ -917,6 +955,7 @@ cross_clang_build()
 
     if [ "$CTNG_SAVE_TEMPS" = "yes" ]; then
       USED_CPP_FLAGS=$USED_CPP_FLAGS" -save-temps=obj "
+      exit 1
     fi
 
     if [ -n "$USED_CPP_FLAGS" ]; then
@@ -948,7 +987,7 @@ cross_clang_build()
     # Verbosity 2 doesn't output anything when installing the kernel headers?!
     echo "CT_KERNEL_LINUX_VERBOSITY_1=y"   >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=1" >> ${CTNG_SAMPLE_CONFIG}
-    echo "CT_PARALLEL_JOBS=20"              >> ${CTNG_SAMPLE_CONFIG}
+#    echo "CT_PARALLEL_JOBS=5"              >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_gettext=y"                    >> ${CTNG_SAMPLE_CONFIG}
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}
@@ -976,7 +1015,6 @@ cross_clang_build()
     if [ -n "$MINGW_W64_PATH" ]; then
       PATH="${MINGW_W64_PATH}:${PATH}"
     fi
-    PATH="${PATH}":$ROOT/${INSTALLDIR}/bin
     popd
     [ -d ${BUILDDIR} ] || mkdir ${BUILDDIR}
     pushd ${BUILDDIR}
@@ -988,8 +1026,8 @@ cross_clang_build()
      trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
      ( while [ 0 ] ; do COLM=$(ps aux | grep libtoolize | grep --invert-match grep | awk '{print $2}'); if [ -n "${COLM}" ]; then kill $COLM; echo $COLM; fi; sleep 10; done ) &
     fi
-    ct-ng ${CTNG_SAMPLE}
-    ct-ng build
+    ${ROOT}/install-ctng.${CTNG_SUFFIX}/bin/ct-ng ${CTNG_SAMPLE}
+    ${ROOT}/install-ctng.${CTNG_SUFFIX}/bin/ct-ng build
     popd
   else
     if [ -n "$MINGW_W64_PATH" ]; then
@@ -1110,8 +1148,9 @@ if [ "$OSTYPE" = "msys" ]; then
 else
   BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
 fi
-#BUILDDIR=/c/ctng-build-${STUB}-${BUILD_PREFIX}
-BUILDDIR=/c/b${STUB}${DEBUG_PREFIX}
+BUILDDIR=/c/b${STUB}${CTNG_SUFFIX_1ST}${DEBUG_PREFIX}
+# Testing for Arnaud Dovi.
+# BUILDDIR=/libs/tmp${CTNG_SUFFIX_1ST}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
 

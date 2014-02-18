@@ -1,7 +1,7 @@
-From 6baef74582fb4c6a51cb59c25d96b67ce44ad9d1 Mon Sep 17 00:00:00 2001
+From 15db065bb9cbcefe761c6bf0d155ec51aa096f44 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 23 Dec 2013 22:05:54 +0000
-Subject: [PATCH 16/28] Add GCC 4.8.2 patch for lrealpath.c
+Subject: [PATCH 16/29] Add GCC 4.8.2 patch for lrealpath.c
 
 .. On Windows, lrealpath in libiberty calls
 GetFullPathName and then CharLowerBuff. This
@@ -67,5 +67,5 @@ index 0000000..37c6ef2
 +       }
 +   }
 -- 
-1.8.5.4
+1.9.0
 

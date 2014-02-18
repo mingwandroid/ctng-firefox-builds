@@ -1,7 +1,7 @@
-From 3115835c4ee942be808ae703d76711bb2d66174d Mon Sep 17 00:00:00 2001
+From 5245a5bf4a4497b069c23759f167ae01403e3aa7 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 22 Jan 2014 00:25:39 +0000
-Subject: [PATCH 21/28] Add glibc 2.15 patches as per the eglibc-2.18 patches
+Subject: [PATCH 21/29] Add glibc 2.15 patches as per the eglibc-2.18 patches
 
 ---
  patches/glibc/2.15/100-make-4.patch                |  24 ++
@@ -576,5 +576,5 @@ index 0000000..c3d2475
 + LIBC_PROG_BINUTILS
 + AC_SUBST(MIG)dnl Needed by sysdeps/mach/configure.in
 -- 
-1.8.5.4
+1.9.0
 

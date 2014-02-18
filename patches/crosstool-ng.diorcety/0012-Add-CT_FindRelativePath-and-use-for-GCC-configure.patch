@@ -1,7 +1,7 @@
-From 2e308efb4745963d8cb5677c7723241fe9d884f6 Mon Sep 17 00:00:00 2001
+From 1ce14f714cf84233a265dcaae92283e5fe1204d7 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 20 Dec 2013 18:48:25 +0000
-Subject: [PATCH 12/28] Add CT_FindRelativePath and use for GCC configure
+Subject: [PATCH 12/29] Add CT_FindRelativePath and use for GCC configure
 
 ---
  scripts/build/cc/100-gcc.sh |  7 +++--
@@ -48,10 +48,10 @@ index 27118d9..8fe6285 100644
          --host=${host}                              \
          --target=${CT_TARGET}                       \
 diff --git a/scripts/functions b/scripts/functions
-index c376a4f..529ebcc 100644
+index 46a6cc9..fe48a72 100644
 --- a/scripts/functions
 +++ b/scripts/functions
-@@ -1395,3 +1395,65 @@ CT_DoLoadState(){
+@@ -1396,3 +1396,65 @@ CT_DoLoadState(){
      exec >>"${tmp_log_file}"
      rm -f "${state_dir}/tail.log"
  }
@@ -118,5 +118,5 @@ index c376a4f..529ebcc 100644
 +    return 0
 +}
 -- 
-1.8.5.4
+1.9.0
 

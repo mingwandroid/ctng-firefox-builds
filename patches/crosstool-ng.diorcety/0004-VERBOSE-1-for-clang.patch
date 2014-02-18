@@ -1,15 +1,15 @@
-From 45e69953c3ba40b062ff446d2d09808694f566c4 Mon Sep 17 00:00:00 2001
+From 7bb41295b48963cc24aad78bc4bf07699c515aca Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
-Date: Mon, 18 Nov 2013 14:23:10 +0000
-Subject: [PATCH 04/28] VERBOSE=1 for clang
+Date: Tue, 18 Feb 2014 18:55:35 +0000
+Subject: [PATCH 04/29] VERBOSE=1 for clang
 
 ---
- scripts/build/cc/200-clang.sh            | 4 +++-
+ scripts/build/cc/200-clang.sh            | 2 ++
  scripts/build/companion_libs/150-llvm.sh | 2 ++
- 2 files changed, 5 insertions(+), 1 deletion(-)
+ 2 files changed, 4 insertions(+)
 
 diff --git a/scripts/build/cc/200-clang.sh b/scripts/build/cc/200-clang.sh
-index cf02d59..f7c5b06 100644
+index f9751f9..15480e2 100644
 --- a/scripts/build/cc/200-clang.sh
 +++ b/scripts/build/cc/200-clang.sh
 @@ -175,6 +175,7 @@ do_clang_backend() {
@@ -20,16 +20,14 @@ index cf02d59..f7c5b06 100644
  
      CT_Pushd "tools/clang/"
  
-@@ -185,7 +186,8 @@ do_clang_backend() {
+@@ -185,6 +186,7 @@ do_clang_backend() {
          LDFLAGS="${ldflags}"          \
          ONLY_TOOLS="clang"            \
          ${OPTIM_MAKE_FLAG}            \
--        
 +        VERBOSE=1
-+
+ 
      CT_Popd
  
-     # clang > 3.1 creates ${CT_TARGET}- prefixed executables already.
 diff --git a/scripts/build/companion_libs/150-llvm.sh b/scripts/build/companion_libs/150-llvm.sh
 index 1a46998..9233096 100644
 --- a/scripts/build/companion_libs/150-llvm.sh
@@ -48,5 +46,5 @@ index 1a46998..9233096 100644
      # LLVM installs dlls into ${prefix}/lib instead of ${prefix}/bin
      # so copy them to ${prefix}/bin so that executables load them in
 -- 
-1.8.5.4
+1.9.0
 

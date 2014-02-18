@@ -1,7 +1,7 @@
-From 6ad71c0cfe6cdc5ba2cb126544346bb72f16b690 Mon Sep 17 00:00:00 2001
+From 8af1d765868d9873db52f551838ccdfb4d6d745d Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 4 Feb 2014 08:08:40 +0000
-Subject: [PATCH 01/28] {e}glibc: Fix various multilib build bugs
+Subject: [PATCH 01/29] {e}glibc: Fix various multilib build bugs
 
 --host=${CT_TARGET} with eg -m32 is not right.
 The arch part must be correct (i686 for 32-bit
@@ -387,5 +387,5 @@ index f38cd6b..8a78896 100644
      # Determine build system if not set by the user
      if [ -z "${CT_BUILD}" ]; then
 -- 
-1.8.5.4
+1.9.0
 

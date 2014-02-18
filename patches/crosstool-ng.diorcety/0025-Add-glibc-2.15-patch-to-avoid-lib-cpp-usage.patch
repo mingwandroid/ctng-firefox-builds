@@ -1,50 +1,18 @@
-From 8072d59cc4c66788b7edff8838c187f7d004e279 Mon Sep 17 00:00:00 2001
+From 26d8195be01324df10f378c37281302f45342d53 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
-Date: Wed, 29 Jan 2014 18:50:55 +0000
-Subject: [PATCH 27/28] Add glibc 2.17 patches
+Date: Wed, 29 Jan 2014 18:50:20 +0000
+Subject: [PATCH 25/29] Add glibc 2.15 patch to avoid /lib/cpp usage
 
 ---
- patches/glibc/2.17/120-make-4.patch                |  24 ++
  ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 +++++++++++++++++++++
- 2 files changed, 277 insertions(+)
- create mode 100644 patches/glibc/2.17/120-make-4.patch
- create mode 100644 patches/glibc/2.17/130-configure-Default-to-CPP-CC--E-unless-overridden.patch
+ 1 file changed, 253 insertions(+)
+ create mode 100644 patches/glibc/2.15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
 
-diff --git a/patches/glibc/2.17/120-make-4.patch b/patches/glibc/2.17/120-make-4.patch
+diff --git a/patches/glibc/2.15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch b/patches/glibc/2.15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
 new file mode 100644
-index 0000000..6fe511c
+index 0000000..a94e8c5
 --- /dev/null
-+++ b/patches/glibc/2.17/120-make-4.patch
-@@ -0,0 +1,24 @@
-+diff -urN a/configure b/configure
-+--- a/configure	2014-01-29 14:12:54.386862814 +0000
-++++ b/configure	2014-01-29 14:42:27.716839917 +0000
-+@@ -4972,7 +4972,7 @@
-+   ac_prog_version=`$MAKE --version 2>&1 | sed -n 's/^.*GNU Make[^0-9]*\([0-9][0-9.]*\).*$/\1/p'`
-+   case $ac_prog_version in
-+     '') ac_prog_version="v. ?.??, bad"; ac_verc_fail=yes;;
-+-    3.79* | 3.[89]*)
-++    3.79* | 3.[89]* | 4.*)
-+        ac_prog_version="$ac_prog_version, ok"; ac_verc_fail=no;;
-+     *) ac_prog_version="$ac_prog_version, bad"; ac_verc_fail=yes;;
-+ 
-+diff -urN a/configure.in b/configure.in
-+--- a/configure.in	2012-12-25 03:02:13.000000000 +0000
-++++ b/configure.in	2014-01-29 14:42:27.720173268 +0000
-+@@ -935,7 +935,7 @@
-+   critic_missing="$critic_missing gcc")
-+ AC_CHECK_PROG_VER(MAKE, gnumake gmake make, --version,
-+   [GNU Make[^0-9]*\([0-9][0-9.]*\)],
-+-  [3.79* | 3.[89]*], critic_missing="$critic_missing make")
-++  [3.79* | 3.[89]* | 4.*], critic_missing="$critic_missing make")
-+ 
-+ AC_CHECK_PROG_VER(MSGFMT, gnumsgfmt gmsgfmt msgfmt, --version,
-+   [GNU gettext.* \([0-9]*\.[0-9.]*\)],
-diff --git a/patches/glibc/2.17/130-configure-Default-to-CPP-CC--E-unless-overridden.patch b/patches/glibc/2.17/130-configure-Default-to-CPP-CC--E-unless-overridden.patch
-new file mode 100644
-index 0000000..0650742
---- /dev/null
-+++ b/patches/glibc/2.17/130-configure-Default-to-CPP-CC--E-unless-overridden.patch
++++ b/patches/glibc/2.15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
 @@ -0,0 +1,253 @@
 +From bb931195fe780bb63e3d57d0742abad1d2128424 Mon Sep 17 00:00:00 2001
 +From: Thomas Schwinge <thomas@codesourcery.com>
@@ -58,21 +26,21 @@ index 0000000..0650742
 + 3 files changed, 28 insertions(+), 167 deletions(-)
 +
 +diff -urN a/ChangeLog b/ChangeLog
-+--- a/ChangeLog	2014-01-29 18:23:27.916668889 +0000
-++++ b/ChangeLog	2014-01-29 18:24:31.976668032 +0000
++--- a/ChangeLog	2014-01-29 18:29:26.273330934 +0000
+++++ b/ChangeLog	2014-01-29 18:30:28.456663480 +0000
 +@@ -1,3 +1,8 @@
 ++2013-01-25  Thomas Schwinge  <thomas@codesourcery.com>
 ++
-++       * configure.in (AC_PROG_CPP): New definition.
-++       * configure: Regenerate.
+++        * configure.in (AC_PROG_CPP): New definition.
+++        * configure: Regenerate.
 ++
-+ 2012-12-21  David S. Miller  <davem@davemloft.net>
++ 2012-01-01  Ulrich Drepper  <drepper@gmail.com>
 + 
-+ 	* po/hr.po: Update from translation team.
++ 	* posix/getconf.c: Update copyright year.
 +diff -urN a/configure b/configure
-+--- a/configure	2014-01-29 18:23:28.080002221 +0000
-++++ b/configure	2014-01-29 18:24:05.313334973 +0000
-+@@ -1568,43 +1568,6 @@
++--- a/configure	2014-01-29 18:29:26.329997600 +0000
+++++ b/configure	2014-01-29 18:29:40.449997483 +0000
++@@ -1599,43 +1599,6 @@
 + 
 + } # ac_fn_c_try_compile
 + 
@@ -116,8 +84,8 @@ index 0000000..0650742
 + # ac_fn_cxx_try_compile LINENO
 + # ----------------------------
 + # Try to compile conftest.$ac_ext, and return whether this succeeded.
-+@@ -2354,6 +2317,11 @@
-+ # Glibc should not depend on any header files
++@@ -2355,6 +2318,11 @@
++ 
 + 
 + 
 ++# We require GCC, and by default use its preprocessor.  Override AC_PROG_CPP
@@ -128,7 +96,7 @@ index 0000000..0650742
 + 
 + 
 + subdirs="$subdirs "
-+@@ -3068,142 +3036,13 @@
++@@ -3069,142 +3037,13 @@
 + 
 + fi
 + 
@@ -273,11 +241,11 @@ index 0000000..0650742
 + # We need the C++ compiler only for testing.
 + ac_ext=cpp
 +diff -urN a/configure.in b/configure.in
-+--- a/configure.in	2014-01-29 18:23:28.073335554 +0000
-++++ b/configure.in	2014-01-29 18:24:05.313334973 +0000
-+@@ -17,6 +17,23 @@
-+   [m4_divert_text([DEFAULTS],
-+     [ac_includes_default='/* none */'])])
++--- a/configure.in	2014-01-29 18:29:26.333330932 +0000
+++++ b/configure.in	2014-01-29 18:29:40.453330831 +0000
++@@ -5,6 +5,23 @@
++ AC_CONFIG_HEADERS([config.h])
++ AC_CONFIG_AUX_DIR([scripts])
 + 
 ++# We require GCC, and by default use its preprocessor.  Override AC_PROG_CPP
 ++# here to work around the Autoconf issue discussed in
@@ -300,5 +268,5 @@ index 0000000..0650742
 + AC_CONFIG_SUBDIRS()
 + 
 -- 
-1.8.5.4
+1.9.0
 

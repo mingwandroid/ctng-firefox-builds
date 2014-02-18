@@ -1,7 +1,7 @@
-From 4ad23aaebcd25b0af6b5168003e318dd79443629 Mon Sep 17 00:00:00 2001
+From 4c87978a06cb66f9a104f90dae659b587bd25f9f Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 00:50:24 +0000
-Subject: [PATCH 23/28] Add glibc 2.15 patch to disable test for
+Subject: [PATCH 23/29] Add glibc 2.15 patch to disable test for
  __builtin_expect
 
 ---
@@ -90,5 +90,5 @@ index 0000000..04415a7
 + cat > conftest.c <<\EOF
 + void zero (void *x)
 -- 
-1.8.5.4
+1.9.0
 

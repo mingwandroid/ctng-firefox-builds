@@ -1,7 +1,7 @@
-From 0ec75020f155f59fd00bb10d6922f85ca311bd77 Mon Sep 17 00:00:00 2001
+From d45a3a2a94e8e262afe423719d17bf1f979e0048 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 09:21:30 +0000
-Subject: [PATCH 24/28] Add glibc 2.15 patch from OpenWrt for cross compiling
+Subject: [PATCH 24/29] Add glibc 2.15 patch from OpenWrt for cross compiling
 
 Url
 https://dev.openwrt.org/browser/trunk/toolchain/glibc/patches/2.14/100-fix_cpuid_h_check.patch?rev=30478
@@ -41,5 +41,5 @@ index 0000000..255c87f
 + 
 + else
 -- 
-1.8.5.4
+1.9.0
 

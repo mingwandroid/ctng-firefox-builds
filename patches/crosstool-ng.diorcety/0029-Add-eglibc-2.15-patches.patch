@@ -1,30 +1,116 @@
-From c9b22673f2057abb3827f7a399d22cb0e9b5228b Mon Sep 17 00:00:00 2001
+From e7df7688c55e28e0ebf070498edaa16064dea7ec Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 18 Feb 2014 21:26:55 +0000
 Subject: [PATCH 29/29] Add eglibc 2.15 patches
 
 ---
- patches/eglibc/2_15/110-make-4.patch               |  24 ++
+ .../100-Remove-test-for-__builtin_expect.patch     |  78 -----
+ patches/eglibc/2_15/100-make-4.patch               |  24 ++
  ...re-Default-to-CPP-CC--E-unless-overridden.patch | 318 +++++++++++++++++++++
- .../120-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
- .../2_15/130-MSYS-Hack-elf-librtld.mk-gen.patch    |  37 +++
+ .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
+ .../2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch    |  37 +++
  ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 182 ++++++++++++
- patches/eglibc/2_15/150-MSYS-Hack-force-ln-s.patch |  39 +++
- .../160-Remove-test-for-__builtin_expect.patch     |  86 ++++++
- 7 files changed, 933 insertions(+)
- create mode 100644 patches/eglibc/2_15/110-make-4.patch
- create mode 100644 patches/eglibc/2_15/115-configure-Default-to-CPP-CC--E-unless-overridden.patch
- create mode 100644 patches/eglibc/2_15/120-Fix-crossrpc-to-build-on-non-Linux.patch
- create mode 100644 patches/eglibc/2_15/130-MSYS-Hack-elf-librtld.mk-gen.patch
- create mode 100644 patches/eglibc/2_15/140-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
- create mode 100644 patches/eglibc/2_15/150-MSYS-Hack-force-ln-s.patch
+ patches/eglibc/2_15/140-MSYS-Hack-force-ln-s.patch |  39 +++
+ .../160-Remove-test-for-__builtin_expect.patch     |  91 ++++++
+ 8 files changed, 938 insertions(+), 78 deletions(-)
+ delete mode 100644 patches/eglibc/2_15/100-Remove-test-for-__builtin_expect.patch
+ create mode 100644 patches/eglibc/2_15/100-make-4.patch
+ create mode 100644 patches/eglibc/2_15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
+ create mode 100644 patches/eglibc/2_15/110-Fix-crossrpc-to-build-on-non-Linux.patch
+ create mode 100644 patches/eglibc/2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch
+ create mode 100644 patches/eglibc/2_15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
+ create mode 100644 patches/eglibc/2_15/140-MSYS-Hack-force-ln-s.patch
  create mode 100644 patches/eglibc/2_15/160-Remove-test-for-__builtin_expect.patch
 
-diff --git a/patches/eglibc/2_15/110-make-4.patch b/patches/eglibc/2_15/110-make-4.patch
+diff --git a/patches/eglibc/2_15/100-Remove-test-for-__builtin_expect.patch b/patches/eglibc/2_15/100-Remove-test-for-__builtin_expect.patch
+deleted file mode 100644
+index ed2d1ce..0000000
+--- a/patches/eglibc/2_15/100-Remove-test-for-__builtin_expect.patch
++++ /dev/null
+@@ -1,78 +0,0 @@
+-diff --git a/configure b/configure
+-index e5e0184..85da2bc 100755
+---- a/configure
+-+++ b/configure
+-@@ -7567,40 +7567,6 @@ _ACEOF
+- fi
+- fi
+- 
+--{ $as_echo "$as_me:$LINENO: checking for __builtin_expect" >&5
+--$as_echo_n "checking for __builtin_expect... " >&6; }
+--if test "${libc_cv_gcc_builtin_expect+set}" = set; then
+--  $as_echo_n "(cached) " >&6
+--else
+--  cat > conftest.c <<EOF
+--#line $LINENO "configure"
+--int foo (int a)
+--{
+--  a = __builtin_expect (a, 10);
+--  return a == 10 ? 0 : 1;
+--}
+--EOF
+--if { ac_try='${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS -nostdlib -nostartfiles
+--			    -o conftest conftest.c -lgcc >&5'
+--  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+--  (eval $ac_try) 2>&5
+--  ac_status=$?
+--  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+--  (exit $ac_status); }; }; then
+--  libc_cv_gcc_builtin_expect=yes
+--else
+--  libc_cv_gcc_builtin_expect=no
+--fi
+--rm -f conftest*
+--fi
+--{ $as_echo "$as_me:$LINENO: result: $libc_cv_gcc_builtin_expect" >&5
+--$as_echo "$libc_cv_gcc_builtin_expect" >&6; }
+--if test "$libc_cv_gcc_builtin_expect" = no; then
+--  { { $as_echo "$as_me:$LINENO: error: support for __builtin_expect needed" >&5
+--$as_echo "$as_me: error: support for __builtin_expect needed" >&2;}
+--   { (exit 1); exit 1; }; }
+--fi
+--
+- { $as_echo "$as_me:$LINENO: checking for __builtin_memset" >&5
+- $as_echo_n "checking for __builtin_memset... " >&6; }
+- if test "${libc_cv_gcc_builtin_memset+set}" = set; then
+-diff --git a/configure.in b/configure.in
+-index 4655c8a..596443d 100644
+---- a/configure.in
+-+++ b/configure.in
+-@@ -2134,28 +2134,6 @@ if test "$libc_cv_c_asmcr0_bug" != 'no'; then
+- fi
+- fi
+- 
+--dnl Check whether compiler understands __builtin_expect.
+--AC_CACHE_CHECK(for __builtin_expect, libc_cv_gcc_builtin_expect,
+--[cat > conftest.c <<EOF
+--#line $LINENO "configure"
+--int foo (int a)
+--{
+--  a = __builtin_expect (a, 10);
+--  return a == 10 ? 0 : 1;
+--}
+--EOF
+--dnl No \ in command here because it ends up inside ''.
+--if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS -nostdlib -nostartfiles
+--			    -o conftest conftest.c -lgcc >&AS_MESSAGE_LOG_FD]); then
+--  libc_cv_gcc_builtin_expect=yes
+--else
+--  libc_cv_gcc_builtin_expect=no
+--fi
+--rm -f conftest*])
+--if test "$libc_cv_gcc_builtin_expect" = no; then
+--  AC_MSG_ERROR([support for __builtin_expect needed])
+--fi
+--
+- AC_CACHE_CHECK(for __builtin_memset, libc_cv_gcc_builtin_memset, [dnl
+- cat > conftest.c <<\EOF
+- void zero (void *x)
+diff --git a/patches/eglibc/2_15/100-make-4.patch b/patches/eglibc/2_15/100-make-4.patch
 new file mode 100644
 index 0000000..7183b85
 --- /dev/null
-+++ b/patches/eglibc/2_15/110-make-4.patch
++++ b/patches/eglibc/2_15/100-make-4.patch
 @@ -0,0 +1,24 @@
 +diff -urN a/configure b/configure
 +--- a/configure	2014-02-07 21:13:28.000000000 +0000
@@ -50,11 +136,11 @@ index 0000000..7183b85
 + 
 + AC_CHECK_PROG_VER(MSGFMT, gnumsgfmt gmsgfmt msgfmt, --version,
 +   [GNU gettext.* \([0-9]*\.[0-9.]*\)],
-diff --git a/patches/eglibc/2_15/115-configure-Default-to-CPP-CC--E-unless-overridden.patch b/patches/eglibc/2_15/115-configure-Default-to-CPP-CC--E-unless-overridden.patch
+diff --git a/patches/eglibc/2_15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch b/patches/eglibc/2_15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
 new file mode 100644
 index 0000000..da534be
 --- /dev/null
-+++ b/patches/eglibc/2_15/115-configure-Default-to-CPP-CC--E-unless-overridden.patch
++++ b/patches/eglibc/2_15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
 @@ -0,0 +1,318 @@
 +diff -urN a/ChangeLog b/ChangeLog
 +--- a/ChangeLog	2014-02-18 19:58:01.703977043 +0000
@@ -374,11 +460,11 @@ index 0000000..da534be
 + dnl This is here so we can set $subdirs directly based on configure fragments.
 + AC_CONFIG_SUBDIRS()
 + 
-diff --git a/patches/eglibc/2_15/120-Fix-crossrpc-to-build-on-non-Linux.patch b/patches/eglibc/2_15/120-Fix-crossrpc-to-build-on-non-Linux.patch
+diff --git a/patches/eglibc/2_15/110-Fix-crossrpc-to-build-on-non-Linux.patch b/patches/eglibc/2_15/110-Fix-crossrpc-to-build-on-non-Linux.patch
 new file mode 100644
 index 0000000..577e8f6
 --- /dev/null
-+++ b/patches/eglibc/2_15/120-Fix-crossrpc-to-build-on-non-Linux.patch
++++ b/patches/eglibc/2_15/110-Fix-crossrpc-to-build-on-non-Linux.patch
 @@ -0,0 +1,247 @@
 +diff -urN a/sunrpc/rpc/types.h b/sunrpc/rpc/types.h
 +--- a/sunrpc/rpc/types.h	2014-02-18 21:01:57.273293081 +0000
@@ -627,11 +713,11 @@ index 0000000..577e8f6
 + 
 + /* valid tirpc nettypes */
 + static const char *valid_ti_nettypes[] =
-diff --git a/patches/eglibc/2_15/130-MSYS-Hack-elf-librtld.mk-gen.patch b/patches/eglibc/2_15/130-MSYS-Hack-elf-librtld.mk-gen.patch
+diff --git a/patches/eglibc/2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch b/patches/eglibc/2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch
 new file mode 100644
 index 0000000..3a4c47c
 --- /dev/null
-+++ b/patches/eglibc/2_15/130-MSYS-Hack-elf-librtld.mk-gen.patch
++++ b/patches/eglibc/2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch
 @@ -0,0 +1,37 @@
 +diff -urN a/elf/Makefile b/elf/Makefile
 +--- a/elf/Makefile	2014-02-18 21:03:08.974401925 +0000
@@ -670,11 +756,11 @@ index 0000000..3a4c47c
 + 	    ;; \
 + 	  */*.a) \
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
-diff --git a/patches/eglibc/2_15/140-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch b/patches/eglibc/2_15/140-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
+diff --git a/patches/eglibc/2_15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch b/patches/eglibc/2_15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 new file mode 100644
 index 0000000..499c450
 --- /dev/null
-+++ b/patches/eglibc/2_15/140-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
++++ b/patches/eglibc/2_15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 @@ -0,0 +1,182 @@
 +diff -urN a/ChangeLog b/ChangeLog
 +--- a/ChangeLog	2014-02-18 21:04:06.581959454 +0000
@@ -858,11 +944,11 @@ index 0000000..499c450
 + ASFLAGS-.ob += -Wa,-Av9a
 +-ASFLAGS-.oS += -Wa,-Av9a
 ++ASFLAGS-.oSTATIC += -Wa,-Av9a
-diff --git a/patches/eglibc/2_15/150-MSYS-Hack-force-ln-s.patch b/patches/eglibc/2_15/150-MSYS-Hack-force-ln-s.patch
+diff --git a/patches/eglibc/2_15/140-MSYS-Hack-force-ln-s.patch b/patches/eglibc/2_15/140-MSYS-Hack-force-ln-s.patch
 new file mode 100644
 index 0000000..291c03d
 --- /dev/null
-+++ b/patches/eglibc/2_15/150-MSYS-Hack-force-ln-s.patch
++++ b/patches/eglibc/2_15/140-MSYS-Hack-force-ln-s.patch
 @@ -0,0 +1,39 @@
 +diff -urN a/configure b/configure
 +--- a/configure	2014-02-18 21:05:29.506575189 +0000
@@ -905,13 +991,13 @@ index 0000000..291c03d
 + AC_SUBST(MIG)dnl Needed by sysdeps/mach/configure.in
 diff --git a/patches/eglibc/2_15/160-Remove-test-for-__builtin_expect.patch b/patches/eglibc/2_15/160-Remove-test-for-__builtin_expect.patch
 new file mode 100644
-index 0000000..50c88c8
+index 0000000..aa946ab
 --- /dev/null
 +++ b/patches/eglibc/2_15/160-Remove-test-for-__builtin_expect.patch
-@@ -0,0 +1,86 @@
-+diff -urN a/configure b/configure
-+--- a/configure	2014-02-18 21:09:53.820662742 +0000
-++++ b/configure	2014-02-18 21:13:11.000000000 +0000
+@@ -0,0 +1,91 @@
++diff -urN a/eglibc-2_15/configure b/eglibc-2_15/configure
++--- a/configure	2014-02-07 21:13:28.000000000 +0000
+++++ b/configure	2014-02-18 21:48:54.993535011 +0000
 +@@ -7376,40 +7376,6 @@
 + fi
 + fi
@@ -953,19 +1039,9 @@ index 0000000..50c88c8
 + { $as_echo "$as_me:$LINENO: checking for __builtin_memset" >&5
 + $as_echo_n "checking for __builtin_memset... " >&6; }
 + if test "${libc_cv_gcc_builtin_memset+set}" = set; then
-+@@ -9502,8 +9468,7 @@
-+ if test -n "$CONFIG_FILES"; then
-+ 
-+ 
-+-ac_cr='
-+-'
-++ac_cr=''
-+ ac_cs_awk_cr=`$AWK 'BEGIN { print "a\rb" }' </dev/null 2>/dev/null`
-+ if test "$ac_cs_awk_cr" = "a${ac_cr}b"; then
-+   ac_cs_awk_cr='\\r'
-+diff -urN a/configure.in b/configure.in
-+--- a/configure.in	2014-02-18 21:09:53.820662742 +0000
-++++ b/configure.in	2014-02-18 21:10:05.067503165 +0000
++diff -urN a/eglibc-2_15/configure.in b/eglibc-2_15/configure.in
++--- a/configure.in	2014-02-07 21:13:28.000000000 +0000
+++++ b/configure.in	2014-02-18 21:48:54.993535011 +0000
 +@@ -2171,28 +2171,6 @@
 + fi
 + fi
@@ -995,6 +1071,21 @@ index 0000000..50c88c8
 + AC_CACHE_CHECK(for __builtin_memset, libc_cv_gcc_builtin_memset, [dnl
 + cat > conftest.c <<\EOF
 + void zero (void *x)
++diff -urN a/sysdeps/i386/configure.rej b/sysdeps/i386/configure.rej
++--- a/sysdeps/i386/configure.rej	1970-01-01 01:00:00.000000000 +0100
+++++ b/sysdeps/i386/configure.rej	2014-02-18 21:23:44.723512431 +0000
++@@ -0,0 +1,11 @@
+++--- sysdeps/i386/configure.orig	2014-01-24 09:13:37.232015700 +0000
++++++ sysdeps/i386/configure	2014-01-24 09:14:32.788193300 +0000
+++@@ -632,7 +632,7 @@
+++ done
+++ 
+++ 
+++-ac_fn_c_check_header_mongrel "$LINENO" "cpuid.h" "ac_cv_header_cpuid_h" "$ac_includes_default"
++++ac_fn_c_check_header_mongrel "$LINENO" "cpuid.h" "ac_cv_header_cpuid_h" ""
+++ if test "x$ac_cv_header_cpuid_h" = xyes; then :
+++ 
+++ else
 -- 
 1.9.0
 

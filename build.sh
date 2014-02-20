@@ -69,6 +69,7 @@ TARGET_TO_PREFIX_steambox="b"
 TARGET_TO_PREFIX_ps3="p"
 TARGET_TO_PREFIX_raspi="r"
 TARGET_TO_PREFIX_aarch64="a"
+TARGET_TO_PREFIX_armv7a="7"
 
 VENDOR_OSES_osx="apple-darwin10"
 VENDOR_OSES_windows="x86_64-w64-mingw32"
@@ -76,6 +77,7 @@ VENDOR_OSES_steamsdk="unknown-linux-gnu"
 VENDOR_OSES_steambox="unknown-linux-gnu"
 VENDOR_OSES_raspi="unknown-linux-gnu"
 VENDOR_OSES_aarch64="unknown-linux-gnu"
+VENDOR_OSES_armv7a="unknown-linux-gnu"
 
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
@@ -99,7 +101,11 @@ TARGET_BINUTILS_VERSIONS_steamsdk="2.24"
 TARGET_BINUTILS_VERSIONS_steambox="2.24"
 TARGET_BINUTILS_VERSIONS_ps3="2.23.2"
 TARGET_BINUTILS_VERSIONS_raspi="2.24"
+# 2.24.51 fails with:
+# /c/bam/.build/src/binutils-2.24.51/binutils/bucomm.c:130:7: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'VPARAMS'
+# TARGET_BINUTILS_VERSIONS_aarch64="2.24.51"
 TARGET_BINUTILS_VERSIONS_aarch64="2.24"
+TARGET_BINUTILS_VERSIONS_armv7a="2.24"
 
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="4.8.2"
@@ -108,16 +114,17 @@ TARGET_GCC_VERSIONS_steambox="4.8.2"
 TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="4.8.2"
 TARGET_GCC_VERSIONS_aarch64="4.8.2"
+TARGET_GCC_VERSIONS_armv7a="4.8.2"
 #TARGET_GCC_VERSIONS_aarch64="4.9.0"
 
-TARGET_LLVM_VERSIONS_osx="head"
-TARGET_LLVM_VERSIONS_windows="head"
-#TARGET_LLVM_VERSIONS_windows="none"
+TARGET_LLVM_VERSIONS_osx="3.4"
+TARGET_LLVM_VERSIONS_windows="3.4"
 TARGET_LLVM_VERSIONS_steamsdk="none"
 TARGET_LLVM_VERSIONS_steambox="none"
 TARGET_LLVM_VERSIONS_ps3="none"
 TARGET_LLVM_VERSIONS_raspi="none"
 TARGET_LLVM_VERSIONS_aarch64="none"
+TARGET_LLVM_VERSIONS_armv7a="none"
 
 TARGET_COMPILER_RT_osx="yes"
 TARGET_COMPILER_RT_windows="no"
@@ -126,6 +133,7 @@ TARGET_COMPILER_RT_steambox="no"
 TARGET_COMPILER_RT_ps3="no"
 TARGET_COMPILER_RT_raspi="no"
 TARGET_COMPILER_RT_aarch64="no"
+TARGET_COMPILER_RT_armv7a="no"
 
 TARGET_IS_LINUX_osx="no"
 TARGET_IS_LINUX_windows="no"
@@ -134,6 +142,7 @@ TARGET_IS_LINUX_steambox="yes"
 TARGET_IS_LINUX_ps3="no"
 TARGET_IS_LINUX_raspi="yes"
 TARGET_IS_LINUX_aarch64="yes"
+TARGET_IS_LINUX_armv7a="yes"
 
 TARGET_IS_DARWIN_osx="yes"
 TARGET_IS_DARWIN_windows="no"
@@ -142,6 +151,7 @@ TARGET_IS_DARWIN_steambox="no"
 TARGET_IS_DARWIN_ps3="no"
 TARGET_IS_DARWIN_raspi="no"
 TARGET_IS_DARWIN_aarch64="no"
+TARGET_IS_DARWIN_armv7a="no"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
@@ -150,14 +160,18 @@ TARGET_LIBC_steambox="eglibc_V_2.17"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
 TARGET_LIBC_aarch64="eglibc_V_2.18"
+TARGET_LIBC_armv7a="eglibc_V_2.18"
 
+# Careful, currently not used, the crosstool-ng.config files
+# specify the versions ATM.
 TARGET_LINUX_K_osx="none"
 TARGET_LINUX_K_windows="none"
 TARGET_LINUX_K_steamsdk="3.2.32"
 TARGET_LINUX_K_steambox="3.10-3"
 TARGET_LINUX_K_ps3="none"
 TARGET_LINUX_K_raspi="3.10"
-TARGET_LIBC_aarch64="3.12"
+TARGET_LINUX_K_aarch64="3.12"
+TARGET_LINUX_K_armv7a="3.12"
 
 # Stands for associative lookup!
 _al()
@@ -183,12 +197,12 @@ option()
 {
   OPTION=$(var_to_option $1)
   if [ -n "$3" ]; then
-    ALL_OPTIONS_TEXT=$ALL_OPTIONS_TEXT" $OPTION=$2\n $3\n\n"
+    ALL_OPTIONS_TEXT=$ALL_OPTIONS_TEXT" $OPTION="$2"\n $3\n\n"
   else
-    ALL_OPTIONS_TEXT=$ALL_OPTIONS_TEXT" $OPTION=$2\n\n"
+    ALL_OPTIONS_TEXT=$ALL_OPTIONS_TEXT" $OPTION="$2"\n\n"
   fi
   ALL_OPTIONS="$ALL_OPTIONS "$1
-  eval $1=$2
+  eval $1=\"$2\"
 }
 option_output_all()
 {
@@ -220,12 +234,14 @@ Where applicable multilib is always enabled."
 ######################################################
 # This set of options are for the crosstool-ng build #
 ######################################################
-option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
+#option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
+
+option CTNG_SOURCE_URL      "mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-wip http://crosstool-ng.org/hg/crosstool-ng" \
 "Specify the vcs, url and name suffix for the crosstool-ng to use.
 Should be one of:
 git{diorcety}:https://github.com/diorcety/crosstool-ng.git
   .. (for Yann Diorcet and my LLVM+Clang fork)
-mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-wip http://crosstool-ng.org/hg/crosstool-ng crosstool-ng.multilib.wip
+mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-wip http://crosstool-ng.org/hg/crosstool-ng
   .. (for Bryan Hundven, Copy P Schafer and my multilib patch queue)
 hg{upstream}:http://crosstool-ng.org/hg/crosstool-ng
   .. (for Yann Morin's upstream project)
@@ -821,10 +837,12 @@ cross_clang_build()
       if [ "$CTNG_VCS" = "git" ]; then
         git clone $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
       elif [ "$CTNG_VCS" = "mq" ]; then
-        hg clone $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
-      elif [ "$CTNG_VCS" = "hg" ]; then
         hg qclone -p $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
+        pushd crosstool-ng.${CTNG_SUFFIX}
         hg qpush -a
+        popd
+      elif [ "$CTNG_VCS" = "hg" ]; then
+        hg clone $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
       else
         echo "Error: Unknown version control system: $CTNG_VCS"
         exit 1

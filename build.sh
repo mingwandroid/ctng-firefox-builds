@@ -856,9 +856,9 @@ cross_clang_build()
 
   CROSSTOOL_CONFIG=${BUILDDIR}/.config
   if [ "${CTNG_CLEAN}" = "yes" ]; then
-    [ -d ${BUILT_XCOMPILER_PREFIX} ] && rm -rf ${BUILT_XCOMPILER_PREFIX}
-    [ -d crosstool-ng ]              && rm -rf crosstool-ng
-    [ -d ${BUILDDIR} ]               && rm -rf ${BUILDDIR}
+    [ -d ${BUILT_XCOMPILER_PREFIX} ]   && rm -rf ${BUILT_XCOMPILER_PREFIX}
+    [ -d crosstool-ng.${CTNG_SUFFIX} ] && rm -rf crosstool-ng.${CTNG_SUFFIX}
+    [ -d ${BUILDDIR} ]                 && rm -rf ${BUILDDIR}
   fi
   if [ ! -f ${BUILT_XCOMPILER_PREFIX}/bin/${CROSSCC}-clang ]; then
     [ -d "${HOME}"/src ] || mkdir "${HOME}"/src

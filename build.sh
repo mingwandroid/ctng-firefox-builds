@@ -440,8 +440,6 @@ elif [ "$OSTYPE" = "msys" ]; then
   # to allow arguments to be blacklisted from being converted
   # between their MSYS2 and Windows representations:
   export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR="
-  BUILD_TOOLS=$PWD/build-tools
-  PATH=$BUILD_TOOLS/bin:$PATH
 elif [ "$OSTYPE" = "darwin" ]; then
   BUILD_OS=darwin
   ulimit -n 4096
@@ -791,7 +789,9 @@ download_build_tools()
     # so for that reason, build a local 3.81 now. Also, since I've ran into weird bugs
     # in MSYS2 GNU make, I want to build it debuggable and have source code available.
     set +e
-    MAKE_VER=$(make --version) | egrep '^GNU Make 3.81'
+    BUILD_TOOLS=$PWD/build-tools
+    PATH=$BUILD_TOOLS/bin:$PATH
+    MAKE_VER=$(make --version | egrep '^GNU Make 3.81')
     if [ "${MAKE_VER}" != "GNU Make 3.81" ]; then
       [ -d $BUILD_TOOLS ] || mkdir $BUILD_TOOLS
       pushd $BUILD_TOOLS
@@ -4101,3 +4101,13 @@ eglibc-2.15 has a memory stomp in it:
 cd /c/bsd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/posix && x86_64-build_unknown-linux-gnu-gcc -O -I/c/bsd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/posix/  -include ../config.h /c/bsd/.build/src/eglibc-2_15/posix/cross-getconf.c -o cross-getconf
 
 Fixed as-per https://dmz-portal.mips.com/bugz/show_bug.cgi?id=426
+
+
+.. when case insensitive and GNU make 3.81, I am getting failure in headers_install for 3.12:
+pushd /c/bsd/.build/x86_64-unknown-linux-gnu/build/build-kernel-headers
+make -C /c/bsd/.build/src/linux-3.12 O=/c/bsd/.build/x86_64-unknown-linux-gnu/build/build-kernel-headers ARCH=x86 INSTALL_HDR_PATH=/home/ray/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr V=1 headers_install
+[ALL  ]    make[1]: Entering directory `/c/bsd/.build/src/linux-3.12'
+[ALL  ]    /home/ray/ctng-firefox-builds/build-tools/bin/make -C /c/bsd/.build/x86_64-unknown-linux-gnu/build/build-kernel-headers 	KBUILD_SRC=/c/bsd/.build/src/linux-3.12 	KBUILD_EXTMOD="" -f /c/bsd/.build/src/linux-3.12/Makefile 	headers_install
+[ALL  ]    /home/ray/ctng-firefox-builds/build-tools/bin/make -rR -f /c/bsd/.build/src/linux-3.12/scripts/Makefile.headersinst obj=include/uapi/linux/netfilter dst=include/uapi/linux/netfilter
+[ALL  ]    /c/bsd/.build/src/linux-3.12/scripts/Makefile.headersinst:55: *** Missing UAPI file /c/bsd/.build/src/linux-3.12/include/uapi/linux/netfilter/xt_CONNMARK.h.  Stop.
+

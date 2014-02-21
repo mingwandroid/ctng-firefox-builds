@@ -85,7 +85,7 @@ BUILD_DEBUGGABLE_windows="no"
 BUILD_DEBUGGABLE_linux="no"
 
 BUILD_DEBUGGERS_darwin="yes"
-BUILD_DEBUGGERS_windows="yes"
+BUILD_DEBUGGERS_windows="no" # Due to expat problems.
 BUILD_DEBUGGERS_linux="yes"
 
 # Could try the dlfcn_win32 project for Windows support.
@@ -117,6 +117,8 @@ TARGET_GCC_VERSIONS_aarch64="4.8.2"
 TARGET_GCC_VERSIONS_armv7a="4.8.2"
 #TARGET_GCC_VERSIONS_aarch64="4.9.0"
 
+# Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
+# To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
 TARGET_LLVM_VERSIONS_osx="3.4"
 TARGET_LLVM_VERSIONS_windows="3.4"
 TARGET_LLVM_VERSIONS_steamsdk="none"
@@ -234,9 +236,10 @@ Where applicable multilib is always enabled."
 ######################################################
 # This set of options are for the crosstool-ng build #
 ######################################################
-#option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
 
-option CTNG_SOURCE_URL      "mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-wip http://crosstool-ng.org/hg/crosstool-ng" \
+#option CTNG_SOURCE_URL      "mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-wip http://crosstool-ng.org/hg/crosstool-ng" \
+
+option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
 "Specify the vcs, url and name suffix for the crosstool-ng to use.
 Should be one of:
 git{diorcety}:https://github.com/diorcety/crosstool-ng.git
@@ -282,8 +285,8 @@ option CTNG_DEBUGGERS      default \
 "Do you want the toolchain built with crosstool-ng
 to include debuggers?"
 option LLVM_VERSION        default \
-"default, none, head, 3.3, 3.2, 3.1 or 3.0 (I test with 3.3 most,
-then next, then the others hardly at all)."
+"default, none, head, 3.4, 3.3, 3.2, 3.1 or 3.0 (I test with 3.3 mostly,
+then 3.4 next, then the others hardly at all)."
 option BINUTILS_VERSION    default \
 "default, none, head, or a sensible Binutils version number."
 option GCC_VERSION        default \
@@ -437,6 +440,8 @@ elif [ "$OSTYPE" = "msys" ]; then
   # to allow arguments to be blacklisted from being converted
   # between their MSYS2 and Windows representations:
   export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR="
+  BUILD_TOOLS=$PWD/build-tools
+  PATH=$BUILD_TOOLS/bin:$PATH
 elif [ "$OSTYPE" = "darwin" ]; then
   BUILD_OS=darwin
   ulimit -n 4096
@@ -772,13 +777,38 @@ USED_CPP_FLAGS=
 CT_BUILD_SUFFIX=
 CT_BUILD_PREFIX=
 
-download_build_compilers()
+# Compilers and GNU make 3.81 (on MSYS2 anyway)
+download_build_tools()
 {
   USED_CPP_FLAGS="-m${BITS}"
   USED_LD_FLAGS="-m${BITS}"
 
   if [ "$OSTYPE" = "msys" ]; then
     . ${THISDIR}/mingw-w64-toolchain.sh --arch=$HOST_ARCH --root=$PWD --path-out=MINGW_W64_PATH --hash-out=MINGW_W64_HASH --enable-verbose --enable-hash-in-path
+
+    # Although I committed a change to Y Morin's crosstool-ng to build GNU make 3.81
+    # if it's not found, this wouldn't help us since that would build MinGW GNU make
+    # so for that reason, build a local 3.81 now. Also, since I've ran into weird bugs
+    # in MSYS2 GNU make, I want to build it debuggable and have source code available.
+    set +e
+    MAKE_VER=$(make --version) | egrep '^GNU Make 3.81'
+    if [ "${MAKE_VER}" != "GNU Make 3.81" ]; then
+      [ -d $BUILD_TOOLS ] || mkdir $BUILD_TOOLS
+      pushd $BUILD_TOOLS
+      wget -c http://ftp.gnu.org/gnu/make/make-3.81.tar.bz2
+      tar -xf make-3.81.tar.bz2
+      pushd make-3.81
+      patch -p1 < ${THISDIR}/patches/make-3.81/MSYS-sh_chars_sh.patch
+      wget -c http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.guess
+      wget -c http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.sub
+      autoreconf -fi
+      ./configure --prefix=$BUILD_TOOLS --build=$(gcc -dumpmachine) CFLAGS="-O0 -ggdb -DDEBUG" \
+                  ac_cv_dos_paths=yes --without-libintl-prefix --without-libiconv-prefix
+      make
+      make install
+      popd
+    fi
+    set -e
   elif [ "$OSTYPE" = "darwin" ]; then
     if [ "${CTNG_LEGACY}" = "yes" ]; then
 #    # I'd like to get a hash for all other compilers too .. for now, just so my BeyondCompare sessions are less noisy, pretend they all have the hash I use most often.
@@ -1135,7 +1165,7 @@ firefox_package()
 }
 
 ROOT=$PWD
-download_build_compilers
+download_build_tools
 
 if [ "${OSTYPE}" = "msys" ]; then
   export PYTHON=$MINGW_W64_PATH/../opt/bin/python.exe
@@ -1171,6 +1201,11 @@ BUILDDIR=/c/b${STUB}${CTNG_SUFFIX_1ST}${DEBUG_PREFIX}
 # BUILDDIR=/libs/tmp${CTNG_SUFFIX_1ST}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
+
+if [ -d $BUILDDIR ]; then
+  echo "Error: Builddir $BUILDDIR already exists, please (re)move it and restart the build"
+  exit 1
+fi
 
 ROOT=$PWD
 download_sdk

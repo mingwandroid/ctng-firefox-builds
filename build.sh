@@ -807,6 +807,7 @@ download_build_tools()
       make
       make install
       popd
+      popd
     fi
     set -e
   elif [ "$OSTYPE" = "darwin" ]; then

@@ -1,4 +1,4 @@
-From 184afdce085f8a2381701c2877fce2466929c1e8 Mon Sep 17 00:00:00 2001
+From 35e2d865f91dce82dbc62f9d3bce2f35e3c6c7ce Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 23 Jan 2014 20:31:22 +0000
 Subject: [PATCH 22/30] Add glibc 2.15 patch from Gentoo for cross compiling
@@ -15,7 +15,7 @@ backport a fix from upstream for cross-compiling glibc w/out glibc already insta
 
 diff --git a/patches/glibc/2.15/150-0095_all_glibc-2.15-ctors-dtors-test.patch b/patches/glibc/2.15/150-0095_all_glibc-2.15-ctors-dtors-test.patch
 new file mode 100644
-index 0000000..02880ca
+index 0000000..0d00a83
 --- /dev/null
 +++ b/patches/glibc/2.15/150-0095_all_glibc-2.15-ctors-dtors-test.patch
 @@ -0,0 +1,50 @@
@@ -38,7 +38,7 @@ index 0000000..02880ca
 +
 +--- a/configure	2014-01-23 21:45:19.176281900 +0000
 ++++ b/configure	2014-01-23 21:44:36.812858900 +0000
-+@@ -6196,18 +6196,21 @@
++@@ -6035,18 +6035,21 @@
 +     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 + /* end confdefs.h.  */
 + 

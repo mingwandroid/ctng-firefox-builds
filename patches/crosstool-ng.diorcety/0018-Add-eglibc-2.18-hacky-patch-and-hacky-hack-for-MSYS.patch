@@ -1,4 +1,4 @@
-From 0fa143a09a8bb820c5e789423adcd28e5a42b17a Mon Sep 17 00:00:00 2001
+From 1a0ddcf890be8c5ce24f9049d7a71b97f6f36709 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 27 Dec 2013 22:16:08 +0000
 Subject: [PATCH 18/30] Add eglibc 2.18 hacky patch and hacky hack for MSYS*
@@ -13,17 +13,17 @@ Also, set env. var MSYS2_ARG_CONV_EXCL="-DNLSPATH=" when calling
 make to prevent MSYS from transforming it to the Windows host
 equivalent value.
 ---
- .../2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch    | 36 ++++++++++++++++++++++
- scripts/build/libc/glibc-eglibc.sh-common          |  5 +--
- 2 files changed, 39 insertions(+), 2 deletions(-)
+ .../2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch    | 61 ++++++++++++++++++++++
+ scripts/build/libc/glibc-eglibc.sh-common          |  5 +-
+ 2 files changed, 64 insertions(+), 2 deletions(-)
  create mode 100644 patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
 
 diff --git a/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch b/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
 new file mode 100644
-index 0000000..3289b90
+index 0000000..eb91b6d
 --- /dev/null
 +++ b/patches/eglibc/2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,61 @@
 +--- eglibc-2_18/elf/Makefile.orig	2013-06-15 18:37:04.000000000 +0100
 ++++ eglibc-2_18/elf/Makefile	2013-12-27 21:44:06.625816100 +0000
 +@@ -63,6 +63,14 @@
@@ -60,6 +60,31 @@ index 0000000..3289b90
 + 	    ;; \
 + 	  */*.a) \
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
++diff -urN a/elf/Makerules b/elf/Makerules
++--- a/Makerules	2014-02-21 22:05:14.105893700 +0000
+++++ b/Makerules	2014-02-22 01:05:14.435886700 +0000
++@@ -373,11 +373,19 @@
++ mv -f $(@:.d=.T) $@ $(generate-md5)
++ endef
++ 
+++# Hack for building on MSYS2 but using native host (e.g. MinGW-w64) compilers.
+++uname_o := $(shell uname -o)
+++ifneq (, $(findstring Msys, $(uname_o)))
+++common-objpfxh = $(shell cd $(common-objpfx); pwd -W)/
+++else
+++common-objpfxh = $(common-objpfx)
+++endif
+++
++ ifneq (,$(objpfx))
++ # Continuation lines here are dangerous because they introduce spaces!
++ define sed-remove-objpfx
++--e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfx)))@ $$(common-objpfx)@g' \
++--e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfx)))@$$(common-objpfx)@g'
+++-e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfxh)))@ $$(common-objpfxh)@g' \
+++-e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfxh)))@$$(common-objpfxh)@g'
++ endef
++ endif
++ 
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
 index 9972480..c4a44d1 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common

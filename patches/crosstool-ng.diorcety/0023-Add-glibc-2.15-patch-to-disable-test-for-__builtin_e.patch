@@ -1,4 +1,4 @@
-From b0b4110b2ca9705e8d0d932f77c6817be1b427a6 Mon Sep 17 00:00:00 2001
+From e4ead75e091772b7dad80b00373dd4b2e43c89c8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 00:50:24 +0000
 Subject: [PATCH 23/30] Add glibc 2.15 patch to disable test for
@@ -11,14 +11,14 @@ Subject: [PATCH 23/30] Add glibc 2.15 patch to disable test for
 
 diff --git a/patches/glibc/2.15/160-Remove-test-for-__builtin_expect.patch b/patches/glibc/2.15/160-Remove-test-for-__builtin_expect.patch
 new file mode 100644
-index 0000000..04415a7
+index 0000000..852b97a
 --- /dev/null
 +++ b/patches/glibc/2.15/160-Remove-test-for-__builtin_expect.patch
 @@ -0,0 +1,74 @@
 +diff -urN a/configure b/configure
 +--- a/configure	2014-01-23 21:57:24.243753400 +0000
 ++++ b/configure	2014-01-24 00:48:02.470346500 +0000
-+@@ -7195,38 +7195,6 @@
++@@ -7034,38 +7034,6 @@
 + fi
 + fi
 + 
@@ -60,7 +60,7 @@ index 0000000..04415a7
 +diff -urN a/configure.in b/configure.in
 +--- a/configure.in	2014-01-23 21:57:23.321700700 +0000
 ++++ b/configure.in	2014-01-24 00:47:37.690929200 +0000
-+@@ -2114,28 +2114,6 @@
++@@ -2131,28 +2131,6 @@
 + fi
 + fi
 + 

@@ -1,4 +1,4 @@
-From f4932bad7261d04bc7abc99879658309d7cc4b87 Mon Sep 17 00:00:00 2001
+From 30b324f269f81e4a3d3ce7c9e029e094f8b12fc8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 22 Jan 2014 00:25:39 +0000
 Subject: [PATCH 21/30] Add glibc 2.15 patches as per the eglibc-2.18 patches
@@ -6,10 +6,10 @@ Subject: [PATCH 21/30] Add glibc 2.15 patches as per the eglibc-2.18 patches
 ---
  patches/glibc/2.15/100-make-4.patch                |  24 ++
  .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 +++++++++++++++++++++
- .../2.15/120-MSYS-Hack-elf-librtld.mk-gen.patch    |  37 +++
- ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 182 +++++++++++++++
+ .../2.15/120-MSYS-Hack-elf-librtld.mk-gen.patch    |  62 ++++++
+ ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 201 +++++++++++++++++
  patches/glibc/2.15/140-MSYS-Hack-force-ln-s.patch  |  39 ++++
- 5 files changed, 529 insertions(+)
+ 5 files changed, 573 insertions(+)
  create mode 100644 patches/glibc/2.15/100-make-4.patch
  create mode 100644 patches/glibc/2.15/110-Fix-crossrpc-to-build-on-non-Linux.patch
  create mode 100644 patches/glibc/2.15/120-MSYS-Hack-elf-librtld.mk-gen.patch
@@ -301,10 +301,10 @@ index 0000000..4e73cfd
 + static const char *valid_ti_nettypes[] =
 diff --git a/patches/glibc/2.15/120-MSYS-Hack-elf-librtld.mk-gen.patch b/patches/glibc/2.15/120-MSYS-Hack-elf-librtld.mk-gen.patch
 new file mode 100644
-index 0000000..34011ff
+index 0000000..1870ea1
 --- /dev/null
 +++ b/patches/glibc/2.15/120-MSYS-Hack-elf-librtld.mk-gen.patch
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,62 @@
 +diff -urN a/elf/Makefile b/elf/Makefile
 +--- a/elf/Makefile	2014-01-21 23:56:27.630555400 +0000
 ++++ b/elf/Makefile	2014-01-21 23:56:49.628848800 +0000
@@ -342,15 +342,40 @@ index 0000000..34011ff
 + 	    ;; \
 + 	  */*.a) \
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
++diff -urN a/elf/Makerules b/elf/Makerules
++--- a/Makerules	2014-02-21 22:05:14.105893700 +0000
+++++ b/Makerules	2014-02-22 01:05:14.435886700 +0000
++@@ -398,11 +398,19 @@
++ mv -f $(@:.d=.T) $@ $(generate-md5)
++ endef
++ 
+++# Hack for building on MSYS2 but using native host (e.g. MinGW-w64) compilers.
+++uname_o := $(shell uname -o)
+++ifneq (, $(findstring Msys, $(uname_o)))
+++common-objpfxh = $(shell cd $(common-objpfx); pwd -W)/
+++else
+++common-objpfxh = $(common-objpfx)
+++endif
+++
++ ifneq (,$(objpfx))
++ # Continuation lines here are dangerous because they introduce spaces!
++ define sed-remove-objpfx
++--e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfx)))@ $$(common-objpfx)@g' \
++--e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfx)))@$$(common-objpfx)@g'
+++-e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfxh)))@ $$(common-objpfxh)@g' \
+++-e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfxh)))@$$(common-objpfxh)@g'
++ endef
++ endif
++ 
 diff --git a/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch b/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 new file mode 100644
-index 0000000..562590a
+index 0000000..0cc0307
 --- /dev/null
 +++ b/patches/glibc/2.15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
-@@ -0,0 +1,182 @@
+@@ -0,0 +1,201 @@
 +diff -urN a/ChangeLog b/ChangeLog
-+--- a/ChangeLog	2014-01-29 19:03:39.363304449 +0000
-++++ b/ChangeLog	2014-01-29 19:08:16.643300874 +0000
++--- a/ChangeLog	2014-02-22 01:19:33.566482400 +0000
+++++ b/ChangeLog	2014-02-22 01:20:23.628339500 +0000
 +@@ -1,3 +1,8 @@
 ++2014-01-22  Ray Donnelly  <mingw.android@gmail.com>
 ++
@@ -358,11 +383,11 @@ index 0000000..562590a
 ++        systems that are not both case sensitive and case preserving.
 ++
 + 2013-01-25  Thomas Schwinge  <thomas@codesourcery.com>
-+
++ 
 +         * configure.in (AC_PROG_CPP): New definition.
 +diff -urN a/extra-lib.mk b/extra-lib.mk
-+--- a/extra-lib.mk	2014-01-21 23:57:21.583406500 +0000
-++++ b/extra-lib.mk	2014-01-21 23:59:13.371101800 +0000
++--- a/extra-lib.mk	2014-02-22 01:19:33.837016800 +0000
+++++ b/extra-lib.mk	2014-02-22 01:20:23.630839800 +0000
 +@@ -13,7 +13,7 @@
 + 
 + ifneq (,$($(lib)-static-only-routines))
@@ -413,8 +438,8 @@ index 0000000..562590a
 + 		      $(all-$(lib)-routines)))
 + 	$(build-extra-lib)
 +diff -urN a/Makeconfig b/Makeconfig
-+--- a/Makeconfig	2014-01-21 23:57:22.811562500 +0000
-++++ b/Makeconfig	2014-01-22 00:01:46.496546200 +0000
++--- a/Makeconfig	2014-02-22 01:19:34.899651700 +0000
+++++ b/Makeconfig	2014-02-22 01:20:23.633340100 +0000
 +@@ -508,7 +508,7 @@
 + # run the linked programs.
 + link-libc = -Wl,-rpath-link=$(rpath-link) \
@@ -453,9 +478,28 @@ index 0000000..562590a
 + 
 + # The assembler can generate debug information too.
 +diff -urN a/Makerules b/Makerules
-+--- a/Makerules	2014-01-21 23:57:22.812562600 +0000
-++++ b/Makerules	2014-01-22 00:02:52.817467900 +0000
-+@@ -418,7 +418,7 @@
++--- a/Makerules	2014-02-22 01:19:34.901151900 +0000
+++++ b/Makerules	2014-02-22 01:20:23.643841400 +0000
++@@ -162,14 +162,14 @@
++ # We only generate these in the top-level makefile, to avoid any weirdness
++ # from subdir-specific makefile tweaks creeping in on an update.
++ $(common-objpfx)%.make: $(..)%.make.c $(..)Makerules $(common-before-compile)
++-	rm -f $@T $@.dT
+++	rm -f $@T $@.dTEMP
++ 	(echo '# Generated from $*.make.c by Makerules.'; \
++ 	 $(CC) $(CFLAGS) $(CPPFLAGS) -E -DASSEMBLER $< \
++-	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dT \
+++	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dTEMP \
++ 	 | sed -n '/@@@/{s/@@@[	 ]*\(.*\)@@@/\1/;s/[	 ]*$$//p;}'; \
++ 	 echo 'common-generated += $(@F)'; \
++-	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dT; \
++-	 rm -f $@.dT) > $@T
+++	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dTEMP; \
+++	 rm -f $@.dTEMP) > $@T
++ 	mv -f $@T $@
++ endif
++ 
++@@ -426,7 +426,7 @@
 + # Bounded pointer thunks are only built for *.ob
 + elide-bp-thunks = $(addprefix $(bppfx),$(bp-thunks))
 + 
@@ -464,7 +508,7 @@ index 0000000..562590a
 + 				  $(routines) $(aux) $(sysdep_routines)) \
 + 		     $(elide-bp-thunks)
 + elide-routines.os += $(static-only-routines) $(elide-bp-thunks)
-+@@ -1011,7 +1011,7 @@
++@@ -1019,7 +1019,7 @@
 + install: $(inst_libdir)/libc.so
 + $(inst_libdir)/libc.so: $(common-objpfx)format.lds \
 + 			$(common-objpfx)libc.so$(libc.so-version) \
@@ -473,7 +517,7 @@ index 0000000..562590a
 + 						  $(libprefix)$(libc-name)) \
 + 			$(+force)
 + 	(echo '/* GNU ld script';\
-+@@ -1019,7 +1019,7 @@
++@@ -1027,7 +1027,7 @@
 + 	 echo '   the static library, so try that secondarily.  */';\
 + 	 cat $<; \
 + 	 echo 'GROUP ( $(slibdir)/libc.so$(libc.so-version)' \
@@ -483,8 +527,8 @@ index 0000000..562590a
 + 	) > $@.new
 + 	mv -f $@.new $@
 +diff -urN a/nptl/Makefile b/nptl/Makefile
-+--- a/nptl/Makefile	2014-01-21 23:57:23.064094500 +0000
-++++ b/nptl/Makefile	2014-01-21 23:57:49.884000200 +0000
++--- a/nptl/Makefile	2014-02-22 01:19:35.178687100 +0000
+++++ b/nptl/Makefile	2014-02-22 01:20:23.638340700 +0000
 +@@ -377,7 +377,7 @@
 + 
 + $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
@@ -504,8 +548,8 @@ index 0000000..562590a
 + 	) > $@.new
 + 	mv -f $@.new $@
 +diff -urN a/sysdeps/i386/i686/Makefile b/sysdeps/i386/i686/Makefile
-+--- a/sysdeps/i386/i686/Makefile	2014-01-21 23:57:24.107727100 +0000
-++++ b/sysdeps/i386/i686/Makefile	2014-01-22 00:03:50.246260400 +0000
++--- a/sysdeps/i386/i686/Makefile	2014-02-22 01:19:36.177313900 +0000
+++++ b/sysdeps/i386/i686/Makefile	2014-02-22 01:20:23.639840900 +0000
 +@@ -16,12 +16,12 @@
 + CFLAGS-.op += -Wa,-mtune=i686
 + CFLAGS-.og += -Wa,-mtune=i686
@@ -522,8 +566,8 @@ index 0000000..562590a
 ++ASFLAGS-.oSTATIC += -Wa,-mtune=i686
 + endif
 +diff -urN a/sysdeps/sparc/sparc32/sparcv9/Makefile b/sysdeps/sparc/sparc32/sparcv9/Makefile
-+--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-01-21 23:57:25.037345100 +0000
-++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-01-22 00:04:01.449183000 +0000
++--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-22 01:19:37.093930300 +0000
+++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-22 01:20:23.641341100 +0000
 +@@ -10,4 +10,4 @@
 + ASFLAGS-.op += -Wa,-Av9a
 + ASFLAGS-.og += -Wa,-Av9a
@@ -532,14 +576,14 @@ index 0000000..562590a
 ++ASFLAGS-.oSTATIC += -Wa,-Av9a
 diff --git a/patches/glibc/2.15/140-MSYS-Hack-force-ln-s.patch b/patches/glibc/2.15/140-MSYS-Hack-force-ln-s.patch
 new file mode 100644
-index 0000000..c3d2475
+index 0000000..de7d34e
 --- /dev/null
 +++ b/patches/glibc/2.15/140-MSYS-Hack-force-ln-s.patch
 @@ -0,0 +1,39 @@
 +diff -urN a/configure b/configure
-+--- a/configure	2014-01-22 00:06:01.032368200 +0000
-++++ b/configure	2014-01-22 00:06:20.261810000 +0000
-+@@ -4636,6 +4636,16 @@
++--- a/configure	2014-02-22 01:19:33.578483900 +0000
+++++ b/configure	2014-02-22 01:22:45.415844200 +0000
++@@ -4475,6 +4475,16 @@
 + $as_echo "no, using $LN_S" >&6; }
 + fi
 + 
@@ -557,9 +601,9 @@ index 0000000..c3d2475
 + # Was a --with-binutils option given?
 + if test -n "$path_binutils"; then
 +diff -urN a/configure.in b/configure.in
-+--- a/configure.in	2014-01-22 00:06:01.032868200 +0000
-++++ b/configure.in	2014-01-22 00:06:20.270811100 +0000
-+@@ -975,6 +975,15 @@
++--- a/configure.in	2014-02-22 01:19:33.578984000 +0000
+++++ b/configure.in	2014-02-22 01:22:45.421845000 +0000
++@@ -992,6 +992,15 @@
 +   INSTALL='\$(..)./scripts/install-sh -c'
 + fi
 + AC_PROG_LN_S

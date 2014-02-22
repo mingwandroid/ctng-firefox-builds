@@ -1,4 +1,4 @@
-From 2ef990876a80f48a206c2a7534de57aa1b5ba3ed Mon Sep 17 00:00:00 2001
+From 7d117a6553a6689121dca9c78f181230323b1ed8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 4 Feb 2014 08:08:40 +0000
 Subject: [PATCH 01/30] {e}glibc: Fix various multilib build bugs
@@ -45,7 +45,7 @@ Signed-off-by: Cody P Schafer <dev@codyps.com>
  3 files changed, 136 insertions(+), 52 deletions(-)
 
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index 43da05d..27118d9 100644
+index 5e34307..ce032ae 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
 @@ -371,6 +371,7 @@ do_gcc_core_backend() {

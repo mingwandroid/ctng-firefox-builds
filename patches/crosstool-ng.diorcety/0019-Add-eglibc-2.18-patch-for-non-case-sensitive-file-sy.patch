@@ -1,4 +1,4 @@
-From 0e579c7216a9e6189d953129f99b146bbccf5d76 Mon Sep 17 00:00:00 2001
+From d92d4519b857ce82f9e27068678b6cb4dffdbd73 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 28 Dec 2013 18:30:54 +0000
 Subject: [PATCH 19/30] Add eglibc 2.18 patch for non case-sensitive file
@@ -6,20 +6,22 @@ Subject: [PATCH 19/30] Add eglibc 2.18 patch for non case-sensitive file
 
 Rename .oS to .oSTATIC so that builds can be done on file
 systems that are not both case sensitive and case preserving.
+
+Also .dT is renamed to .dTEMP to avoid conflicts with .dt
 ---
- ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 219 +++++++++++++++++++++
- 1 file changed, 219 insertions(+)
+ ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 238 +++++++++++++++++++++
+ 1 file changed, 238 insertions(+)
  create mode 100644 patches/eglibc/2_18/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 
 diff --git a/patches/eglibc/2_18/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch b/patches/eglibc/2_18/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 new file mode 100644
-index 0000000..a9b3245
+index 0000000..30c17a9
 --- /dev/null
 +++ b/patches/eglibc/2_18/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
-@@ -0,0 +1,219 @@
-+diff -urN eglibc-2_18.orig/extra-lib.mk eglibc-2_18/extra-lib.mk
-+--- eglibc-2_18.orig/extra-lib.mk	2013-03-18 16:44:23.000000000 +0000
-++++ eglibc-2_18/extra-lib.mk	2013-12-28 18:20:23.373054900 +0000
+@@ -0,0 +1,238 @@
++diff -urN a/extra-lib.mk b/extra-lib.mk
++--- a/extra-lib.mk	2014-02-22 01:29:15.086826100 +0000
+++++ b/extra-lib.mk	2014-02-22 01:31:15.413105600 +0000
 +@@ -13,7 +13,7 @@
 + 
 + ifneq (,$($(lib)-static-only-routines))
@@ -80,9 +82,9 @@ index 0000000..a9b3245
 + 	     $(filter $($(lib)-static-only-routines),\
 + 		      $(all-$(lib)-routines)))
 + 	$(build-extra-lib)
-+diff -urN eglibc-2_18.orig/Makeconfig eglibc-2_18/Makeconfig
-+--- eglibc-2_18.orig/Makeconfig	2013-04-28 16:21:50.000000000 +0100
-++++ eglibc-2_18/Makeconfig	2013-12-28 18:27:03.810027100 +0000
++diff -urN a/Makeconfig b/Makeconfig
++--- a/Makeconfig	2014-02-22 01:29:16.036946800 +0000
+++++ b/Makeconfig	2014-02-22 01:31:15.417106100 +0000
 +@@ -469,7 +469,7 @@
 + link-libc-tests-rpath-link = $(link-libc-rpath-link)
 + endif
@@ -120,10 +122,29 @@ index 0000000..a9b3245
 + endif
 + 
 + # The assembler can generate debug information too.
-+diff -urN eglibc-2_18.orig/Makerules eglibc-2_18/Makerules
-+--- eglibc-2_18.orig/Makerules	2013-06-24 23:42:26.000000000 +0100
-++++ eglibc-2_18/Makerules	2013-12-28 18:27:03.821027700 +0000
-+@@ -409,7 +409,7 @@
++diff -urN a/Makerules b/Makerules
++--- a/Makerules	2014-02-22 01:31:53.861988000 +0000
+++++ b/Makerules	2014-02-22 01:31:15.439609000 +0000
++@@ -162,14 +162,14 @@
++ # We only generate these in the top-level makefile, to avoid any weirdness
++ # from subdir-specific makefile tweaks creeping in on an update.
++ $(common-objpfx)%.make: $(..)%.make.c $(..)Makerules $(common-before-compile)
++-	rm -f $@T $@.dT
+++	rm -f $@T $@.dTEMP
++ 	(echo '# Generated from $*.make.c by Makerules.'; \
++ 	 $(CC) $(CFLAGS) $(CPPFLAGS) -E -DASSEMBLER $< \
++-	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dT \
+++	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dTEMP \
++ 	 | sed -n '/@@@/{s/@@@[	 ]*\(.*\)@@@/\1/;s/[	 ]*$$//p;}'; \
++ 	 echo 'common-generated += $(@F)'; \
++-	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dT; \
++-	 rm -f $@.dT) > $@T
+++	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dTEMP; \
+++	 rm -f $@.dTEMP) > $@T
++ 	mv -f $@T $@
++ endif
++ 
++@@ -417,7 +417,7 @@
 + endif
 + endif
 + 
@@ -132,7 +153,7 @@ index 0000000..a9b3245
 + 				  $(routines) $(aux) $(sysdep_routines))
 + elide-routines.os += $(static-only-routines)
 + 
-+@@ -662,7 +662,7 @@
++@@ -670,7 +670,7 @@
 + 
 + +depfiles := $(sources:.c=.d) \
 + 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-objs:.os=.o))) \
@@ -141,7 +162,7 @@ index 0000000..a9b3245
 + 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-test-objs:.os=.o))) \
 + 	     $(addsuffix .d,$(tests) $(xtests) $(test-srcs))
 + ifeq ($(build-programs),yes)
-+@@ -970,7 +970,7 @@
++@@ -978,7 +978,7 @@
 + install: $(inst_libdir)/libc.so
 + $(inst_libdir)/libc.so: $(common-objpfx)format.lds \
 + 			$(common-objpfx)libc.so$(libc.so-version) \
@@ -150,7 +171,7 @@ index 0000000..a9b3245
 + 						  $(libprefix)$(libc-name)) \
 + 			$(+force)
 + 	(echo '/* GNU ld script';\
-+@@ -978,7 +978,7 @@
++@@ -986,7 +986,7 @@
 + 	 echo '   the static library, so try that secondarily.  */';\
 + 	 cat $<; \
 + 	 echo 'GROUP ( $(slibdir)/libc.so$(libc.so-version)' \
@@ -159,9 +180,9 @@ index 0000000..a9b3245
 + 	      ' AS_NEEDED (' $(rtlddir)/$(rtld-installed-name) ') )' \
 + 	) > $@.new
 + 	mv -f $@.new $@
-+diff -urN eglibc-2_18.orig/nptl/Makefile eglibc-2_18/nptl/Makefile
-+--- eglibc-2_18.orig/nptl/Makefile	2013-06-24 23:42:26.000000000 +0100
-++++ eglibc-2_18/nptl/Makefile	2013-12-28 18:27:03.833028400 +0000
++diff -urN a/nptl/Makefile b/nptl/Makefile
++--- a/nptl/Makefile	2014-02-22 01:29:16.296479700 +0000
+++++ b/nptl/Makefile	2014-02-22 01:31:15.425607200 +0000
 +@@ -399,7 +399,7 @@
 + 
 + $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
@@ -180,9 +201,9 @@ index 0000000..a9b3245
 + 	      ')' \
 + 	) > $@.new
 + 	mv -f $@.new $@
-+diff -urN eglibc-2_18.orig/sysdeps/i386/i686/Makefile eglibc-2_18/sysdeps/i386/i686/Makefile
-+--- eglibc-2_18.orig/sysdeps/i386/i686/Makefile	2013-03-03 17:10:55.000000000 +0000
-++++ eglibc-2_18/sysdeps/i386/i686/Makefile	2013-12-28 18:27:03.828028100 +0000
++diff -urN a/sysdeps/i386/i686/Makefile b/sysdeps/i386/i686/Makefile
++--- a/sysdeps/i386/i686/Makefile	2014-02-22 01:29:19.359368700 +0000
+++++ b/sysdeps/i386/i686/Makefile	2014-02-22 01:31:15.428607600 +0000
 +@@ -15,11 +15,11 @@
 + CFLAGS-.os += -Wa,-mtune=i686
 + CFLAGS-.op += -Wa,-mtune=i686
@@ -197,9 +218,9 @@ index 0000000..a9b3245
 +-ASFLAGS-.oS += -Wa,-mtune=i686
 ++ASFLAGS-.oSTATIC += -Wa,-mtune=i686
 + endif
-+diff -urN eglibc-2_18.orig/sysdeps/ieee754/ldbl-opt/Makefile eglibc-2_18/sysdeps/ieee754/ldbl-opt/Makefile
-+--- eglibc-2_18.orig/sysdeps/ieee754/ldbl-opt/Makefile	2012-12-25 10:39:27.000000000 +0000
-++++ eglibc-2_18/sysdeps/ieee754/ldbl-opt/Makefile	2013-12-28 18:23:21.392948300 +0000
++diff -urN a/sysdeps/ieee754/ldbl-opt/Makefile b/sysdeps/ieee754/ldbl-opt/Makefile
++--- a/sysdeps/ieee754/ldbl-opt/Makefile	2014-02-22 01:29:19.919939800 +0000
+++++ b/sysdeps/ieee754/ldbl-opt/Makefile	2014-02-22 01:31:15.431107900 +0000
 +@@ -49,7 +49,7 @@
 + libnldbl-routines = $(libnldbl-calls:%=nldbl-%)
 + libnldbl-inhibit-o = $(object-suffixes)
@@ -209,9 +230,9 @@ index 0000000..a9b3245
 + 
 + CFLAGS-nldbl-acos.c = -fno-builtin-acosl
 + CFLAGS-nldbl-acosh.c = -fno-builtin-acoshl
-+diff -urN eglibc-2_18.orig/sysdeps/sparc/sparc32/sparcv9/Makefile eglibc-2_18/sysdeps/sparc/sparc32/sparcv9/Makefile
-+--- eglibc-2_18.orig/sysdeps/sparc/sparc32/sparcv9/Makefile	2013-03-03 17:10:55.000000000 +0000
-++++ eglibc-2_18/sysdeps/sparc/sparc32/sparcv9/Makefile	2013-12-28 18:27:03.839028800 +0000
++diff -urN a/sysdeps/sparc/sparc32/sparcv9/Makefile b/sysdeps/sparc/sparc32/sparcv9/Makefile
++--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-22 01:29:21.106090500 +0000
+++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-22 01:31:15.433608200 +0000
 +@@ -10,11 +10,11 @@
 + ASFLAGS-.os += -Wa,-Av9d
 + ASFLAGS-.op += -Wa,-Av9d
@@ -226,9 +247,9 @@ index 0000000..a9b3245
 +-ASFLAGS-.oS += -Wa,-Av9a
 ++ASFLAGS-.oSTATIC += -Wa,-Av9a
 + endif
-+diff -urN eglibc-2_18.orig/sysdeps/sparc/sparc64/Makefile eglibc-2_18/sysdeps/sparc/sparc64/Makefile
-+--- eglibc-2_18.orig/sysdeps/sparc/sparc64/Makefile	2013-03-03 17:10:55.000000000 +0000
-++++ eglibc-2_18/sysdeps/sparc/sparc64/Makefile	2013-12-28 18:22:29.150678900 +0000
++diff -urN a/sysdeps/sparc/sparc64/Makefile b/sysdeps/sparc/sparc64/Makefile
++--- a/sysdeps/sparc/sparc64/Makefile	2014-02-22 01:29:21.243107900 +0000
+++++ b/sysdeps/sparc/sparc64/Makefile	2014-02-22 01:31:15.436108500 +0000
 +@@ -12,5 +12,5 @@
 + ASFLAGS-.os += -Wa,-Av9d
 + ASFLAGS-.op += -Wa,-Av9d

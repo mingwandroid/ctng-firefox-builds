@@ -1,4 +1,4 @@
-From bb729614b318fb9919cc033d9f2b19cf5b5d48c3 Mon Sep 17 00:00:00 2001
+From 889ff3a47287141e3ca917e8edcc189ff130b653 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 18:22:19 +0000
 Subject: [PATCH 17/30] Add GCC 4.8.2 hack cp -p as ln -s issues

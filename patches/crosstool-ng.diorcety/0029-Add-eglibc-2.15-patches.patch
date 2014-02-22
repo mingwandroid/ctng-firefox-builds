@@ -1,4 +1,4 @@
-From 98c55e61038b639bf724b681b22df226d0606180 Mon Sep 17 00:00:00 2001
+From 9833bfb7211efcd1e7d1b06381a6668f769ef52b Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 18 Feb 2014 21:26:55 +0000
 Subject: [PATCH 29/30] Add eglibc 2.15 patches
@@ -8,11 +8,11 @@ Subject: [PATCH 29/30] Add eglibc 2.15 patches
  patches/eglibc/2_15/100-make-4.patch               |  24 ++
  ...re-Default-to-CPP-CC--E-unless-overridden.patch | 318 +++++++++++++++++++++
  .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
- .../2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch    |  37 +++
- ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 182 ++++++++++++
+ .../2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch    |  62 ++++
+ ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 201 +++++++++++++
  patches/eglibc/2_15/140-MSYS-Hack-force-ln-s.patch |  39 +++
  .../160-Remove-test-for-__builtin_expect.patch     |  91 ++++++
- 8 files changed, 938 insertions(+), 78 deletions(-)
+ 8 files changed, 982 insertions(+), 78 deletions(-)
  delete mode 100644 patches/eglibc/2_15/100-Remove-test-for-__builtin_expect.patch
  create mode 100644 patches/eglibc/2_15/100-make-4.patch
  create mode 100644 patches/eglibc/2_15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
@@ -715,10 +715,10 @@ index 0000000..577e8f6
 + static const char *valid_ti_nettypes[] =
 diff --git a/patches/eglibc/2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch b/patches/eglibc/2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch
 new file mode 100644
-index 0000000..3a4c47c
+index 0000000..5269d58
 --- /dev/null
 +++ b/patches/eglibc/2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,62 @@
 +diff -urN a/elf/Makefile b/elf/Makefile
 +--- a/elf/Makefile	2014-02-18 21:03:08.974401925 +0000
 ++++ b/elf/Makefile	2014-02-18 21:03:18.381213967 +0000
@@ -756,15 +756,40 @@ index 0000000..3a4c47c
 + 	    ;; \
 + 	  */*.a) \
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
++diff -urN a/elf/Makerules b/elf/Makerules
++--- a/Makerules	2014-02-21 22:05:14.105893700 +0000
+++++ b/Makerules	2014-02-22 01:05:14.435886700 +0000
++@@ -402,11 +402,19 @@
++ mv -f $(@:.d=.T) $@ $(generate-md5)
++ endef
++ 
+++# Hack for building on MSYS2 but using native host (e.g. MinGW-w64) compilers.
+++uname_o := $(shell uname -o)
+++ifneq (, $(findstring Msys, $(uname_o)))
+++common-objpfxh = $(shell cd $(common-objpfx); pwd -W)/
+++else
+++common-objpfxh = $(common-objpfx)
+++endif
+++
++ ifneq (,$(objpfx))
++ # Continuation lines here are dangerous because they introduce spaces!
++ define sed-remove-objpfx
++--e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfx)))@ $$(common-objpfx)@g' \
++--e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfx)))@$$(common-objpfx)@g'
+++-e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfxh)))@ $$(common-objpfxh)@g' \
+++-e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfxh)))@$$(common-objpfxh)@g'
++ endef
++ endif
++ 
 diff --git a/patches/eglibc/2_15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch b/patches/eglibc/2_15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
 new file mode 100644
-index 0000000..499c450
+index 0000000..1ab1b90
 --- /dev/null
 +++ b/patches/eglibc/2_15/130-Rename-oS-to-oSTATIC-for-case-insensitive-fs.patch
-@@ -0,0 +1,182 @@
+@@ -0,0 +1,201 @@
 +diff -urN a/ChangeLog b/ChangeLog
-+--- a/ChangeLog	2014-02-18 21:04:06.581959454 +0000
-++++ b/ChangeLog	2014-02-18 21:04:32.595695077 +0000
++--- a/ChangeLog	2014-02-22 01:12:45.524167600 +0000
+++++ b/ChangeLog	2014-02-22 01:12:59.581952700 +0000
 +@@ -1,3 +1,8 @@
 ++2014-01-22  Ray Donnelly  <mingw.android@gmail.com>
 ++
@@ -774,79 +799,9 @@ index 0000000..499c450
 + 2013-01-25  Thomas Schwinge  <thomas@codesourcery.com>
 + 
 +         * configure.in (AC_PROG_CPP): New definition.
-+diff -urN a/Makeconfig b/Makeconfig
-+--- a/Makeconfig	2014-02-18 21:04:06.658627324 +0000
-++++ b/Makeconfig	2014-02-18 21:04:32.595695077 +0000
-+@@ -508,7 +508,7 @@
-+ # run the linked programs.
-+ link-libc = -Wl,-rpath-link=$(rpath-link) \
-+ 	    $(common-objpfx)libc.so$(libc.so-version) \
-+-	    $(common-objpfx)$(patsubst %,$(libtype.oS),c) \
-++	    $(common-objpfx)$(patsubst %,$(libtype.oSTATIC),c) \
-+ 	    $(as-needed) $(common-objpfx)elf/ld.so $(no-as-needed) $(gnulib)
-+ # This is how to find at build-time things that will be installed there.
-+ rpath-dirs = math elf dlfcn nss nis rt resolv crypt
-+@@ -738,7 +738,7 @@
-+ # The compilation rules use $(CPPFLAGS-${SUFFIX}) and $(CFLAGS-${SUFFIX})
-+ # to pass different flags for each flavor.
-+ libtypes = $(foreach o,$(object-suffixes-for-libc),$(libtype$o))
-+-all-object-suffixes := .o .os .op .og .ob .oS
-++all-object-suffixes := .o .os .op .og .ob .oSTATIC
-+ object-suffixes :=
-+ CPPFLAGS-.o = $(pic-default)
-+ CFLAGS-.o = $(filter %frame-pointer,$(+cflags))
-+@@ -798,14 +798,14 @@
-+ 
-+ ifeq (yes,$(build-shared))
-+ # Build special library that contains the static-only routines for libc.
-+-object-suffixes-for-libc += .oS
-++object-suffixes-for-libc += .oSTATIC
-+ 
-+ # Must build the routines as PIC, though, because they can end up in (users')
-+ # shared objects.  We don't want to use CFLAGS-os because users may, for
-+ # example, make that processor-specific.
-+-CFLAGS-.oS = $(CFLAGS-.o) $(PIC-ccflag)
-+-CPPFLAGS-.oS = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
-+-libtype.oS = lib%_nonshared.a
-++CFLAGS-.oSTATIC = $(CFLAGS-.o) $(PIC-ccflag)
-++CPPFLAGS-.oSTATIC = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
-++libtype.oSTATIC = lib%_nonshared.a
-+ endif
-+ 
-+ # The assembler can generate debug information too.
-+diff -urN a/Makerules b/Makerules
-+--- a/Makerules	2014-02-18 21:04:06.685294414 +0000
-++++ b/Makerules	2014-02-18 21:04:32.599028491 +0000
-+@@ -441,7 +441,7 @@
-+ # Bounded pointer thunks are only built for *.ob
-+ elide-bp-thunks = $(addprefix $(bppfx),$(bp-thunks))
-+ 
-+-elide-routines.oS += $(filter-out $(static-only-routines),\
-++elide-routines.oSTATIC += $(filter-out $(static-only-routines),\
-+ 				  $(routines) $(aux) $(sysdep_routines)) \
-+ 		     $(elide-bp-thunks)
-+ elide-routines.os += $(static-only-routines) $(elide-bp-thunks)
-+@@ -1060,7 +1060,7 @@
-+ install: $(inst_libdir)/libc.so
-+ $(inst_libdir)/libc.so: $(common-objpfx)format.lds \
-+ 			$(common-objpfx)libc.so$(libc.so-version) \
-+-			$(inst_libdir)/$(patsubst %,$(libtype.oS),\
-++			$(inst_libdir)/$(patsubst %,$(libtype.oSTATIC),\
-+ 						  $(libprefix)$(libc-name)) \
-+ 			$(+force)
-+ 	(echo '/* GNU ld script';\
-+@@ -1068,7 +1068,7 @@
-+ 	 echo '   the static library, so try that secondarily.  */';\
-+ 	 cat $<; \
-+ 	 echo 'GROUP ( $(slibdir)/libc.so$(libc.so-version)' \
-+-	      '$(libdir)/$(patsubst %,$(libtype.oS),$(libprefix)$(libc-name))'\
-++	      '$(libdir)/$(patsubst %,$(libtype.oSTATIC),$(libprefix)$(libc-name))'\
-+ 	      ' AS_NEEDED (' $(slibdir)/$(rtld-installed-name) ') )' \
-+ 	) > $@.new
-+ 	mv -f $@.new $@
 +diff -urN a/extra-lib.mk b/extra-lib.mk
-+--- a/extra-lib.mk	2014-02-18 21:04:06.588626231 +0000
-++++ b/extra-lib.mk	2014-02-18 21:04:32.595695077 +0000
++--- a/extra-lib.mk	2014-02-22 01:12:45.915717300 +0000
+++++ b/extra-lib.mk	2014-02-22 01:12:59.590953900 +0000
 +@@ -13,7 +13,7 @@
 + 
 + ifneq (,$($(lib)-static-only-routines))
@@ -896,9 +851,98 @@ index 0000000..499c450
 + 	     $(filter $($(lib)-static-only-routines),\
 + 		      $(all-$(lib)-routines)))
 + 	$(build-extra-lib)
++diff -urN a/Makeconfig b/Makeconfig
++--- a/Makeconfig	2014-02-22 01:12:46.838334500 +0000
+++++ b/Makeconfig	2014-02-22 01:12:59.585453200 +0000
++@@ -508,7 +508,7 @@
++ # run the linked programs.
++ link-libc = -Wl,-rpath-link=$(rpath-link) \
++ 	    $(common-objpfx)libc.so$(libc.so-version) \
++-	    $(common-objpfx)$(patsubst %,$(libtype.oS),c) \
+++	    $(common-objpfx)$(patsubst %,$(libtype.oSTATIC),c) \
++ 	    $(as-needed) $(common-objpfx)elf/ld.so $(no-as-needed) $(gnulib)
++ # This is how to find at build-time things that will be installed there.
++ rpath-dirs = math elf dlfcn nss nis rt resolv crypt
++@@ -738,7 +738,7 @@
++ # The compilation rules use $(CPPFLAGS-${SUFFIX}) and $(CFLAGS-${SUFFIX})
++ # to pass different flags for each flavor.
++ libtypes = $(foreach o,$(object-suffixes-for-libc),$(libtype$o))
++-all-object-suffixes := .o .os .op .og .ob .oS
+++all-object-suffixes := .o .os .op .og .ob .oSTATIC
++ object-suffixes :=
++ CPPFLAGS-.o = $(pic-default)
++ CFLAGS-.o = $(filter %frame-pointer,$(+cflags))
++@@ -798,14 +798,14 @@
++ 
++ ifeq (yes,$(build-shared))
++ # Build special library that contains the static-only routines for libc.
++-object-suffixes-for-libc += .oS
+++object-suffixes-for-libc += .oSTATIC
++ 
++ # Must build the routines as PIC, though, because they can end up in (users')
++ # shared objects.  We don't want to use CFLAGS-os because users may, for
++ # example, make that processor-specific.
++-CFLAGS-.oS = $(CFLAGS-.o) $(PIC-ccflag)
++-CPPFLAGS-.oS = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
++-libtype.oS = lib%_nonshared.a
+++CFLAGS-.oSTATIC = $(CFLAGS-.o) $(PIC-ccflag)
+++CPPFLAGS-.oSTATIC = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
+++libtype.oSTATIC = lib%_nonshared.a
++ endif
++ 
++ # The assembler can generate debug information too.
++diff -urN a/Makerules b/Makerules
++--- a/Makerules	2014-02-22 01:12:46.839334600 +0000
+++++ b/Makerules	2014-02-22 01:12:59.598954900 +0000
++@@ -163,14 +163,14 @@
++ # We only generate these in the top-level makefile, to avoid any weirdness
++ # from subdir-specific makefile tweaks creeping in on an update.
++ $(common-objpfx)%.make: $(..)%.make.c $(..)Makerules $(common-before-compile)
++-	rm -f $@T $@.dT
+++	rm -f $@T $@.dTEMP
++ 	(echo '# Generated from $*.make.c by Makerules.'; \
++ 	 $(CC) $(CFLAGS) $(CPPFLAGS) -E -DASSEMBLER $< \
++-	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dT \
+++	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dTEMP \
++ 	 | sed -n '/@@@/{s/@@@[	 ]*\(.*\)@@@/\1/;s/[	 ]*$$//p;}'; \
++ 	 echo 'common-generated += $(@F)'; \
++-	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dT; \
++-	 rm -f $@.dT) > $@T
+++	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dTEMP; \
+++	 rm -f $@.dTEMP) > $@T
++ 	mv -f $@T $@
++ endif
++ 
++@@ -449,7 +449,7 @@
++ # Bounded pointer thunks are only built for *.ob
++ elide-bp-thunks = $(addprefix $(bppfx),$(bp-thunks))
++ 
++-elide-routines.oS += $(filter-out $(static-only-routines),\
+++elide-routines.oSTATIC += $(filter-out $(static-only-routines),\
++ 				  $(routines) $(aux) $(sysdep_routines)) \
++ 		     $(elide-bp-thunks)
++ elide-routines.os += $(static-only-routines) $(elide-bp-thunks)
++@@ -1068,7 +1068,7 @@
++ install: $(inst_libdir)/libc.so
++ $(inst_libdir)/libc.so: $(common-objpfx)format.lds \
++ 			$(common-objpfx)libc.so$(libc.so-version) \
++-			$(inst_libdir)/$(patsubst %,$(libtype.oS),\
+++			$(inst_libdir)/$(patsubst %,$(libtype.oSTATIC),\
++ 						  $(libprefix)$(libc-name)) \
++ 			$(+force)
++ 	(echo '/* GNU ld script';\
++@@ -1076,7 +1076,7 @@
++ 	 echo '   the static library, so try that secondarily.  */';\
++ 	 cat $<; \
++ 	 echo 'GROUP ( $(slibdir)/libc.so$(libc.so-version)' \
++-	      '$(libdir)/$(patsubst %,$(libtype.oS),$(libprefix)$(libc-name))'\
+++	      '$(libdir)/$(patsubst %,$(libtype.oSTATIC),$(libprefix)$(libc-name))'\
++ 	      ' AS_NEEDED (' $(slibdir)/$(rtld-installed-name) ') )' \
++ 	) > $@.new
++ 	mv -f $@.new $@
 +diff -urN a/nptl/Makefile b/nptl/Makefile
-+--- a/nptl/Makefile	2014-02-18 21:04:06.681960998 +0000
-++++ b/nptl/Makefile	2014-02-18 21:04:32.599028491 +0000
++--- a/nptl/Makefile	2014-02-22 01:12:47.111369200 +0000
+++++ b/nptl/Makefile	2014-02-22 01:12:59.592954100 +0000
 +@@ -396,7 +396,7 @@
 + 
 + $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
@@ -918,8 +962,8 @@ index 0000000..499c450
 + 	) > $@.new
 + 	mv -f $@.new $@
 +diff -urN a/sysdeps/i386/i686/Makefile b/sysdeps/i386/i686/Makefile
-+--- a/sysdeps/i386/i686/Makefile	2014-02-18 21:04:06.658627324 +0000
-++++ b/sysdeps/i386/i686/Makefile	2014-02-18 21:04:32.599028491 +0000
++--- a/sysdeps/i386/i686/Makefile	2014-02-22 01:12:48.110496000 +0000
+++++ b/sysdeps/i386/i686/Makefile	2014-02-22 01:12:59.594954400 +0000
 +@@ -16,12 +16,12 @@
 + CFLAGS-.op += -Wa,-mtune=i686
 + CFLAGS-.og += -Wa,-mtune=i686
@@ -936,8 +980,8 @@ index 0000000..499c450
 ++ASFLAGS-.oSTATIC += -Wa,-mtune=i686
 + endif
 +diff -urN a/sysdeps/sparc/sparc32/sparcv9/Makefile b/sysdeps/sparc/sparc32/sparcv9/Makefile
-+--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-18 21:04:06.611959942 +0000
-++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-18 21:04:32.599028491 +0000
++--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-22 01:12:49.028112600 +0000
+++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-22 01:12:59.596454600 +0000
 +@@ -10,4 +10,4 @@
 + ASFLAGS-.op += -Wa,-Av9a
 + ASFLAGS-.og += -Wa,-Av9a

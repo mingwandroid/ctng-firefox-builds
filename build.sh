@@ -157,7 +157,7 @@ TARGET_IS_DARWIN_armv7a="no"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
-TARGET_LIBC_steamsdk="eglibc_V_2.15"
+TARGET_LIBC_steamsdk="glibc_V_2.15"
 TARGET_LIBC_steambox="eglibc_V_2.17"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
@@ -775,6 +775,36 @@ USED_CPP_FLAGS=
 CT_BUILD_SUFFIX=
 CT_BUILD_PREFIX=
 
+dl_compile_install_make_381()
+{
+  # Although I committed a change to Y Morin's crosstool-ng to build GNU make 3.81
+  # if it's not found, this wouldn't help us since that would build MinGW GNU make
+  # so for that reason, build a local 3.81 now. Also, since I've ran into weird bugs
+  # in MSYS2 GNU make, I want to build it debuggable and have source code available.
+  set +e
+  BUILD_TOOLS=$PWD/build-tools
+  PATH=$BUILD_TOOLS/bin:$PATH
+  MAKE_VER=$(make --version | egrep '^GNU Make 3.81')
+  if [ "${MAKE_VER}" != "GNU Make 3.81" ]; then
+    [ -d $BUILD_TOOLS ] || mkdir $BUILD_TOOLS
+    pushd $BUILD_TOOLS
+    wget -c http://ftp.gnu.org/gnu/make/make-3.81.tar.bz2
+    tar -xf make-3.81.tar.bz2
+    pushd make-3.81
+    patch -p1 < ${THISDIR}/patches/make-3.81/MSYS-sh_chars_sh.patch
+    wget -c http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.guess
+    wget -c http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.sub
+    autoreconf -fi
+    ./configure --prefix=$BUILD_TOOLS --build=$(gcc -dumpmachine) CFLAGS="-O0 -ggdb -DDEBUG" \
+                ac_cv_dos_paths=yes --without-libintl-prefix --without-libiconv-prefix
+    make
+    make install
+    popd
+    popd
+  fi
+  set -e
+}
+
 # Compilers and GNU make 3.81 (on MSYS2 anyway)
 download_build_tools()
 {
@@ -783,33 +813,7 @@ download_build_tools()
 
   if [ "$OSTYPE" = "msys" ]; then
     . ${THISDIR}/mingw-w64-toolchain.sh --arch=$HOST_ARCH --root=$PWD --path-out=MINGW_W64_PATH --hash-out=MINGW_W64_HASH --enable-verbose --enable-hash-in-path
-
-    # Although I committed a change to Y Morin's crosstool-ng to build GNU make 3.81
-    # if it's not found, this wouldn't help us since that would build MinGW GNU make
-    # so for that reason, build a local 3.81 now. Also, since I've ran into weird bugs
-    # in MSYS2 GNU make, I want to build it debuggable and have source code available.
-    set +e
-    BUILD_TOOLS=$PWD/build-tools
-    PATH=$BUILD_TOOLS/bin:$PATH
-    MAKE_VER=$(make --version | egrep '^GNU Make 3.81')
-    if [ "${MAKE_VER}" != "GNU Make 3.81" ]; then
-      [ -d $BUILD_TOOLS ] || mkdir $BUILD_TOOLS
-      pushd $BUILD_TOOLS
-      wget -c http://ftp.gnu.org/gnu/make/make-3.81.tar.bz2
-      tar -xf make-3.81.tar.bz2
-      pushd make-3.81
-      patch -p1 < ${THISDIR}/patches/make-3.81/MSYS-sh_chars_sh.patch
-      wget -c http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.guess
-      wget -c http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.sub
-      autoreconf -fi
-      ./configure --prefix=$BUILD_TOOLS --build=$(gcc -dumpmachine) CFLAGS="-O0 -ggdb -DDEBUG" \
-                  ac_cv_dos_paths=yes --without-libintl-prefix --without-libiconv-prefix
-      make
-      make install
-      popd
-      popd
-    fi
-    set -e
+      dl_compile_install_make_381
   elif [ "$OSTYPE" = "darwin" ]; then
     if [ "${CTNG_LEGACY}" = "yes" ]; then
 #    # I'd like to get a hash for all other compilers too .. for now, just so my BeyondCompare sessions are less noisy, pretend they all have the hash I use most often.
@@ -861,6 +865,7 @@ cross_clang_build()
     [ -d crosstool-ng.${CTNG_SUFFIX} ] && rm -rf crosstool-ng.${CTNG_SUFFIX}
     [ -d ${BUILDDIR} ]                 && rm -rf ${BUILDDIR}
   fi
+
   if [ ! -f ${BUILT_XCOMPILER_PREFIX}/bin/${CROSSCC}-clang ]; then
     [ -d "${HOME}"/src ] || mkdir "${HOME}"/src
     [ -d crosstool-ng.${CTNG_SUFFIX} ] ||
@@ -899,6 +904,7 @@ cross_clang_build()
     CTNG_SAMPLE_CONFIG=samples/${CTNG_SAMPLE}/crosstool.config
     [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
     cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${BITS} ${CTNG_SAMPLE_CONFIG}
+    echo "CT_PARALLEL_JOBS_OUTPUT_SYNC=y"      >> ${CTNG_SAMPLE_CONFIG}
     LLVM_VERSION_DOT=$(echo $LLVM_VERSION | tr '_' '.')
     echo "CT_LLVM_V_${LLVM_VERSION}"           >> ${CTNG_SAMPLE_CONFIG}
     if [ -n "$MINGW_W64_PATH" -o -n ${USED_CC} ]; then
@@ -1036,7 +1042,7 @@ cross_clang_build()
     # Verbosity 2 doesn't output anything when installing the kernel headers?!
     echo "CT_KERNEL_LINUX_VERBOSITY_1=y"   >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=1" >> ${CTNG_SAMPLE_CONFIG}
-#    echo "CT_PARALLEL_JOBS=5"              >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_PARALLEL_JOBS=4"              >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_gettext=y"                    >> ${CTNG_SAMPLE_CONFIG}
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}
@@ -1199,7 +1205,9 @@ else
 fi
 BUILDDIR=/c/b${STUB}${CTNG_SUFFIX_1ST}${DEBUG_PREFIX}
 # Testing for Arnaud Dovi.
-# BUILDDIR=/libs/tmp${CTNG_SUFFIX_1ST}
+# r=registry set to sensitive
+# p=posix set to 1
+BUILDDIR=/libs/rp${CTNG_SUFFIX_1ST}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
 
@@ -3731,62 +3739,6 @@ want to see a byteswap-16.h ...
 
 
 
-export PATH=/home/ray/ctng-firefox-builds/x-l-glibc_V_2.15-x86_64-213be3fb/bin:/c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin:/c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH
-build_glibc()
-{
-VERSION=$1; shift
-PTRSIZE=$1; shift
-BUILDDIR=$1; shift
-[ -d glibc-${VERSION} ] && rm -rf glibc-${VERSION}
-if [ -f ~/src/glibc-${VERSION}.tar.xz ]; then
-  tar -xf ~/src/glibc-${VERSION}.tar.xz
-elif [ -f ~/src/glibc-${VERSION}.tar.bz2 ]; then
-  tar -xf ~/src/glibc-${VERSION}.tar.bz2
-fi
-SRCDIR=$PWD/glibc-${VERSION}
-pushd $SRCDIR
-PATCHES=$(find ~/ctng-firefox-builds/crosstool-ng/patches/glibc/${VERSION} -name "*.patch" | sort)
-for PATCH in $PATCHES; do
-  echo Patching with $PATCH
-  patch -Np1 -i $PATCH
-done
-popd
-export BUILD_CC=x86_64-build_unknown-linux-gnu-gcc
-export CFLAGS=" -U_FORTIFY_SOURCE          -O2 "
-export AR=x86_64-unknown-linux-gnu-ar
-export RANLIB=x86_64-unknown-linux-gnu-ranlib
-if [ "$PTRSIZE" = "32" ]; then
-  LIBDIR=/usr/lib/../lib
-  export CC="x86_64-unknown-linux-gnu-gcc -m32"
-  HARCHPREFIX=i686
-else
-  LIBDIR=/usr/lib/../lib64
-  export CC="x86_64-unknown-linux-gnu-gcc"
-  HARCHPREFIX=x86_64
-fi
-[ -d $BUILDDIR ] && rm -rf $BUILDDIR
-mkdir $BUILDDIR
-pushd $BUILDDIR
-$SRCDIR/configure --prefix=/usr --build=x86_64-build_w64-mingw32 --host=$HARCHPREFIX-unknown-linux-gnu \
-   --without-cvs --disable-profile --without-gd \
-   --with-headers=/home/ray/ctng-firefox-builds/x-l-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include \
-   --libdir=$LIBDIR \
-   --disable-debug \
-   --disable-sanity-checks \
-   --enable-kernel=3.12.0 \
-   --with-__thread --with-tls --enable-shared --enable-add-ons=nptl > configure.log 2>&1
-
-make -j1 > make.log 2>&1
-make install DESTDIR=$PWD/../install_${VERSION}_${PTRSIZE} > install.log 2>&1
-popd
-}
-
-pushd /tmp
-build_glibc 2.15 32 $PWD/build_2.15_32
-build_glibc 2.16.0 32 $PWD/build_2.16.0_32
-bcompare /tmp/build_2.15_32 /tmp/build_2.16.0_32 &
-popd
-
 # Another gnumake crash?!?
 
 [ALL  ]      x86_64-unknown-linux-gnu-gcc     svc_udp.c -c -std=gnu99 -fgnu89-inline -O2 -U_FORTIFY_SOURCE -Wall -Winline -Wwrite-strings -fmerge-all-constants -Wstrict-prototypes   -fPIC      -I../include -I/c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final/sunrpc -I/c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final -I../sysdeps/x86_64/elf -I../nptl/sysdeps/unix/sysv/linux/x86_64 -I../sysdeps/unix/sysv/linux/x86_64 -I../sysdeps/unix/sysv/linux/wordsize-64 -I../nptl/sysdeps/unix/sysv/linux -I../nptl/sysdeps/pthread -I../sysdeps/pthread -I../sysdeps/unix/sysv/linux -I../sysdeps/gnu -I../sysdeps/unix/common -I../sysdeps/unix/mman -I../sysdeps/unix/inet -I../nptl/sysdeps/unix/sysv -I../sysdeps/unix/sysv -I../sysdeps/unix/x86_64 -I../nptl/sysdeps/unix -I../sysdeps/unix -I../sysdeps/posix -I../sysdeps/x86_64/fpu/multiarch -I../sysdeps/x86_64/fpu -I../sysdeps/x86_64/multiarch -I../nptl/sysdeps/x86_64 -I../sysdeps/x86_64 -I../sysdeps/wordsize-64 -I../sysdeps/ieee754/ldbl-96 -I../sysdeps/ieee754/dbl-64/wordsize-64 -I../sysdeps/ieee754/dbl-64 -I../sysdeps/ieee754/flt-32 -I../sysdeps/ieee754 -I../sysdeps/generic/elf -I../sysdeps/generic -I../nptl  -I.. -I../libio -I. -nostdinc -isystem C:/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -isystem C:/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -isystem /home/ukrdonnell/ctng-firefox-builds/x-l-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include -D_LIBC_REENTRANT -include ../include/libc-symbols.h  -DPIC -DSHARED     -D_RPC_THREAD_SAFE_ -o /c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final/sunrpc/svc_udp.os -MD -MP -MF /c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final/sunrpc/svc_udp.os.dt -MT /c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/build/build-libc-final/sunrpc/svc_udp.os
@@ -4112,3 +4064,165 @@ make -C /c/bsd/.build/src/linux-3.12 O=/c/bsd/.build/x86_64-unknown-linux-gnu/bu
 [ALL  ]    /home/ray/ctng-firefox-builds/build-tools/bin/make -rR -f /c/bsd/.build/src/linux-3.12/scripts/Makefile.headersinst obj=include/uapi/linux/netfilter dst=include/uapi/linux/netfilter
 [ALL  ]    /c/bsd/.build/src/linux-3.12/scripts/Makefile.headersinst:55: *** Missing UAPI file /c/bsd/.build/src/linux-3.12/include/uapi/linux/netfilter/xt_CONNMARK.h.  Stop.
 
+
+
+
+export PATH=/home/ray/ctng-firefox-builds/x-l-glibc_V_2.15-x86_64-213be3fb/bin:/c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/x86_64-unknown-linux-gnu/buildtools/bin:/c/ctng-build-x-l-glibc_V_2.15-x86_64-213be3fb/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH
+export PATH=/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/bin:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/bin:/libs/rpd/.build/tools/bin:/libs/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH
+build_glibc()
+{
+E_OR_NOWT=$1; shift
+VERSION=$1; shift
+PTRSIZE=$1; shift
+BUILDDIR=$1; shift
+SYSROOT=$1; shift
+PKGVER=${E_OR_NOWT}glibc-${VERSION}
+[ -d ${PKGVER} ] && rm -rf ${PKGVER}
+if [ -f ~/src/${PKGVER}.tar.xz ]; then
+  tar -xf ~/src/${PKGVER}.tar.xz
+elif [ -f ~/src/${PKGVER}.tar.bz2 ]; then
+  tar -xf ~/src/${PKGVER}.tar.bz2
+fi
+SRCDIR=$PWD/${PKGVER}
+pushd $SRCDIR
+PATCHES=$(find /libs/ctng-firefox-builds/crosstool-ng.diorcety/patches/${E_OR_NOWT}glibc/${VERSION} -name "*.patch" | sort)
+for PATCH in $PATCHES; do
+  echo Patching with $PATCH
+  patch -Np1 -i $PATCH
+done
+popd
+export BUILD_CC=x86_64-build_unknown-linux-gnu-gcc
+export CFLAGS=" -U_FORTIFY_SOURCE          -O2 "
+export AR=x86_64-unknown-linux-gnu-ar
+export RANLIB=x86_64-unknown-linux-gnu-ranlib
+if [ "$PTRSIZE" = "32" ]; then
+  LIBDIR=/usr/lib/../lib
+  export CC="x86_64-unknown-linux-gnu-gcc -m32"
+  HARCHPREFIX=i686
+else
+  LIBDIR=/usr/lib/../lib64
+  export CC="x86_64-unknown-linux-gnu-gcc"
+  HARCHPREFIX=x86_64
+fi
+[ -d $BUILDDIR ] && rm -rf $BUILDDIR
+mkdir $BUILDDIR
+pushd $BUILDDIR
+# Start files 32 version:
+BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE -O2" CC="x86_64-unknown-linux-gnu-gcc -m32" AR=x86_64-unknown-linux-gnu-ar \
+   RANLIB=x86_64-unknown-linux-gnu-ranlib /usr/bin/bash $SRCDIR/configure --prefix=/usr \
+   --build=x86_64-build_w64-mingw32 \
+   --host=$HARCHPREFIX-unknown-linux-gnu \
+   --cache-file=/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache \
+   --without-cvs --disable-profile --without-gd \
+   --with-headers=${SYSROOT}/usr/include \
+   --libdir=/usr/lib/../lib --enable-obsolete-rpc \
+   --enable-kernel=3.12.0 \
+   --with-__thread \
+   --with-tls \
+   --enable-shared \
+   --enable-add-ons=nptl > configure.log 2>&1
+
+#$SRCDIR/configure --prefix=/usr --build=x86_64-build_w64-mingw32 --host=$HARCHPREFIX-unknown-linux-gnu \
+#   --without-cvs --disable-profile --without-gd \
+#   --with-headers=${SYSROOT}/usr/include \
+#   --libdir=$LIBDIR \
+#   --disable-debug \
+#   --disable-sanity-checks \
+#   --enable-kernel=3.12.0 \
+#   --with-__thread --with-tls --enable-shared --enable-add-ons=nptl > configure.log 2>&1
+
+make -j1 > make.log 2>&1 && make install DESTDIR=$PWD/../install_${VERSION}_${PTRSIZE} > install.log 2>&1
+popd
+}
+
+build_glibc_cut()
+{
+E_OR_NOWT=$1; shift
+VERSION=$1; shift
+PTRSIZE=$1; shift
+BUILDDIR=$1; shift
+SYSROOT=$1; shift
+PKGVER=${E_OR_NOWT}glibc-${VERSION}
+SRCDIR=$PWD/${PKGVER}
+export BUILD_CC=x86_64-build_unknown-linux-gnu-gcc
+export CFLAGS=" -U_FORTIFY_SOURCE          -O2 "
+export AR=x86_64-unknown-linux-gnu-ar
+export RANLIB=x86_64-unknown-linux-gnu-ranlib
+if [ "$PTRSIZE" = "32" ]; then
+  LIBDIR=/usr/lib/../lib
+  export CC="x86_64-unknown-linux-gnu-gcc -m32"
+  HARCHPREFIX=i686
+else
+  LIBDIR=/usr/lib/../lib64
+  export CC="x86_64-unknown-linux-gnu-gcc"
+  HARCHPREFIX=x86_64
+fi
+[ -d $BUILDDIR ] && rm -rf $BUILDDIR
+mkdir $BUILDDIR
+pushd $BUILDDIR
+# Start files 32 version:
+BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE -O2" CC="x86_64-unknown-linux-gnu-gcc -m32" AR=x86_64-unknown-linux-gnu-ar \
+   RANLIB=x86_64-unknown-linux-gnu-ranlib /usr/bin/bash ${SRCDIR}/configure --prefix=/usr \
+   --build=x86_64-build_w64-mingw32 \
+   --host=$HARCHPREFIX-unknown-linux-gnu \
+   --cache-file=/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache \
+   --without-cvs --disable-profile --without-gd \
+   --with-headers=${SYSROOT}/usr/include \
+   --libdir=/usr/lib/../lib --enable-obsolete-rpc \
+   --enable-kernel=3.12.0 \
+   --with-__thread \
+   --with-tls \
+   --enable-shared \
+   --enable-add-ons=nptl > configure.log 2>&1
+
+#$SRCDIR/configure --prefix=/usr --build=x86_64-build_w64-mingw32 --host=$HARCHPREFIX-unknown-linux-gnu \
+#   --without-cvs --disable-profile --without-gd \
+#   --with-headers=${SYSROOT}/usr/include \
+#   --libdir=$LIBDIR \
+#   --disable-debug \
+#   --disable-sanity-checks \
+#   --enable-kernel=3.12.0 \
+#   --with-__thread --with-tls --enable-shared --enable-add-ons=nptl > configure.log 2>&1
+
+make -j1 > make.log 2>&1 && make install DESTDIR=$PWD/../install_${VERSION}_${PTRSIZE} > install.log 2>&1
+popd
+}
+
+[ -d /libs/tmp ] || mkdir /libs/tmp
+pushd /libs/tmp
+build_glibc_cut "e" 2_15 32 $PWD/build_2_15_32 /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot
+build_glibc "" 2.16.0 32 $PWD/build_2.16.0_32 /libs/ctng-firefox-builds/s-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot
+bcompare /tmp/build_2.15_32 /tmp/build_2.16.0_32 &
+popd
+
+x86_64-unknown-linux-gnu-gcc     -m32 -E -dM -MD -MP -MF /libs/tmp/build_2_15_32/bits/stdio_lim.dT -MT '/libs/tmp/build_2_15_32/bits/stdio_lim.h /libs/tmp/build_2_15_32/bits/stdio_lim.d' 	\
+  -Iinclude  -I/libs/tmp/build_2_15_32 -Isysdeps/i386/elf -Inptl/sysdeps/unix/sysv/linux/i386/i686 -Isysdeps/unix/sysv/linux/i386/i686 -Inptl/sysdeps/unix/sysv/linux/i386 -Isysdeps/unix/sysv/linux/i386 -Inptl/sysdeps/unix/sysv/linux -Inptl/sysdeps/pthread -Isysdeps/pthread -Isysdeps/unix/sysv/linux -Isysdeps/gnu -Isysdeps/unix/common -Isysdeps/unix/mman -Isysdeps/unix/inet -Isysdeps/unix/sysv/i386 -Inptl/sysdeps/unix/sysv -Isysdeps/unix/sysv -Isysdeps/unix/i386 -Inptl/sysdeps/unix -Isysdeps/unix -Isysdeps/posix -Isysdeps/i386/i686/fpu -Isysdeps/i386/i686/multiarch -Inptl/sysdeps/i386/i686 -Isysdeps/i386/i686 -Isysdeps/i386/i486 -Inptl/sysdeps/i386/i486 -Isysdeps/i386/fpu -Inptl/sysdeps/i386 -Isysdeps/i386 -Isysdeps/wordsize-32 -Isysdeps/ieee754/ldbl-96 -Isysdeps/ieee754/dbl-64 -Isysdeps/ieee754/flt-32 -Isysdeps/ieee754 -Isysdeps/generic/elf -Isysdeps/generic -Inptl   -Ilibio -I. -nostdinc -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include -xc - -o /libs/tmp/build_2_15_32/bits/stdio_lim.hT
+sed -e 's@ Z:/libs/tmp/build_2_15_32/@ $(common-objpfx)@g' -e 's@^Z:/libs/tmp/build_2_15_32/@$(common-objpfx)@g' -e 's@  *\([^ 	\/$][^ 	\]*\)@ $(..)\1@g' -e 's@^\([^ 	\/$][^ 	\]*\)@$(..)\1@g'			\
+	    /libs/tmp/build_2_15_32/bits/stdio_lim.dT > /libs/tmp/build_2_15_32/bits/stdio_lim.dt
+mv -f /libs/tmp/build_2_15_32/bits/stdio_lim.dt /libs/tmp/build_2_15_32/bits/stdio_lim.d
+
+hmm, try again!
+pushd /libs/rpd/.build/src/eglibc-2_15
+PATH=/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/bin:$PATH
+echo '#include "posix/bits/posix1_lim.h"' > tmp.c
+echo '#define _LIBC 1' >> tmp.c
+echo '#include "misc/sys/uio.h"' >> tmp.c
+x86_64-unknown-linux-gnu-gcc -m32 -E -dM -MD -MP -MF /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/bits/stdio_lim.dT -MT '/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/bits/stdio_lim.h /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/bits/stdio_lim.d' -Iinclude -I/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32 -Isysdeps/i386/elf -Inptl/sysdeps/unix/sysv/linux/i386/i686 -Isysdeps/unix/sysv/linux/i386/i686 -Inptl/sysdeps/unix/sysv/linux/i386 -Isysdeps/unix/sysv/linux/i386 -Inptl/sysdeps/unix/sysv/linux -Inptl/sysdeps/pthread -Isysdeps/pthread -Isysdeps/unix/sysv/linux -Isysdeps/gnu -Isysdeps/unix/common -Isysdeps/unix/mman -Isysdeps/unix/inet -Isysdeps/unix/sysv/i386 -Inptl/sysdeps/unix/sysv -Isysdeps/unix/sysv -Isysdeps/unix/i386 -Inptl/sysdeps/unix -Isysdeps/unix -Isysdeps/posix -Isysdeps/i386/i686/fpu -Isysdeps/i386/i686/multiarch -Inptl/sysdeps/i386/i686 -Isysdeps/i386/i686 -Isysdeps/i386/i486 -Inptl/sysdeps/i386/i486 -Isysdeps/i386/fpu -Inptl/sysdeps/i386 -Isysdeps/i386 -Isysdeps/wordsize-32 -Isysdeps/ieee754/ldbl-96 -Isysdeps/ieee754/dbl-64 -Isysdeps/ieee754/flt-32 -Isysdeps/ieee754 -Isysdeps/generic/elf -Isysdeps/generic -Inptl   -Ilibio -I. -nostdinc -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include -xc tmp.c -o /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/bits/stdio_lim.hT
+# { echo '#include "posix/bits/posix1_lim.h"'; echo '#define _LIBC 1';						  echo '#include "misc/sys/uio.h"'; } |				x86_64-unknown-linux-gnu-gcc     -m32 -E -dM -MD -MP -MF /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/bits/stdio_lim.dT -MT '/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/bits/stdio_lim.h /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/bits/stdio_lim.d' 		      -Iinclude  -I/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32 -Isysdeps/i386/elf -Inptl/sysdeps/unix/sysv/linux/i386/i686 -Isysdeps/unix/sysv/linux/i386/i686 -Inptl/sysdeps/unix/sysv/linux/i386 -Isysdeps/unix/sysv/linux/i386 -Inptl/sysdeps/unix/sysv/linux -Inptl/sysdeps/pthread -Isysdeps/pthread -Isysdeps/unix/sysv/linux -Isysdeps/gnu -Isysdeps/unix/common -Isysdeps/unix/mman -Isysdeps/unix/inet -Isysdeps/unix/sysv/i386 -Inptl/sysdeps/unix/sysv -Isysdeps/unix/sysv -Isysdeps/unix/i386 -Inptl/sysdeps/unix -Isysdeps/unix -Isysdeps/posix -Isysdeps/i386/i686/fpu -Isysdeps/i386/i686/multiarch -Inptl/sysdeps/i386/i686 -Isysdeps/i386/i686 -Isysdeps/i386/i486 -Inptl/sysdeps/i386/i486 -Isysdeps/i386/fpu -Inptl/sysdeps/i386 -Isysdeps/i386 -Isysdeps/wordsize-32 -Isysdeps/ieee754/ldbl-96 -Isysdeps/ieee754/dbl-64 -Isysdeps/ieee754/flt-32 -Isysdeps/ieee754 -Isysdeps/generic/elf -Isysdeps/generic -Inptl   -Ilibio -I. -nostdinc -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include -xc - -o /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/bits/stdio_lim.hT
+
+.. the problem is really:
+$(..)Z:/ appears which is invalid. $(..) is placed in from of every non-absolute path.
+.. the paths need to me make unixy-absolute.
+The Z:/ ones are:
+$(..)Z:/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include/linux/limits.h
+$(..)Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stddef.h \
+$(..)Z:/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include/linux/limits.h:
+$(..)Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stddef.h:
+..
+what variables can be sedded to replace those with their MSYS equivalents?
+sysincludes = -nostdinc -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include
+so whatever variable is passed to the first instance of -isystem
+and whatever variable is passed to the third instance of -isystem
+
+1st = i=`$CC -print-file-name="include"`/.. && test "x$i" != x && test "x$i" != "x$d" &&
+3rd = $sysheaders

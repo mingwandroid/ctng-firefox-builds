@@ -1,4 +1,4 @@
-From 934fffe63d262d054d0ead5229266b4fe2c7ef46 Mon Sep 17 00:00:00 2001
+From 3fa0d65f78224eb47b0b86e8eb84fbb9307bac2c Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 23 Feb 2014 14:44:23 +0000
 Subject: [PATCH 31/31] {e}glibc 2.15, 2.16, 2.18: Re{number|name} + fix
@@ -48,7 +48,7 @@ I currently have no plans to port these patches to {e}glibc
  patches/eglibc/2_15/250-MSYS-Hack-force-ln-s.patch |  39 +++
  .../300-Remove-test-for-__builtin_expect.patch     |  76 +++++
  ...tr-use-of-local-buffer-outside-its-extent.patch |  55 ++++
- ..._18-sunrpc-Makefile-for-cross-compilation.patch | 158 ++++++++++
+ ..._18-sunrpc-Makefile-for-cross-compilation.patch | 182 ++++++++++++
  patches/eglibc/2_16/200-make-4.patch               |  24 ++
  ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 ++++++++++++++++
  .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
@@ -85,7 +85,7 @@ I currently have no plans to port these patches to {e}glibc
  .../310-Remove-test-for-__builtin_expect.patch     |  74 +++++
  .../320-100-fix_cpuid_h_check-from-OpenWrt.patch   |  24 ++
  ...tr-use-of-local-buffer-outside-its-extent.patch |  35 +++
- ..._18-sunrpc-Makefile-for-cross-compilation.patch | 165 +++++++++++
+ ..._18-sunrpc-Makefile-for-cross-compilation.patch | 189 ++++++++++++
  ...f-libgcc_s-and-libgcc_eh-when-building-gl.patch | 318 +++++++++++++++++++++
  patches/glibc/2.16.0/100-make-4.patch              |  24 --
  ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 ----------------
@@ -103,7 +103,7 @@ I currently have no plans to port these patches to {e}glibc
  .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++++
  ...Rename-extensions-for-case-insensitive-fs.patch | 238 +++++++++++++++
  patches/glibc/2.18/250-MSYS-Hack-force-ln-s.patch  |  39 +++
- 71 files changed, 5877 insertions(+), 3032 deletions(-)
+ 71 files changed, 5925 insertions(+), 3032 deletions(-)
  delete mode 100644 patches/eglibc/2_15/100-make-4.patch
  delete mode 100644 patches/eglibc/2_15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
  delete mode 100644 patches/eglibc/2_15/110-Fix-crossrpc-to-build-on-non-Linux.patch
@@ -2380,13 +2380,27 @@ index 0000000..6a7426c
 + #include "confstr.inc"
 diff --git a/patches/eglibc/2_15/340-Use-eglibc-2_18-sunrpc-Makefile-for-cross-compilation.patch b/patches/eglibc/2_15/340-Use-eglibc-2_18-sunrpc-Makefile-for-cross-compilation.patch
 new file mode 100644
-index 0000000..b94e8e2
+index 0000000..a1f86e4
 --- /dev/null
 +++ b/patches/eglibc/2_15/340-Use-eglibc-2_18-sunrpc-Makefile-for-cross-compilation.patch
-@@ -0,0 +1,158 @@
+@@ -0,0 +1,182 @@
++diff -urN a/Makerules b/Makerules
++--- a/Makerules	2014-02-24 15:08:46.500225100 +0000
+++++ b/Makerules	2014-02-24 15:08:59.472967100 +0000
++@@ -1293,8 +1293,8 @@
++ endef
++ 
++ # We always want to use configuration definitions.
++-# Note that this is only used for commands running in $(objpfx).
++-ALL_BUILD_CFLAGS = $(BUILD_CFLAGS) -include $(..)config.h
+++ALL_BUILD_CFLAGS = $(BUILD_CFLAGS) $(BUILD_CPPFLAGS) -D_GNU_SOURCE \
+++		   -DIS_IN_build -include $(common-objpfx)config.h
++ 
++ # Support the GNU standard name for this target.
++ .PHONY: check
 +diff -urN a/sunrpc/Makefile b/sunrpc/Makefile
-+--- a/sunrpc/Makefile	2014-02-24 13:41:17.827018200 +0000
-++++ b/sunrpc/Makefile	2014-02-24 13:43:17.123841600 +0000
++--- a/sunrpc/Makefile	2014-02-24 15:08:47.548285000 +0000
+++++ b/sunrpc/Makefile	2014-02-24 15:08:59.463966600 +0000
 +@@ -1,4 +1,4 @@
 +-# Copyright (C) 1994-2004, 2005, 2006, 2011, 2012 Free Software Foundation, Inc.
 ++# Copyright (C) 1994-2013 Free Software Foundation, Inc.
@@ -2538,10 +2552,20 @@ index 0000000..b94e8e2
 + 	$(move-if-change) $(@:stmp=T) $(@:stmp=c)
 +diff -urN a/sunrpc/rpcgen.c b/sunrpc/rpcgen.c
 +--- a/sunrpc/rpcgen.c	1970-01-01 01:00:00.000000000 +0100
-++++ b/sunrpc/rpcgen.c	2012-03-10 01:14:00.000000000 +0000
+++++ b/sunrpc/rpcgen.c	2014-02-24 15:08:59.467966800 +0000
 +@@ -0,0 +1,2 @@
 ++/* Empty file expected by glibc's standard build rules for
 ++   executables.  */
++diff -urN a/config.h.in b/config.h.in
++--- a/config.h.in	2014-02-24 16:13:54.864770800 +0000
+++++ b/config.h.in	2014-02-24 16:14:17.624072500 +0000
++@@ -1,4 +1,5 @@
++-#if !defined __ASSEMBLER__ && !defined _ISOMAC && !defined __OPTIMIZE__
+++#if !defined IS_IN_build && !defined __ASSEMBLER__ && !defined _ISOMAC \
+++    && !defined __OPTIMIZE__
++ # error "glibc cannot be compiled without optimization"
++ #endif
++ 
 diff --git a/patches/eglibc/2_16/200-make-4.patch b/patches/eglibc/2_16/200-make-4.patch
 new file mode 100644
 index 0000000..fa93ca1
@@ -6979,13 +7003,27 @@ index 0000000..1059c04
 + #ifndef _XBS5_ILP32_OFF32
 diff --git a/patches/glibc/2.15/340-Use-glibc-2_18-sunrpc-Makefile-for-cross-compilation.patch b/patches/glibc/2.15/340-Use-glibc-2_18-sunrpc-Makefile-for-cross-compilation.patch
 new file mode 100644
-index 0000000..23fd8af
+index 0000000..66a5828
 --- /dev/null
 +++ b/patches/glibc/2.15/340-Use-glibc-2_18-sunrpc-Makefile-for-cross-compilation.patch
-@@ -0,0 +1,165 @@
+@@ -0,0 +1,189 @@
++diff -urN a/Makerules b/Makerules
++--- a/Makerules	2014-02-24 15:11:01.467944800 +0000
+++++ b/Makerules	2014-02-24 15:11:11.017491000 +0000
++@@ -1226,8 +1226,8 @@
++ endef
++ 
++ # We always want to use configuration definitions.
++-# Note that this is only used for commands running in $(objpfx).
++-ALL_BUILD_CFLAGS = $(BUILD_CFLAGS) -include $(..)config.h
+++ALL_BUILD_CFLAGS = $(BUILD_CFLAGS) $(BUILD_CPPFLAGS) -D_GNU_SOURCE \
+++		   -DIS_IN_build -include $(common-objpfx)config.h
++ 
++ # Support the GNU standard name for this target.
++ .PHONY: check
 +diff -urN a/sunrpc/Makefile b/sunrpc/Makefile
-+--- a/sunrpc/Makefile	2012-01-01 12:16:32.000000000 +0000
-++++ b/sunrpc/Makefile	2014-02-24 13:47:54.181688400 +0000
++--- a/sunrpc/Makefile	2014-02-24 15:11:02.619010600 +0000
+++++ b/sunrpc/Makefile	2014-02-24 15:11:11.009490600 +0000
 +@@ -1,4 +1,4 @@
 +-# Copyright (C) 1994-2004, 2005, 2006, 2011 Free Software Foundation, Inc.
 ++# Copyright (C) 1994-2013 Free Software Foundation, Inc.
@@ -7144,10 +7182,20 @@ index 0000000..23fd8af
 + 	$(move-if-change) $(@:stmp=T) $(@:stmp=c)
 +diff -urN a/sunrpc/rpcgen.c b/sunrpc/rpcgen.c
 +--- a/sunrpc/rpcgen.c	1970-01-01 01:00:00.000000000 +0100
-++++ b/sunrpc/rpcgen.c	2013-08-10 23:52:55.000000000 +0100
+++++ b/sunrpc/rpcgen.c	2014-02-24 15:11:11.013490800 +0000
 +@@ -0,0 +1,2 @@
 ++/* Empty file expected by glibc's standard build rules for
 ++   executables.  */
++diff -urN a/config.h.in b/config.h.in
++--- a/config.h.in	2014-02-24 16:13:54.864770800 +0000
+++++ b/config.h.in	2014-02-24 16:14:17.624072500 +0000
++@@ -1,4 +1,5 @@
++-#if !defined __ASSEMBLER__ && !defined _ISOMAC && !defined __OPTIMIZE__
+++#if !defined IS_IN_build && !defined __ASSEMBLER__ && !defined _ISOMAC \
+++    && !defined __OPTIMIZE__
++ # error "glibc cannot be compiled without optimization"
++ #endif
++ 
 diff --git a/patches/glibc/2.16.0/001-Avoid-use-of-libgcc_s-and-libgcc_eh-when-building-gl.patch b/patches/glibc/2.16.0/001-Avoid-use-of-libgcc_s-and-libgcc_eh-when-building-gl.patch
 new file mode 100644
 index 0000000..9f7ea79

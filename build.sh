@@ -4303,3 +4303,27 @@ $(cross-rpcgen-objs): $(objpfx)cross-%.o: %.c $(before-compile)
 
 
 https://www.sourceware.org/ml/libc-alpha/2012-05/msg01030.html
+
+
+eglibc 2.15 branch started on Tue Jun 21 15:37:38 2011 UTC (r14238)
+7b57bfe5988e476ea40934457dfd1c8a231e2391 - 17/04/2011 - Obsolete RPC implementation in libc.
+53cf59efd8569841040efa540740acb7bd3e481e - 18/04/2011 - Add before-compile to dependencies for libc_compat_pic_objects.
+877175d8ea2e0182909e04cac603017ca31022ef - 20/04/2011 - Fix build problem in sunrpc.
+4df46dbda7787fd9f718c4d98a8416fcfa2f2c56 - 23/04/2011 - Fix "make xcheck" in sunrpc.
+597df64714851a68b25663c8b61b0e597552bebb - 06/05/2011 - Install rpc/netdb.h again
+a4300c7a4d65e24a4a0215460c063ea9c7b4605a - 07/03/2012 - Remove distribute variable from Makefiles
+9a07f9d01f1689e99e89bbb5ec48e6930da755f1 - 10/03/2012 - Use standard build rule to build rpcgen
+3ff4252677ff55a0dd4ded5b5cbccda25812ba12 - 23/03/2012 - Add libnss_files to routines and static-only-routines ?
+da392631c9056d412daa5ba92b8e82a6951d4a87 - 10/05/2012 - Add dependency tracking for rpc-compat-routines
+28e725016266de6cc18f7aef5c675c57b7a42a89 - 10/05/2012 - Build rpcgen-generated files when cross compiling. <- this is the most important part.
+021db4be6f1f4189f66feee066a495d49e92b93e - 10/05/2012 - Make sunrpc code usable again
+656416c96528437f54b345b1470aaa40f145ed30 - 16/05/2012 - Fix dependency tracking on cross-rpcgen-objs
+
+.. probably want to be careful to not break the ABI on any of this.
+
+pushd /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32
+export PATH=/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/bin:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/bin:/libs/rpd/.build/tools/bin:/libs/ctng-firefox-builds/mingw64-213be3fb/bin:"$PATH"
+'BUILD_CC=x86_64-build_w64-mingw32-gcc' 'CFLAGS= -U_FORTIFY_SOURCE          -O2 ' 'CC=x86_64-unknown-linux-gnu-gcc     -m32' 'AR=x86_64-unknown-linux-gnu-ar' 'RANLIB=x86_64-unknown-linux-gnu-ranlib' '/usr/bin/bash' '/libs/rpd/.build/src/eglibc-2_15/configure' '--prefix=/usr' '--build=x86_64-build_w64-mingw32' '--host=i686-unknown-linux-gnu' '--cache-file=/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache' '--without-cvs' '--disable-profile' '--without-gd' '--with-headers=/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include' '--libdir=/usr/lib/../lib' '--enable-obsolete-rpc' '--enable-kernel=3.12.0' '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=nptl' '--with-pkgversion=crosstool-NG hg+unknown-20140224.172755' 
+BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE          -O2" CC="x86_64-unknown-linux-gnu-gcc     -m32" AR="x86_64-unknown-linux-gnu-ar" RANLIB="x86_64-unknown-linux-gnu-ranlib" /usr/bin/bash '/libs/rpd/.build/src/eglibc-2_15/configure' '--prefix=/usr' '--build=x86_64-build_w64-mingw32' '--host=i686-unknown-linux-gnu' '--cache-file=/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache' '--without-cvs' '--disable-profile' '--without-gd' '--with-headers=/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include' '--libdir=/usr/lib/../lib' '--enable-obsolete-rpc' '--enable-kernel=3.12.0' '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=nptl' '--with-pkgversion=crosstool-NG hg+unknown-20140224.172755'
+'make' '-j4' '-l' 'BUILD_CPPFLAGS=-I/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/include/' 'BUILD_LDFLAGS=-L/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic' 'csu/subdir_lib' 
+'make' '-j4' '-l' 'install_root=/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot' 'install-bootstrap-headers=yes' 'BUILD_CPPFLAGS=-I/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/include/' 'BUILD_LDFLAGS=-L/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic' 'install-headers' 

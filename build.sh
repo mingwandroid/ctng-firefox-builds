@@ -157,7 +157,7 @@ TARGET_IS_DARWIN_armv7a="no"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
-TARGET_LIBC_steamsdk="glibc_V_2.15"
+TARGET_LIBC_steamsdk="eglibc_V_2.15"
 TARGET_LIBC_steambox="eglibc_V_2.17"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="eglibc_V_2.18"
@@ -813,7 +813,7 @@ download_build_tools()
 
   if [ "$OSTYPE" = "msys" ]; then
     . ${THISDIR}/mingw-w64-toolchain.sh --arch=$HOST_ARCH --root=$PWD --path-out=MINGW_W64_PATH --hash-out=MINGW_W64_HASH --enable-verbose --enable-hash-in-path
-      dl_compile_install_make_381
+#      dl_compile_install_make_381
   elif [ "$OSTYPE" = "darwin" ]; then
     if [ "${CTNG_LEGACY}" = "yes" ]; then
 #    # I'd like to get a hash for all other compilers too .. for now, just so my BeyondCompare sessions are less noisy, pretend they all have the hash I use most often.
@@ -4226,3 +4226,80 @@ and whatever variable is passed to the third instance of -isystem
 
 1st = i=`$CC -print-file-name="include"`/.. && test "x$i" != x && test "x$i" != "x$d" &&
 3rd = $sysheaders
+
+
+.. some more differences:
+# Z:\libs\rpd\.build\x86_64-unknown-linux-gnu\build\build-libc-startfiles_32\config.make
+# Windows
+sysincludes = -nostdinc -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -isystem Z:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -isystem /libs/ctng-firefox-builds/s-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include
+c++-sysincludes = 
+
+# Linux equiv:
+sysincludes = -nostdinc -isystem /libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -isystem /libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -isystem /libs/ctng-firefox-builds/s-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include
+c++-sysincludes =  -isystem /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/../../../../include/c++/4.8.2 -isystem /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/../../../../include/c++/4.8.2/x86_64-unknown-linux-gnu -isystem /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/../../../../include/c++/4.8.2/backward
+
+.. CXX_SYSINCLUDES ends up empty on Windows.
+
+# Z:\libs\rpd\.build\x86_64-unknown-linux-gnu\build\build-libc-startfiles_32\ifunc-defines.h.d
+# Windows
+/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/limits.h \
+
+# Linux
+ -fixed/limits.h \
+ .. in this case it is Linux that is more wrong (and it is my fault too), the seds should all have been done with a trailing / .. this should be fixed really .. also it is sedding with
+ .. nothing so I must not be setting a variable that I need to set.
+ 
+.. anyway, that a distraction .. problem is 
+
+Linux:
+[ALL  ]      /libs/rpd/.build/tools/bin/install -c -m 644 ../bits/huge_vall.h /libs/ctng-firefox-builds/s-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include/bits/huge_vall.h
+
+Windows:
+[ALL  ]      make[3]: *** No rule to make target `/libs/ctng-firefox-builds/s-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include/bits/huge_vall.h', needed by `install-headers-nosubdir'.  Stop.
+
+
+Repeating:
+
+cd /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles
+# /usr/bin/make  subdir=math -C math ..=../ install-headers
+# make PARALLELMFLAGS="" -C /libs/rpd/.build/src/glibc-2.15 objdir=`pwd` sysheaders=/libs/ctng-firefox-builds/s-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/include install-headers
+# Linux
+'make' '-j4' '-l' 'install_root=/libs/ctng-firefox-builds/s-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot' 'install-bootstrap-headers=yes' 'install-headers' 
+# Windows
+'make' '-j4' '-l' 'install_root=/libs/ctng-firefox-builds/s-glibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot' 'install-bootstrap-headers=yes' 'BUILD_CPPFLAGS=-I/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/include/' 'BUILD_LDFLAGS=-L/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic' 'install-headers' 
+
+
+
+
+
+[ALL  ]      make[3]: Entering directory '/libs/rpd/.build/src/eglibc-2_15/sunrpc'
+...
+[ALL  ]      gcc rpc_main.c -c -D_RPC_THREAD_SAFE_ -D_CROSS_RPCGEN_ 	-o /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_main.o -MD -MP -MF /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_main.o.dt -MT /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_main.o
+[ALL  ]      gcc rpc_hout.c -c -D_RPC_THREAD_SAFE_ -D_CROSS_RPCGEN_ 	-o /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_hout.o -MD -MP -MF /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_hout.o.dt -MT /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_hout.o
+[ALL  ]      gcc rpc_cout.c -c -D_RPC_THREAD_SAFE_ -D_CROSS_RPCGEN_ 	-o /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_cout.o -MD -MP -MF /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_cout.o.dt -MT /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_cout.o
+[ALL  ]      gcc rpc_parse.c -c -D_RPC_THREAD_SAFE_ -D_CROSS_RPCGEN_ 	-o /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_parse.o -MD -MP -MF /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_parse.o.dt -MT /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32/sunrpc/cross-rpc_parse.o
+[ERROR]      rpc_main.c:42:21: fatal error: libintl.h: No such file or directory
+[ALL  ]       #include <libintl.h>
+[ALL  ]                           ^
+^ Questions are, why gcc instead of the build compiler? Where are my build_cc flags?
+
+..glibc version does not cross compile rpcgen, it compiles it for Linux twice instead.
+.. _CROSS_RPCGEN_ BUILD_CPPFLAGS BUILD_LDFLAGS 
+
+.. the problem is eglibc-2.15:
+$(addprefix $(objpfx)cross-,$(rpcgen-objs)): $(objpfx)cross-%.o: %.c
+	gcc $< -c -D_RPC_THREAD_SAFE_ -D_CROSS_RPCGEN_ \
+		$(OUTPUT_OPTION) $(compile-mkdep-flags)
+
+
+
+.. vs eglibc-2.18:
+# When generic makefile support for build system programs is
+# available, it should replace this code.  See
+# <http://sourceware.org/bugzilla/show_bug.cgi?id=14087>.
+$(cross-rpcgen-objs): $(objpfx)cross-%.o: %.c $(before-compile)
+	$(BUILD_CC) $($(basename $(<F))-CFLAGS) $(ALL_BUILD_CFLAGS) $< \
+		$(OUTPUT_OPTION) $(native-compile-mkdep-flags) -c
+
+
+https://www.sourceware.org/ml/libc-alpha/2012-05/msg01030.html

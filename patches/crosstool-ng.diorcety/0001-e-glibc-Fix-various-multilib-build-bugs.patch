@@ -1,4 +1,4 @@
-From 15f90c1daa85eaa73b377c35ffc007ae8d83c213 Mon Sep 17 00:00:00 2001
+From f1c5dbb9c25e5cfd3fc8f053bacaf10db80ad64c Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 4 Feb 2014 08:08:40 +0000
 Subject: [PATCH 01/31] {e}glibc: Fix various multilib build bugs

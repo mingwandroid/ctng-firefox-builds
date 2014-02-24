@@ -1,4 +1,4 @@
-From 29fbf58c7d555fb713dc8601f5bd0e0da37d1130 Mon Sep 17 00:00:00 2001
+From 288cad6c496d8cd02ec87f76c35f3616c8e3813f Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 00:50:24 +0000
 Subject: [PATCH 23/31] Add glibc 2.15 patch to disable test for

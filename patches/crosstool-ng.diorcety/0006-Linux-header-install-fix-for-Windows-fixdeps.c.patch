@@ -1,4 +1,4 @@
-From ddc714d457e4acec8d24e61c6d89b6a175ad8bba Mon Sep 17 00:00:00 2001
+From 623709811b5d61cc76ba34632ac66a5c8429ae49 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 3 Dec 2013 00:16:22 +0000
 Subject: [PATCH 06/31] Linux header install fix for Windows (fixdeps.c)

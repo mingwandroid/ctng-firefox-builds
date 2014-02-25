@@ -1,4 +1,4 @@
-From 21e3c62d6ed9be8561b90afd7fd2f2fe22234707 Mon Sep 17 00:00:00 2001
+From 93244a82f73867906a0cbeb35aa385a187d39c8f Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 29 Jan 2014 18:50:20 +0000
 Subject: [PATCH 25/31] Add glibc 2.15 patch to avoid /lib/cpp usage

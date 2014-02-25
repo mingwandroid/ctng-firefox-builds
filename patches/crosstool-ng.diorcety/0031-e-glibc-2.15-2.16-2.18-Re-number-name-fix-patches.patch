@@ -1,4 +1,4 @@
-From c81dd0e30e77ad4a2593b9c6c7c31f6b50195b09 Mon Sep 17 00:00:00 2001
+From 63f4414f434a1306138f2b6f02f5d773eb3df2fd Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 23 Feb 2014 14:44:23 +0000
 Subject: [PATCH 31/31] {e}glibc 2.15, 2.16, 2.18: Re{number|name} + fix
@@ -33,6 +33,11 @@ for cross compilation.
 cross-fix-rpc_types_h-include
 .. changed an instance of #include <rpc/types.h> to
 
+5.
+MinGW-w64-cross-fixes-for-timezone-and-getconf
+.. fixes problems in timezone (link, symlink, general cross)
+and getconf (check for "nul" as well as "/dev/null")
+
 I currently have no plans to port these patches to {e}glibc
 2.17 but will port them to 2.19 in the future.
 ---
@@ -51,6 +56,7 @@ I currently have no plans to port these patches to {e}glibc
  ...Rename-extensions-for-case-insensitive-fs.patch | 201 +++++++++++++
  patches/eglibc/2_15/250-MSYS-Hack-force-ln-s.patch |  39 +++
  .../2_15/260-cross-fix-rpc_types_h-include.patch   |  11 +
+ ...-w64-cross-fixes-for-timezone-and-getconf.patch | 137 +++++++++
  .../300-Remove-test-for-__builtin_expect.patch     |  76 +++++
  ...tr-use-of-local-buffer-outside-its-extent.patch |  55 ++++
  ..._18-sunrpc-Makefile-for-cross-compilation.patch | 182 ++++++++++++
@@ -108,7 +114,7 @@ I currently have no plans to port these patches to {e}glibc
  .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++++
  ...Rename-extensions-for-case-insensitive-fs.patch | 238 +++++++++++++++
  patches/glibc/2.18/250-MSYS-Hack-force-ln-s.patch  |  39 +++
- 72 files changed, 5936 insertions(+), 3032 deletions(-)
+ 73 files changed, 6073 insertions(+), 3032 deletions(-)
  delete mode 100644 patches/eglibc/2_15/100-make-4.patch
  delete mode 100644 patches/eglibc/2_15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
  delete mode 100644 patches/eglibc/2_15/110-Fix-crossrpc-to-build-on-non-Linux.patch
@@ -124,6 +130,7 @@ I currently have no plans to port these patches to {e}glibc
  create mode 100644 patches/eglibc/2_15/240-Rename-extensions-for-case-insensitive-fs.patch
  create mode 100644 patches/eglibc/2_15/250-MSYS-Hack-force-ln-s.patch
  create mode 100644 patches/eglibc/2_15/260-cross-fix-rpc_types_h-include.patch
+ create mode 100644 patches/eglibc/2_15/270-MinGW-w64-cross-fixes-for-timezone-and-getconf.patch
  create mode 100644 patches/eglibc/2_15/300-Remove-test-for-__builtin_expect.patch
  create mode 100644 patches/eglibc/2_15/310-Fix-confstr-use-of-local-buffer-outside-its-extent.patch
  create mode 100644 patches/eglibc/2_15/340-Use-eglibc-2_18-sunrpc-Makefile-for-cross-compilation.patch
@@ -2258,6 +2265,149 @@ index 0000000..b2fec09
 + #include "rpc_parse.h"
 + #include "rpc_util.h"
 + #include "proto.h"
+diff --git a/patches/eglibc/2_15/270-MinGW-w64-cross-fixes-for-timezone-and-getconf.patch b/patches/eglibc/2_15/270-MinGW-w64-cross-fixes-for-timezone-and-getconf.patch
+new file mode 100644
+index 0000000..9e43962
+--- /dev/null
++++ b/patches/eglibc/2_15/270-MinGW-w64-cross-fixes-for-timezone-and-getconf.patch
+@@ -0,0 +1,137 @@
++diff -urN a/posix/cross-getconf.c b/posix/cross-getconf.c
++--- a/posix/cross-getconf.c	2014-02-25 00:34:28.936889000 +0000
+++++ b/posix/cross-getconf.c	2014-02-25 00:34:34.591607100 +0000
++@@ -119,7 +119,9 @@
++ 
++   getconf_dir = getenv ("GETCONF_DIR");
++   if (getconf_dir == NULL
++-      || strcmp (getconf_dir, "/dev/null") != 0)
+++      || (strcmp (getconf_dir, "/dev/null") != 0 &&
+++          strcmp (getconf_dir, "nul") != 0
+++          ))
++     {
++       fprintf (stderr, "%s: GETCONF_DIR should be /dev/null\n", argv[0]);
++       return 1;
++diff -urN a/timezone/Makefile b/timezone/Makefile
++--- a/timezone/Makefile	2014-02-25 00:34:31.877262400 +0000
+++++ b/timezone/Makefile	2014-02-25 00:34:37.446969700 +0000
++@@ -180,12 +180,27 @@
++ 
++ $(objpfx)zic: $(addprefix $(objpfx), $(zic-objs))
++ 
++-$(addprefix $(objpfx)cross-,$(zic-objs)): $(objpfx)cross-%.o: %.c
++-	gcc $< -c $(OUTPUT_OPTION) $(CFLAGS-$*.c) $(CPPFLAGS-$*) \
++-		-DCROSS_ZIC $(compile-mkdep-flags)
+++#$(addprefix $(objpfx)cross-,$(zic-objs)): $(objpfx)cross-%.o: %.c
+++#	gcc $< -c $(OUTPUT_OPTION) $(CFLAGS-$*.c) $(CPPFLAGS-$*) \
+++#		-DCROSS_ZIC $(compile-mkdep-flags)
+++#
+++#$(objpfx)cross-zic: $(addprefix $(objpfx)cross-,$(zic-objs))
+++#	gcc $(addprefix $(objpfx)cross-,$(zic-objs)) -o $@
++ 
++-$(objpfx)cross-zic: $(addprefix $(objpfx)cross-,$(zic-objs))
++-	gcc $(addprefix $(objpfx)cross-,$(zic-objs)) -o $@
+++cross-zic-objs := $(addprefix $(objpfx)cross-,$(zic-objs))
+++
+++ALL_BUILD_CFLAGS = $(BUILD_CFLAGS) $(BUILD_CPPFLAGS) -D_GNU_SOURCE \
+++		   -DIS_IN_build
+++
+++# When generic makefile support for build system programs is
+++# available, it should replace this code.  See
+++# <http://sourceware.org/bugzilla/show_bug.cgi?id=14087>.
+++$(cross-zic-objs): $(objpfx)cross-%.o: %.c $(before-compile)
+++	$(BUILD_CC) $($(basename $(<F))-CFLAGS) $(ALL_BUILD_CFLAGS) \
+++	-DCROSS_ZIC $< $(OUTPUT_OPTION) $(native-compile-mkdep-flags) -c
+++
+++$(objpfx)cross-zic: $(cross-zic-objs)
+++	$(BUILD_CC) $^ $(BUILD_LDFLAGS) -o $@
++ 
++ tz-cflags = -DTZDIR='"$(zonedir)"' \
++ 	    -DTZDEFAULT='"$(localtime-file)"' \
++diff -urN a/timezone/private.h b/timezone/private.h
++--- a/timezone/private.h	2014-02-25 00:34:31.878762600 +0000
+++++ b/timezone/private.h	2014-02-25 00:34:37.448969900 +0000
++@@ -94,7 +94,10 @@
++ #endif /* HAVE_GETTEXT */
++ 
++ #if HAVE_SYS_WAIT_H
+++#ifdef _WIN32
+++#else
++ #include <sys/wait.h>	/* for WIFEXITED and WEXITSTATUS */
+++#endif
++ #endif /* HAVE_SYS_WAIT_H */
++ 
++ #ifndef WIFEXITED
++diff -urN a/timezone/zic.c b/timezone/zic.c
++--- a/timezone/zic.c	2014-02-25 00:34:31.885763500 +0000
+++++ b/timezone/zic.c	2014-02-25 00:34:37.455470800 +0000
++@@ -32,6 +32,10 @@
++ #define MKDIR_UMASK 0755
++ #endif
++ 
+++#ifdef _WIN32
+++#define mkdir(_x,_f) mkdir(_x)
+++#endif
+++
++ /*
++ ** On some ancient hosts, predicates like `isspace(C)' are defined
++ ** only if isascii(C) || C == EOF. Modern hosts obey the C Standard,
++@@ -105,9 +109,58 @@
++ 	zic_t		z_untiltime;
++ };
++ 
+++#ifdef _WIN32
+++int copy_file(const char * fromname, const char * toname) {
+++	FILE *from, *to;
+++	size_t nbytes;
+++	char buffer[4096];
+++
+++	from = fopen(fromname, "rb");
+++	if ( from == NULL )
+++	  return -1;
+++
+++	to = fopen(toname, "wb");
+++	if ( to == NULL )
+++	  return -1;
+++
+++	while ( (nbytes = fread(buffer, 1, sizeof(buffer), from)) > 0 ) {
+++	  if ( fwrite(buffer, 1, nbytes, to) != nbytes ) {
+++	    return -1;
+++	  }
+++	}
+++	fclose(from);
+++	fclose(to);
+++	return 0;
+++}
+++
+++int	link(const char * fromname, const char * toname) {
+++	return copy_file(fromname, toname);
+++}
+++
+++int symlink(const char * symlink_contents, const char * toname) {
+++	char linktarget[4096];
+++	if ( symlink_contents[0] == '/' ) {
+++	  /* Absolute, easy. */
+++	  strcpy( linktarget, symlink_contents );
+++	} else {
+++	  /* Relative, fiddly - assumes that toname is absolute .. */
+++	  strcpy( linktarget, toname );
+++	  if ( strrchr( linktarget, '/') != NULL ) {
+++	    *(strrchr( linktarget, '/')+1) = '\0';
+++	  } else {
+++	    linktarget[0] = '\0';
+++	  }
+++	  strcat( linktarget, symlink_contents );
+++	}
+++	return copy_file(linktarget, toname);
+++}
+++#endif
+++
++ extern int	getopt(int argc, char * const argv[],
++ 			const char * options);
+++#ifndef _WIN32
++ extern int	link(const char * fromname, const char * toname);
+++#endif
++ extern char *	optarg;
++ extern int	optind;
++ 
 diff --git a/patches/eglibc/2_15/300-Remove-test-for-__builtin_expect.patch b/patches/eglibc/2_15/300-Remove-test-for-__builtin_expect.patch
 new file mode 100644
 index 0000000..c990a01

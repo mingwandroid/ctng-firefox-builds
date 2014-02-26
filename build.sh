@@ -257,7 +257,7 @@ option CTNG_CLEAN          no \
 "Remove old crosstool-ng build and artefacts
 before starting the build, otherwise an old
 crosstool-ng may be re-used."
-option CTNG_SAVE_STEPS     default \
+option CTNG_SAVE_STEPS     yes \
 "Save steps so that they can be restarted
 later. This doesn't work well for llvm
 and clang unfortunately, but while iterating
@@ -1083,6 +1083,16 @@ cross_clang_build()
     fi
     ${ROOT}/install-ctng.${CTNG_SUFFIX}/bin/ct-ng ${CTNG_SAMPLE}
     ${ROOT}/install-ctng.${CTNG_SUFFIX}/bin/ct-ng build
+    if [ "${BUILD_OS}" = "windows" ]; then
+      # Copy needed DLLs.
+      cp ${MINGW_W64_PATH}/libstdc++*.dll     ${BUILT_XCOMPILER_PREFIX}/bin
+      cp ${MINGW_W64_PATH}/libgcc*.dll        ${BUILT_XCOMPILER_PREFIX}/bin
+      cp ${MINGW_W64_PATH}/libwinpthread*.dll ${BUILT_XCOMPILER_PREFIX}/bin
+      for FILE in $(find ${BUILDDIR} -name "libiconv*.dll") ; do
+        LIBEXECDIR=$(find ${BUILT_XCOMPILER_PREFIX}/libexec -type d -name "$GCC_VERSION")
+        cp ${FILE} ${LIBEXECDIR}
+      done
+    fi
     popd
   else
     if [ -n "$MINGW_W64_PATH" ]; then
@@ -1207,7 +1217,7 @@ BUILDDIR=/c/b${STUB}${CTNG_SUFFIX_1ST}${DEBUG_PREFIX}
 # Testing for Arnaud Dovi.
 # r=registry set to sensitive
 # p=posix set to 1
-BUILDDIR=/libs/rp${CTNG_SUFFIX_1ST}
+# BUILDDIR=/libs/rp${CTNG_SUFFIX_1ST}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
 BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
 
@@ -4331,3 +4341,34 @@ BUILD_CC=x86_64-build_w64-mingw32-gcc CFLAGS="-U_FORTIFY_SOURCE          -O2" CC
 pushd /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-libc-final_32
 export PATH=/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/bin:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/bin:/libs/rpd/.build/tools/bin:/libs/ctng-firefox-builds/mingw64-213be3fb/bin:"$PATH"
 'make' '-j4' '-l' 'BUILD_CPPFLAGS=-I/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/include/' 'BUILD_LDFLAGS=-L/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic' 'install_root=/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot' 'install' 
+
+
+.. continuing ct-ng at steps (e.g. ct-ng libc+) causes MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=" to not work.
+I suspect this is because ct-ng is a gnu make script and thus makev is already a loaded image when it forks so the env block is not changed?
+Something weird like that anyway.
+
+[ALL  ]    /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -B/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -g -Os -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector   -fpic -mlong-double-80 -I. -I. -I../.././gcc -I../../../../../src/gcc-4.8.2/libgcc -I../../../../../src/gcc-4.8.2/libgcc/. -I../../../../../src/gcc-4.8.2/libgcc/../gcc -I../../../../../src/gcc-4.8.2/libgcc/../include -I../../../../../src/gcc-4.8.2/libgcc/config/libbid -DENABLE_DECIMAL_BID_FORMAT -DHAVE_CC_TLS  -DUSE_TLS -o _muldi3.o -MT _muldi3.o -MD -MP -MF _muldi3.dep -DL_muldi3 -c ../../../../../src/gcc-4.8.2/libgcc/libgcc2.c -fvisibility=hidden -DHIDE_EXPORTS
+[ALL  ]    /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -B/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -g -Os -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector   -fpic -mlong-double-80 -I. -I. -I../.././gcc -I../../../../../src/gcc-4.8.2/libgcc -I../../../../../src/gcc-4.8.2/libgcc/. -I../../../../../src/gcc-4.8.2/libgcc/../gcc -I../../../../../src/gcc-4.8.2/libgcc/../include -I../../../../../src/gcc-4.8.2/libgcc/config/libbid -DENABLE_DECIMAL_BID_FORMAT -DHAVE_CC_TLS  -DUSE_TLS -o _negdi2.o -MT _negdi2.o -MD -MP -MF _negdi2.dep -DL_negdi2 -c ../../../../../src/gcc-4.8.2/libgcc/libgcc2.c -fvisibility=hidden -DHIDE_EXPORTS
+[ALL  ]    /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -B/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -g -Os -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector   -fpic -mlong-double-80 -I. -I. -I../.././gcc -I../../../../../src/gcc-4.8.2/libgcc -I../../../../../src/gcc-4.8.2/libgcc/. -I../../../../../src/gcc-4.8.2/libgcc/../gcc -I../../../../../src/gcc-4.8.2/libgcc/../include -I../../../../../src/gcc-4.8.2/libgcc/config/libbid -DENABLE_DECIMAL_BID_FORMAT -DHAVE_CC_TLS  -DUSE_TLS -o _lshrdi3.o -MT _lshrdi3.o -MD -MP -MF _lshrdi3.dep -DL_lshrdi3 -c ../../../../../src/gcc-4.8.2/libgcc/libgcc2.c -fvisibility=hidden -DHIDE_EXPORTS
+[ALL  ]    In file included from ../../../../../src/gcc-4.8.2/libgcc/libgcc2.c:27:0:
+[ERROR]    ../../../../../src/gcc-4.8.2/libgcc/../gcc/tsystem.h:87:19: fatal error: stdio.h: No such file or directory
+[ALL  ]     #include <stdio.h>
+[ALL  ]                       ^
+[ALL  ]    compilation terminated.
+
+pushd /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/32/libgcc
+MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=" PATH=/libs/ctng-firefox-builds/mingw64-213be3fb/bin:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/bin:$PATH /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -B/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -g -Os -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector   -fpic -mlong-double-80 -I. -I. -I../.././gcc -I../../../../../src/gcc-4.8.2/libgcc -I../../../../../src/gcc-4.8.2/libgcc/. -I../../../../../src/gcc-4.8.2/libgcc/../gcc -I../../../../../src/gcc-4.8.2/libgcc/../include -I../../../../../src/gcc-4.8.2/libgcc/config/libbid -DENABLE_DECIMAL_BID_FORMAT -DHAVE_CC_TLS  -DUSE_TLS -o _muldi3.o -MT _muldi3.o -MD -MP -MF _muldi3.dep -DL_muldi3 -c ../../../../../src/gcc-4.8.2/libgcc/libgcc2.c -fvisibility=hidden -DHIDE_EXPORTS
+
+.. to fix, delete gcc/cppdefault.o gcc/xgcc.exe gcc/cc1.exe and re-make.
+MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" /libs/ctng-firefox-builds/install-ctng.diorcety/bin/ct-ng cc_for_host+
+
+.. non-unique files are:
+x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_connmark.h  [ xt_CONNMARK.h simply includes xt_connmark.h, so must use xt_connmark.h ]
+x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_mark.h      [ xt_MARK.h simply includes xt_mark.h, so must use xt_mark.h ]
+x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_dscp.h      [ xt_DSCP.h includes xt_dscp.h but adds extra stuff afterwards .. could be merged ]
+x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_rateest.h   [ differs xt_rateest_target_info vs xt_rateest_match_info, both used ]
+x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_tcpmss.h    [ differs xt_tcpmss_match_info vs xt_tcpmss_info both used ]
+x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter_ipv4/ipt_ecn.h [ differs IPT_ECN_OP_MATCH_IP in ipt_ecn.h not used internally ]
+x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter_ipv4/ipt_ttl.h [ differs ip4t_HL_info vs ip4t_hl_info but both compile-guarded with '#ifndef _IP4T_HL_H' ]
+x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter_ipv6/ip6t_hl.h [ differs ip6t_HL_info vs ip6t_hl_info but both compile-guarded with '#ifndef _IP6T_HL_H' ]
+see also: http://comments.gmane.org/gmane.comp.security.firewalls.netfilter.devel/37373

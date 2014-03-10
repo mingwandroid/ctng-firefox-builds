@@ -4362,6 +4362,9 @@ MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=" PATH=/libs/ctng-firefox-builds
 .. to fix, delete gcc/cppdefault.o gcc/xgcc.exe gcc/cc1.exe and re-make.
 MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" /libs/ctng-firefox-builds/install-ctng.diorcety/bin/ct-ng cc_for_host+
 
+.. made a little bit easier:
+./msys2-continue-step.sh ./install-ctng.diorcety /c/bsd ./s-eglibc_V_2.15-x86_64-213be3fb cc_core_pass_2
+
 .. non-unique files are:
 x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_connmark.h  [ xt_CONNMARK.h simply includes xt_connmark.h, so must use xt_connmark.h ]
 x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter/xt_mark.h      [ xt_MARK.h simply includes xt_mark.h, so must use xt_mark.h ]

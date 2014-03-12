@@ -22,11 +22,13 @@ case "${1}" in
   ;;
 esac
 
+GCC_VERSION=4.8.2
+
 # Replace './' with '${THISDIR}/' in any directory arguments so that they are absolute.
 # .. of course '../' will still throw us! $(cd $1 ; pwd) would be better but doesn't
 # work with error checking logic.
-CTNG_PREFIX=${1/./${THISDIR}/}    ; shift
-BUILD_DIR=${1/./${THISDIR}/}      ; shift
+CTNG_PREFIX=${1/.\//${THISDIR}/}  ; shift
+BUILD_DIR=${1/.\//${THISDIR}/}    ; shift
 FINAL_PREFIX=${1/.\//${THISDIR}/} ; shift
 STEP=${1}                         ; shift
 
@@ -42,13 +44,13 @@ MINGW_W64_PREFIX=$( find "${THISDIR}" -maxdepth 1 -name "mingw64-*" )
 [ -d "${MINGW_W64_PREFIX}" ]      || ( echo "ERROR: MINGW_W64_PREFIX of \"${MINGW_W64_PREFIX}\" not found. Do you have multiple mingw64-XXXXXXXX directories? Please delete old ones and then re-run." ; usage_exit 1 ) || exit 1
 
 pushd ${BUILD_DIR}
-MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" ${CTNG_PREFIX}/bin/ct-ng ${STEP}+
+  MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" ${CTNG_PREFIX}/bin/ct-ng ${STEP}+
 popd
 
 cp ${MINGW_W64_PREFIX}/bin/libstdc++*.dll     ${FINAL_PREFIX}/bin
 cp ${MINGW_W64_PREFIX}/bin/libgcc*.dll        ${FINAL_PREFIX}/bin
 cp ${MINGW_W64_PREFIX}/bin/libwinpthread*.dll ${FINAL_PREFIX}/bin
-LIBEXECDIR=$( find ${FINAL_PREFIX}/libexec \( -type d -and -name "4.8.2"\) )
+LIBEXECDIR=$( find ${FINAL_PREFIX}/libexec \( -type d -and -name "$GCC_VERSION" \) )
 for FILE in $(find ${BUILD_DIR} -name "libiconv*.dll") ; do
  cp ${FILE} ${LIBEXECDIR}
 done

@@ -1088,8 +1088,8 @@ cross_clang_build()
       cp ${MINGW_W64_PATH}/libstdc++*.dll     ${BUILT_XCOMPILER_PREFIX}/bin
       cp ${MINGW_W64_PATH}/libgcc*.dll        ${BUILT_XCOMPILER_PREFIX}/bin
       cp ${MINGW_W64_PATH}/libwinpthread*.dll ${BUILT_XCOMPILER_PREFIX}/bin
+      LIBEXECDIR=$(find ${BUILT_XCOMPILER_PREFIX}/libexec \( -type d -name "$GCC_VERSION" \) )
       for FILE in $(find ${BUILDDIR} -name "libiconv*.dll") ; do
-        LIBEXECDIR=$(find ${BUILT_XCOMPILER_PREFIX}/libexec -type d -name "$GCC_VERSION")
         cp ${FILE} ${LIBEXECDIR}
       done
     fi

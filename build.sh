@@ -630,7 +630,7 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     if [ -f /etc/arch-release ]; then
       HOST_MULTILIB="-multilib"
     fi
-    PACKAGES="openssh git python2 tar mercurial gcc${HOST_MULTILIB} libtool${HOST_MULTILIB} wget p7zip unzip zip yasm svn gdb"
+    PACKAGES="gperf bison flex openssh git python2 tar mercurial gcc${HOST_MULTILIB} libtool${HOST_MULTILIB} wget p7zip unzip zip yasm svn gdb"
     # ncurses for Arch Linux vs ncurses-devel for MSYS is Alexey's fault ;-)
     # .. he has split packages up more than Arch does, so there is not a 1:1
     #    relationship between them anymore.

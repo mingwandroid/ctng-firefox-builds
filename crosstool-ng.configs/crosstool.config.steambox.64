@@ -5,7 +5,9 @@ CT_ARCH_64=y
 CT_ARCH_x86=y
 CT_MULTILIB=y
 CT_KERNEL_linux=y
-CT_KERNEL_V_3_10_19=y
+# Get version number from:
+# http://repo.steampowered.com/steamos/pool/main/l/linux/?C=M;O=D
+CT_KERNEL_V_3_10_11=y
 CT_BINUTILS_FOR_TARGET=y
 #CT_DEBUG_dmalloc=y
 #CT_DEBUG_duma=y

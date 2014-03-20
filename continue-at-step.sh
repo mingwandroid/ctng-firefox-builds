@@ -40,20 +40,24 @@ STEP=${1}                         ; shift
 [ -n "${STEP}" ]                  || ( echo "ERROR: please specify a step to continue at." ; usage_exit 1 ) || exit 1
 STATE_DIR=$( find "${BUILD_DIR}/.build" -maxdepth 3 \( -type d -and -path "*/state/${STEP}" \) )
 [ -d "${STATE_DIR}" ]             || ( echo "ERROR: build-dir of \"${BUILD_DIR}/.build\" does not contain a stage/${STEP} sub-directory, wrong step of \"${STEP}\" specified?" ; usage_exit 1 ) || exit 1
-MINGW_W64_PREFIX=$( find "${THISDIR}" -maxdepth 1 -name "mingw64-*" )
-[ -d "${MINGW_W64_PREFIX}" ]      || ( echo "ERROR: MINGW_W64_PREFIX of \"${MINGW_W64_PREFIX}\" not found. Do you have multiple mingw64-XXXXXXXX directories? Please delete old ones and then re-run." ; usage_exit 1 ) || exit 1
+if [ "$OSTYPE" = "msys" ]; then
+  MINGW_W64_PREFIX=$( find "${THISDIR}" -maxdepth 1 -name "mingw64-*" )
+  [ -d "${MINGW_W64_PREFIX}" ]      || ( echo "ERROR: MINGW_W64_PREFIX of \"${MINGW_W64_PREFIX}\" not found. Do you have multiple mingw64-XXXXXXXX directories? Please delete old ones and then re-run." ; usage_exit 1 ) || exit 1
+fi
 
 pushd ${BUILD_DIR}
   MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" ${CTNG_PREFIX}/bin/ct-ng ${STEP}+
 popd
 
-cp ${MINGW_W64_PREFIX}/bin/libstdc++*.dll     ${FINAL_PREFIX}/bin
-cp ${MINGW_W64_PREFIX}/bin/libgcc*.dll        ${FINAL_PREFIX}/bin
-cp ${MINGW_W64_PREFIX}/bin/libwinpthread*.dll ${FINAL_PREFIX}/bin
-LIBEXECDIR=$( find ${FINAL_PREFIX}/libexec \( -type d -and -name "$GCC_VERSION" \) )
-for FILE in $(find ${BUILD_DIR} -name "libiconv*.dll") ; do
- cp ${FILE} ${LIBEXECDIR}
-done
+if [ "$OSTYPE" = "msys" ]; then
+  cp ${MINGW_W64_PREFIX}/bin/libstdc++*.dll     ${FINAL_PREFIX}/bin
+  cp ${MINGW_W64_PREFIX}/bin/libgcc*.dll        ${FINAL_PREFIX}/bin
+  cp ${MINGW_W64_PREFIX}/bin/libwinpthread*.dll ${FINAL_PREFIX}/bin
+  LIBEXECDIR=$( find ${FINAL_PREFIX}/libexec \( -type d -and -name "$GCC_VERSION" \) )
+  for FILE in $(find ${BUILD_DIR} -name "libiconv*.dll") ; do
+   cp ${FILE} ${LIBEXECDIR}
+  done
+fi
 
 echo "Done! Urgh."
 

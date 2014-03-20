@@ -82,7 +82,7 @@ VENDOR_OSES_armv7a="unknown-linux-gnu"
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
 BUILD_DEBUGGABLE_windows="no"
-BUILD_DEBUGGABLE_linux="no"
+BUILD_DEBUGGABLE_linux="yes"
 
 BUILD_DEBUGGERS_darwin="yes"
 BUILD_DEBUGGERS_windows="no" # Due to expat problems.
@@ -1010,7 +1010,6 @@ cross_clang_build()
 
     if [ "$CTNG_SAVE_TEMPS" = "yes" ]; then
       USED_CPP_FLAGS=$USED_CPP_FLAGS" -save-temps=obj "
-      exit 1
     fi
 
     if [ -n "$USED_CPP_FLAGS" ]; then

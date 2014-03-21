@@ -1,4 +1,4 @@
-From 471c37ac5f1637e44b604b48ad98628106347d90 Mon Sep 17 00:00:00 2001
+From aa92d1888773a881c03a9dc45b26bc1a6a4c7341 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 23 Feb 2014 14:44:23 +0000
 Subject: [PATCH 31/31] {e}glibc 2.15 .. 2.18: Re{number|name} + fix patches
@@ -65,7 +65,7 @@ and getconf (check for "nul" as well as "/dev/null")
  patches/eglibc/2_17/200-make-4.patch               |  24 ++
  ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 +++++++++++++
  .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 107 ++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 113 ++++++
  ...Rename-extensions-for-case-insensitive-fs.patch | 395 +++++++++++++++++++++
  patches/eglibc/2_17/250-MSYS-Hack-force-ln-s.patch |  39 ++
  patches/eglibc/2_18/100-make-4.patch               |  24 --
@@ -113,7 +113,7 @@ and getconf (check for "nul" as well as "/dev/null")
  patches/glibc/2.17/200-make-4.patch                |  24 ++
  ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 +++++++++++++
  .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 107 ++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 113 ++++++
  ...Rename-extensions-for-case-insensitive-fs.patch | 395 +++++++++++++++++++++
  patches/glibc/2.17/250-MSYS-Hack-force-ln-s.patch  |  39 ++
  ...a-ARM-Fix-clone-code-when-built-for-Thumb.patch |  44 +--
@@ -124,7 +124,7 @@ and getconf (check for "nul" as well as "/dev/null")
  .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++
  ...Rename-extensions-for-case-insensitive-fs.patch | 238 +++++++++++++
  patches/glibc/2.18/250-MSYS-Hack-force-ln-s.patch  |  39 ++
- 87 files changed, 8181 insertions(+), 3309 deletions(-)
+ 87 files changed, 8193 insertions(+), 3309 deletions(-)
  delete mode 100644 patches/eglibc/2_15/100-make-4.patch
  delete mode 100644 patches/eglibc/2_15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
  delete mode 100644 patches/eglibc/2_15/110-Fix-crossrpc-to-build-on-non-Linux.patch
@@ -4205,25 +4205,31 @@ index 0000000..e95ba20
 + static const char *valid_ti_nettypes[] =
 diff --git a/patches/eglibc/2_17/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch b/patches/eglibc/2_17/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
 new file mode 100644
-index 0000000..3891319
+index 0000000..3abbe5b
 --- /dev/null
 +++ b/patches/eglibc/2_17/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,113 @@
 +diff -urN a/Makefile.in b/Makefile.in
 +--- a/Makefile.in	2012-10-10 16:35:46.000000000 +0100
-++++ b/Makefile.in	2014-03-21 00:06:04.425324064 +0000
-+@@ -6,7 +6,7 @@
+++++ b/Makefile.in	2014-03-21 02:52:19.000000000 +0000
++@@ -1,4 +1,5 @@
++ srcdir = @srcdir@
+++sysheaders = @sysheaders@
++ 
++ # Uncomment the line below if you want to do parallel build.
++ # PARALLELMFLAGS = -j 4
++@@ -6,7 +7,7 @@
 + .PHONY: all install
 + 
 + all .DEFAULT:
 +-	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` $@
-++        $(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
+++	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
 + 
 + install:
 + 	LANGUAGE=C LC_ALL=C; export LANGUAGE LC_ALL; \
 +diff -urN a/Makerules b/Makerules
 +--- a/Makerules	2012-11-06 17:31:45.000000000 +0000
-++++ b/Makerules	2014-03-21 00:06:04.425324064 +0000
+++++ b/Makerules	2014-03-21 02:51:38.222280727 +0000
 +@@ -396,11 +396,29 @@
 + mv -f $(@:.d=.T) $@ $(generate-md5)
 + endef
@@ -4257,8 +4263,8 @@ index 0000000..3891319
 + endif
 + 
 +diff -urN a/configure b/configure
-+--- a/configure	2014-03-21 00:06:35.282467649 +0000
-++++ b/configure	2014-03-21 00:06:04.441990587 +0000
++--- a/configure	2014-03-21 02:51:13.488564746 +0000
+++++ b/configure	2014-03-21 02:51:38.222280727 +0000
 +@@ -629,6 +629,7 @@
 + libc_cv_gcc_static_libgcc
 + CXX_SYSINCLUDES
@@ -4268,8 +4274,8 @@ index 0000000..3891319
 + NM
 + AWK
 +diff -urN a/configure.in b/configure.in
-+--- a/configure.in	2014-03-21 00:06:35.282467649 +0000
-++++ b/configure.in	2014-03-21 00:06:04.441990587 +0000
++--- a/configure.in	2014-03-21 02:51:13.488564746 +0000
+++++ b/configure.in	2014-03-21 02:51:38.222280727 +0000
 +@@ -1042,6 +1042,7 @@
 +     done
 +   fi
@@ -4280,7 +4286,7 @@ index 0000000..3891319
 + 
 +diff -urN a/elf/Makefile b/elf/Makefile
 +--- a/elf/Makefile	2012-12-02 21:11:45.000000000 +0000
-++++ b/elf/Makefile	2014-03-21 00:06:04.441990587 +0000
+++++ b/elf/Makefile	2014-03-21 02:51:38.222280727 +0000
 +@@ -63,6 +63,15 @@
 + ld-map		= $(common-objpfx)ld.map
 + # eglibc: endif
@@ -10816,25 +10822,31 @@ index 0000000..f53db71
 + static const char *valid_ti_nettypes[] =
 diff --git a/patches/glibc/2.17/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch b/patches/glibc/2.17/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
 new file mode 100644
-index 0000000..fc76139
+index 0000000..af6d5fe
 --- /dev/null
 +++ b/patches/glibc/2.17/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,113 @@
 +diff -urN a/Makefile.in b/Makefile.in
-+--- a/Makefile.in	2014-03-21 00:31:12.211974711 +0000
-++++ b/Makefile.in	2014-03-21 00:31:20.355433877 +0000
-+@@ -6,7 +6,7 @@
++--- a/Makefile.in	2012-12-25 03:02:13.000000000 +0000
+++++ b/Makefile.in	2014-03-21 02:54:43.000000000 +0000
++@@ -1,4 +1,5 @@
++ srcdir = @srcdir@
+++sysheaders = @sysheaders@
++ 
++ # Uncomment the line below if you want to do parallel build.
++ # PARALLELMFLAGS = -j 4
++@@ -6,7 +7,7 @@
 + .PHONY: all install
 + 
 + all .DEFAULT:
 +-	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` $@
-++        $(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
+++	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
 + 
 + install:
 + 	LANGUAGE=C LC_ALL=C; export LANGUAGE LC_ALL; \
 +diff -urN a/Makerules b/Makerules
-+--- a/Makerules	2014-03-21 00:31:12.211974711 +0000
-++++ b/Makerules	2014-03-21 00:31:20.355433877 +0000
++--- a/Makerules	2012-12-25 03:02:13.000000000 +0000
+++++ b/Makerules	2014-03-21 02:53:42.364200543 +0000
 +@@ -392,11 +392,29 @@
 + mv -f $(@:.d=.T) $@ $(generate-md5)
 + endef
@@ -10868,8 +10880,8 @@ index 0000000..fc76139
 + endif
 + 
 +diff -urN a/configure b/configure
-+--- a/configure	2014-03-21 00:31:11.655299407 +0000
-++++ b/configure	2014-03-21 00:31:20.372101049 +0000
++--- a/configure	2014-03-21 02:53:20.140523442 +0000
+++++ b/configure	2014-03-21 02:53:42.364200543 +0000
 +@@ -629,6 +629,7 @@
 + libc_cv_gcc_static_libgcc
 + CXX_SYSINCLUDES
@@ -10879,8 +10891,8 @@ index 0000000..fc76139
 + NM
 + AWK
 +diff -urN a/configure.in b/configure.in
-+--- a/configure.in	2014-03-21 00:31:11.655299407 +0000
-++++ b/configure.in	2014-03-21 00:31:20.372101049 +0000
++--- a/configure.in	2014-03-21 02:53:20.140523442 +0000
+++++ b/configure.in	2014-03-21 02:53:42.364200543 +0000
 +@@ -1019,6 +1019,7 @@
 +     done
 +   fi
@@ -10890,8 +10902,8 @@ index 0000000..fc76139
 + AC_SUBST(CXX_SYSINCLUDES)
 + 
 +diff -urN a/elf/Makefile b/elf/Makefile
-+--- a/elf/Makefile	2014-03-21 00:31:12.195307850 +0000
-++++ b/elf/Makefile	2014-03-21 00:31:20.372101049 +0000
++--- a/elf/Makefile	2012-12-25 03:02:13.000000000 +0000
+++++ b/elf/Makefile	2014-03-21 02:53:42.377534099 +0000
 +@@ -63,6 +63,15 @@
 + ld-map		= $(common-objpfx)ld.map
 + endif

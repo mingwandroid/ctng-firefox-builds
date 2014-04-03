@@ -45,8 +45,14 @@ if [ "$OSTYPE" = "msys" ]; then
   [ -d "${MINGW_W64_PREFIX}" ]      || ( echo "ERROR: MINGW_W64_PREFIX of \"${MINGW_W64_PREFIX}\" not found. Do you have multiple mingw64-XXXXXXXX directories? Please delete old ones and then re-run." ; usage_exit 1 ) || exit 1
 fi
 
+set -e
+
 pushd ${BUILD_DIR}
   MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" ${CTNG_PREFIX}/bin/ct-ng ${STEP}+
+  if [ ! $? ] ; then
+    echo "ERROR: ct-ng ${STEP}+ failed!"
+    exit 1
+  popd
 popd
 
 if [ "$OSTYPE" = "msys" ]; then

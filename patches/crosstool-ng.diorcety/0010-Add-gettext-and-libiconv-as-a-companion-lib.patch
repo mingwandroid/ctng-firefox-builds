@@ -1,4 +1,4 @@
-From 5e7326ec6e14ab8ea3d4ae7a9d5f3a414ba7eed0 Mon Sep 17 00:00:00 2001
+From 655e9c7bbb1f7dc97d9381bc71816ff3206d1170 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 9 Feb 2014 18:44:25 +0000
 Subject: [PATCH 10/31] Add gettext and libiconv as a companion lib
@@ -145,7 +145,7 @@ index 8dc4e44..cc2e8d1 100644
  ## help EGLIBC (Embedded GLIBC) is a variant of the standard GNU GLIBC
  ## help that is designed to work well on embedded systems.  EGLIBC strives
 diff --git a/config/libc/glibc.in b/config/libc/glibc.in
-index 3fe7522..36f6dce 100644
+index 6cc3852..152513f 100644
 --- a/config/libc/glibc.in
 +++ b/config/libc/glibc.in
 @@ -4,6 +4,7 @@

@@ -1,4 +1,4 @@
-From 45284af58d8785cbf1ef947c8bc176a9202e8992 Mon Sep 17 00:00:00 2001
+From 49d5d3f763df9bbb2ceac7de4f78318ce581f455 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 11:40:10 +0000
 Subject: [PATCH 02/31] ISL MinGW-w64 build fix (lacks ffs declaration)
@@ -16,33 +16,12 @@ passes substitutes ffs for __builtin_ffs.
 
 Patches provided for both ISL 0.11.1 and 0.12.1
 ---
- config/companion_libs/isl.in                     |    5 +
  patches/isl/0.11.1/100-MinGW-w64-build-fix.patch | 5783 ++++++++++++++++++++++
  patches/isl/0.12.1/100-MinGW-w64-build-fix.patch |  113 +
- 3 files changed, 5901 insertions(+)
+ 2 files changed, 5896 insertions(+)
  create mode 100644 patches/isl/0.11.1/100-MinGW-w64-build-fix.patch
  create mode 100644 patches/isl/0.12.1/100-MinGW-w64-build-fix.patch
 
-diff --git a/config/companion_libs/isl.in b/config/companion_libs/isl.in
-index 51854c8..1fd54f9 100644
---- a/config/companion_libs/isl.in
-+++ b/config/companion_libs/isl.in
-@@ -10,6 +10,10 @@ config ISL_V_0_11_1
-     bool
-     prompt "0.11.1"
- 
-+config ISL_V_0_12_1
-+    bool
-+    prompt "0.12.1"
-+
- endchoice
- 
- config ISL_VERSION
-@@ -17,3 +21,4 @@ config ISL_VERSION
- # Don't remove next line
- # CT_INSERT_VERSION_STRING_BELOW
-     default "0.11.1" if ISL_V_0_11_1
-+    default "0.12.1" if ISL_V_0_12_1
 diff --git a/patches/isl/0.11.1/100-MinGW-w64-build-fix.patch b/patches/isl/0.11.1/100-MinGW-w64-build-fix.patch
 new file mode 100644
 index 0000000..f03da97

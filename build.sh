@@ -81,7 +81,7 @@ VENDOR_OSES_armv7a="unknown-linux-gnu"
 
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
-BUILD_DEBUGGABLE_windows="no"
+BUILD_DEBUGGABLE_windows="yes"
 BUILD_DEBUGGABLE_linux="yes"
 
 BUILD_DEBUGGERS_darwin="yes"
@@ -915,6 +915,7 @@ cross_clang_build()
       fi
       echo "CT_BUILD=\"${DUMPEDMACHINE}\""     >> ${CTNG_SAMPLE_CONFIG}
     fi
+    echo "CT_EXPERIMENTAL=y"                        >> ${CTNG_SAMPLE_CONFIG}
     if [ -n "$CT_BUILD_PREFIX" ]; then
       echo "CT_BUILD_PREFIX=\"${CT_BUILD_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
     fi
@@ -942,15 +943,16 @@ cross_clang_build()
         echo "CT_LLVM_V_3_4=y"         >> ${CTNG_SAMPLE_CONFIG}
       fi
     else
-      echo "CT_BINUTILS_binutils=y"            >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_BINUTILS_V_${BINUTILS_VERS_}=y" >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_BINUTILS_FOR_TARGET=y"          >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_binutils=y"                      >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_V_${BINUTILS_VERS_}=y"           >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_VERSION=\"${BINUTILS_VERSION}\"" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_FOR_TARGET=y"                    >> ${CTNG_SAMPLE_CONFIG}
       # The following may only work correctly for non-cross builds, but
       # actually it's in GCC that PLUGINS are likely to fail with cross.
       if [ "$STATIC_TOOLCHAIN" = "no" -a "$GNU_PLUGINS" = "yes" ]; then
-        echo "CT_BINUTILS_PLUGINS=y"           >> ${CTNG_SAMPLE_CONFIG}
+        echo "CT_BINUTILS_PLUGINS=y"                     >> ${CTNG_SAMPLE_CONFIG}
       else
-        echo "CT_BINUTILS_PLUGINS=n"           >> ${CTNG_SAMPLE_CONFIG}
+        echo "CT_BINUTILS_PLUGINS=n"                     >> ${CTNG_SAMPLE_CONFIG}
       fi
     fi
 

@@ -1,4 +1,4 @@
-From fb270a48601e2702246d2db228ffc80c627791ef Mon Sep 17 00:00:00 2001
+From 59d07220ac7bdca616825f782451ff5027e80ddf Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 23 Dec 2013 22:05:54 +0000
 Subject: [PATCH 16/31] Add GCC 4.8.2 patch for lrealpath.c
@@ -10,32 +10,50 @@ between the build system's idea of the paths
 and GCC's idea of them, so fix this back to
 / dirseps and keep the case as it was.
 ---
- ...dows-not-minding-non-existant-parent-dirs.patch |  3 +-
- ...realpath-no-force-lowercase-nor-backslash.patch | 34 ++++++++++++++++++++++
- 2 files changed, 36 insertions(+), 1 deletion(-)
+ ...realpath-no-force-lowercase-nor-backslash.patch | 67 ++++++++++++++++++++++
+ 1 file changed, 67 insertions(+)
  create mode 100644 patches/gcc/4.8.2/150-windows-lrealpath-no-force-lowercase-nor-backslash.patch
 
-diff --git a/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch b/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch
-index 21f5c81..f7a8455 100644
---- a/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch
-+++ b/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch
-@@ -1,4 +1,5 @@
----- /tmp/gcc-4.8.2/libcpp/files.c	2013-03-06 16:18:40.000000000 +0000
-+diff -urN gcc-4.8.2.orig/libcpp/files.c gcc-4.8.2/libcpp/files.c
-+--- gcc-4.8.2.orig/libcpp/files.c	2013-03-06 16:18:40.000000000 +0000
- +++ gcc-4.8.2/libcpp/files.c	2013-12-23 13:38:19.780368200 +0000
- @@ -30,6 +30,13 @@
-  #include "md5.h"
 diff --git a/patches/gcc/4.8.2/150-windows-lrealpath-no-force-lowercase-nor-backslash.patch b/patches/gcc/4.8.2/150-windows-lrealpath-no-force-lowercase-nor-backslash.patch
 new file mode 100644
-index 0000000..37c6ef2
+index 0000000..dcc22ff
 --- /dev/null
 +++ b/patches/gcc/4.8.2/150-windows-lrealpath-no-force-lowercase-nor-backslash.patch
-@@ -0,0 +1,34 @@
-+diff -urN gcc-4.8.2.orig/libiberty/lrealpath.c gcc-4.8.2/libiberty/lrealpath.c
-+--- gcc-4.8.2.orig/libiberty/lrealpath.c	2013-12-21 20:21:26.446076700 +0000
-++++ gcc-4.8.2/libiberty/lrealpath.c	2013-12-22 02:56:54.800559500 +0000
-+@@ -138,15 +138,26 @@
+@@ -0,0 +1,67 @@
++From b1bcd92d101211407db1fbc8c5e8ffeedddab483 Mon Sep 17 00:00:00 2001
++From: Ray Donnelly <mingw.android@gmail.com>
++Date: Tue, 1 Apr 2014 23:26:36 +0100
++Subject: [PATCH 3/4] 2014-04-03  Ray Donnelly <mingw.android@gmail.com>
++
++Don't force lowercase, do use forwardslashes in lrealpath
++
++There is no need to convert to lowercase or backslashes in
++lrealpath. Via a registry key, the Windows kernel can be put
++into case sensitive mode for NFS paths and from my own
++experiments also works to a good degree for NTFS paths.
++
++A problem caused by transforming to lowercase is that it
++it causes embedded file paths to not match what was input, so
++for example, code that uses sed to replace these paths fails.
++A concrete example of this happens when building glibc as it
++processes .map files.
++
++Forwardslashes are also preferred over backslashes as Posix-y
++shells always use forwardslashes and ensuring they appear in
++place of backslashes causes less issues in build systems.
++
++libiberty/
++	* lrealpath.c (lrealpath): Don't force lowercase, do
++	use forwardslashes.
++---
++ libiberty/lrealpath.c | 19 +++++++++++++++----
++ 1 file changed, 15 insertions(+), 4 deletions(-)
++
++diff --git a/libiberty/lrealpath.c b/libiberty/lrealpath.c
++index b27c8de..2b3d4a9 100644
++--- a/libiberty/lrealpath.c
+++++ b/libiberty/lrealpath.c
++@@ -138,15 +138,26 @@ lrealpath (const char *filename)
 +   {
 +     char buf[MAX_PATH];
 +     char* basename;
@@ -49,8 +67,8 @@ index 0000000..37c6ef2
 +-	   Canonicalize to lowercase, using the codepage associated
 +-	   with the process locale.  */
 +-        CharLowerBuff (buf, len);
-++	/* Turn all back slashes back back into forward slashes
-++	   and don't make it all lowercase.
+++	/* Turn all back slashes back into forward slashes and
+++	   don't transform to lowercase.
 ++	   Rationale:
 ++	   Windows is as happy with / as it is with \. This will
 ++	   have been built using Cygwin, MSYS* or cross-compiled
@@ -61,11 +79,14 @@ index 0000000..37c6ef2
 ++	   software or external to it, e.g. processing map files
 ++	   with sed) work as expected.  */
 ++	slash = buf;
-++	while ((slash = strchr(slash,'\\')) !=  NULL)
+++	while ((slash = strchr(slash,'\\')) != NULL)
 ++	  *slash = '/';
 +         return strdup (buf);
 +       }
 +   }
++-- 
++1.9.0
++
 -- 
 1.9.0
 

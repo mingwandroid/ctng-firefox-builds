@@ -1,4 +1,4 @@
-From 33dcdf69d7108a10f3c62d7fe2d3616c627925c7 Mon Sep 17 00:00:00 2001
+From dd615524a5d382ab77eaace6862e4e56f223018a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 22 Dec 2013 03:00:07 +0000
 Subject: [PATCH 14/31] Add GCC 4.8.2 patch for pex-win32.c
@@ -8,20 +8,37 @@ there was a need to. This meant the 32k limit was being
 hit during builds of cross libgcc by both xgcc.exe and
 collect2.exe
 ---
- ...rguments-that-dont-need-it-in-pex-win32.c.patch | 86 ++++++++++++++++++++++
- 1 file changed, 86 insertions(+)
+ ...rguments-that-dont-need-it-in-pex-win32.c.patch | 106 +++++++++++++++++++++
+ 1 file changed, 106 insertions(+)
  create mode 100644 patches/gcc/4.8.2/130-dont-escape-arguments-that-dont-need-it-in-pex-win32.c.patch
 
 diff --git a/patches/gcc/4.8.2/130-dont-escape-arguments-that-dont-need-it-in-pex-win32.c.patch b/patches/gcc/4.8.2/130-dont-escape-arguments-that-dont-need-it-in-pex-win32.c.patch
 new file mode 100644
-index 0000000..e2a3fae
+index 0000000..b38052a
 --- /dev/null
 +++ b/patches/gcc/4.8.2/130-dont-escape-arguments-that-dont-need-it-in-pex-win32.c.patch
-@@ -0,0 +1,86 @@
-+diff -urN gcc-4.8.2.orig/libiberty/pex-win32.c gcc-4.8.2/libiberty/pex-win32.c
-+--- gcc-4.8.2.orig/libiberty/pex-win32.c	2013-12-21 20:21:26.446076700 +0000
-++++ gcc-4.8.2/libiberty/pex-win32.c	2013-12-22 02:56:54.800559500 +0000
-+@@ -340,17 +340,26 @@
+@@ -0,0 +1,106 @@
++From c48bb2589b94c1b772e99f794efed8dde7a67b19 Mon Sep 17 00:00:00 2001
++From: Ray Donnelly <mingw.android@gmail.com>
++Date: Tue, 1 Apr 2014 23:17:48 +0100
++Subject: [PATCH 1/4] 2014-04-03  Ray Donnelly <mingw.android@gmail.com>
++
++We only quote arguments that contain spaces, \n \t \v
++or " characters to prevent wasting 2 characters per
++argument of the CreateProcess() 32,768 limit.
++
++libiberty/
++	* pex-win32.c (argv_to_cmdline): Don't quote
++	args unnecessarily
++---
++ libiberty/pex-win32.c | 47 ++++++++++++++++++++++++++++++++++++++---------
++ 1 file changed, 38 insertions(+), 9 deletions(-)
++
++diff --git a/libiberty/pex-win32.c b/libiberty/pex-win32.c
++index eae72c5..c37fb9f 100644
++--- a/libiberty/pex-win32.c
+++++ b/libiberty/pex-win32.c
++@@ -340,17 +340,26 @@ argv_to_cmdline (char *const *argv)
 +   char *p;
 +   size_t cmdline_len;
 +   int i, j, k;
@@ -50,7 +67,7 @@ index 0000000..e2a3fae
 + 	  if (argv[i][j] == '"')
 + 	    {
 + 	      /* Escape preceeding backslashes.  */
-+@@ -362,16 +371,33 @@
++@@ -362,16 +371,33 @@ argv_to_cmdline (char *const *argv)
 + 	}
 +       /* Trailing backslashes also need to be escaped because they will be
 +          followed by the terminating quote.  */
@@ -63,7 +80,7 @@ index 0000000..e2a3fae
 ++        }
 +       cmdline_len += j;
 +-      cmdline_len += 3;  /* for leading and trailing quotes and space */
-++      cmdline_len += 1 + (needs_quotes<<1);  /* for leading and trailing quotes and space */
+++      cmdline_len += needs_quotes * 2 + 1;  /* for leading and trailing quotes and space */
 +     }
 +   cmdline = XNEWVEC (char, cmdline_len);
 +   p = cmdline;
@@ -88,7 +105,7 @@ index 0000000..e2a3fae
 +       for (j = 0; argv[i][j]; j++)
 + 	{
 + 	  if (argv[i][j] == '"')
-+@@ -382,9 +408,12 @@
++@@ -382,9 +408,12 @@ argv_to_cmdline (char *const *argv)
 + 	    }
 + 	  *p++ = argv[i][j];
 + 	}
@@ -104,6 +121,9 @@ index 0000000..e2a3fae
 +       *p++ = ' ';
 +     }
 +   p[-1] = '\0';
++-- 
++1.9.0
++
 -- 
 1.9.0
 

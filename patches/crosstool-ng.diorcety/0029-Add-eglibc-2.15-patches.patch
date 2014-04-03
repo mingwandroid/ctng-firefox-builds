@@ -1,4 +1,4 @@
-From 609f06601830c73377015804d28b591140b75547 Mon Sep 17 00:00:00 2001
+From de531fa610eb44c96928d36cd800346701a00509 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 18 Feb 2014 21:26:55 +0000
 Subject: [PATCH 29/31] Add eglibc 2.15 patches

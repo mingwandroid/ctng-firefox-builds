@@ -1,4 +1,4 @@
-From 360cadf820c4f57d45b0e083a9eecea5aefe1bcd Mon Sep 17 00:00:00 2001
+From ae644181dd5745e80d5377c5222e15382ae4c572 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 23 Dec 2013 13:41:25 +0000
 Subject: [PATCH 15/31] Add GCC 4.8.2 patch for files.c
@@ -10,19 +10,45 @@ open(), so if there are any '..' directories then take
 a more thurough code-path to check each dir in the chain
 exists.
 ---
- ...dows-not-minding-non-existant-parent-dirs.patch | 110 +++++++++++++++++++++
- 1 file changed, 110 insertions(+)
+ ...dows-not-minding-non-existant-parent-dirs.patch | 138 +++++++++++++++++++++
+ 1 file changed, 138 insertions(+)
  create mode 100644 patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch
 
 diff --git a/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch b/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch
 new file mode 100644
-index 0000000..21f5c81
+index 0000000..28a528d
 --- /dev/null
 +++ b/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch
-@@ -0,0 +1,110 @@
-+--- /tmp/gcc-4.8.2/libcpp/files.c	2013-03-06 16:18:40.000000000 +0000
-++++ gcc-4.8.2/libcpp/files.c	2013-12-23 13:38:19.780368200 +0000
-+@@ -30,6 +30,13 @@
+@@ -0,0 +1,138 @@
++From f67f599fc648d68b5caa60825c3ca34f395d90c9 Mon Sep 17 00:00:00 2001
++From: Ray Donnelly <mingw.android@gmail.com>
++Date: Tue, 1 Apr 2014 23:20:18 +0100
++Subject: [PATCH 2/4] 2014-04-03  Ray Donnelly <mingw.android@gmail.com>
++
++Make Windows 'path exists' semantics more Posix-like
++
++Windows does a short-circuit lookup of paths containing
++../ which means that:
++
++exists/doesnotexist/../file
++
++is considered to exist, while on Posix it is considered
++not to. The Posix semantics are relied upon when building
++glibc so any paths containing "../" are checked component
++wise.
++
++libcpp/
++	* files.c (open_file): Implement Posix existence
++	semantics for paths containing '../'
++---
++ libcpp/files.c | 86 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++ 1 file changed, 86 insertions(+)
++
++diff --git a/libcpp/files.c b/libcpp/files.c
++index 7e88778..9ea8caa 100644
++--- a/libcpp/files.c
+++++ b/libcpp/files.c
++@@ -30,6 +30,13 @@ along with this program; see the file COPYING3.  If not see
 + #include "md5.h"
 + #include <dirent.h>
 + 
@@ -36,7 +62,7 @@ index 0000000..21f5c81
 + /* Variable length record files on VMS will have a stat size that includes
 +    record control characters that won't be included in the read size.  */
 + #ifdef VMS
-+@@ -198,6 +205,49 @@
++@@ -198,6 +205,49 @@ static int pchf_save_compare (const void *e1, const void *e2);
 + static int pchf_compare (const void *d_p, const void *e_p);
 + static bool check_file_against_entries (cpp_reader *, _cpp_file *, bool);
 + 
@@ -45,7 +71,7 @@ index 0000000..21f5c81
 ++static int stat_st_mode_symlink (char const* path, struct stat* buf)
 ++{
 ++  WIN32_FILE_ATTRIBUTE_DATA attr;
-++  memset(buf,0,sizeof(*buf));
+++  memset(buf, 0, sizeof(*buf));
 ++  int err = GetFileAttributesExA (path, GetFileExInfoStandard, &attr) ? 0 : 1;
 ++  if (!err)
 ++    {
@@ -86,7 +112,7 @@ index 0000000..21f5c81
 + /* Given a filename in FILE->PATH, with the empty string interpreted
 +    as <stdin>, open it.
 + 
-+@@ -227,6 +277,43 @@
++@@ -227,6 +277,42 @@ open_file (_cpp_file *file)
 +     }
 +   else
 +     file->fd = open (file->path, O_RDONLY | O_NOCTTY | O_BINARY, 0666);
@@ -102,27 +128,26 @@ index 0000000..21f5c81
 ++  if (file->fd > 0)
 ++    {
 ++      char filepath[MAX_PATH];
-++      strncpy (filepath, file->path, sizeof(filepath) - 1);
-++      char* dirsep = &filepath[0];
-++      while ( (dirsep = strpbrk (dirsep, "\\")) != NULL)
+++      strncpy (filepath, file->path, MAX_PATH);
+++      filepath[MAX_PATH-1] = (char) 0;
+++      char *dirsep = &filepath[0];
+++      while ( (dirsep = strchr (dirsep, '\\')) != NULL)
 ++        *dirsep = '/';
-++      if (strstr(file->path, "/../"))
+++      if (strstr(filepath, "../"))
 ++	{
 ++	  dirsep = &filepath[0];
-++	  char dirsepc;
 ++	  /* Check each directory in the chain. */
-++	  while ( (dirsep = strpbrk (dirsep, "\\/")) != NULL)
+++	  while ( (dirsep = strchr (dirsep, '/')) != NULL)
 ++	    {
-++	      dirsepc = *(++dirsep);
-++	      *dirsep = '\0';
+++	      *dirsep = (char) 0;
 ++	      if (stat_st_mode_symlink (filepath, &file->st) == -1)
 ++	        {
-++	          *dirsep = dirsepc;
+++	          *dirsep = '/';
 ++	          close (file->fd);
 ++	          file->fd = -1;
 ++	          return false;
 ++	        }
-++	      *dirsep = dirsepc;
+++	      *dirsep = '/';
 ++	    }
 ++	}
 ++    }
@@ -130,6 +155,9 @@ index 0000000..21f5c81
 + 
 +   if (file->fd != -1)
 +     {
++-- 
++1.9.0
++
 -- 
 1.9.0
 

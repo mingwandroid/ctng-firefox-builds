@@ -4376,3 +4376,63 @@ x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter_ipv4/ipt_ecn.h [ di
 x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter_ipv4/ipt_ttl.h [ differs ip4t_HL_info vs ip4t_hl_info but both compile-guarded with '#ifndef _IP4T_HL_H' ]
 x86_64-unknown-linux-gnu/sysroot/usr/include/linux/netfilter_ipv6/ip6t_hl.h [ differs ip6t_HL_info vs ip6t_hl_info but both compile-guarded with '#ifndef _IP6T_HL_H' ]
 see also: http://comments.gmane.org/gmane.comp.security.firewalls.netfilter.devel/37373
+
+# Failing to build debug raspi compilers on Windows:
+# pushd /c/brd-d/.build/armv6hl-unknown-linux-gnueabi/build/build-binutils-host-x86_64-build_w64-mingw32/binutils
+# export PATH=/home/ray/ctng-firefox-builds/r-eglibc_V_2.18-x86_64-213be3fb-d/bin:/c/brd-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/c/brd-d/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH
+# /usr/bin/bash ./libtool --tag=CC   --mode=link x86_64-build_w64-mingw32-gcc -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wshadow -O0 -ggdb -pipe -m64 -save-temps=obj  -D__USE_MINGW_ANSI_STDIO=1 -D__USE_MINGW_ACCESS  -static-libstdc++ -static-libgcc -m64 -Wl,--stack,12582912 -o ranlib.exe ar.o is-ranlib.o arparse.o arlex.o arsup.o rename.o binemul.o emul_vanilla.o bucomm.o version.o filemode.o ../bfd/libbfd.la ../libiberty/libiberty.a   -lz
+# .. fails:
+# ../libiberty/libiberty.a(xmalloc.o): In function `xmalloc':
+# C:/brd-d/.build/src/binutils-2.24/libiberty/xmalloc.c:142: multiple definition of `xmalloc'
+# ar.o:C:\\brd-d\\.build\\armv6hl-unknown-linux-gnueabi\\build\\build-binutils-host-x86_64-build_w64-mingw32\\binutils/./.libs/lt-ar.c:322: first defined here
+# arparse.o: In function `yyparse':
+# C:\\brd-d\\.build\\armv6hl-unknown-linux-gnueabi\\build\\build-binutils-host-x86_64-build_w64-mingw32\\binutils/arparse.y:191: undefined reference to `verbose'
+# C:\\brd-d\\.build\\armv6hl-unknown-linux-gnueabi\\build\\build-binutils-host-x86_64-build_w64-mingw32\\binutils/arparse.y:191: undefined reference to `verbose'
+# arsup.o: In function `ar_directory_doer':
+# C:/brd-d/.build/src/binutils-2.24/binutils/arsup.c:99: undefined reference to `verbose'
+# arsup.o: In function `ar_directory':
+# C:/brd-d/.build/src/binutils-2.24/binutils/arsup.c:107: undefined reference to `open_inarch'
+# arsup.o: In function `prompt':
+# C:/brd-d/.build/src/binutils-2.24/binutils/arsup.c:134: undefined reference to `interactive'
+# arsup.o: In function `maybequit':
+# C:/brd-d/.build/src/binutils-2.24/binutils/arsup.c:144: undefined reference to `interactive'
+# arsup.o: In function `ar_addlib':
+# C:/brd-d/.build/src/binutils-2.24/binutils/arsup.c:237: undefined reference to `open_inarch'
+# arsup.o: In function `ar_list':
+# C:/brd-d/.build/src/binutils-2.24/binutils/arsup.c:424: undefined reference to `verbose'
+# arsup.o: In function `ar_extract':
+# C:/brd-d/.build/src/binutils-2.24/binutils/arsup.c:464: undefined reference to `extract_file'
+# collect2.exe: error: ld returned 1 exit status
+# ..
+# nm ar.o | grep xmalloc
+# 0000000000000616 T xmalloc
+
+# Whereas this works fine:
+# pushd /c/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-binutils-host-x86_64-build_w64-mingw32/binutils
+# /usr/bin/bash ./libtool --tag=CC   --mode=link x86_64-build_w64-mingw32-gcc -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wshadow -O2 -g -pipe -m64 -D__USE_MINGW_ANSI_STDIO=1 -D__USE_MINGW_ACCESS  -static-libstdc++ -static-libgcc -m64 -Wl,--stack,12582912 -o ranlib.exe ar.o is-ranlib.o arparse.o arlex.o arsup.o rename.o binemul.o emul_vanilla.o bucomm.o version.o filemode.o ../bfd/libbfd.la ../libiberty/libiberty.a   -lz
+# nm ar.o | grep xmalloc
+# U xmalloc
+# U xmalloc_set_program_name
+
+# I think optimisations to throw away unused things are all that makes it build normally.
+# open_inarch is interesting.
+# it is in:
+# C:\brd-d\.build\src\binutils-2.24\binutils\arsup.h : bfd *open_inarch (const char *archive_filename, const char *);
+# C:\brd-d\.build\src\binutils-2.24\binutils\ar.c : bfd * open_inarch (const char *archive_filename, const char *file)
+# ..
+# ar.o is compiled with: x86_64-build_w64-mingw32-gcc -DHAVE_CONFIG_H -I. -I/c/brd-d/.build/src/binutils-2.24/binutils  -I. -I/c/brd-d/.build/src/binutils-2.24/binutils -I../bfd -I/c/brd-d/.build/src/binutils-2.24/binutils/../bfd -I/c/brd-d/.build/src/binutils-2.24/binutils/../include -DLOCALEDIR=""/home/ray/ctng-firefox-builds/r-eglibc_V_2.18-x86_64-213be3fb-d/share/locale"" -Dbin_dummy_emulation=bin_vanilla_emulation  -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wshadow -O0 -ggdb -pipe -m64 -save-temps=obj  -D__USE_MINGW_ANSI_STDIO=1 -D__USE_MINGW_ACCESS -MT ar.o -MD -MP -MF .deps/ar.Tpo -c -o ar.o /c/brd-d/.build/src/binutils-2.24/binutils/ar.c
+# in the release build:
+# nm ar.o | grep open_inarch
+# 0000000000000bb0 T open_inarch
+# in the debug build:
+# nm ar.o | grep open_inarch
+# ... nothing
+# there's a load of symbols missing too:
+# release: nm ar.o | wc -l
+#          127
+# debug: nm ar.o | wc -l
+#        70
+# I think ar.o is built twice, once minimally and once fully, and for the debug build we never get to the full build.
+# .. just the one built from lt-ar.c probably.
+
+# .. Can't use --save-temps=obj (and maybe not any --save-temps) when building binutils.

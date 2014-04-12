@@ -1,0 +1,49 @@
+From 5506f71ff933de131dfd6caefc67897827222f03 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Sat, 12 Apr 2014 13:13:01 +0100
+Subject: [PATCH 02/38] config/target: Add support for Auto Float
+
+This options stops any options being passed to gcc's configure script about
+what float option to use (hw, sw, or softfp), hence letting gcc automatically
+decide for itself which option to use.
+
+This might be helpful for multilib configurations.
+
+This patch is originally based on a patch by: Cody P Schafer
+
+Signed-off-by: Bryan Hundven <bryanhundven@gmail.com>
+---
+ config/target.in | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/config/target.in b/config/target.in
+index 3182d23..4dbbbf0 100644
+--- a/config/target.in
++++ b/config/target.in
+@@ -299,6 +299,15 @@ choice
+     prompt "Floating point:"
+     depends on ARCH_SUPPORTS_WITH_FLOAT
+ 
++config ARCH_FLOAT_AUTO
++    bool
++    prompt "Auto (Let GCC decide)"
++    help
++     Instead of explicitly passing a float option, don't
++     pass any float options and let gcc figure it out.
++
++     For multilib configurations, this may help.
++
+ config ARCH_FLOAT_HW
+     bool
+     prompt "hardware (FPU)"
+@@ -367,6 +376,7 @@ config TARGET_LDFLAGS
+ config ARCH_FLOAT
+     string
+     default ""       if ! ARCH_SUPPORTS_WITH_FLOAT
++    default "auto"   if ARCH_FLOAT_AUTO
+     default "hard"   if ARCH_FLOAT_HW
+     default "soft"   if ARCH_FLOAT_SW
+     default "softfp" if ARCH_FLOAT_SOFTFP
+-- 
+1.9.0
+

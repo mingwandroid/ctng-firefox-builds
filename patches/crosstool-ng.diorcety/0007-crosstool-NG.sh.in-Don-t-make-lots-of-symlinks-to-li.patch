@@ -1,0 +1,67 @@
+From 748a32aca48e0e8274c767bea43ca3e7f4da9dc7 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Sat, 12 Apr 2014 13:18:15 +0100
+Subject: [PATCH 07/38] crosstool-NG.sh.in: Don't make lots of symlinks to lib
+ folder
+
+For 4 different folders:
+
+${CT_PREFIX_DIR}
+${CT_SYSROOT_DIR}
+${CT_SYSROOT_DIR}/usr
+${CT_PREFIX_DIR}/${CT_TARGET}
+
+.. symlinks from lib32 and lib64 to lib were created. This
+is a lot of symlinks and is untidy.
+
+They're likely not needed in any case, but for now, excluded
+for the multilib case only.
+
+Signed-off-by: Ray Donnelly <mingw.android@gmail.com>
+---
+ scripts/crosstool-NG.sh.in | 24 +++++++++++++-----------
+ 1 file changed, 13 insertions(+), 11 deletions(-)
+
+diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
+index f38cd6b..8a78896 100644
+--- a/scripts/crosstool-NG.sh.in
++++ b/scripts/crosstool-NG.sh.in
+@@ -341,22 +341,24 @@ if [ -z "${CT_RESTART}" ]; then
+         CT_Popd
+     fi
+ 
+-    # Since we're *not* multilib on the target side, we want all the
+-    # libraries to end up in "lib".  We create "lib64" (for 64-bit
++    # If we are *not* multilib on the target side, we want all the
++    # libraries to end up in "lib".  So create "lib64" (for 64-bit
+     # build or host architectures) and "lib32" (for 32-bit emulation
+     # on 64-bit) as symlinks to "lib".
+     #
+     # Not all of these symlinks are necessary, but better safe than
+     # sorry. They are summarily removed by build/internals.sh:do_finish.
+-    for d in                            \
+-        "${CT_PREFIX_DIR}"              \
+-        "${CT_SYSROOT_DIR}"             \
+-        "${CT_SYSROOT_DIR}/usr"         \
+-        "${CT_PREFIX_DIR}/${CT_TARGET}" \
+-    ; do
+-        CT_DoExecLog ALL ln -sf "lib" "${d}/lib32"
+-        CT_DoExecLog ALL ln -sf "lib" "${d}/lib64"
+-    done
++    if [ ! "${CT_MULTILIB}" = "y" ]; then
++        for d in                            \
++            "${CT_PREFIX_DIR}"              \
++            "${CT_SYSROOT_DIR}"             \
++            "${CT_SYSROOT_DIR}/usr"         \
++            "${CT_PREFIX_DIR}/${CT_TARGET}" \
++        ; do
++            CT_DoExecLog ALL ln -sf "lib" "${d}/lib32"
++            CT_DoExecLog ALL ln -sf "lib" "${d}/lib64"
++        done
++    fi
+ 
+     # Determine build system if not set by the user
+     if [ -z "${CT_BUILD}" ]; then
+-- 
+1.9.0
+

@@ -237,14 +237,13 @@ Where applicable multilib is always enabled."
 # This set of options are for the crosstool-ng build #
 ######################################################
 
-#option CTNG_SOURCE_URL      "mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-wip http://crosstool-ng.org/hg/crosstool-ng" \
-
-option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
+#option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
+option CTNG_SOURCE_URL      "mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-multilib http://crosstool-ng.org/hg/crosstool-ng" \
 "Specify the vcs, url and name suffix for the crosstool-ng to use.
 Should be one of:
 git{diorcety}:https://github.com/diorcety/crosstool-ng.git
   .. (for Yann Diorcet and my LLVM+Clang fork)
-mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-wip http://crosstool-ng.org/hg/crosstool-ng
+mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-multilib http://crosstool-ng.org/hg/crosstool-ng
   .. (for Bryan Hundven, Copy P Schafer and my multilib patch queue)
 hg{upstream}:http://crosstool-ng.org/hg/crosstool-ng
   .. (for Yann Morin's upstream project)

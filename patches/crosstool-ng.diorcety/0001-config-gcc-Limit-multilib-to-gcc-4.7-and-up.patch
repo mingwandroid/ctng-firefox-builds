@@ -1,0 +1,34 @@
+From 1a3bd998c7f47cb0adecb9c2aba0ad8e01260a33 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Sat, 12 Apr 2014 13:12:21 +0100
+Subject: [PATCH 01/38] config/gcc: Limit multilib to gcc 4.7 and up
+
+Signed-off-by: Bryan Hundven <bryanhundven@gmail.com>
+---
+ config/target.in | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/config/target.in b/config/target.in
+index 930876f..3182d23 100644
+--- a/config/target.in
++++ b/config/target.in
+@@ -63,6 +63,7 @@ comment "Generic target options"
+ config MULTILIB
+     bool
+     prompt "Build a multilib toolchain (READ HELP!!!)"
++    depends on CC_GCC_4_7_or_later 
+     help
+       If you say 'y' here, then the toolchain will also contain the C library
+       optimised for some variants of the selected architecture, besides the
+@@ -73,6 +74,8 @@ config MULTILIB
+       The list of variants is dependent on the architecture, and is hard-coded
+       in gcc, so it is not possible to say what variants to support, only
+       whether hard-coded variants should be supported or not.
++
++      Multilib currently is known to work with gcc-4.7 and greater.
+       
+       NOTE: The multilib feature in crosstool-NG is not well-tested.
+             Use at your own risk, and report success and/or failure.
+-- 
+1.9.0
+

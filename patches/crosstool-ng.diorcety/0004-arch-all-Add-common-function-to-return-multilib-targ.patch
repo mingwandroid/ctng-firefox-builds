@@ -1,0 +1,343 @@
+From 338dc837919d0147d8560bbd8d0b534b714ed92d Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Sat, 12 Apr 2014 13:16:01 +0100
+Subject: [PATCH 04/38] arch/all: Add common function to return multilib target
+
+This code was abstracted out of Cody P Schafer's multilib patch.
+It doesn't seem right having architecture dependent code in something generic
+like the (e)glibc-common script. So this patch breaks it out into
+scripts/build/arch/<arch>.sh in a function:
+
+  multilib_target_to_build="$(CT_DoArchMultilibTarget 'multi_flags' 'target-in')"
+
+Signed-off-by: Bryan Hundven <bryanhundven@gmail.com>
+Signed-off-by: Ray Donnelly <ray.donnelly@gmail.com>
+---
+ scripts/build/arch/alpha.sh      | 13 +++++++++++
+ scripts/build/arch/arm.sh        | 13 +++++++++++
+ scripts/build/arch/avr32.sh      | 13 +++++++++++
+ scripts/build/arch/blackfin.sh   | 13 +++++++++++
+ scripts/build/arch/m68k.sh       | 13 +++++++++++
+ scripts/build/arch/microblaze.sh | 13 +++++++++++
+ scripts/build/arch/mips.sh       | 13 +++++++++++
+ scripts/build/arch/powerpc.sh    | 28 ++++++++++++++++++++++
+ scripts/build/arch/s390.sh       | 20 ++++++++++++++++
+ scripts/build/arch/sh.sh         | 13 +++++++++++
+ scripts/build/arch/sparc.sh      | 13 +++++++++++
+ scripts/build/arch/x86.sh        | 50 ++++++++++++++++++++++++++++++++++++++++
+ 12 files changed, 215 insertions(+)
+
+diff --git a/scripts/build/arch/alpha.sh b/scripts/build/arch/alpha.sh
+index cf6d40d..cac7f74 100644
+--- a/scripts/build/arch/alpha.sh
++++ b/scripts/build/arch/alpha.sh
+@@ -4,3 +4,16 @@ CT_DoArchTupleValues () {
+     # The architecture part of the tuple:
+     CT_TARGET_ARCH="${CT_ARCH}${CT_ARCH_SUFFIX:-${CT_ARCH_ALPHA_VARIANT}}"
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    :;
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/arm.sh b/scripts/build/arch/arm.sh
+index 430bdde..bf88855 100644
+--- a/scripts/build/arch/arm.sh
++++ b/scripts/build/arch/arm.sh
+@@ -38,3 +38,16 @@ CT_DoArchTupleValues() {
+         CT_TARGET_SYS="${CT_TARGET_SYS}hf"
+     fi
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    :;
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/avr32.sh b/scripts/build/arch/avr32.sh
+index 2faf8d8..aafcab7 100644
+--- a/scripts/build/arch/avr32.sh
++++ b/scripts/build/arch/avr32.sh
+@@ -11,3 +11,16 @@ CT_DoArchTupleValues() {
+     CT_TARGET_SYS=none
+ 
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    :;
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/blackfin.sh b/scripts/build/arch/blackfin.sh
+index 768b07a..447616d 100644
+--- a/scripts/build/arch/blackfin.sh
++++ b/scripts/build/arch/blackfin.sh
+@@ -12,3 +12,16 @@ CT_DoArchTupleValues() {
+     CT_ARCH_WITH_FPU=
+     CT_ARCH_WITH_FLOAT=
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    :;
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/m68k.sh b/scripts/build/arch/m68k.sh
+index bf26d1b..e81953a 100644
+--- a/scripts/build/arch/m68k.sh
++++ b/scripts/build/arch/m68k.sh
+@@ -3,3 +3,16 @@
+ CT_DoArchTupleValues() {
+     :
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    :;
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/microblaze.sh b/scripts/build/arch/microblaze.sh
+index 456a6e3..1ee27b7 100644
+--- a/scripts/build/arch/microblaze.sh
++++ b/scripts/build/arch/microblaze.sh
+@@ -19,3 +19,16 @@ CT_DoArchTupleValues () {
+     esac
+ 
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    :;
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/mips.sh b/scripts/build/arch/mips.sh
+index 97a077f..a89d83d 100644
+--- a/scripts/build/arch/mips.sh
++++ b/scripts/build/arch/mips.sh
+@@ -19,3 +19,16 @@ CT_DoArchTupleValues() {
+     CT_ARCH_ABI_CFLAG="-mabi=${CT_ARCH_mips_ABI}"
+     CT_ARCH_WITH_ABI="--with-abi=${CT_ARCH_mips_ABI}"
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    :;
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/powerpc.sh b/scripts/build/arch/powerpc.sh
+index e5ad335..aae94b1 100644
+--- a/scripts/build/arch/powerpc.sh
++++ b/scripts/build/arch/powerpc.sh
+@@ -28,3 +28,31 @@ CT_DoArchTupleValues () {
+         CT_ARCH_CC_EXTRA_CONFIG="--enable-e500_double"
+     fi
+ }
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    local m32=false
++    local m64=false
++    local mlittle=false
++    local mbig=false
++
++    case "${multi_flags}" in
++        *-m32*)     m32=true ;;
++        *-m64*)     m64=true ;;
++        *-mbig*)    mbig=true ;;
++        *-mlittle*) mlittle=true ;;
++    esac
++
++    case "${target}" in
++        powerpc-*|powerpcle-*)      $m64 && target=${target/powerpc-/powerpc64-} ;;
++        powerpc64-*|powerpc64le-*)  $m32 && target=${target/powerpc64-/powerpc-} ;;
++    esac
++
++    # return the target
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/s390.sh b/scripts/build/arch/s390.sh
+index b4b8078..a63a918 100644
+--- a/scripts/build/arch/s390.sh
++++ b/scripts/build/arch/s390.sh
+@@ -6,3 +6,23 @@ CT_DoArchTupleValues() {
+         CT_TARGET_ARCH="s390x${CT_ARCH_SUFFIX}"
+     fi
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++    local -ah
++
++    local m31=false
++    local m64=false
++
++    case "${multi_flags}" in
++        *-m64*) m64=true ;;
++        *-m31*) m31=true ;;
++    esac
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/sh.sh b/scripts/build/arch/sh.sh
+index 7780e40..dc5136c 100644
+--- a/scripts/build/arch/sh.sh
++++ b/scripts/build/arch/sh.sh
+@@ -35,3 +35,16 @@ CT_DoArchTupleValues () {
+     esac
+     CT_ARCH_FLOAT_CFLAG=
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    :;
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/sparc.sh b/scripts/build/arch/sparc.sh
+index 6fa3877..95999a6 100644
+--- a/scripts/build/arch/sparc.sh
++++ b/scripts/build/arch/sparc.sh
+@@ -6,3 +6,16 @@ CT_DoArchTupleValues() {
+     fi
+ 
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    :;
++
++    echo "${target}"
++}
+diff --git a/scripts/build/arch/x86.sh b/scripts/build/arch/x86.sh
+index 69407db..7fbbffc 100644
+--- a/scripts/build/arch/x86.sh
++++ b/scripts/build/arch/x86.sh
+@@ -21,3 +21,53 @@ CT_DoArchTupleValues() {
+     fi
+     CT_TARGET_ARCH="${CT_TARGET_ARCH}${CT_ARCH_SUFFIX}"
+ }
++
++#------------------------------------------------------------------------------
++# Get multilib architecture-specific target
++# Usage: CT_DoArchMultilibTarget "multilib flags" "target tuple"
++CT_DoArchMultilibTarget ()
++{
++    local multi_flags="${1}"
++    local target="${2}"
++
++    # Ugly spagetti, but more readable then previously.
++    case "${multi_flags}" in
++        *-m32*)
++            case "${target}" in
++                # Switch target to i486-<vendor>-<os>-gnu if multi_flag is m32 and CT_TARGET is x86_64-<vendor>-<os>-gnu
++                x86_64-*) target=${target/#x86_64-/i486-} ;;
++            esac
++            ;;
++        *-m64*)
++            case "${target}" in
++                # Switch target to x86_64-<vendor>-<os>-gnu if multi_flag is m64 and CT_TARGET is x86_64-<vendor>-<os>-gnux32
++                x86_64-*gnux32) target=${target/%-gnux32/-gnu} ;;
++                # Switch target to x86_64-<vendor>-<os>-gnu if multi_flag is m64 and CT_TARGET is i[34567]86-<vendor>-<os>-gnu
++                i[34567]86-*) target=${target/#i[34567]86-/x86_64-} ;;
++            esac
++            ;;
++        *-mx32*)
++            case "${target}" in
++                # Invalid CT_TARGET: i[34567]86-<vendor>-<os>-gnux32 is invalid. Error out.
++                # Maybe next patch revision, I'll just check for this in crosstool-NG.sh.in or ct-ng.in.
++                i[34567]86-*gnux32)
++                    CT_DoLog ERROR "Invalid CT_TARGET: i[34567]86-<vendor>-<os>-gnux32 is invalid."
++                    CT_DoLog ERROR "CT_TARGET: ${CT_TARGET}"
++                    CT_Abort "Go read: https://wiki.debian.org/Multiarch/Tuples"
++                    ;;
++                # Switch target to x86_64-<vendor>-<os>-gnux32 if multi_flag is mx32 and CT_TARGET is x86_64-<vendor>-<os>-gnu
++                x86_64-*gnu) target=${target/%-gnu/-gnux32} ;;
++                # Switch target to x86_64-<vendor>-<os>-gnux32 if multi_flag is mx32 and CT_TARGET is i[34567]86-<vendor>-<os>-gnu
++                i[34567]86-*)
++                    target=${target/%-gnu/-gnux32}
++                    target=${target/#i[34567]86-/x86_64-}
++                    ;;
++            esac
++            ;;
++    esac
++
++    case "${target}" in
++    esac
++
++    echo "${target}"
++}
+-- 
+1.9.0
+

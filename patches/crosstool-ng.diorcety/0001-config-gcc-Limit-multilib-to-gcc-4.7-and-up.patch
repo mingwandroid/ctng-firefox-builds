@@ -1,7 +1,7 @@
-From 1a3bd998c7f47cb0adecb9c2aba0ad8e01260a33 Mon Sep 17 00:00:00 2001
+From 2e6793fb0e342b9b665676ef53f0c6217b9ded6b Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:12:21 +0100
-Subject: [PATCH 01/38] config/gcc: Limit multilib to gcc 4.7 and up
+Subject: [PATCH 01/37] config/gcc: Limit multilib to gcc 4.7 and up
 
 Signed-off-by: Bryan Hundven <bryanhundven@gmail.com>
 ---
@@ -30,5 +30,5 @@ index 930876f..3182d23 100644
        NOTE: The multilib feature in crosstool-NG is not well-tested.
              Use at your own risk, and report success and/or failure.
 -- 
-1.9.0
+1.9.2
 

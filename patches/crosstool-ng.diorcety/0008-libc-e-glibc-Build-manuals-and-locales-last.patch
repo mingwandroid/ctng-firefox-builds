@@ -1,7 +1,7 @@
-From bcf3bfe0b371c685e8c5c60e0cc99946fc0f8c03 Mon Sep 17 00:00:00 2001
+From 07c0d302595869199a5750be24bed1b81969baac Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:19:06 +0100
-Subject: [PATCH 08/38] libc/(e)glibc: Build manuals and locales last
+Subject: [PATCH 08/37] libc/(e)glibc: Build manuals and locales last
 
 Rather then building the manuals and locales for each multilib target, only
 build the manuals on the last multilib target.
@@ -89,5 +89,5 @@ index d8dbd91..95ab33e 100644
          fi
      fi # libc_full == y
 -- 
-1.9.0
+1.9.2
 

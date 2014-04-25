@@ -1,7 +1,7 @@
-From e2ea69e6f22206ea9cdaa829c9d4f741a4923192 Mon Sep 17 00:00:00 2001
+From 76614df53f3b15abf37bbf2cdf63f55bd3d0e410 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 18:22:19 +0000
-Subject: [PATCH 24/38] Add GCC 4.8.2 hack cp -p as ln -s issues
+Subject: [PATCH 23/37] Add GCC 4.8.2 hack cp -p as ln -s issues
 
 When building a multilib libgcc on Windows, cp -p is used
 but the semantics are quite different from those of ln -s
@@ -40,5 +40,5 @@ index 0000000..33f361d
 + SHLIB_LINK = $(CC) $(LIBGCC2_CFLAGS) -shared -nodefaultlibs \
 + 	$(SHLIB_LDFLAGS) \
 -- 
-1.9.0
+1.9.2
 

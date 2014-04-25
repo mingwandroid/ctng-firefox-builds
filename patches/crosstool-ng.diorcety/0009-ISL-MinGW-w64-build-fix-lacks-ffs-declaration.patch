@@ -1,7 +1,7 @@
-From 50e3742c84b8bae15e3babc462bb15cc91881b73 Mon Sep 17 00:00:00 2001
+From 53bc77b3cd86679214ec46cc3d466b3f8de74aae Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 11:40:10 +0000
-Subject: [PATCH 09/38] ISL MinGW-w64 build fix (lacks ffs declaration)
+Subject: [PATCH 09/37] ISL MinGW-w64 build fix (lacks ffs declaration)
 
 Backported from ISL project git repository:
 http://repo.or.cz/w/isl.git/commit/bf19b4da725deff1f109478e4f577b54e09d08e7
@@ -14,13 +14,16 @@ This problem only happens at -O0 as one of the optimization
 passes substitutes ffs for __builtin_ffs.
 </original-commit-msg>
 
-Patches provided for both ISL 0.11.1 and 0.12.1
+Patches provided for both ISL 0.11.1, 0.12.1 and a small bit missed
+from 0.12.2.
 ---
  patches/isl/0.11.1/100-MinGW-w64-build-fix.patch | 5783 ++++++++++++++++++++++
  patches/isl/0.12.1/100-MinGW-w64-build-fix.patch |  113 +
- 2 files changed, 5896 insertions(+)
+ patches/isl/0.12.2/100-MinGW-w64-build-fix.patch |   11 +
+ 3 files changed, 5907 insertions(+)
  create mode 100644 patches/isl/0.11.1/100-MinGW-w64-build-fix.patch
  create mode 100644 patches/isl/0.12.1/100-MinGW-w64-build-fix.patch
+ create mode 100644 patches/isl/0.12.2/100-MinGW-w64-build-fix.patch
 
 diff --git a/patches/isl/0.11.1/100-MinGW-w64-build-fix.patch b/patches/isl/0.11.1/100-MinGW-w64-build-fix.patch
 new file mode 100644
@@ -5930,6 +5933,23 @@ index 0000000..de969e1
 + 
 + static void swap_equality(struct isl_basic_map *bmap, int a, int b)
 + {
+diff --git a/patches/isl/0.12.2/100-MinGW-w64-build-fix.patch b/patches/isl/0.12.2/100-MinGW-w64-build-fix.patch
+new file mode 100644
+index 0000000..82a1161
+--- /dev/null
++++ b/patches/isl/0.12.2/100-MinGW-w64-build-fix.patch
+@@ -0,0 +1,11 @@
++diff -urN isl-0.12.2/isl_map_simplify.c isl-0.12.2.new/isl_map_simplify.c
++--- isl-0.12.2/isl_map_simplify.c	2014-01-12 11:34:13.000000000 +0000
+++++ isl-0.12.2.new/isl_map_simplify.c	2014-04-25 21:21:23.894599700 +0100
++@@ -18,6 +18,7 @@
++ #include "isl_tab.h"
++ #include <isl_space_private.h>
++ #include <isl_mat_private.h>
+++#include "isl_config.h"
++ 
++ static void swap_equality(struct isl_basic_map *bmap, int a, int b)
++ {
 -- 
-1.9.0
+1.9.2
 

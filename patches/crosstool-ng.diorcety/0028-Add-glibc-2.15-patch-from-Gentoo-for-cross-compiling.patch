@@ -1,7 +1,7 @@
-From 3c3123fd1948817205600730a0f9277c5fae1a71 Mon Sep 17 00:00:00 2001
+From b0cd9f0f0fc1ab9cb1a091b8caa1680d364ae11c Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 23 Jan 2014 20:31:22 +0000
-Subject: [PATCH 29/38] Add glibc 2.15 patch from Gentoo for cross compiling
+Subject: [PATCH 28/37] Add glibc 2.15 patch from Gentoo for cross compiling
 
 Url
 http://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo/src/patchsets/glibc/2.15/0095_all_glibc-2.15-ctors-dtors-test.patch
@@ -70,5 +70,5 @@ index 0000000..0d00a83
 + 	{ gsub(/\[ */, "[") }
 + 	$2 == ".ctors" || $2 == ".dtors" {
 -- 
-1.9.0
+1.9.2
 

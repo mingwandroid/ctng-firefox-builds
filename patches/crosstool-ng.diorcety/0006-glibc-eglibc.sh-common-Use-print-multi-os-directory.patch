@@ -1,7 +1,7 @@
-From 76f6c2f030e54655225b33f1f0adf5210255167c Mon Sep 17 00:00:00 2001
+From 21aa7e37359d1db717584d00b8f791fa86bd94fa Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:17:33 +0100
-Subject: [PATCH 06/38] glibc-eglibc.sh-common: Use --print-multi-os-directory
+Subject: [PATCH 06/37] glibc-eglibc.sh-common: Use --print-multi-os-directory
 
 GCC makes the distinction between:
 multilib (-print-multi-lib) and
@@ -213,5 +213,5 @@ index 29d8661..d8dbd91 100644
  
          if [ "${CT_BUILD_MANUALS}" = "y" ]; then
 -- 
-1.9.0
+1.9.2
 

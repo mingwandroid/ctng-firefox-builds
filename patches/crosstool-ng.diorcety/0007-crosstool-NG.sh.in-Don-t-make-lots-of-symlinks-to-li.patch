@@ -1,7 +1,7 @@
-From 748a32aca48e0e8274c767bea43ca3e7f4da9dc7 Mon Sep 17 00:00:00 2001
+From 14966342a4c9358ecc5c9f9c7f775f26340903bc Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:18:15 +0100
-Subject: [PATCH 07/38] crosstool-NG.sh.in: Don't make lots of symlinks to lib
+Subject: [PATCH 07/37] crosstool-NG.sh.in: Don't make lots of symlinks to lib
  folder
 
 For 4 different folders:
@@ -63,5 +63,5 @@ index f38cd6b..8a78896 100644
      # Determine build system if not set by the user
      if [ -z "${CT_BUILD}" ]; then
 -- 
-1.9.0
+1.9.2
 

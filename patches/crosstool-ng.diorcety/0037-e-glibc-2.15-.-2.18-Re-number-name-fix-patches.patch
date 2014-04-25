@@ -1,7 +1,7 @@
-From 205b8f7cc8fb716a1e22be206c3bab3f6c95b73b Mon Sep 17 00:00:00 2001
+From 43f6f75cf39f04f341b5deff00b9c3a63946b2ab Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 23 Feb 2014 14:44:23 +0000
-Subject: [PATCH 38/38] {e}glibc 2.15 .. 2.18: Re{number|name} + fix patches
+Subject: [PATCH 37/37] {e}glibc 2.15 .. 2.18: Re{number|name} + fix patches
 
 Mine are all from 200-290, those before are pre-existing
 and ones 300+ are other people's patches that I've added
@@ -12275,5 +12275,5 @@ index 0000000..9c5e1ff
 + LIBC_PROG_BINUTILS
 + 
 -- 
-1.9.0
+1.9.2
 

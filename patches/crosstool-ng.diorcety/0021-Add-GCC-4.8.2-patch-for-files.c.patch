@@ -1,4 +1,4 @@
-From dad1a9dbed4cf09b2c29677a5ffaad74e64d674e Mon Sep 17 00:00:00 2001
+From 2b45095993f6752eebdaeddcae59972e90dfe988 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 23 Dec 2013 13:41:25 +0000
 Subject: [PATCH 21/37] Add GCC 4.8.2 patch for files.c

@@ -1,4 +1,4 @@
-From b0cd9f0f0fc1ab9cb1a091b8caa1680d364ae11c Mon Sep 17 00:00:00 2001
+From c6fc87d327ad9713c430554d4308d53296df01c2 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 23 Jan 2014 20:31:22 +0000
 Subject: [PATCH 28/37] Add glibc 2.15 patch from Gentoo for cross compiling

@@ -1,7 +1,7 @@
-From 75fac97ae3165a96c01561cc2a1b7c6c851e52f3 Mon Sep 17 00:00:00 2001
+From 1be9a9ffb5a97e2cd46fc24cbe1578cc1f5937ce Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
-Date: Sun, 9 Feb 2014 18:44:25 +0000
-Subject: [PATCH 17/37] Add gettext and libiconv as a companion lib
+Date: Sat, 26 Apr 2014 14:15:21 +0100
+Subject: [PATCH 17/18] Add gettext and libiconv as a companion lib
 
 .. it's needed for the RPC stuff in {e}glibc.
 
@@ -19,8 +19,8 @@ iconv is avoided on Darwin.
  ...rclib_stdio.in.h-remove-gets-declarations.patch |  30 ++
  scripts/build/companion_libs/320-libiconv.sh       | 107 ++++++
  scripts/build/companion_libs/330-gettext.sh        | 131 ++++++++
- scripts/build/libc/glibc-eglibc.sh-common          |  18 +-
- 12 files changed, 783 insertions(+), 4 deletions(-)
+ scripts/build/libc/glibc-eglibc.sh-common          |  24 +-
+ 12 files changed, 789 insertions(+), 4 deletions(-)
  create mode 100644 config/companion_libs/gettext.in
  create mode 100644 config/companion_libs/libiconv.in
  create mode 100644 patches/gettext/0.18.2/110-Fix-linker-error-redefinition-of-vasprintf.patch
@@ -895,10 +895,30 @@ index 0000000..e74b877
 +
 +fi
 diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
-index 95ab33e..d388d23 100644
+index 95ab33e..b60c407 100644
 --- a/scripts/build/libc/glibc-eglibc.sh-common
 +++ b/scripts/build/libc/glibc-eglibc.sh-common
-@@ -397,10 +397,20 @@ do_libc_backend_once() {
+@@ -392,15 +392,30 @@ do_libc_backend_once() {
+             ;;
+     esac
+ 
++    case "$CT_BUILD" in
++        *mingw*)
++            # When installing headers on MinGW-w64, sunrpc needs gettext for building
++            # cross-rpcgen.
++            # used to parse the output of the C-preprocessor.
++            extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
++            extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic" )
++            ;;
++        *darwin*)
++            # .. same goes for Darwin.
++            extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
++            extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -lintl" )
++            ;;
++    esac
++
+     if [ "${libc_headers}" = "y" ]; then
+         CT_DoLog EXTRA "Installing C library headers"
  
          # use the 'install-headers' makefile target to install the
          # headers
@@ -906,16 +926,6 @@ index 95ab33e..d388d23 100644
 -                         install_root="${install_root}"             \
 -                         install-bootstrap-headers=yes              \
 -                         "${extra_make_args[@]}"                    \
-+        case "$CT_BUILD" in
-+            *mingw*)
-+                # When installing headers on MinGW-w64, sunrpc needs gettext for building
-+                # cross-rpcgen.
-+                # used to parse the output of the C-preprocessor.
-+                extra_make_args+=( BUILD_CPPFLAGS="-I${CT_BUILDTOOLS_PREFIX_DIR}/include/" )
-+                extra_make_args+=( BUILD_LDFLAGS="-L${CT_BUILDTOOLS_PREFIX_DIR}/lib -lintl" )
-+                ;;
-+        esac
-+
 +        CT_DoExecLog ALL make ${JOBSFLAGS}                                        \
 +                         install_root="${install_root}"                           \
 +                         install-bootstrap-headers=yes                            \
@@ -923,6 +933,14 @@ index 95ab33e..d388d23 100644
                           install-headers
  
          # For glibc, a few headers need to be manually installed
+@@ -468,6 +483,7 @@ do_libc_backend_once() {
+     fi # libc_headers == y
+ 
+     if [ "${libc_full}" = "y" ]; then
++
+         CT_DoLog EXTRA "Building C library"
+         CT_DoExecLog ALL make ${JOBSFLAGS}              \
+                               "${extra_make_args[@]}"   \
 -- 
 1.9.2
 

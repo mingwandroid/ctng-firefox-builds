@@ -1,7 +1,7 @@
-From 52383373253318761236c5cc18923175b8982052 Mon Sep 17 00:00:00 2001
+From 933281fd7ccea039cea3407b2a157a7569318a13 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:16:52 +0100
-Subject: [PATCH 05/37] libc/(e)glibc: Use common arch call to get multilib
+Subject: [PATCH 05/18] libc/(e)glibc: Use common arch call to get multilib
  targets
 
 The previous patch added the function 'CT_DoMultilibTarget()' to

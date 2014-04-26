@@ -1,7 +1,7 @@
-From a0d6e97188689154886b4f33dcb34a742b8943d9 Mon Sep 17 00:00:00 2001
+From 7123f1913b3e48aadd8efe1b4fcf255ccb70be64 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:13:01 +0100
-Subject: [PATCH 02/37] config/target: Add support for Auto Float
+Subject: [PATCH 02/18] config/target: Add support for Auto Float
 
 This options stops any options being passed to gcc's configure script about
 what float option to use (hw, sw, or softfp), hence letting gcc automatically

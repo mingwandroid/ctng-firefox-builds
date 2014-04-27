@@ -1,4 +1,4 @@
-From 56922a1cd07113746a8368a3e13f3f820536f2ca Mon Sep 17 00:00:00 2001
+From 1423bce9b8c67fa2c9fbe0c2f3d780e6ba2dd72a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 23 Feb 2014 14:44:23 +0000
 Subject: [PATCH 37/37] {e}glibc 2.15 .. 2.19: Re{number|name} + fix patches
@@ -38,97 +38,101 @@ MinGW-w64-cross-fixes-for-timezone-and-getconf
 and getconf (check for "nul" as well as "/dev/null")
 ---
  patches/eglibc/2_15/100-make-4.patch               |  24 --
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 318 -----------------
- .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 -------------
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 318 ---------------------
+ .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ----------------
  .../2_15/120-MSYS-Hack-elf-librtld.mk-gen.patch    |  62 ----
- ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 201 -----------
- patches/eglibc/2_15/140-MSYS-Hack-force-ln-s.patch |  39 --
- .../160-Remove-test-for-__builtin_expect.patch     |  91 -----
- ...tr-use-of-local-buffer-outside-its-extent.patch |  55 ---
+ ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 201 -------------
+ patches/eglibc/2_15/140-MSYS-Hack-force-ln-s.patch |  39 ---
+ .../160-Remove-test-for-__builtin_expect.patch     |  91 ------
+ ...tr-use-of-local-buffer-outside-its-extent.patch |  55 ----
  patches/eglibc/2_15/200-make-4.patch               |  24 ++
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 318 +++++++++++++++++
- .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 111 ++++++
- ...Rename-extensions-for-case-insensitive-fs.patch | 201 +++++++++++
- patches/eglibc/2_15/250-MSYS-Hack-force-ln-s.patch |  39 ++
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 318 +++++++++++++++++++++
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 113 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 201 +++++++++++++
+ patches/eglibc/2_15/250-MSYS-Hack-force-ln-s.patch |  39 +++
  .../2_15/260-cross-fix-rpc_types_h-include.patch   |  11 +
- ...-w64-cross-fixes-for-timezone-and-getconf.patch | 137 +++++++
- .../300-Remove-test-for-__builtin_expect.patch     |  76 ++++
- ...tr-use-of-local-buffer-outside-its-extent.patch |  55 +++
- ..._18-sunrpc-Makefile-for-cross-compilation.patch | 182 ++++++++++
+ ...-w64-cross-fixes-for-timezone-and-getconf.patch | 137 +++++++++
+ .../300-Remove-test-for-__builtin_expect.patch     |  76 +++++
+ ...tr-use-of-local-buffer-outside-its-extent.patch |  55 ++++
+ ..._18-sunrpc-Makefile-for-cross-compilation.patch | 182 ++++++++++++
  patches/eglibc/2_16/200-make-4.patch               |  24 ++
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 +++++++++++++
- .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 111 ++++++
- ...Rename-extensions-for-case-insensitive-fs.patch | 210 +++++++++++
- patches/eglibc/2_16/250-MSYS-Hack-force-ln-s.patch |  39 ++
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 ++++++++++++++++
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 113 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 249 ++++++++++++++++
+ patches/eglibc/2_16/250-MSYS-Hack-force-ln-s.patch |  39 +++
  patches/eglibc/2_17/200-make-4.patch               |  24 ++
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 +++++++++++++
- .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 113 ++++++
- ...Rename-extensions-for-case-insensitive-fs.patch | 395 +++++++++++++++++++++
- patches/eglibc/2_17/250-MSYS-Hack-force-ln-s.patch |  39 ++
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 ++++++++++++++++
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 115 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 250 ++++++++++++++++
+ patches/eglibc/2_17/250-MSYS-Hack-force-ln-s.patch |  39 +++
  patches/eglibc/2_18/100-make-4.patch               |  24 --
- .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 251 -------------
+ .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 251 ----------------
  .../2_18/120-MSYS-Hack-elf-librtld.mk-gen.patch    |  61 ----
- ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 238 -------------
- patches/eglibc/2_18/140-MSYS-Hack-force-ln-s.patch |  39 --
+ ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 238 ---------------
+ patches/eglibc/2_18/140-MSYS-Hack-force-ln-s.patch |  39 ---
  patches/eglibc/2_18/200-make-4.patch               |  24 ++
- .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 248 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++
- ...Rename-extensions-for-case-insensitive-fs.patch | 238 +++++++++++++
- patches/eglibc/2_18/250-MSYS-Hack-force-ln-s.patch |  39 ++
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 248 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 247 ++++++++++++++++
+ patches/eglibc/2_18/250-MSYS-Hack-force-ln-s.patch |  39 +++
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 248 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 247 ++++++++++++++++
+ patches/eglibc/2_19/250-MSYS-Hack-force-ln-s.patch |  39 +++
  patches/glibc/2.15/100-make-4.patch                |  24 --
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 -------------
- .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 -------------
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 ----------------
+ .../110-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ----------------
  .../2.15/120-MSYS-Hack-elf-librtld.mk-gen.patch    |  62 ----
- ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 201 -----------
- patches/glibc/2.15/140-MSYS-Hack-force-ln-s.patch  |  39 --
- .../150-0095_all_glibc-2.15-ctors-dtors-test.patch |  50 ---
- .../160-Remove-test-for-__builtin_expect.patch     |  74 ----
+ ...ame-oS-to-oSTATIC-for-case-insensitive-fs.patch | 201 -------------
+ patches/glibc/2.15/140-MSYS-Hack-force-ln-s.patch  |  39 ---
+ .../150-0095_all_glibc-2.15-ctors-dtors-test.patch |  50 ----
+ .../160-Remove-test-for-__builtin_expect.patch     |  74 -----
  .../170-100-fix_cpuid_h_check-from-OpenWrt.patch   |  22 --
- ...tr-use-of-local-buffer-outside-its-extent.patch |  35 --
+ ...tr-use-of-local-buffer-outside-its-extent.patch |  35 ---
  patches/glibc/2.15/200-make-4.patch                |  24 ++
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 +++++++++++++
- .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 113 ++++++
- ...Rename-extensions-for-case-insensitive-fs.patch | 210 +++++++++++
- patches/glibc/2.15/250-MSYS-Hack-force-ln-s.patch  |  39 ++
- .../300-0095_all_glibc-2.15-ctors-dtors-test.patch |  51 +++
- .../310-Remove-test-for-__builtin_expect.patch     |  74 ++++
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 ++++++++++++++++
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 113 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 210 ++++++++++++++
+ patches/glibc/2.15/250-MSYS-Hack-force-ln-s.patch  |  39 +++
+ .../300-0095_all_glibc-2.15-ctors-dtors-test.patch |  51 ++++
+ .../310-Remove-test-for-__builtin_expect.patch     |  74 +++++
  .../320-100-fix_cpuid_h_check-from-OpenWrt.patch   |  24 ++
- ...tr-use-of-local-buffer-outside-its-extent.patch |  35 ++
- ..._18-sunrpc-Makefile-for-cross-compilation.patch | 189 ++++++++++
- ...f-libgcc_s-and-libgcc_eh-when-building-gl.patch | 318 +++++++++++++++++
+ ...tr-use-of-local-buffer-outside-its-extent.patch |  35 +++
+ ..._18-sunrpc-Makefile-for-cross-compilation.patch | 189 ++++++++++++
+ ...f-libgcc_s-and-libgcc_eh-when-building-gl.patch | 318 +++++++++++++++++++++
  patches/glibc/2.16.0/100-make-4.patch              |  24 --
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 -------------
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 242 ----------------
  patches/glibc/2.16.0/200-make-4.patch              |  24 ++
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 +++++++++++++
- .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 113 ++++++
- ...Rename-extensions-for-case-insensitive-fs.patch | 249 +++++++++++++
- .../glibc/2.16.0/250-MSYS-Hack-force-ln-s.patch    |  39 ++
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 ++++++++++++++++
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 113 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 249 ++++++++++++++++
+ .../glibc/2.16.0/250-MSYS-Hack-force-ln-s.patch    |  39 +++
  patches/glibc/2.17/120-make-4.patch                |  24 --
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 -------------
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 ----------------
  patches/glibc/2.17/200-make-4.patch                |  24 ++
- ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 +++++++++++++
- .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 115 ++++++
- ...Rename-extensions-for-case-insensitive-fs.patch | 250 +++++++++++++
- patches/glibc/2.17/250-MSYS-Hack-force-ln-s.patch  |  39 ++
+ ...re-Default-to-CPP-CC--E-unless-overridden.patch | 253 ++++++++++++++++
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 247 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 115 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 250 ++++++++++++++++
+ patches/glibc/2.17/250-MSYS-Hack-force-ln-s.patch  |  39 +++
  ...a-ARM-Fix-clone-code-when-built-for-Thumb.patch |  44 +--
  ...ad_cond_broadcast-and-pthread_cond_signal.patch |  46 +--
  patches/glibc/2.18/120-make-4.patch                |  45 ---
  patches/glibc/2.18/200-make-4.patch                |  24 ++
- .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 248 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++
- ...Rename-extensions-for-case-insensitive-fs.patch | 247 +++++++++++++
- patches/glibc/2.18/250-MSYS-Hack-force-ln-s.patch  |  39 ++
- .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 248 +++++++++++++
- .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++
- ...Rename-extensions-for-case-insensitive-fs.patch | 247 +++++++++++++
- patches/glibc/2.19/250-MSYS-Hack-force-ln-s.patch  |  39 ++
- 91 files changed, 8785 insertions(+), 3309 deletions(-)
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 248 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 247 ++++++++++++++++
+ patches/glibc/2.18/250-MSYS-Hack-force-ln-s.patch  |  39 +++
+ .../220-Fix-crossrpc-to-build-on-non-Linux.patch   | 248 ++++++++++++++++
+ .../230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch | 118 ++++++++
+ ...Rename-extensions-for-case-insensitive-fs.patch | 247 ++++++++++++++++
+ patches/glibc/2.19/250-MSYS-Hack-force-ln-s.patch  |  39 +++
+ 95 files changed, 9346 insertions(+), 3309 deletions(-)
  delete mode 100644 patches/eglibc/2_15/100-make-4.patch
  delete mode 100644 patches/eglibc/2_15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
  delete mode 100644 patches/eglibc/2_15/110-Fix-crossrpc-to-build-on-non-Linux.patch
@@ -170,6 +174,10 @@ and getconf (check for "nul" as well as "/dev/null")
  create mode 100644 patches/eglibc/2_18/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
  create mode 100644 patches/eglibc/2_18/240-Rename-extensions-for-case-insensitive-fs.patch
  create mode 100644 patches/eglibc/2_18/250-MSYS-Hack-force-ln-s.patch
+ create mode 100644 patches/eglibc/2_19/220-Fix-crossrpc-to-build-on-non-Linux.patch
+ create mode 100644 patches/eglibc/2_19/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
+ create mode 100644 patches/eglibc/2_19/240-Rename-extensions-for-case-insensitive-fs.patch
+ create mode 100644 patches/eglibc/2_19/250-MSYS-Hack-force-ln-s.patch
  delete mode 100644 patches/glibc/2.15/100-make-4.patch
  delete mode 100644 patches/glibc/2.15/105-configure-Default-to-CPP-CC--E-unless-overridden.patch
  delete mode 100644 patches/glibc/2.15/110-Fix-crossrpc-to-build-on-non-Linux.patch
@@ -1913,13 +1921,13 @@ index 0000000..32ba3ef
 + static const char *valid_ti_nettypes[] =
 diff --git a/patches/eglibc/2_15/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch b/patches/eglibc/2_15/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
 new file mode 100644
-index 0000000..926a569
+index 0000000..599f7aa
 --- /dev/null
 +++ b/patches/eglibc/2_15/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
-@@ -0,0 +1,111 @@
+@@ -0,0 +1,113 @@
 +diff -urN a/configure b/configure
-+--- a/configure	2014-02-23 12:27:38.819159100 +0000
-++++ b/configure	2014-02-23 12:27:48.963447300 +0000
++--- a/configure	2014-04-27 01:03:05.863090200 +0100
+++++ b/configure	2014-04-27 01:03:45.506357600 +0100
 +@@ -706,6 +706,7 @@
 + libc_cv_gcc_static_libgcc
 + CXX_SYSINCLUDES
@@ -1929,8 +1937,8 @@ index 0000000..926a569
 + READELF
 + SED
 +diff -urN a/configure.in b/configure.in
-+--- a/configure.in	2014-02-23 12:27:38.819659200 +0000
-++++ b/configure.in	2014-02-23 12:27:48.965947600 +0000
++--- a/configure.in	2014-04-27 01:03:05.864090200 +0100
+++++ b/configure.in	2014-04-27 01:03:45.520358400 +0100
 +@@ -1133,6 +1133,7 @@
 +     done
 +   fi
@@ -1940,8 +1948,8 @@ index 0000000..926a569
 + AC_SUBST(CXX_SYSINCLUDES)
 + 
 +diff -urN a/elf/Makefile b/elf/Makefile
-+--- a/elf/Makefile	2014-02-23 12:27:38.986180300 +0000
-++++ b/elf/Makefile	2014-02-23 12:27:48.967947900 +0000
++--- a/elf/Makefile	2014-04-27 01:03:05.960095700 +0100
+++++ b/elf/Makefile	2014-04-27 01:03:45.523358600 +0100
 +@@ -146,6 +146,15 @@
 + ld-map		= $(common-objpfx)ld.map
 + # eglibc: endif
@@ -1978,9 +1986,9 @@ index 0000000..926a569
 + 	  */*.a) \
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
 +diff -urN a/Makefile.in b/Makefile.in
-+--- a/Makefile.in	2014-02-23 12:27:40.000309100 +0000
-++++ b/Makefile.in	2014-02-23 12:27:48.969448000 +0000
-+@@ -1,10 +1,11 @@
++--- a/Makefile.in	2014-04-27 01:03:06.646134900 +0100
+++++ b/Makefile.in	2014-04-27 01:04:20.059333900 +0100
++@@ -1,11 +1,12 @@
 + srcdir = @srcdir@
 ++sysheaders = @sysheaders@
 + 
@@ -1993,9 +2001,11 @@ index 0000000..926a569
 + 
 + install:
 + 	LANGUAGE=C LC_ALL=C; export LANGUAGE LC_ALL; \
++-	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` $@
+++	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
 +diff -urN a/Makerules b/Makerules
-+--- a/Makerules	2014-02-23 12:27:40.000809200 +0000
-++++ b/Makerules	2014-02-23 12:27:48.971448300 +0000
++--- a/Makerules	2014-04-27 01:03:06.646134900 +0100
+++++ b/Makerules	2014-04-27 01:03:45.527358800 +0100
 +@@ -402,11 +402,29 @@
 + mv -f $(@:.d=.T) $@ $(generate-md5)
 + endef
@@ -2030,13 +2040,13 @@ index 0000000..926a569
 + 
 diff --git a/patches/eglibc/2_15/240-Rename-extensions-for-case-insensitive-fs.patch b/patches/eglibc/2_15/240-Rename-extensions-for-case-insensitive-fs.patch
 new file mode 100644
-index 0000000..6fa0158
+index 0000000..4d5bdcb
 --- /dev/null
 +++ b/patches/eglibc/2_15/240-Rename-extensions-for-case-insensitive-fs.patch
 @@ -0,0 +1,201 @@
 +diff -urN a/ChangeLog b/ChangeLog
-+--- a/ChangeLog	2014-02-23 12:27:52.949453400 +0000
-++++ b/ChangeLog	2014-02-23 12:28:03.474790000 +0000
++--- a/ChangeLog	2014-04-27 01:08:14.134722300 +0100
+++++ b/ChangeLog	2014-04-27 01:08:47.198613400 +0100
 +@@ -1,3 +1,8 @@
 ++2014-01-22  Ray Donnelly  <mingw.android@gmail.com>
 ++
@@ -2047,8 +2057,8 @@ index 0000000..6fa0158
 + 
 +         * configure.in (AC_PROG_CPP): New definition.
 +diff -urN a/extra-lib.mk b/extra-lib.mk
-+--- a/extra-lib.mk	2014-02-23 12:27:53.494522700 +0000
-++++ b/extra-lib.mk	2014-02-23 12:28:03.476790200 +0000
++--- a/extra-lib.mk	2014-04-27 01:08:14.413738200 +0100
+++++ b/extra-lib.mk	2014-04-27 01:08:47.267617400 +0100
 +@@ -13,7 +13,7 @@
 + 
 + ifneq (,$($(lib)-static-only-routines))
@@ -2099,8 +2109,8 @@ index 0000000..6fa0158
 + 		      $(all-$(lib)-routines)))
 + 	$(build-extra-lib)
 +diff -urN a/Makeconfig b/Makeconfig
-+--- a/Makeconfig	2014-02-23 12:27:54.416639800 +0000
-++++ b/Makeconfig	2014-02-23 12:28:03.478290400 +0000
++--- a/Makeconfig	2014-04-27 01:08:14.950769000 +0100
+++++ b/Makeconfig	2014-04-27 01:08:47.269617500 +0100
 +@@ -508,7 +508,7 @@
 + # run the linked programs.
 + link-libc = -Wl,-rpath-link=$(rpath-link) \
@@ -2139,8 +2149,8 @@ index 0000000..6fa0158
 + 
 + # The assembler can generate debug information too.
 +diff -urN a/Makerules b/Makerules
-+--- a/Makerules	2014-02-23 12:27:54.418139900 +0000
-++++ b/Makerules	2014-02-23 12:28:03.480290700 +0000
++--- a/Makerules	2014-04-27 01:08:14.951769000 +0100
+++++ b/Makerules	2014-04-27 01:08:47.272617700 +0100
 +@@ -163,14 +163,14 @@
 + # We only generate these in the top-level makefile, to avoid any weirdness
 + # from subdir-specific makefile tweaks creeping in on an update.
@@ -2188,8 +2198,8 @@ index 0000000..6fa0158
 + 	) > $@.new
 + 	mv -f $@.new $@
 +diff -urN a/nptl/Makefile b/nptl/Makefile
-+--- a/nptl/Makefile	2014-02-23 12:27:54.665171300 +0000
-++++ b/nptl/Makefile	2014-02-23 12:28:03.482791000 +0000
++--- a/nptl/Makefile	2014-04-27 01:08:15.092777100 +0100
+++++ b/nptl/Makefile	2014-04-27 01:08:47.274617800 +0100
 +@@ -396,7 +396,7 @@
 + 
 + $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
@@ -2209,8 +2219,8 @@ index 0000000..6fa0158
 + 	) > $@.new
 + 	mv -f $@.new $@
 +diff -urN a/sysdeps/i386/i686/Makefile b/sysdeps/i386/i686/Makefile
-+--- a/sysdeps/i386/i686/Makefile	2014-02-23 12:27:55.704803300 +0000
-++++ b/sysdeps/i386/i686/Makefile	2014-02-23 12:28:03.483791100 +0000
++--- a/sysdeps/i386/i686/Makefile	2014-04-27 01:08:15.651809100 +0100
+++++ b/sysdeps/i386/i686/Makefile	2014-04-27 01:08:47.276617900 +0100
 +@@ -16,12 +16,12 @@
 + CFLAGS-.op += -Wa,-mtune=i686
 + CFLAGS-.og += -Wa,-mtune=i686
@@ -2227,8 +2237,8 @@ index 0000000..6fa0158
 ++ASFLAGS-.oSTATIC += -Wa,-mtune=i686
 + endif
 +diff -urN a/sysdeps/sparc/sparc32/sparcv9/Makefile b/sysdeps/sparc/sparc32/sparcv9/Makefile
-+--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-23 12:27:56.617419200 +0000
-++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-23 12:28:03.484791300 +0000
++--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-04-27 01:08:16.162838300 +0100
+++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-04-27 01:08:47.278618000 +0100
 +@@ -10,4 +10,4 @@
 + ASFLAGS-.op += -Wa,-Av9a
 + ASFLAGS-.og += -Wa,-Av9a
@@ -2803,13 +2813,13 @@ index 0000000..fa93ca1
 +   [GNU gettext.* \([0-9]*\.[0-9.]*\)],
 diff --git a/patches/eglibc/2_16/210-configure-Default-to-CPP-CC--E-unless-overridden.patch b/patches/eglibc/2_16/210-configure-Default-to-CPP-CC--E-unless-overridden.patch
 new file mode 100644
-index 0000000..8b217d0
+index 0000000..a950904
 --- /dev/null
 +++ b/patches/eglibc/2_16/210-configure-Default-to-CPP-CC--E-unless-overridden.patch
 @@ -0,0 +1,242 @@
 +diff -urN a/ChangeLog b/ChangeLog
-+--- a/ChangeLog	2014-02-23 12:57:20.763937400 +0000
-++++ b/ChangeLog	2014-02-23 12:58:32.256015700 +0000
++--- a/ChangeLog	2014-02-07 21:08:45.000000000 +0000
+++++ b/ChangeLog	2014-04-27 01:13:58.290406900 +0100
 +@@ -1,3 +1,8 @@
 ++2013-01-25  Thomas Schwinge  <thomas@codesourcery.com>
 ++
@@ -2820,8 +2830,8 @@ index 0000000..8b217d0
 + 
 + 	[BZ #16510]
 +diff -urN a/configure b/configure
-+--- a/configure	2014-02-23 12:57:20.776439000 +0000
-++++ b/configure	2014-02-23 13:04:56.835851100 +0000
++--- a/configure	2014-04-27 01:14:46.525165700 +0100
+++++ b/configure	2014-04-27 01:13:58.302407600 +0100
 +@@ -1562,43 +1562,6 @@
 + 
 + } # ac_fn_c_try_compile
@@ -3023,8 +3033,8 @@ index 0000000..8b217d0
 + # We need the C++ compiler only for testing.
 + ac_ext=cpp
 +diff -urN a/configure.in b/configure.in
-+--- a/configure.in	2014-02-23 12:57:20.776939000 +0000
-++++ b/configure.in	2014-02-23 12:57:43.338304000 +0000
++--- a/configure.in	2014-04-27 01:14:46.544166800 +0100
+++++ b/configure.in	2014-04-27 01:13:58.307407800 +0100
 +@@ -10,6 +10,23 @@
 +   [m4_divert_text([DEFAULTS],
 +     [ac_includes_default='/* none */'])])
@@ -3304,10 +3314,10 @@ index 0000000..33768d0
 + static const char *valid_ti_nettypes[] =
 diff --git a/patches/eglibc/2_16/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch b/patches/eglibc/2_16/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
 new file mode 100644
-index 0000000..30a2ad6
+index 0000000..8d8f9ca
 --- /dev/null
 +++ b/patches/eglibc/2_16/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
-@@ -0,0 +1,111 @@
+@@ -0,0 +1,113 @@
 +diff -urN a/configure b/configure
 +--- a/configure	2014-02-23 13:08:58.318515600 +0000
 ++++ b/configure	2014-02-23 13:09:22.363068800 +0000
@@ -3371,7 +3381,7 @@ index 0000000..30a2ad6
 +diff -urN a/Makefile.in b/Makefile.in
 +--- a/Makefile.in	2014-02-23 13:08:59.586676600 +0000
 ++++ b/Makefile.in	2014-02-23 13:09:22.377070600 +0000
-+@@ -1,10 +1,11 @@
++@@ -1,11 +1,12 @@
 + srcdir = @srcdir@
 ++sysheaders = @sysheaders@
 + 
@@ -3384,6 +3394,8 @@ index 0000000..30a2ad6
 + 
 + install:
 + 	LANGUAGE=C LC_ALL=C; export LANGUAGE LC_ALL; \
++-	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` $@
+++	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
 +diff -urN a/Makerules b/Makerules
 +--- a/Makerules	2014-02-23 13:08:59.587176700 +0000
 ++++ b/Makerules	2014-02-23 13:09:22.380071000 +0000
@@ -3421,13 +3433,13 @@ index 0000000..30a2ad6
 + 
 diff --git a/patches/eglibc/2_16/240-Rename-extensions-for-case-insensitive-fs.patch b/patches/eglibc/2_16/240-Rename-extensions-for-case-insensitive-fs.patch
 new file mode 100644
-index 0000000..1811114
+index 0000000..0639f2c
 --- /dev/null
 +++ b/patches/eglibc/2_16/240-Rename-extensions-for-case-insensitive-fs.patch
-@@ -0,0 +1,210 @@
+@@ -0,0 +1,249 @@
 +diff -urN a/ChangeLog b/ChangeLog
-+--- a/ChangeLog	2014-02-23 13:19:11.952437200 +0000
-++++ b/ChangeLog	2014-02-23 13:19:52.339565700 +0000
++--- a/ChangeLog	2014-04-27 01:15:47.515654200 +0100
+++++ b/ChangeLog	2014-04-27 01:16:51.834333000 +0100
 +@@ -1,3 +1,8 @@
 ++2014-01-22  Ray Donnelly  <mingw.android@gmail.com>
 ++
@@ -3439,7 +3451,7 @@ index 0000000..1811114
 +         * configure.in (AC_PROG_CPP): New definition.
 +diff -urN a/extra-lib.mk b/extra-lib.mk
 +--- a/extra-lib.mk	2012-05-26 18:46:57.000000000 +0100
-++++ b/extra-lib.mk	2014-02-23 13:19:52.343566200 +0000
+++++ b/extra-lib.mk	2014-04-27 01:16:51.848333800 +0100
 +@@ -13,7 +13,7 @@
 + 
 + ifneq (,$($(lib)-static-only-routines))
@@ -3490,8 +3502,8 @@ index 0000000..1811114
 + 		      $(all-$(lib)-routines)))
 + 	$(build-extra-lib)
 +diff -urN a/Makeconfig b/Makeconfig
-+--- a/Makeconfig	2014-02-23 13:19:02.228202300 +0000
-++++ b/Makeconfig	2014-02-23 13:19:52.349066900 +0000
++--- a/Makeconfig	2014-04-27 01:14:41.831897300 +0100
+++++ b/Makeconfig	2014-04-27 01:16:51.850333900 +0100
 +@@ -485,7 +485,7 @@
 + # run the linked programs.
 + link-libc-before-gnulib = -Wl,-rpath-link=$(rpath-link) \
@@ -3530,8 +3542,8 @@ index 0000000..1811114
 + 
 + # The assembler can generate debug information too.
 +diff -urN a/Makerules b/Makerules
-+--- a/Makerules	2014-02-23 13:19:24.293504300 +0000
-++++ b/Makerules	2014-02-23 13:19:52.363068700 +0000
++--- a/Makerules	2014-04-27 01:16:27.333931700 +0100
+++++ b/Makerules	2014-04-27 01:18:18.610296300 +0100
 +@@ -162,14 +162,14 @@
 + # We only generate these in the top-level makefile, to avoid any weirdness
 + # from subdir-specific makefile tweaks creeping in on an update.
@@ -3551,6 +3563,15 @@ index 0000000..1811114
 + 	mv -f $@T $@
 + endif
 + 
++@@ -354,7 +354,7 @@
++ # eglibc: endif # $(versioning) = yes
++ endif # sysd-sorted-done
++ 
++-# Generate .dT files as we compile.
+++# Generate .dTEMP files as we compile.
++ compile-mkdep-flags = -MD -MP -MF $@.dt -MT $@
++ compile-command.S = $(compile.S) $(OUTPUT_OPTION) $(compile-mkdep-flags)
++ compile-command.c = $(compile.c) $(OUTPUT_OPTION) $(compile-mkdep-flags)
 +@@ -453,7 +453,7 @@
 + # Bounded pointer thunks are only built for *.ob
 + elide-bp-thunks = $(addprefix $(bppfx),$(bp-thunks))
@@ -3560,6 +3581,15 @@ index 0000000..1811114
 + 				  $(routines) $(aux) $(sysdep_routines)) \
 + 		     $(elide-bp-thunks)
 + elide-routines.os += $(static-only-routines) $(elide-bp-thunks)
++@@ -687,7 +687,7 @@
++ 
++ +depfiles := $(sources:.c=.d) \
++ 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-objs:.os=.o))) \
++-	     $(patsubst %.oS,%.d,$(filter %.oS,$(extra-objs))) \
+++	     $(patsubst %.oSTATIC,%.d,$(filter %.oSTATIC,$(extra-objs))) \
++ 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-test-objs:.os=.o))) \
++ 	     $(addsuffix .d,$(tests) $(xtests) $(test-srcs))
++ ifeq ($(build-programs),yes)
 +@@ -995,7 +995,7 @@
 + install: $(inst_libdir)/libc.so
 + $(inst_libdir)/libc.so: $(common-objpfx)format.lds \
@@ -3580,7 +3610,7 @@ index 0000000..1811114
 + 	mv -f $@.new $@
 +diff -urN a/nptl/Makefile b/nptl/Makefile
 +--- a/nptl/Makefile	2012-06-22 16:11:15.000000000 +0100
-++++ b/nptl/Makefile	2014-02-23 13:19:52.375570300 +0000
+++++ b/nptl/Makefile	2014-04-27 01:16:51.855334200 +0100
 +@@ -391,7 +391,7 @@
 + 
 + $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
@@ -3601,7 +3631,7 @@ index 0000000..1811114
 + 	mv -f $@.new $@
 +diff -urN a/sysdeps/i386/i686/Makefile b/sysdeps/i386/i686/Makefile
 +--- a/sysdeps/i386/i686/Makefile	2010-03-13 18:20:12.000000000 +0000
-++++ b/sysdeps/i386/i686/Makefile	2014-02-23 13:19:52.382571100 +0000
+++++ b/sysdeps/i386/i686/Makefile	2014-04-27 01:16:51.857334300 +0100
 +@@ -16,12 +16,12 @@
 + CFLAGS-.op += -Wa,-mtune=i686
 + CFLAGS-.og += -Wa,-mtune=i686
@@ -3617,9 +3647,20 @@ index 0000000..1811114
 +-ASFLAGS-.oS += -Wa,-mtune=i686
 ++ASFLAGS-.oSTATIC += -Wa,-mtune=i686
 + endif
++diff -urN a/sysdeps/ieee754/ldbl-opt/Makefile b/sysdeps/ieee754/ldbl-opt/Makefile
++--- a/sysdeps/ieee754/ldbl-opt/Makefile	2012-05-26 18:46:57.000000000 +0100
+++++ b/sysdeps/ieee754/ldbl-opt/Makefile	2014-04-27 01:17:09.282331000 +0100
++@@ -49,6 +49,6 @@
++ libnldbl-routines = $(libnldbl-calls:%=nldbl-%)
++ libnldbl-inhibit-o = $(object-suffixes)
++ libnldbl-static-only-routines = $(libnldbl-routines)
++-extra-objs += $(addsuffix .oS, $(libnldbl-routines))
+++extra-objs += $(addsuffix .oSTATIC, $(libnldbl-routines))
++ 
++ endif
 +diff -urN a/sysdeps/sparc/sparc32/sparcv9/Makefile b/sysdeps/sparc/sparc32/sparcv9/Makefile
 +--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2012-03-21 20:25:11.000000000 +0000
-++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-23 13:19:52.383571300 +0000
+++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-04-27 01:16:51.858334400 +0100
 +@@ -11,12 +11,12 @@
 + ASFLAGS-.op += -Wa,-Av9d
 + ASFLAGS-.og += -Wa,-Av9d
@@ -3634,6 +3675,16 @@ index 0000000..1811114
 + ASFLAGS-.ob += -Wa,-Av9a
 +-ASFLAGS-.oS += -Wa,-Av9a
 ++ASFLAGS-.oSTATIC += -Wa,-Av9a
++ endif
++diff -urN a/sysdeps/sparc/sparc64/Makefile b/sysdeps/sparc/sparc64/Makefile
++--- a/sysdeps/sparc/sparc64/Makefile	2012-03-21 20:25:11.000000000 +0000
+++++ b/sysdeps/sparc/sparc64/Makefile	2014-04-27 01:17:17.436797400 +0100
++@@ -13,5 +13,5 @@
++ ASFLAGS-.op += -Wa,-Av9d
++ ASFLAGS-.og += -Wa,-Av9d
++ ASFLAGS-.ob += -Wa,-Av9d
++-ASFLAGS-.oS += -Wa,-Av9d
+++ASFLAGS-.oSTATIC += -Wa,-Av9d
 + endif
 diff --git a/patches/eglibc/2_16/250-MSYS-Hack-force-ln-s.patch b/patches/eglibc/2_16/250-MSYS-Hack-force-ln-s.patch
 new file mode 100644
@@ -4213,66 +4264,13 @@ index 0000000..e95ba20
 + static const char *valid_ti_nettypes[] =
 diff --git a/patches/eglibc/2_17/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch b/patches/eglibc/2_17/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
 new file mode 100644
-index 0000000..3abbe5b
+index 0000000..d445c8f
 --- /dev/null
 +++ b/patches/eglibc/2_17/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
-@@ -0,0 +1,113 @@
-+diff -urN a/Makefile.in b/Makefile.in
-+--- a/Makefile.in	2012-10-10 16:35:46.000000000 +0100
-++++ b/Makefile.in	2014-03-21 02:52:19.000000000 +0000
-+@@ -1,4 +1,5 @@
-+ srcdir = @srcdir@
-++sysheaders = @sysheaders@
-+ 
-+ # Uncomment the line below if you want to do parallel build.
-+ # PARALLELMFLAGS = -j 4
-+@@ -6,7 +7,7 @@
-+ .PHONY: all install
-+ 
-+ all .DEFAULT:
-+-	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` $@
-++	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
-+ 
-+ install:
-+ 	LANGUAGE=C LC_ALL=C; export LANGUAGE LC_ALL; \
-+diff -urN a/Makerules b/Makerules
-+--- a/Makerules	2012-11-06 17:31:45.000000000 +0000
-++++ b/Makerules	2014-03-21 02:51:38.222280727 +0000
-+@@ -396,11 +396,29 @@
-+ mv -f $(@:.d=.T) $@ $(generate-md5)
-+ endef
-+ 
-++# Hack for building on MSYS2 but using native host (e.g. MinGW-w64) compilers.
-++# suffix of w means Windows, and m means MSYS2.
-++uname_o := $(shell uname -o)
-++sysroot = $(shell echo `$(CC) -print-file-name="include"`)
-++ifneq (, $(findstring Msys, $(uname_o)))
-++common-objpfxw = $(shell cd $(common-objpfx); pwd -W)/
-++sysheadersw = $(shell cd $(sysheaders); pwd -W)
-++sysrootm = $(shell cd $(sysroot); pwd)
-++else
-++common-objpfxw = $(common-objpfx)
-++sysheadersw = $(sysheaders)
-++sysrootm = $(sysroot)
-++endif
-++
-+ ifneq (,$(objpfx))
-+ # Continuation lines here are dangerous because they introduce spaces!
-+ define sed-remove-objpfx
-+--e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfx)))@ $$(common-objpfx)@g' \
-+--e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfx)))@$$(common-objpfx)@g'
-++-e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfxw)))@ $$(common-objpfx)@g' \
-++-e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfxw)))@$$(common-objpfx)@g' \
-++-e 's@ $(subst .,\.,$(subst @,\@,$(sysheadersw)))@ $(sysheaders)@g' \
-++-e 's@^$(subst .,\.,$(subst @,\@,$(sysheadersw)))@$(sysheaders)@g' \
-++-e 's@ $(subst .,\.,$(subst @,\@,$(sysroot)))@ $(sysrootm)@g' \
-++-e 's@^$(subst .,\.,$(subst @,\@,$(sysroot)))@$(sysrootm)@g'
-+ endef
-+ endif
-+ 
+@@ -0,0 +1,115 @@
 +diff -urN a/configure b/configure
-+--- a/configure	2014-03-21 02:51:13.488564746 +0000
-++++ b/configure	2014-03-21 02:51:38.222280727 +0000
++--- a/configure	2014-04-27 01:31:56.021049500 +0100
+++++ b/configure	2014-04-27 01:32:13.790065900 +0100
 +@@ -629,6 +629,7 @@
 + libc_cv_gcc_static_libgcc
 + CXX_SYSINCLUDES
@@ -4282,8 +4280,8 @@ index 0000000..3abbe5b
 + NM
 + AWK
 +diff -urN a/configure.in b/configure.in
-+--- a/configure.in	2014-03-21 02:51:13.488564746 +0000
-++++ b/configure.in	2014-03-21 02:51:38.222280727 +0000
++--- a/configure.in	2014-04-27 01:31:56.021049500 +0100
+++++ b/configure.in	2014-04-27 01:32:13.799066400 +0100
 +@@ -1042,6 +1042,7 @@
 +     done
 +   fi
@@ -4293,8 +4291,8 @@ index 0000000..3abbe5b
 + AC_SUBST(CXX_SYSINCLUDES)
 + 
 +diff -urN a/elf/Makefile b/elf/Makefile
-+--- a/elf/Makefile	2012-12-02 21:11:45.000000000 +0000
-++++ b/elf/Makefile	2014-03-21 02:51:38.222280727 +0000
++--- a/elf/Makefile	2014-04-27 01:31:56.124055400 +0100
+++++ b/elf/Makefile	2014-04-27 01:32:13.802066600 +0100
 +@@ -63,6 +63,15 @@
 + ld-map		= $(common-objpfx)ld.map
 + # eglibc: endif
@@ -4330,15 +4328,70 @@ index 0000000..3abbe5b
 + 	    ;; \
 + 	  */*.a) \
 + 	    echo rtld-$${lib%%/*} += $$file ;; \
++diff -urN a/Makefile.in b/Makefile.in
++--- a/Makefile.in	2014-04-27 01:31:56.959103200 +0100
+++++ b/Makefile.in	2014-04-27 01:32:31.288066700 +0100
++@@ -1,4 +1,5 @@
++ srcdir = @srcdir@
+++sysheaders = @sysheaders@
++ 
++ # Uncomment the line below if you want to do parallel build.
++ # PARALLELMFLAGS = -j 4
++@@ -6,8 +7,8 @@
++ .PHONY: all install
++ 
++ all .DEFAULT:
++-	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` $@
+++	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
++ 
++ install:
++ 	LANGUAGE=C LC_ALL=C; export LANGUAGE LC_ALL; \
++-	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` $@
+++	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
++diff -urN a/Makerules b/Makerules
++--- a/Makerules	2014-04-27 01:31:56.959103200 +0100
+++++ b/Makerules	2014-04-27 01:32:13.806066800 +0100
++@@ -396,11 +396,29 @@
++ mv -f $(@:.d=.T) $@ $(generate-md5)
++ endef
++ 
+++# Hack for building on MSYS2 but using native host (e.g. MinGW-w64) compilers.
+++# suffix of w means Windows, and m means MSYS2.
+++uname_o := $(shell uname -o)
+++sysroot = $(shell echo `$(CC) -print-file-name="include"`)
+++ifneq (, $(findstring Msys, $(uname_o)))
+++common-objpfxw = $(shell cd $(common-objpfx); pwd -W)/
+++sysheadersw = $(shell cd $(sysheaders); pwd -W)
+++sysrootm = $(shell cd $(sysroot); pwd)
+++else
+++common-objpfxw = $(common-objpfx)
+++sysheadersw = $(sysheaders)
+++sysrootm = $(sysroot)
+++endif
+++
++ ifneq (,$(objpfx))
++ # Continuation lines here are dangerous because they introduce spaces!
++ define sed-remove-objpfx
++--e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfx)))@ $$(common-objpfx)@g' \
++--e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfx)))@$$(common-objpfx)@g'
+++-e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfxw)))@ $$(common-objpfx)@g' \
+++-e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfxw)))@$$(common-objpfx)@g' \
+++-e 's@ $(subst .,\.,$(subst @,\@,$(sysheadersw)))@ $(sysheaders)@g' \
+++-e 's@^$(subst .,\.,$(subst @,\@,$(sysheadersw)))@$(sysheaders)@g' \
+++-e 's@ $(subst .,\.,$(subst @,\@,$(sysroot)))@ $(sysrootm)@g' \
+++-e 's@^$(subst .,\.,$(subst @,\@,$(sysroot)))@$(sysrootm)@g'
++ endef
++ endif
++ 
 diff --git a/patches/eglibc/2_17/240-Rename-extensions-for-case-insensitive-fs.patch b/patches/eglibc/2_17/240-Rename-extensions-for-case-insensitive-fs.patch
 new file mode 100644
-index 0000000..c2f7d4d
+index 0000000..9b016c4
 --- /dev/null
 +++ b/patches/eglibc/2_17/240-Rename-extensions-for-case-insensitive-fs.patch
-@@ -0,0 +1,395 @@
+@@ -0,0 +1,250 @@
 +diff -urN a/ChangeLog b/ChangeLog
-+--- a/ChangeLog	2014-03-21 00:06:35.282467649 +0000
-++++ b/ChangeLog	2014-03-21 00:07:12.286373455 +0000
++--- a/ChangeLog	2014-04-27 01:26:45.189271000 +0100
+++++ b/ChangeLog	2014-04-27 01:27:00.384140100 +0100
 +@@ -1,3 +1,8 @@
 ++2014-01-22  Ray Donnelly  <mingw.android@gmail.com>
 ++
@@ -4348,116 +4401,9 @@ index 0000000..c2f7d4d
 + 2013-01-25  Thomas Schwinge  <thomas@codesourcery.com>
 + 
 +         * configure.in (AC_PROG_CPP): New definition.
-+diff -urN a/Makeconfig b/Makeconfig
-+--- a/Makeconfig	2012-11-06 17:31:45.000000000 +0000
-++++ b/Makeconfig	2014-03-21 00:07:12.303040181 +0000
-+@@ -453,7 +453,7 @@
-+ # run the linked programs.
-+ link-libc-before-gnulib = -Wl,-rpath-link=$(rpath-link) \
-+ 	    $(common-objpfx)libc.so$(libc.so-version) \
-+-	    $(common-objpfx)$(patsubst %,$(libtype.oS),c) \
-++	    $(common-objpfx)$(patsubst %,$(libtype.oSTATIC),c) \
-+ 	    $(as-needed) $(common-objpfx)elf/ld.so $(no-as-needed)
-+ link-libc = $(link-libc-before-gnulib) $(gnulib)
-+ link-libc-tests = $(link-libc-before-gnulib) $(gnulib-tests)
-+@@ -756,7 +756,7 @@
-+ # The compilation rules use $(CPPFLAGS-${SUFFIX}) and $(CFLAGS-${SUFFIX})
-+ # to pass different flags for each flavor.
-+ libtypes = $(foreach o,$(object-suffixes-for-libc),$(libtype$o))
-+-all-object-suffixes := .o .os .op .og .ob .oS
-++all-object-suffixes := .o .os .op .og .ob .oSTATIC
-+ object-suffixes :=
-+ CPPFLAGS-.o = $(pic-default)
-+ CFLAGS-.o = $(filter %frame-pointer,$(+cflags))
-+@@ -807,14 +807,14 @@
-+ 
-+ ifeq (yes,$(build-shared))
-+ # Build special library that contains the static-only routines for libc.
-+-object-suffixes-for-libc += .oS
-++object-suffixes-for-libc += .oSTATIC
-+ 
-+ # Must build the routines as PIC, though, because they can end up in (users')
-+ # shared objects.  We don't want to use CFLAGS-os because users may, for
-+ # example, make that processor-specific.
-+-CFLAGS-.oS = $(CFLAGS-.o) $(PIC-ccflag)
-+-CPPFLAGS-.oS = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
-+-libtype.oS = lib%_nonshared.a
-++CFLAGS-.oSTATIC = $(CFLAGS-.o) $(PIC-ccflag)
-++CPPFLAGS-.oSTATIC = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
-++libtype.oSTATIC = lib%_nonshared.a
-+ endif
-+ 
-+ # The assembler can generate debug information too.
-+diff -urN a/Makerules b/Makerules
-+--- a/Makerules	2014-03-21 00:07:34.306713947 +0000
-++++ b/Makerules	2014-03-21 00:07:12.303040181 +0000
-+@@ -162,14 +162,14 @@
-+ # We only generate these in the top-level makefile, to avoid any weirdness
-+ # from subdir-specific makefile tweaks creeping in on an update.
-+ $(common-objpfx)%.make: $(..)%.make.c $(..)Makerules $(common-before-compile)
-+-	rm -f $@T $@.dT
-++	rm -f $@T $@.dTEMP
-+ 	(echo '# Generated from $*.make.c by Makerules.'; \
-+ 	 $(CC) $(CFLAGS) $(CPPFLAGS) -E -DASSEMBLER $< \
-+-	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dT \
-++	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dTEMP \
-+ 	 | sed -n '/@@@/{s/@@@[	 ]*\(.*\)@@@/\1/;s/[	 ]*$$//p;}'; \
-+ 	 echo 'common-generated += $(@F)'; \
-+-	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dT; \
-+-	 rm -f $@.dT) > $@T
-++	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dTEMP; \
-++	 rm -f $@.dTEMP) > $@T
-+ 	mv -f $@T $@
-+ endif
-+ 
-+@@ -354,7 +354,7 @@
-+ # eglibc: endif # $(versioning) = yes
-+ endif # sysd-sorted-done
-+ 
-+-# Generate .dT files as we compile.
-++# Generate .dTEMP files as we compile.
-+ compile-mkdep-flags = -MD -MP -MF $@.dt -MT $@
-+ compile-command.S = $(compile.S) $(OUTPUT_OPTION) $(compile-mkdep-flags)
-+ compile-command.c = $(compile.c) $(OUTPUT_OPTION) $(compile-mkdep-flags)
-+@@ -453,7 +453,7 @@
-+ # Bounded pointer thunks are only built for *.ob
-+ elide-bp-thunks = $(addprefix $(bppfx),$(bp-thunks))
-+ 
-+-elide-routines.oS += $(filter-out $(static-only-routines),\
-++elide-routines.oSTATIC += $(filter-out $(static-only-routines),\
-+ 				  $(routines) $(aux) $(sysdep_routines)) \
-+ 		     $(elide-bp-thunks)
-+ elide-routines.os += $(static-only-routines) $(elide-bp-thunks)
-+@@ -687,7 +687,7 @@
-+ 
-+ +depfiles := $(sources:.c=.d) \
-+ 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-objs:.os=.o))) \
-+-	     $(patsubst %.oS,%.d,$(filter %.oS,$(extra-objs))) \
-++             $(patsubst %.oSTATIC,%.d,$(filter %.oSTATIC,$(extra-objs))) \
-+ 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-test-objs:.os=.o))) \
-+ 	     $(addsuffix .d,$(tests) $(xtests) $(test-srcs))
-+ ifeq ($(build-programs),yes)
-+@@ -995,7 +995,7 @@
-+ install: $(inst_libdir)/libc.so
-+ $(inst_libdir)/libc.so: $(common-objpfx)format.lds \
-+ 			$(common-objpfx)libc.so$(libc.so-version) \
-+-			$(inst_libdir)/$(patsubst %,$(libtype.oS),\
-++			$(inst_libdir)/$(patsubst %,$(libtype.oSTATIC),\
-+ 						  $(libprefix)$(libc-name)) \
-+ 			$(+force)
-+ 	(echo '/* GNU ld script';\
-+@@ -1003,7 +1003,7 @@
-+ 	 echo '   the static library, so try that secondarily.  */';\
-+ 	 cat $<; \
-+ 	 echo 'GROUP ( $(slibdir)/libc.so$(libc.so-version)' \
-+-	      '$(libdir)/$(patsubst %,$(libtype.oS),$(libprefix)$(libc-name))'\
-++	      '$(libdir)/$(patsubst %,$(libtype.oSTATIC),$(libprefix)$(libc-name))'\
-+ 	      ' AS_NEEDED (' $(slibdir)/$(rtld-installed-name) ') )' \
-+ 	) > $@.new
-+ 	mv -f $@.new $@
 +diff -urN a/extra-lib.mk b/extra-lib.mk
-+--- a/extra-lib.mk	2012-05-26 18:46:57.000000000 +0100
-++++ b/extra-lib.mk	2014-03-21 00:07:12.303040181 +0000
++--- a/extra-lib.mk	2014-04-27 01:26:45.738302400 +0100
+++++ b/extra-lib.mk	2014-04-27 01:27:00.405141300 +0100
 +@@ -13,7 +13,7 @@
 + 
 + ifneq (,$($(lib)-static-only-routines))
@@ -4507,9 +4453,116 @@ index 0000000..c2f7d4d
 + 	     $(filter $($(lib)-static-only-routines),\
 + 		      $(all-$(lib)-routines)))
 + 	$(build-extra-lib)
++diff -urN a/Makeconfig b/Makeconfig
++--- a/Makeconfig	2014-04-27 01:26:46.269332800 +0100
+++++ b/Makeconfig	2014-04-27 01:27:00.401141000 +0100
++@@ -453,7 +453,7 @@
++ # run the linked programs.
++ link-libc-before-gnulib = -Wl,-rpath-link=$(rpath-link) \
++ 	    $(common-objpfx)libc.so$(libc.so-version) \
++-	    $(common-objpfx)$(patsubst %,$(libtype.oS),c) \
+++	    $(common-objpfx)$(patsubst %,$(libtype.oSTATIC),c) \
++ 	    $(as-needed) $(common-objpfx)elf/ld.so $(no-as-needed)
++ link-libc = $(link-libc-before-gnulib) $(gnulib)
++ link-libc-tests = $(link-libc-before-gnulib) $(gnulib-tests)
++@@ -756,7 +756,7 @@
++ # The compilation rules use $(CPPFLAGS-${SUFFIX}) and $(CFLAGS-${SUFFIX})
++ # to pass different flags for each flavor.
++ libtypes = $(foreach o,$(object-suffixes-for-libc),$(libtype$o))
++-all-object-suffixes := .o .os .op .og .ob .oS
+++all-object-suffixes := .o .os .op .og .ob .oSTATIC
++ object-suffixes :=
++ CPPFLAGS-.o = $(pic-default)
++ CFLAGS-.o = $(filter %frame-pointer,$(+cflags))
++@@ -807,14 +807,14 @@
++ 
++ ifeq (yes,$(build-shared))
++ # Build special library that contains the static-only routines for libc.
++-object-suffixes-for-libc += .oS
+++object-suffixes-for-libc += .oSTATIC
++ 
++ # Must build the routines as PIC, though, because they can end up in (users')
++ # shared objects.  We don't want to use CFLAGS-os because users may, for
++ # example, make that processor-specific.
++-CFLAGS-.oS = $(CFLAGS-.o) $(PIC-ccflag)
++-CPPFLAGS-.oS = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
++-libtype.oS = lib%_nonshared.a
+++CFLAGS-.oSTATIC = $(CFLAGS-.o) $(PIC-ccflag)
+++CPPFLAGS-.oSTATIC = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
+++libtype.oSTATIC = lib%_nonshared.a
++ endif
++ 
++ # The assembler can generate debug information too.
++diff -urN a/Makerules b/Makerules
++--- a/Makerules	2014-04-27 01:26:46.269332800 +0100
+++++ b/Makerules	2014-04-27 01:27:00.403141200 +0100
++@@ -162,14 +162,14 @@
++ # We only generate these in the top-level makefile, to avoid any weirdness
++ # from subdir-specific makefile tweaks creeping in on an update.
++ $(common-objpfx)%.make: $(..)%.make.c $(..)Makerules $(common-before-compile)
++-	rm -f $@T $@.dT
+++	rm -f $@T $@.dTEMP
++ 	(echo '# Generated from $*.make.c by Makerules.'; \
++ 	 $(CC) $(CFLAGS) $(CPPFLAGS) -E -DASSEMBLER $< \
++-	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dT \
+++	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dTEMP \
++ 	 | sed -n '/@@@/{s/@@@[	 ]*\(.*\)@@@/\1/;s/[	 ]*$$//p;}'; \
++ 	 echo 'common-generated += $(@F)'; \
++-	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dT; \
++-	 rm -f $@.dT) > $@T
+++	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dTEMP; \
+++	 rm -f $@.dTEMP) > $@T
++ 	mv -f $@T $@
++ endif
++ 
++@@ -354,7 +354,7 @@
++ # eglibc: endif # $(versioning) = yes
++ endif # sysd-sorted-done
++ 
++-# Generate .dT files as we compile.
+++# Generate .dTEMP files as we compile.
++ compile-mkdep-flags = -MD -MP -MF $@.dt -MT $@
++ compile-command.S = $(compile.S) $(OUTPUT_OPTION) $(compile-mkdep-flags)
++ compile-command.c = $(compile.c) $(OUTPUT_OPTION) $(compile-mkdep-flags)
++@@ -453,7 +453,7 @@
++ # Bounded pointer thunks are only built for *.ob
++ elide-bp-thunks = $(addprefix $(bppfx),$(bp-thunks))
++ 
++-elide-routines.oS += $(filter-out $(static-only-routines),\
+++elide-routines.oSTATIC += $(filter-out $(static-only-routines),\
++ 				  $(routines) $(aux) $(sysdep_routines)) \
++ 		     $(elide-bp-thunks)
++ elide-routines.os += $(static-only-routines) $(elide-bp-thunks)
++@@ -687,7 +687,7 @@
++ 
++ +depfiles := $(sources:.c=.d) \
++ 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-objs:.os=.o))) \
++-	     $(patsubst %.oS,%.d,$(filter %.oS,$(extra-objs))) \
+++	     $(patsubst %.oSTATIC,%.d,$(filter %.oSTATIC,$(extra-objs))) \
++ 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-test-objs:.os=.o))) \
++ 	     $(addsuffix .d,$(tests) $(xtests) $(test-srcs))
++ ifeq ($(build-programs),yes)
++@@ -995,7 +995,7 @@
++ install: $(inst_libdir)/libc.so
++ $(inst_libdir)/libc.so: $(common-objpfx)format.lds \
++ 			$(common-objpfx)libc.so$(libc.so-version) \
++-			$(inst_libdir)/$(patsubst %,$(libtype.oS),\
+++			$(inst_libdir)/$(patsubst %,$(libtype.oSTATIC),\
++ 						  $(libprefix)$(libc-name)) \
++ 			$(+force)
++ 	(echo '/* GNU ld script';\
++@@ -1003,7 +1003,7 @@
++ 	 echo '   the static library, so try that secondarily.  */';\
++ 	 cat $<; \
++ 	 echo 'GROUP ( $(slibdir)/libc.so$(libc.so-version)' \
++-	      '$(libdir)/$(patsubst %,$(libtype.oS),$(libprefix)$(libc-name))'\
+++	      '$(libdir)/$(patsubst %,$(libtype.oSTATIC),$(libprefix)$(libc-name))'\
++ 	      ' AS_NEEDED (' $(slibdir)/$(rtld-installed-name) ') )' \
++ 	) > $@.new
++ 	mv -f $@.new $@
 +diff -urN a/nptl/Makefile b/nptl/Makefile
-+--- a/nptl/Makefile	2012-12-25 10:39:27.000000000 +0000
-++++ b/nptl/Makefile	2014-03-21 00:07:12.303040181 +0000
++--- a/nptl/Makefile	2014-04-27 01:26:46.407340600 +0100
+++++ b/nptl/Makefile	2014-04-27 01:27:00.407141400 +0100
 +@@ -397,7 +397,7 @@
 + 
 + $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
@@ -4529,8 +4582,8 @@ index 0000000..c2f7d4d
 + 	) > $@.new
 + 	mv -f $@.new $@
 +diff -urN a/sysdeps/i386/i686/Makefile b/sysdeps/i386/i686/Makefile
-+--- a/sysdeps/i386/i686/Makefile	2010-03-13 18:20:12.000000000 +0000
-++++ b/sysdeps/i386/i686/Makefile	2014-03-21 00:07:12.303040181 +0000
++--- a/sysdeps/i386/i686/Makefile	2014-04-27 01:26:48.889482600 +0100
+++++ b/sysdeps/i386/i686/Makefile	2014-04-27 01:27:00.409141500 +0100
 +@@ -16,12 +16,12 @@
 + CFLAGS-.op += -Wa,-mtune=i686
 + CFLAGS-.og += -Wa,-mtune=i686
@@ -4546,166 +4599,21 @@ index 0000000..c2f7d4d
 +-ASFLAGS-.oS += -Wa,-mtune=i686
 ++ASFLAGS-.oSTATIC += -Wa,-mtune=i686
 + endif
-+diff -urN a/sysdeps/ieee754/ldbl-opt/Makefile.autosave b/sysdeps/ieee754/ldbl-opt/Makefile.autosave
-+--- a/sysdeps/ieee754/ldbl-opt/Makefile.autosave	1970-01-01 01:00:00.000000000 +0100
-++++ b/sysdeps/ieee754/ldbl-opt/Makefile.autosave	2014-03-21 00:07:12.303040181 +0000
-+@@ -0,0 +1,153 @@
-++# The`long double' type is a distinct type we support if
-++# -mlong-double-128 option is used (or when it becomes a default
-++# when -mlong-double-64 is not used).
-++long-double-fcts = yes
-++ifeq (,$(filter -mlong-double-128,$(sysdep-CFLAGS)))
-++sysdep-CFLAGS += -mlong-double-128
-++endif
-++
-++ifeq ($(subdir),math)
-++libm-routines += s_nexttowardfd
-++routines += math_ldbl_opt nldbl-compat
-++
-++extra-libs += libnldbl
-++libnldbl-calls = asprintf dprintf fprintf fscanf iovfscanf \
-++		 obstack_printf obstack_vprintf printf scanf snprintf \
-++		 sprintf sscanf vasprintf vdprintf vfprintf \
-++		 vfscanf vprintf vscanf vsnprintf \
-++		 vsprintf vsscanf \
-++		 printf_fp printf_size \
-++		 fprintf_chk printf_chk snprintf_chk sprintf_chk \
-++		 vfprintf_chk vprintf_chk \
-++		 vsnprintf_chk vsprintf_chk \
-++		 asprintf_chk vasprintf_chk dprintf_chk \
-++		 vdprintf_chk obstack_printf_chk obstack_vprintf_chk \
-++		 syslog syslog_chk vsyslog vsyslog_chk \
-++		 strtold strtold_l strtoldint wcstold wcstold_l wcstoldint \
-++		 qecvt qfcvt qgcvt qecvt_r qfcvt_r \
-++		 isinf isnan finite signbit scalb log2 lgamma_r ceil \
-++		 significand acos asin atan atan2 cos sin tan cosh sinh \
-++		 tanh acosh asinh atanh exp log log10 exp10 pow10 expm1 \
-++		 log1p logb exp2 sqrt cbrt fabs floor j0 j1 y0 y1 erf erfc \
-++		 lgamma tgamma gamma rint nearbyint round trunc \
-++		 copysign fdim fmax fmin nextafter pow hypot fmod drem \
-++		 remainder ldexp scalbn frexp modf scalbln fma nan sincos \
-++		 jn yn ilogb remquo lrint lround llrint llround nexttowardf \
-++		 nexttoward conj cacos cacosh casin catan catanh ccos ccosh \
-++		 casinh cexp clog cproj csin csinh csqrt ctan ctanh cpow \
-++		 cabs carg cimag creal clog10 \
-++		 isoc99_scanf isoc99_fscanf isoc99_sscanf \
-++		 isoc99_vscanf isoc99_vfscanf isoc99_vsscanf
-++libnldbl-calls-$(OPTION_EGLIBC_LOCALE_CODE) += strfmon strfmon_l
-++libnldbl-calls-$(OPTION_POSIX_WIDE_CHAR_DEVICE_IO) += fwprintf fwscanf \
-++		 swprintf swscanf vfwprintf vfwscanf vswprintf vswscanf \
-++		 vwprintf vwscanf wprintf wscanf fwprintf_chk swprintf_chk \
-++		 vfwprintf_chk vswprintf_chk vwprintf_chk wprintf_chk \
-++		 isoc99_wscanf isoc99_fwscanf isoc99_swscanf \
-++		 isoc99_vwscanf isoc99_vfwscanf isoc99_vswscanf
-++libnldbl-calls += $(libnldbl-calls-y)
-++libnldbl-routines = $(libnldbl-calls:%=nldbl-%)
-++libnldbl-inhibit-o = $(object-suffixes)
-++libnldbl-static-only-routines = $(libnldbl-routines)
++diff -urN a/sysdeps/ieee754/ldbl-opt/Makefile b/sysdeps/ieee754/ldbl-opt/Makefile
++--- a/sysdeps/ieee754/ldbl-opt/Makefile	2014-04-27 01:26:49.040491300 +0100
+++++ b/sysdeps/ieee754/ldbl-opt/Makefile	2014-04-27 01:27:14.901970400 +0100
++@@ -49,7 +49,7 @@
++ libnldbl-routines = $(libnldbl-calls:%=nldbl-%)
++ libnldbl-inhibit-o = $(object-suffixes)
++ libnldbl-static-only-routines = $(libnldbl-routines)
++-extra-objs += $(addsuffix .oS, $(libnldbl-routines))
 ++extra-objs += $(addsuffix .oSTATIC, $(libnldbl-routines))
-++
-++CFLAGS-nldbl-acos.c = -fno-builtin-acosl
-++CFLAGS-nldbl-acosh.c = -fno-builtin-acoshl
-++CFLAGS-nldbl-asin.c = -fno-builtin-asinl
-++CFLAGS-nldbl-asinh.c = -fno-builtin-asinhl
-++CFLAGS-nldbl-atan.c = -fno-builtin-atanl
-++CFLAGS-nldbl-atan2.c = -fno-builtin-atan2l
-++CFLAGS-nldbl-atanh.c = -fno-builtin-atanhl
-++CFLAGS-nldbl-cabs.c = -fno-builtin-cabsl
-++CFLAGS-nldbl-cacos.c = -fno-builtin-cacosl
-++CFLAGS-nldbl-cacosh.c = -fno-builtin-cacoshl
-++CFLAGS-nldbl-carg.c = -fno-builtin-cargl
-++CFLAGS-nldbl-casin.c = -fno-builtin-casinl
-++CFLAGS-nldbl-casinh.c = -fno-builtin-casinhl
-++CFLAGS-nldbl-catan.c = -fno-builtin-catanl
-++CFLAGS-nldbl-catanh.c = -fno-builtin-catanhl
-++CFLAGS-nldbl-cbrt.c = -fno-builtin-cbrtl
-++CFLAGS-nldbl-ccos.c = -fno-builtin-ccosl
-++CFLAGS-nldbl-ccosh.c = -fno-builtin-ccoshl
-++CFLAGS-nldbl-ceil.c = -fno-builtin-ceill
-++CFLAGS-nldbl-cexp.c = -fno-builtin-cexpl
-++CFLAGS-nldbl-cimag.c = -fno-builtin-cimagl
-++CFLAGS-nldbl-clog.c = -fno-builtin-clogl
-++CFLAGS-nldbl-clog10.c = -fno-builtin-clog10l
-++CFLAGS-nldbl-conj.c = -fno-builtin-conjl
-++CFLAGS-nldbl-copysign.c = -fno-builtin-copysignl
-++CFLAGS-nldbl-cos.c = -fno-builtin-cosl
-++CFLAGS-nldbl-cosh.c = -fno-builtin-coshl
-++CFLAGS-nldbl-cpow.c = -fno-builtin-cpowl
-++CFLAGS-nldbl-cproj.c = -fno-builtin-cprojl
-++CFLAGS-nldbl-creal.c = -fno-builtin-creall
-++CFLAGS-nldbl-csin.c = -fno-builtin-csinl
-++CFLAGS-nldbl-csinh.c = -fno-builtin-csinhl
-++CFLAGS-nldbl-csqrt.c = -fno-builtin-csqrtl
-++CFLAGS-nldbl-ctan.c = -fno-builtin-ctanl
-++CFLAGS-nldbl-ctanh.c = -fno-builtin-ctanhl
-++CFLAGS-nldbl-drem.c = -fno-builtin-dreml
-++CFLAGS-nldbl-erf.c = -fno-builtin-erfl
-++CFLAGS-nldbl-erfc.c = -fno-builtin-erfcl
-++CFLAGS-nldbl-exp.c = -fno-builtin-expl
-++CFLAGS-nldbl-exp10.c = -fno-builtin-exp10l
-++CFLAGS-nldbl-exp2.c = -fno-builtin-exp2l
-++CFLAGS-nldbl-expm1.c = -fno-builtin-expm1l
-++CFLAGS-nldbl-fabs.c = -fno-builtin-fabsl
-++CFLAGS-nldbl-fdim.c = -fno-builtin-fdiml
-++CFLAGS-nldbl-finite.c = -fno-builtin-finitel
-++CFLAGS-nldbl-floor.c = -fno-builtin-floorl
-++CFLAGS-nldbl-fma.c = -fno-builtin-fmal
-++CFLAGS-nldbl-fmax.c = -fno-builtin-fmaxl
-++CFLAGS-nldbl-fmin.c = -fno-builtin-fminl
-++CFLAGS-nldbl-fmod.c = -fno-builtin-fmodl
-++CFLAGS-nldbl-frexp.c = -fno-builtin-frexpl
-++CFLAGS-nldbl-gamma.c = -fno-builtin-gammal
-++CFLAGS-nldbl-hypot.c = -fno-builtin-hypotl
-++CFLAGS-nldbl-ilogb.c = -fno-builtin-ilogbl
-++CFLAGS-nldbl-isinf.c = -fno-builtin-isinfl
-++CFLAGS-nldbl-isnan.c = -fno-builtin-isnanl
-++CFLAGS-nldbl-j0.c = -fno-builtin-j0l
-++CFLAGS-nldbl-j1.c = -fno-builtin-j1l
-++CFLAGS-nldbl-jn.c = -fno-builtin-jnl
-++CFLAGS-nldbl-ldexp.c = -fno-builtin-ldexpl
-++CFLAGS-nldbl-lgamma.c = -fno-builtin-lgammal
-++CFLAGS-nldbl-lgamma_r.c = -fno-builtin-lgammal_r
-++CFLAGS-nldbl-llrint.c = -fno-builtin-llrintl
-++CFLAGS-nldbl-llround.c = -fno-builtin-llroundl
-++CFLAGS-nldbl-log.c = -fno-builtin-logl
-++CFLAGS-nldbl-log10.c = -fno-builtin-log10l
-++CFLAGS-nldbl-log1p.c = -fno-builtin-log1pl
-++CFLAGS-nldbl-log2.c = -fno-builtin-log2l
-++CFLAGS-nldbl-logb.c = -fno-builtin-logbl
-++CFLAGS-nldbl-lrint.c = -fno-builtin-lrintl
-++CFLAGS-nldbl-lround.c = -fno-builtin-lroundl
-++CFLAGS-nldbl-modf.c = -fno-builtin-modfl
-++CFLAGS-nldbl-nan.c = -fno-builtin-nanl
-++CFLAGS-nldbl-nearbyint.c = -fno-builtin-nearbyintl
-++CFLAGS-nldbl-nextafter.c = -fno-builtin-nextafterl
-++CFLAGS-nldbl-nexttoward.c = -fno-builtin-nexttoward -fno-builtin-nexttowardl
-++CFLAGS-nldbl-nexttowardf.c = -fno-builtin-nexttowardf
-++CFLAGS-nldbl-pow.c = -fno-builtin-powl
-++CFLAGS-nldbl-pow10.c = -fno-builtin-pow10l
-++CFLAGS-nldbl-remainder.c = -fno-builtin-remainderl
-++CFLAGS-nldbl-remquo.c = -fno-builtin-remquol
-++CFLAGS-nldbl-rint.c = -fno-builtin-rintl
-++CFLAGS-nldbl-round.c = -fno-builtin-roundl
-++CFLAGS-nldbl-scalb.c = -fno-builtin-scalbl
-++CFLAGS-nldbl-scalbln.c = -fno-builtin-scalblnl
-++CFLAGS-nldbl-scalbn.c = -fno-builtin-scalbnl
-++CFLAGS-nldbl-significand.c = -fno-builtin-significandl
-++CFLAGS-nldbl-sin.c = -fno-builtin-sinl
-++CFLAGS-nldbl-sincos.c = -fno-builtin-sincosl
-++CFLAGS-nldbl-sinh.c = -fno-builtin-sinhl
-++CFLAGS-nldbl-sqrt.c = -fno-builtin-sqrtl
-++CFLAGS-nldbl-tan.c = -fno-builtin-tanl
-++CFLAGS-nldbl-tanh.c = -fno-builtin-tanhl
-++CFLAGS-nldbl-tgamma.c = -fno-builtin-tgammal
-++CFLAGS-nldbl-trunc.c = -fno-builtin-truncl
-++CFLAGS-nldbl-y0.c = -fno-builtin-y0l
-++CFLAGS-nldbl-y1.c = -fno-builtin-y1l
-++CFLAGS-nldbl-yn.c = -fno-builtin-ynl
-++
-++endif
++ 
++ CFLAGS-nldbl-acos.c = -fno-builtin-acosl
++ CFLAGS-nldbl-acosh.c = -fno-builtin-acoshl
 +diff -urN a/sysdeps/sparc/sparc32/sparcv9/Makefile b/sysdeps/sparc/sparc32/sparcv9/Makefile
-+--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2012-03-21 20:25:11.000000000 +0000
-++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-03-21 00:07:12.303040181 +0000
++--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-04-27 01:26:49.928542000 +0100
+++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-04-27 01:27:00.414141800 +0100
 +@@ -11,12 +11,12 @@
 + ASFLAGS-.op += -Wa,-Av9d
 + ASFLAGS-.og += -Wa,-Av9d
@@ -4722,8 +4630,8 @@ index 0000000..c2f7d4d
 ++ASFLAGS-.oSTATIC += -Wa,-Av9a
 + endif
 +diff -urN a/sysdeps/sparc/sparc64/Makefile b/sysdeps/sparc/sparc64/Makefile
-+--- a/sysdeps/sparc/sparc64/Makefile	2012-03-21 20:25:11.000000000 +0000
-++++ b/sysdeps/sparc/sparc64/Makefile	2014-03-21 00:07:12.303040181 +0000
++--- a/sysdeps/sparc/sparc64/Makefile	2014-04-27 01:26:49.958543800 +0100
+++++ b/sysdeps/sparc/sparc64/Makefile	2014-04-27 01:27:00.415141800 +0100
 +@@ -13,5 +13,5 @@
 + ASFLAGS-.op += -Wa,-Av9d
 + ASFLAGS-.og += -Wa,-Av9d
@@ -5829,13 +5737,13 @@ index 0000000..92e9993
 + 
 diff --git a/patches/eglibc/2_18/240-Rename-extensions-for-case-insensitive-fs.patch b/patches/eglibc/2_18/240-Rename-extensions-for-case-insensitive-fs.patch
 new file mode 100644
-index 0000000..0d6ebc9
+index 0000000..0b852b8
 --- /dev/null
 +++ b/patches/eglibc/2_18/240-Rename-extensions-for-case-insensitive-fs.patch
-@@ -0,0 +1,238 @@
+@@ -0,0 +1,247 @@
 +diff -urN a/extra-lib.mk b/extra-lib.mk
-+--- a/extra-lib.mk	2014-02-23 13:43:53.279041800 +0000
-++++ b/extra-lib.mk	2014-02-23 13:44:06.132674000 +0000
++--- a/extra-lib.mk	2014-04-27 01:35:35.609609300 +0100
+++++ b/extra-lib.mk	2014-04-27 01:35:52.378568400 +0100
 +@@ -13,7 +13,7 @@
 + 
 + ifneq (,$($(lib)-static-only-routines))
@@ -5897,8 +5805,8 @@ index 0000000..0d6ebc9
 + 		      $(all-$(lib)-routines)))
 + 	$(build-extra-lib)
 +diff -urN a/Makeconfig b/Makeconfig
-+--- a/Makeconfig	2014-02-23 13:43:54.209159900 +0000
-++++ b/Makeconfig	2014-02-23 13:44:06.135674300 +0000
++--- a/Makeconfig	2014-04-27 01:35:36.166641100 +0100
+++++ b/Makeconfig	2014-04-27 01:35:52.402569800 +0100
 +@@ -469,7 +469,7 @@
 + link-libc-tests-rpath-link = $(link-libc-rpath-link)
 + endif
@@ -5937,8 +5845,8 @@ index 0000000..0d6ebc9
 + 
 + # The assembler can generate debug information too.
 +diff -urN a/Makerules b/Makerules
-+--- a/Makerules	2014-02-23 13:43:54.210160000 +0000
-++++ b/Makerules	2014-02-23 13:44:06.140675000 +0000
++--- a/Makerules	2014-04-27 01:35:36.166641100 +0100
+++++ b/Makerules	2014-04-27 01:36:20.014149100 +0100
 +@@ -162,14 +162,14 @@
 + # We only generate these in the top-level makefile, to avoid any weirdness
 + # from subdir-specific makefile tweaks creeping in on an update.
@@ -5958,6 +5866,15 @@ index 0000000..0d6ebc9
 + 	mv -f $@T $@
 + endif
 + 
++@@ -331,7 +331,7 @@
++ # eglibc: endif # $(versioning) = yes
++ endif # sysd-sorted-done
++ 
++-# Generate .dT files as we compile.
+++# Generate .dTEMP files as we compile.
++ compile-mkdep-flags = -MD -MP -MF $@.dt -MT $@
++ compile-command.S = $(compile.S) $(OUTPUT_OPTION) $(compile-mkdep-flags)
++ compile-command.c = $(compile.c) $(OUTPUT_OPTION) $(compile-mkdep-flags)
 +@@ -427,7 +427,7 @@
 + endif
 + endif
@@ -5995,8 +5912,8 @@ index 0000000..0d6ebc9
 + 	) > $@.new
 + 	mv -f $@.new $@
 +diff -urN a/nptl/Makefile b/nptl/Makefile
-+--- a/nptl/Makefile	2014-02-23 13:43:54.471693200 +0000
-++++ b/nptl/Makefile	2014-02-23 13:44:06.143175300 +0000
++--- a/nptl/Makefile	2014-04-27 01:35:36.317649800 +0100
+++++ b/nptl/Makefile	2014-04-27 01:35:52.406570000 +0100
 +@@ -399,7 +399,7 @@
 + 
 + $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
@@ -6016,8 +5933,8 @@ index 0000000..0d6ebc9
 + 	) > $@.new
 + 	mv -f $@.new $@
 +diff -urN a/sysdeps/i386/i686/Makefile b/sysdeps/i386/i686/Makefile
-+--- a/sysdeps/i386/i686/Makefile	2014-02-23 13:43:56.947007500 +0000
-++++ b/sysdeps/i386/i686/Makefile	2014-02-23 13:44:06.145175500 +0000
++--- a/sysdeps/i386/i686/Makefile	2014-04-27 01:35:42.426999200 +0100
+++++ b/sysdeps/i386/i686/Makefile	2014-04-27 01:35:52.407570100 +0100
 +@@ -15,11 +15,11 @@
 + CFLAGS-.os += -Wa,-mtune=i686
 + CFLAGS-.op += -Wa,-mtune=i686
@@ -6033,8 +5950,8 @@ index 0000000..0d6ebc9
 ++ASFLAGS-.oSTATIC += -Wa,-mtune=i686
 + endif
 +diff -urN a/sysdeps/ieee754/ldbl-opt/Makefile b/sysdeps/ieee754/ldbl-opt/Makefile
-+--- a/sysdeps/ieee754/ldbl-opt/Makefile	2014-02-23 13:43:57.225542900 +0000
-++++ b/sysdeps/ieee754/ldbl-opt/Makefile	2014-02-23 13:44:06.146675700 +0000
++--- a/sysdeps/ieee754/ldbl-opt/Makefile	2014-04-27 01:35:42.612009800 +0100
+++++ b/sysdeps/ieee754/ldbl-opt/Makefile	2014-04-27 01:35:52.408570100 +0100
 +@@ -49,7 +49,7 @@
 + libnldbl-routines = $(libnldbl-calls:%=nldbl-%)
 + libnldbl-inhibit-o = $(object-suffixes)
@@ -6045,8 +5962,8 @@ index 0000000..0d6ebc9
 + CFLAGS-nldbl-acos.c = -fno-builtin-acosl
 + CFLAGS-nldbl-acosh.c = -fno-builtin-acoshl
 +diff -urN a/sysdeps/sparc/sparc32/sparcv9/Makefile b/sysdeps/sparc/sparc32/sparcv9/Makefile
-+--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-23 13:43:57.795615300 +0000
-++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-02-23 13:44:06.148175900 +0000
++--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-04-27 01:35:42.956029500 +0100
+++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-04-27 01:35:52.409570200 +0100
 +@@ -10,11 +10,11 @@
 + ASFLAGS-.os += -Wa,-Av9d
 + ASFLAGS-.op += -Wa,-Av9d
@@ -6062,8 +5979,8 @@ index 0000000..0d6ebc9
 ++ASFLAGS-.oSTATIC += -Wa,-Av9a
 + endif
 +diff -urN a/sysdeps/sparc/sparc64/Makefile b/sysdeps/sparc/sparc64/Makefile
-+--- a/sysdeps/sparc/sparc64/Makefile	2014-02-23 13:43:57.857123100 +0000
-++++ b/sysdeps/sparc/sparc64/Makefile	2014-02-23 13:44:06.149676100 +0000
++--- a/sysdeps/sparc/sparc64/Makefile	2014-04-27 01:35:42.993031600 +0100
+++++ b/sysdeps/sparc/sparc64/Makefile	2014-04-27 01:35:52.410570200 +0100
 +@@ -12,5 +12,5 @@
 + ASFLAGS-.os += -Wa,-Av9d
 + ASFLAGS-.op += -Wa,-Av9d
@@ -6101,6 +6018,682 @@ index 0000000..d130e35
 +--- a/configure.in	2014-02-23 13:44:11.481853200 +0000
 ++++ b/configure.in	2014-02-23 13:44:24.726035000 +0000
 +@@ -971,6 +971,15 @@
++   INSTALL='\$(..)./scripts/install-sh -c'
++ fi
++ AC_PROG_LN_S
+++# Even though 'ln -s' doesn't work right in MSYS2, it works enough for
+++# eglibc, whereas cp -r doesn't.
+++case "$build_os" in
+++*mingw*)
+++  as_ln_s='ln -s'
+++  LN_S=$as_ln_s
+++  AC_MSG_WARN(Hacked as_ln_s and LN_S to 'ln -s' for MSYS2)
+++  ;;
+++esac
++ 
++ LIBC_PROG_BINUTILS
++ 
+diff --git a/patches/eglibc/2_19/220-Fix-crossrpc-to-build-on-non-Linux.patch b/patches/eglibc/2_19/220-Fix-crossrpc-to-build-on-non-Linux.patch
+new file mode 100644
+index 0000000..5ff2b16
+--- /dev/null
++++ b/patches/eglibc/2_19/220-Fix-crossrpc-to-build-on-non-Linux.patch
+@@ -0,0 +1,248 @@
++diff -urN a/sunrpc/rpc/types.h b/sunrpc/rpc/types.h
++--- a/sunrpc/rpc/types.h	2013-10-18 22:33:25.000000000 +0100
+++++ b/sunrpc/rpc/types.h	2014-04-27 01:42:33.526512800 +0100
++@@ -74,6 +74,7 @@
++ # define __daddr_t_defined
++ #endif
++ 
+++#ifdef __linux__
++ #ifndef __u_char_defined
++ typedef __u_char u_char;
++ typedef __u_short u_short;
++@@ -89,11 +90,14 @@
++ typedef __caddr_t caddr_t;
++ # define __daddr_t_defined
++ #endif
+++#endif
++ 
++ #include <sys/time.h>
++ #include <sys/param.h>
++ 
+++#ifndef _WIN32
++ #include <netinet/in.h>
+++#endif
++ 
++ #ifndef INADDR_LOOPBACK
++ #define       INADDR_LOOPBACK         (u_long)0x7F000001
++diff -urN a/sunrpc/rpc_main.c b/sunrpc/rpc_main.c
++--- a/sunrpc/rpc_main.c	2013-11-06 23:03:08.000000000 +0000
+++++ b/sunrpc/rpc_main.c	2014-04-27 01:42:33.534513200 +0100
++@@ -38,14 +38,20 @@
++ #include <stdio.h>
++ #include <string.h>
++ #include <unistd.h>
+++#ifndef IS_IN_build
++ #include <libintl.h>
+++#endif
++ #include <locale.h>
++ #include <ctype.h>
++ #include <sys/types.h>
++ #include <sys/param.h>
++ #include <sys/file.h>
++ #include <sys/stat.h>
+++#ifndef _WIN32
++ #include <sys/wait.h>
+++#else
+++#include <windows.h>
+++#endif
++ #include "rpc_parse.h"
++ #include "rpc_util.h"
++ #include "rpc_scan.h"
++@@ -54,6 +60,33 @@
++ #include "../version.h"
++ #define PACKAGE _libc_intl_domainname
++ 
+++#ifdef _WIN32
+++#define rindex(_dest, _src) strrchr((_dest), (_src))
+++
+++char* __cdecl stpcpy(char* __restrict__ dest, char const* __restrict__ src);
+++
+++char* __cdecl stpcpy(char* __restrict__ dest, char const* __restrict__ src)
+++{
+++  if (src == NULL)
+++      return NULL;
+++  return strcpy(dest, src) + strlen(dest);
+++}
+++#endif /* _WIN32 */
+++
+++#if defined(_WIN32) || defined(__BSD__)
+++
+++char* __cdecl stpncpy(char* __restrict__ dest, char const* __restrict__ src, size_t len);
+++
+++char* __cdecl stpncpy(char* __restrict__ dest, char const* __restrict__ src, size_t len)
+++{
+++  size_t min_len = strlen(src);
+++  if (min_len > len)
+++    min_len = len;
+++  return strncpy(dest, src, len) + min_len;
+++}
+++
+++#endif /* defined(_WIN32) || defined(__BSD__) */
+++
++ #define EXTEND	1		/* alias for TRUE */
++ #define DONT_EXTEND	0	/* alias for FALSE */
++ 
++@@ -81,7 +114,11 @@
++ static const char *CPP = "/lib/cpp";
++ static const char CPPFLAGS[] = "-C";
++ static char *pathbuf;
+++#ifdef _WIN32
+++static HANDLE cpp_pid;
+++#else
++ static int cpp_pid;
+++#endif
++ static const char *allv[] =
++ {
++   "rpcgen", "-s", "udp", "-s", "tcp"
++@@ -328,6 +365,20 @@
++ {
++   struct stat64 buf;
++ 
+++  /* Avoid trying to directly execute a bash script on Windows. */
+++#ifdef _WIN32
+++  char* CPPENVV = getenv("CPP");
+++  if (CPPENVV)
+++    {
+++      CPP = (char*)malloc(strlen(CPPENVV)+1);
+++      strcpy((char*)CPP, CPPENVV);
+++      /* Don't bother checking that it exists with stat64 as
+++       * we'd have to check in the path, also it usually ends
+++       * with a few arguments. */
+++      return;
+++    }
+++#endif
+++
++   if (stat64 (CPP, &buf) == 0)
++     return;
++ 
++@@ -341,9 +392,122 @@
++   CPP = "cpp";
++ }
++ 
+++#ifdef _WIN32
+++/*
+++ * Open input file with given define for C-preprocessor
+++ */
+++static void
+++open_input (const char *infile, const char *define)
+++{
+++  int argi;
+++  int argcc = 0;
+++  LPSTR argsall;
+++  HANDLE StdOutHandle;
+++  HANDLE StdErrHandle;
+++  HANDLE ReadPipe;
+++  HANDLE WritePipe;
+++  SECURITY_ATTRIBUTES SecAttr;
+++  STARTUPINFO StartupInfo;
+++  PROCESS_INFORMATION ProcessInfo;
+++  DWORD Status;
+++
+++  find_cpp ();
+++  putarg (0, CPP);
+++  putarg (1, CPPFLAGS);
+++  addarg (define);
+++  if (infile)
+++    addarg (infile);
+++  addarg ((char *) NULL);
+++  for (argi = 0; argi < argcount - 1; ++argi)
+++    {
+++      argcc += strlen(arglist[argi])+2;
+++    }
+++  argsall = (LPSTR)alloca(argcc + 1);
+++  if (!argsall)
+++    {
+++      fprintf (stderr, _ ("cannot alloca for argsall\n"));
+++      exit (1);
+++    }
+++  argsall[0] = '\0';
+++  for (argi = 0; argi < argcount - 1; ++argi)
+++    {
+++      strcat((char*)argsall, arglist[argi]);
+++      strcat((char*)argsall, " ");
+++    }
+++
+++  memset(&SecAttr,     0, sizeof(SecAttr));
+++  memset(&StartupInfo, 0, sizeof(StartupInfo));
+++  memset(&ProcessInfo, 0, sizeof(ProcessInfo));
+++
+++  SecAttr.nLength = sizeof(SecAttr);
+++  SecAttr.bInheritHandle = TRUE;
+++
+++  Status = CreatePipe( &ReadPipe, &WritePipe, &SecAttr, 0 );
+++  if (!Status)
+++    {
+++      fprintf (stderr, _ ("cannot CreatePipe: GetLastError() -> %d\n"), GetLastError());
+++      exit (1);
+++    }
+++
+++  SetHandleInformation( ReadPipe, HANDLE_FLAG_INHERIT, 0 );
+++
+++  /*
+++  StdOutHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+++  StdErrHandle = GetStdHandle( STD_ERROR_HANDLE );
+++  if (StdOutHandle != INVALID_HANDLE_VALUE) {
+++      SetHandleInformation( StdOutHandle, HANDLE_FLAG_INHERIT, 0 );
+++  }
+++  if (StdErrHandle != INVALID_HANDLE_VALUE) {
+++      SetHandleInformation( StdErrHandle, HANDLE_FLAG_INHERIT, 0 );
+++  }
+++  */
+++
+++  StartupInfo.cb         = sizeof(StartupInfo);
+++  StartupInfo.hStdInput  = GetStdHandle( STD_INPUT_HANDLE );
+++  StartupInfo.hStdOutput = WritePipe;
+++  StartupInfo.hStdError  = GetStdHandle( STD_ERROR_HANDLE );
+++  StartupInfo.dwFlags    = STARTF_USESTDHANDLES;
+++
+++  Status = CreateProcess(
+++          NULL,           /* lpApplicationName */
+++          argsall,        /* lpCommandLine */
+++          NULL,           /* lpProcessAttributes */
+++          NULL,           /* lpThreadAttributes */
+++          TRUE,           /* bInheritHandles */
+++          0,              /* dwCreationFlags */
+++          NULL,           /* lpEnvironment */
+++          NULL,           /* lpCurrentDirectory */
+++          &StartupInfo,   /* lpStartupInfo */
+++          &ProcessInfo ); /* lpProcessInformation */
+++
+++  CloseHandle( WritePipe );
+++  if (!Status)
+++    {
+++      fprintf (stderr, _ ("cannot find C preprocessor: %s, GetLastError() -> %d\n"), CPP, GetLastError());
+++      exit (1);
+++    }
+++  int fd = _open_osfhandle((intptr_t)ReadPipe, _O_APPEND | _O_RDONLY);
+++  if(fd != -1)
+++    {
+++      fin = _fdopen(fd, "a+");
+++    }
+++  cpp_pid = ProcessInfo.hProcess;
+++}
+++
+++/* Close the connection to the C-preprocessor and check for successfull
+++   termination.  */
+++static void
+++close_input (void)
+++{
+++  WaitForSingleObject(cpp_pid, INFINITE);
+++}
+++
+++#else
+++
++ /*
++  * Open input file with given define for C-preprocessor
++  */
+++
++ static void
++ open_input (const char *infile, const char *define)
++ {
++@@ -416,6 +580,7 @@
++       crash ();
++     }
++ }
+++#endif
++ 
++ /* valid tirpc nettypes */
++ static const char *valid_ti_nettypes[] =
+diff --git a/patches/eglibc/2_19/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch b/patches/eglibc/2_19/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
+new file mode 100644
+index 0000000..1bd383e
+--- /dev/null
++++ b/patches/eglibc/2_19/230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
+@@ -0,0 +1,118 @@
++diff -urN a/configure b/configure
++--- a/configure	2014-01-03 17:51:28.000000000 +0000
+++++ b/configure	2014-04-27 01:44:19.856594500 +0100
++@@ -623,6 +623,7 @@
++ libc_cv_gcc_static_libgcc
++ CXX_SYSINCLUDES
++ SYSINCLUDES
+++sysheaders
++ AUTOCONF
++ NM
++ AWK
++diff -urN a/configure.ac b/configure.ac
++--- a/configure.ac	2014-01-03 17:51:28.000000000 +0000
+++++ b/configure.ac	2014-04-27 01:47:04.064986700 +0100
++@@ -1061,6 +1061,7 @@
++     done
++   fi
++ fi
+++AC_SUBST(sysheaders)
++ AC_SUBST(SYSINCLUDES)
++ AC_SUBST(CXX_SYSINCLUDES)
++ 
++diff -urN a/elf/Makefile b/elf/Makefile
++--- a/elf/Makefile	2014-01-03 17:51:28.000000000 +0000
+++++ b/elf/Makefile	2014-04-27 01:47:04.073987200 +0100
++@@ -63,6 +63,15 @@
++ ld-map		= $(common-objpfx)ld.map
++ endif
++ 
+++# Hack for building on MSYS2 but using native host (e.g. MinGW-w64) compilers.
+++# suffix of w means Windows.
+++uname_o := $(shell uname -o)
+++ifneq (, $(findstring Msys, $(uname_o)))
+++common-objpfxw = $(shell cd $(common-objpfx); pwd -W)/
+++else
+++common-objpfxw = $(common-objpfx)
+++endif
+++
++ ifeq (yes,$(build-shared))
++ extra-objs	= $(all-rtld-routines:%=%.os) soinit.os sofini.os interp.os
++ generated	+= librtld.os dl-allobjs.os ld.so ldd
++@@ -290,15 +299,15 @@
++ 
++ $(objpfx)librtld.mk: $(objpfx)librtld.map Makefile
++ 	LC_ALL=C \
++-	sed -n 's@^$(common-objpfx)\([^(]*\)(\([^)]*\.os\)) *.*$$@\1 \2@p' \
+++	sed -n 's@^$(common-objpfxw)\([^(]*\)(\([^)]*\.os\)) *.*$$@\1 \2@p' \
++ 	    $< | \
++ 	while read lib file; do \
++ 	  case $$lib in \
++ 	  libc_pic.a) \
++ 	    LC_ALL=C fgrep -l /$$file \
++-		  $(common-objpfx)stamp.os $(common-objpfx)*/stamp.os | \
+++		  $(common-objpfxw)stamp.os $(common-objpfxw)*/stamp.os | \
++ 	    LC_ALL=C \
++-	    sed 's@^$(common-objpfx)\([^/]*\)/stamp\.os$$@rtld-\1'" +=$$file@"\
+++	    sed 's@^$(common-objpfxw)\([^/]*\)/stamp\.os$$@rtld-\1'" +=$$file@"\
++ 	    ;; \
++ 	  */*.a) \
++ 	    echo rtld-$${lib%%/*} += $$file ;; \
++diff -urN a/Makefile.in b/Makefile.in
++--- a/Makefile.in	2013-04-28 16:21:50.000000000 +0100
+++++ b/Makefile.in	2014-04-27 01:47:04.209995000 +0100
++@@ -1,4 +1,5 @@
++ srcdir = @srcdir@
+++sysheaders = @sysheaders@
++ 
++ # Uncomment the line below if you want to do parallel build.
++ # PARALLELMFLAGS = -j 4
++@@ -6,11 +7,11 @@
++ .PHONY: all install bench
++ 
++ all .DEFAULT:
++-	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` $@
+++	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
++ 
++ install:
++ 	LANGUAGE=C LC_ALL=C; export LANGUAGE LC_ALL; \
++-	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` $@
+++	$(MAKE) -r PARALLELMFLAGS="$(PARALLELMFLAGS)" -C $(srcdir) objdir=`pwd` sysheaders=$(sysheaders) $@
++ 
++ bench bench-clean:
++ 	$(MAKE) -C $(srcdir)/benchtests $(PARALLELMFLAGS) objdir=`pwd` $@
++diff -urN a/Makerules b/Makerules
++--- a/Makerules	2014-02-07 21:04:10.000000000 +0000
+++++ b/Makerules	2014-04-27 01:47:04.215995300 +0100
++@@ -369,11 +369,29 @@
++ mv -f $(@:.d=.T) $@ $(generate-md5)
++ endef
++ 
+++# Hack for building on MSYS2 but using native host (e.g. MinGW-w64) compilers.
+++# suffix of w means Windows, and m means MSYS2.
+++uname_o := $(shell uname -o)
+++sysroot = $(shell echo `$(CC) -print-file-name="include"`)
+++ifneq (, $(findstring Msys, $(uname_o)))
+++common-objpfxw = $(shell cd $(common-objpfx); pwd -W)/
+++sysheadersw = $(shell cd $(sysheaders); pwd -W)
+++sysrootm = $(shell cd $(sysroot); pwd)
+++else
+++common-objpfxw = $(common-objpfx)
+++sysheadersw = $(sysheaders)
+++sysrootm = $(sysroot)
+++endif
+++
++ ifneq (,$(objpfx))
++ # Continuation lines here are dangerous because they introduce spaces!
++ define sed-remove-objpfx
++--e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfx)))@ $$(common-objpfx)@g' \
++--e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfx)))@$$(common-objpfx)@g'
+++-e 's@ $(subst .,\.,$(subst @,\@,$(common-objpfxw)))@ $$(common-objpfx)@g' \
+++-e 's@^$(subst .,\.,$(subst @,\@,$(common-objpfxw)))@$$(common-objpfx)@g' \
+++-e 's@ $(subst .,\.,$(subst @,\@,$(sysheadersw)))@ $(sysheaders)@g' \
+++-e 's@^$(subst .,\.,$(subst @,\@,$(sysheadersw)))@$(sysheaders)@g' \
+++-e 's@ $(subst .,\.,$(subst @,\@,$(sysroot)))@ $(sysrootm)@g' \
+++-e 's@^$(subst .,\.,$(subst @,\@,$(sysroot)))@$(sysrootm)@g'
++ endef
++ endif
++ 
+diff --git a/patches/eglibc/2_19/240-Rename-extensions-for-case-insensitive-fs.patch b/patches/eglibc/2_19/240-Rename-extensions-for-case-insensitive-fs.patch
+new file mode 100644
+index 0000000..23c9527
+--- /dev/null
++++ b/patches/eglibc/2_19/240-Rename-extensions-for-case-insensitive-fs.patch
+@@ -0,0 +1,247 @@
++diff -urN a/extra-lib.mk b/extra-lib.mk
++--- a/extra-lib.mk	2014-04-27 01:49:50.160486800 +0100
+++++ b/extra-lib.mk	2014-04-27 01:50:07.308467600 +0100
++@@ -13,7 +13,7 @@
++ 
++ ifneq (,$($(lib)-static-only-routines))
++ ifneq (,$(filter yes%,$(build-shared)$($(lib).so-version)))
++-object-suffixes-$(lib) += $(filter-out $($(lib)-inhibit-o),.oS)
+++object-suffixes-$(lib) += $(filter-out $($(lib)-inhibit-o),.oSTATIC)
++ endif
++ endif
++ 
++@@ -31,7 +31,7 @@
++ 
++ # Add each flavor of library to the lists of things to build and install.
++ install-lib += $(foreach o,$(object-suffixes-$(lib)),$(lib:lib%=$(libtype$o)))
++-extra-objs += $(foreach o,$(filter-out .os .oS,$(object-suffixes-$(lib))),\
+++extra-objs += $(foreach o,$(filter-out .os .oSTATIC,$(object-suffixes-$(lib))),\
++ 			$(patsubst %,%$o,$(filter-out \
++ 					   $($(lib)-shared-only-routines),\
++ 					   $(all-$(lib)-routines))))
++@@ -39,8 +39,8 @@
++ extra-objs += $(patsubst %,%.os,$(filter-out $($(lib)-static-only-routines),\
++ 					     $(all-$(lib)-routines)))
++ endif
++-ifneq (,$(filter .oS,$(object-suffixes-$(lib))))
++-extra-objs += $(patsubst %,%.oS,$(filter $($(lib)-static-only-routines),\
+++ifneq (,$(filter .oSTATIC,$(object-suffixes-$(lib))))
+++extra-objs += $(patsubst %,%.oSTATIC,$(filter $($(lib)-static-only-routines),\
++ 					 $(all-$(lib)-routines)))
++ endif
++ alltypes-$(lib) := $(foreach o,$(object-suffixes-$(lib)),\
++@@ -64,7 +64,7 @@
++ 
++ 
++ # Use o-iterator.mk to generate a rule for each flavor of library.
++-ifneq (,$(filter-out .os .oS,$(object-suffixes-$(lib))))
+++ifneq (,$(filter-out .os .oSTATIC,$(object-suffixes-$(lib))))
++ define o-iterator-doit
++ $(objpfx)$(patsubst %,$(libtype$o),$(lib:lib%=%)): \
++   $(patsubst %,$(objpfx)%$o,\
++@@ -72,7 +72,7 @@
++ 			  $(all-$(lib)-routines))); \
++ 	$$(build-extra-lib)
++ endef
++-object-suffixes-left = $(filter-out .os .oS,$(object-suffixes-$(lib)))
+++object-suffixes-left = $(filter-out .os .oSTATIC,$(object-suffixes-$(lib)))
++ include $(patsubst %,$(..)o-iterator.mk,$(object-suffixes-left))
++ endif
++ 
++@@ -84,9 +84,9 @@
++ 	$(build-extra-lib)
++ endif
++ 
++-ifneq (,$(filter .oS,$(object-suffixes-$(lib))))
++-$(objpfx)$(patsubst %,$(libtype.oS),$(lib:lib%=%)): \
++-  $(patsubst %,$(objpfx)%.oS,\
+++ifneq (,$(filter .oSTATIC,$(object-suffixes-$(lib))))
+++$(objpfx)$(patsubst %,$(libtype.oSTATIC),$(lib:lib%=%)): \
+++  $(patsubst %,$(objpfx)%.oSTATIC,\
++ 	     $(filter $($(lib)-static-only-routines),\
++ 		      $(all-$(lib)-routines)))
++ 	$(build-extra-lib)
++diff -urN a/Makeconfig b/Makeconfig
++--- a/Makeconfig	2014-04-27 01:49:51.128542200 +0100
+++++ b/Makeconfig	2014-04-27 01:50:07.343469600 +0100
++@@ -469,7 +469,7 @@
++ link-libc-tests-rpath-link = $(link-libc-rpath-link)
++ endif
++ link-libc-before-gnulib = $(common-objpfx)libc.so$(libc.so-version) \
++-			  $(common-objpfx)$(patsubst %,$(libtype.oS),c) \
+++			  $(common-objpfx)$(patsubst %,$(libtype.oSTATIC),c) \
++ 			  $(as-needed) $(common-objpfx)elf/ld.so \
++ 			  $(no-as-needed)
++ link-libc = $(link-libc-rpath-link) $(link-libc-before-gnulib) $(gnulib)
++@@ -813,7 +813,7 @@
++ # The compilation rules use $(CPPFLAGS-${SUFFIX}) and $(CFLAGS-${SUFFIX})
++ # to pass different flags for each flavor.
++ libtypes = $(foreach o,$(object-suffixes-for-libc),$(libtype$o))
++-all-object-suffixes := .o .os .op .og .oS
+++all-object-suffixes := .o .os .op .og .oSTATIC
++ object-suffixes :=
++ CPPFLAGS-.o = $(pic-default)
++ CFLAGS-.o = $(filter %frame-pointer,$(+cflags))
++@@ -852,14 +852,14 @@
++ 
++ ifeq (yes,$(build-shared))
++ # Build special library that contains the static-only routines for libc.
++-object-suffixes-for-libc += .oS
+++object-suffixes-for-libc += .oSTATIC
++ 
++ # Must build the routines as PIC, though, because they can end up in (users')
++ # shared objects.  We don't want to use CFLAGS-os because users may, for
++ # example, make that processor-specific.
++-CFLAGS-.oS = $(CFLAGS-.o) $(PIC-ccflag)
++-CPPFLAGS-.oS = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
++-libtype.oS = lib%_nonshared.a
+++CFLAGS-.oSTATIC = $(CFLAGS-.o) $(PIC-ccflag)
+++CPPFLAGS-.oSTATIC = $(CPPFLAGS-.o) -DPIC -DLIBC_NONSHARED=1
+++libtype.oSTATIC = lib%_nonshared.a
++ endif
++ 
++ # The assembler can generate debug information too.
++diff -urN a/Makerules b/Makerules
++--- a/Makerules	2014-04-27 01:49:51.129542200 +0100
+++++ b/Makerules	2014-04-27 01:50:07.347469800 +0100
++@@ -161,14 +161,14 @@
++ # We only generate these in the top-level makefile, to avoid any weirdness
++ # from subdir-specific makefile tweaks creeping in on an update.
++ $(common-objpfx)%.make: $(..)%.make.c $(..)Makerules $(common-before-compile)
++-	rm -f $@T $@.dT
+++	rm -f $@T $@.dTEMP
++ 	(echo '# Generated from $*.make.c by Makerules.'; \
++ 	 $(CC) $(CFLAGS) $(CPPFLAGS) -E -DASSEMBLER $< \
++-	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dT \
+++	       -MD -MP -MT '$$(common-objpfx)$*.make' -MF $@.dTEMP \
++ 	 | sed -n '/@@@/{s/@@@[	 ]*\(.*\)@@@/\1/;s/[	 ]*$$//p;}'; \
++ 	 echo 'common-generated += $(@F)'; \
++-	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dT; \
++-	 rm -f $@.dT) > $@T
+++	 sed $(sed-remove-objpfx) $(sed-remove-dotdot) $@.dTEMP; \
+++	 rm -f $@.dTEMP) > $@T
++ 	mv -f $@T $@
++ endif
++ 
++@@ -327,7 +327,7 @@
++ endif # $(build-shared) = yes
++ endif # sysd-sorted-done
++ 
++-# Generate .dT files as we compile.
+++# Generate .dTEMP files as we compile.
++ compile-mkdep-flags = -MD -MP -MF $@.dt -MT $@
++ compile-command.S = $(compile.S) $(OUTPUT_OPTION) $(compile-mkdep-flags)
++ compile-command.c = $(compile.c) $(OUTPUT_OPTION) $(compile-mkdep-flags)
++@@ -423,7 +423,7 @@
++ endif
++ endif
++ 
++-elide-routines.oS += $(filter-out $(static-only-routines),\
+++elide-routines.oSTATIC += $(filter-out $(static-only-routines),\
++ 				  $(routines) $(aux) $(sysdep_routines))
++ elide-routines.os += $(static-only-routines)
++ 
++@@ -700,7 +700,7 @@
++ 
++ +depfiles := $(sources:.c=.d) \
++ 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-objs:.os=.o))) \
++-	     $(patsubst %.oS,%.d,$(filter %.oS,$(extra-objs))) \
+++	     $(patsubst %.oSTATIC,%.d,$(filter %.oSTATIC,$(extra-objs))) \
++ 	     $(patsubst %.o,%.d,$(filter %.o,$(extra-test-objs:.os=.o))) \
++ 	     $(addsuffix .d,$(tests) $(xtests) $(test-srcs))
++ ifeq ($(build-programs),yes)
++@@ -1008,7 +1008,7 @@
++ install: $(inst_libdir)/libc.so
++ $(inst_libdir)/libc.so: $(common-objpfx)format.lds \
++ 			$(common-objpfx)libc.so$(libc.so-version) \
++-			$(inst_libdir)/$(patsubst %,$(libtype.oS),\
+++			$(inst_libdir)/$(patsubst %,$(libtype.oSTATIC),\
++ 						  $(libprefix)$(libc-name)) \
++ 			$(+force)
++ 	(echo '/* GNU ld script';\
++@@ -1016,7 +1016,7 @@
++ 	 echo '   the static library, so try that secondarily.  */';\
++ 	 cat $<; \
++ 	 echo 'GROUP ( $(slibdir)/libc.so$(libc.so-version)' \
++-	      '$(libdir)/$(patsubst %,$(libtype.oS),$(libprefix)$(libc-name))'\
+++	      '$(libdir)/$(patsubst %,$(libtype.oSTATIC),$(libprefix)$(libc-name))'\
++ 	      ' AS_NEEDED (' $(rtlddir)/$(rtld-installed-name) ') )' \
++ 	) > $@.new
++ 	mv -f $@.new $@
++diff -urN a/nptl/Makefile b/nptl/Makefile
++--- a/nptl/Makefile	2014-04-27 01:49:51.305552300 +0100
+++++ b/nptl/Makefile	2014-04-27 01:50:07.350470000 +0100
++@@ -398,7 +398,7 @@
++ 
++ $(inst_libdir)/libpthread.so: $(common-objpfx)format.lds \
++ 			      $(objpfx)libpthread.so$(libpthread.so-version) \
++-			      $(inst_libdir)/$(patsubst %,$(libtype.oS),\
+++			      $(inst_libdir)/$(patsubst %,$(libtype.oSTATIC),\
++ 							$(libprefix)pthread) \
++ 			      $(+force)
++ 	(echo '/* GNU ld script';\
++@@ -406,7 +406,7 @@
++ 	 echo '   the static library, so try that secondarily.  */';\
++ 	 cat $<; \
++ 	 echo 'GROUP ( $(slibdir)/libpthread.so$(libpthread.so-version)' \
++-	      '$(libdir)/$(patsubst %,$(libtype.oS),$(libprefix)pthread)'\
+++	      '$(libdir)/$(patsubst %,$(libtype.oSTATIC),$(libprefix)pthread)'\
++ 	      ')' \
++ 	) > $@.new
++ 	mv -f $@.new $@
++diff -urN a/sysdeps/i386/i686/Makefile b/sysdeps/i386/i686/Makefile
++--- a/sysdeps/i386/i686/Makefile	2014-04-27 01:49:53.760692700 +0100
+++++ b/sysdeps/i386/i686/Makefile	2014-04-27 01:50:07.353470200 +0100
++@@ -15,11 +15,11 @@
++ CFLAGS-.os += -Wa,-mtune=i686
++ CFLAGS-.op += -Wa,-mtune=i686
++ CFLAGS-.og += -Wa,-mtune=i686
++-CFLAGS-.oS += -Wa,-mtune=i686
+++CFLAGS-.oSTATIC += -Wa,-mtune=i686
++ 
++ ASFLAGS-.o += -Wa,-mtune=i686
++ ASFLAGS-.os += -Wa,-mtune=i686
++ ASFLAGS-.op += -Wa,-mtune=i686
++ ASFLAGS-.og += -Wa,-mtune=i686
++-ASFLAGS-.oS += -Wa,-mtune=i686
+++ASFLAGS-.oSTATIC += -Wa,-mtune=i686
++ endif
++diff -urN a/sysdeps/ieee754/ldbl-opt/Makefile b/sysdeps/ieee754/ldbl-opt/Makefile
++--- a/sysdeps/ieee754/ldbl-opt/Makefile	2014-04-27 01:49:53.919701800 +0100
+++++ b/sysdeps/ieee754/ldbl-opt/Makefile	2014-04-27 01:50:07.355470300 +0100
++@@ -49,7 +49,7 @@
++ libnldbl-routines = $(libnldbl-calls:%=nldbl-%)
++ libnldbl-inhibit-o = $(object-suffixes)
++ libnldbl-static-only-routines = $(libnldbl-routines)
++-extra-objs += $(addsuffix .oS, $(libnldbl-routines))
+++extra-objs += $(addsuffix .oSTATIC, $(libnldbl-routines))
++ 
++ CFLAGS-nldbl-acos.c = -fno-builtin-acosl
++ CFLAGS-nldbl-acosh.c = -fno-builtin-acoshl
++diff -urN a/sysdeps/sparc/sparc32/sparcv9/Makefile b/sysdeps/sparc/sparc32/sparcv9/Makefile
++--- a/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-04-27 01:49:55.197774900 +0100
+++++ b/sysdeps/sparc/sparc32/sparcv9/Makefile	2014-04-27 01:50:07.357470400 +0100
++@@ -10,11 +10,11 @@
++ ASFLAGS-.os += -Wa,-Av9d
++ ASFLAGS-.op += -Wa,-Av9d
++ ASFLAGS-.og += -Wa,-Av9d
++-ASFLAGS-.oS += -Wa,-Av9d
+++ASFLAGS-.oSTATIC += -Wa,-Av9d
++ else
++ ASFLAGS-.o += -Wa,-Av9a
++ ASFLAGS-.os += -Wa,-Av9a
++ ASFLAGS-.op += -Wa,-Av9a
++ ASFLAGS-.og += -Wa,-Av9a
++-ASFLAGS-.oS += -Wa,-Av9a
+++ASFLAGS-.oSTATIC += -Wa,-Av9a
++ endif
++diff -urN a/sysdeps/sparc/sparc64/Makefile b/sysdeps/sparc/sparc64/Makefile
++--- a/sysdeps/sparc/sparc64/Makefile	2014-04-27 01:49:55.236777100 +0100
+++++ b/sysdeps/sparc/sparc64/Makefile	2014-04-27 01:50:07.359470500 +0100
++@@ -12,5 +12,5 @@
++ ASFLAGS-.os += -Wa,-Av9d
++ ASFLAGS-.op += -Wa,-Av9d
++ ASFLAGS-.og += -Wa,-Av9d
++-ASFLAGS-.oS += -Wa,-Av9d
+++ASFLAGS-.oSTATIC += -Wa,-Av9d
++ endif
+diff --git a/patches/eglibc/2_19/250-MSYS-Hack-force-ln-s.patch b/patches/eglibc/2_19/250-MSYS-Hack-force-ln-s.patch
+new file mode 100644
+index 0000000..552fbbc
+--- /dev/null
++++ b/patches/eglibc/2_19/250-MSYS-Hack-force-ln-s.patch
+@@ -0,0 +1,39 @@
++diff -urN a/configure b/configure
++--- a/configure	2014-04-27 01:49:49.993477200 +0100
+++++ b/configure	2014-04-27 01:52:26.115406900 +0100
++@@ -4475,6 +4475,16 @@
++ $as_echo "no, using $LN_S" >&6; }
++ fi
++ 
+++# Even though 'ln -s' doesn't work right in MSYS2, it works enough for
+++# eglibc, whereas cp -r doesn't.
+++case "$build_os" in
+++*mingw*)
+++  as_ln_s='ln -s'
+++  LN_S=$as_ln_s
+++  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Hacked as_ln_s and LN_S to 'ln -s' for MSYS2" >&5
+++$as_echo "$as_me: WARNING: Hacked as_ln_s and LN_S to 'ln -s' for MSYS2" >&2;}
+++  ;;
+++esac
++ 
++ # Was a --with-binutils option given?
++ if test -n "$path_binutils"; then
++diff -urN a/configure.ac b/configure.ac
++--- a/configure.ac	2014-04-27 01:49:49.993477200 +0100
+++++ b/configure.ac	2014-04-27 01:52:26.122407300 +0100
++@@ -972,6 +972,15 @@
 +   INSTALL='\$(..)./scripts/install-sh -c'
 + fi
 + AC_PROG_LN_S

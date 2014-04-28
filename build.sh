@@ -4435,3 +4435,49 @@ see also: http://comments.gmane.org/gmane.comp.security.firewalls.netfilter.deve
 # .. just the one built from lt-ar.c probably.
 
 # .. Can't use --save-temps=obj (and maybe not any --save-temps) when building binutils.
+# dealing with glibc first ..
+# .. 2.15 has
+# 200-make-4.patch
+# 210-configure-Default-to-CPP-CC--E-unless-overridden.patch
+# 220-Fix-crossrpc-to-build-on-non-Linux.patch
+# 230-MSYS-vs-MinGW-Hacky-sed-in-Makefiles.patch
+# 240-Rename-extensions-for-case-insensitive-fs.patch
+# 250-MSYS-Hack-force-ln-s.patch
+# 300-0095_all_glibc-2.15-ctors-dtors-test.patch
+# 310-Remove-test-for-__builtin_expect.patch
+# 320-100-fix_cpuid_h_check-from-OpenWrt.patch
+# 330-Fix-confstr-use-of-local-buffer-outside-its-extent.patch
+# 340-Use-glibc-2_18-sunrpc-Makefile-for-cross-compilation.patch
+# ..
+#
+# 2.16 drops:
+# 300-0095_all_glibc-2.15-ctors-dtors-test.patch                 [ALREADY APPLIED]
+# 310-Remove-test-for-__builtin_expect.patch                     [ALREADY APPLIED]
+# 320-100-fix_cpuid_h_check-from-OpenWrt.patch                   [ALREADY APPLIED]
+# 330-Fix-confstr-use-of-local-buffer-outside-its-extent.patch   [ALREADY APPLIED]
+# 340-Use-glibc-2_18-sunrpc-Makefile-for-cross-compilation.patch [ALREADY APPLIED]
+
+# Seems glibc\2.17\240-Rename-extensions-for-case-insensitive-fs.patch has stuff that's missed in 2.16 version ..
+
+# One bit missing from 2.17\240-Rename-extensions-for-case-insensitive-fs.patch now ..
+
+
+# pushd E:/brd/.build/src/eglibc-2_18/misc/
+# E:/brd/.build/armv6hl-unknown-linux-gnueabi/buildtools/libexec/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/cc1.exe \
+#   -E -quiet -nostdinc -MD syscall.d -MF E:/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.d-tsoft \
+#   -MP -MT "E:/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.h \
+#   /e/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.d" \
+#   -U __ARM_PCS_VFP -D _LIBC -isystem E:/brd/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include \
+#   -isystem E:/brd/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed \
+#   -isystem E:/msys64/home/ray/ctng-firefox-builds/r-eglibc_V_2.18-x86_64-213be3fb/armv6hl-unknown-linux-gnueabi/sysroot/usr/include \
+#   ../sysdeps/unix/sysv/linux/sys/syscall.h -march=armv6 -mtune=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp -mtls-dialect=gnu -ffreestanding -dM
+
+# Need to debug this with Qt Creator ..
+# PATH, E:\msys64\home\ray\ctng-firefox-builds\r-eglibc_V_2.18-x86_64-213be3fb-d\bin;E:\brd-d\.build\armv6hl-unknown-linux-gnueabi\buildtools\bin;E:\brd-d\.build\tools\bin;E:\msys64\home\ray\ctng-firefox-builds\mingw64-213be3fb\bin;E:\msys64\local\bin;E:\msys64\bin;E:\msys64\opt\bin;C:\Program Files (x86)\Intel\iCLS Client;C:\Program Files\Intel\iCLS Client;C:\Program Files\Broadcom\Broadcom 802.11 Network Adapter\Driver;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files\WIDCOMM\Bluetooth Software;C:\Program Files\WIDCOMM\Bluetooth Software\syswow64;C:\Program Files (x86)\Intel\OpenCL SDK\3.0\bin\x86;C:\Program Files (x86)\Intel\OpenCL SDK\3.0\bin\x64;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files\TortoiseGit\bin
+# E:\brd-d\.build\src\eglibc-2_18\misc\
+# E:\brd-d\.build\armv6hl-unknown-linux-gnueabi\buildtools\bin\armv6hl-unknown-linux-gnueabi-gcc.exe -ffreestanding -E -MD -MP -MF E:/brd-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.d-tsoft -MT "E:/brd-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.h /e/brd-d/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.d" -x c -nostdinc -isystem E:/brd-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include -isystem E:/brd-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed -isystem E:/msys64/home/ray/ctng-firefox-builds/r-eglibc_V_2.18-x86_64-213be3fb-d/armv6hl-unknown-linux-gnueabi/sysroot/usr/include ../sysdeps/unix/sysv/linux/sys/syscall.h -U__ARM_PCS_VFP -D_LIBC -dM
+
+# pushd /e/brd/.build/src/eglibc-2_18/misc
+# PATH=/msys64/home/ray/ctng-firefox-builds/r-eglibc_V_2.18-x86_64-213be3fb-d/bin:/e/brd-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/e/brd-d/.build/tools/bin:/e/msys64/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:/e/msys64/local/bin:/e/msys64/bin:/e/msys64/opt/bin \
+#  /mingw64/bin/qtcreator.exe
+#  -E -quiet -nostdinc -MD syscall.d -MF E:/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.d-tsoft -MP -MT "E:/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.h /e/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.d" -U __ARM_PCS_VFP -D _LIBC -isystem E:/brd/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include -isystem E:/brd/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed -isystem E:/msys64/home/ray/ctng-firefox-builds/r-eglibc_V_2.18-x86_64-213be3fb/armv6hl-unknown-linux-gnueabi/sysroot/usr/include ../sysdeps/unix/sysv/linux/sys/syscall.h -march=armv6 -mtune=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp -mtls-dialect=gnu -ffreestanding -dM

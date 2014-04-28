@@ -1,4 +1,4 @@
-From c7f2889fa1020a5d1ad372bf7b34419608d7857a Mon Sep 17 00:00:00 2001
+From bd2553dadf320def3a27175e9154a6f13cd3b5b2 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 11:40:10 +0000
 Subject: [PATCH 09/37] ISL MinGW-w64 build fix (lacks ffs declaration)

@@ -1,4 +1,4 @@
-From ece67392f5d1701cd778b1afaae9c01d4a48ecba Mon Sep 17 00:00:00 2001
+From b20291a4651df470583c22d922d17ff917545b4b Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:17:33 +0100
 Subject: [PATCH 06/37] glibc-eglibc.sh-common: Use --print-multi-os-directory

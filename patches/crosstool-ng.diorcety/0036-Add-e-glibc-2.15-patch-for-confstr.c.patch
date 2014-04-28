@@ -1,4 +1,4 @@
-From 1b2c82fb19fcffd39b3d2d80da16284604a6f23b Mon Sep 17 00:00:00 2001
+From 27f8f70fd5a0df4179b4060c81e3af12787da2b6 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 18 Feb 2014 23:39:34 +0000
 Subject: [PATCH 36/37] Add {e}glibc 2.15 patch for confstr.c

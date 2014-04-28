@@ -1,4 +1,4 @@
-From 2b45095993f6752eebdaeddcae59972e90dfe988 Mon Sep 17 00:00:00 2001
+From 33aa709b4885282653e392741fdebd3ddac4499e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 23 Dec 2013 13:41:25 +0000
 Subject: [PATCH 21/37] Add GCC 4.8.2 patch for files.c
@@ -16,7 +16,7 @@ exists.
 
 diff --git a/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch b/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch
 new file mode 100644
-index 0000000..28a528d
+index 0000000..022c35c
 --- /dev/null
 +++ b/patches/gcc/4.8.2/140-fix-for-windows-not-minding-non-existant-parent-dirs.patch
 @@ -0,0 +1,138 @@
@@ -147,7 +147,7 @@ index 0000000..28a528d
 ++	          file->fd = -1;
 ++	          return false;
 ++	        }
-++	      *dirsep = '/';
+++	      *dirsep++ = '/';
 ++	    }
 ++	}
 ++    }

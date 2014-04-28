@@ -1,4 +1,4 @@
-From b07a85183e030ec2e697e0900a7bdc62fa7d3754 Mon Sep 17 00:00:00 2001
+From df3237ae1754654290f501235f8d7bd922cc7ca3 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:13:01 +0100
 Subject: [PATCH 02/37] config/target: Add support for Auto Float

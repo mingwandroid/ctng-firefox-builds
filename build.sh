@@ -643,10 +643,10 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     set +e
     ${SUDO} pacman -S --force --needed --noconfirm $PACKAGES
     # While I'm debugging the occasional crash in gnumake, force install one with debugging symbols.
-    if [ ! -f /etc/arch-release ]; then
-      wget -c https://www.dropbox.com/s/zfr9f7anbml8829/make-4.0-5-x86_64.pkg.tar.xz
-      ${SUDO} pacman -U --force --needed --noconfirm make-4.0-5-x86_64.pkg.tar.xz
-    fi
+#    if [ ! -f /etc/arch-release ]; then
+#      wget -c https://www.dropbox.com/s/zfr9f7anbml8829/make-4.0-5-x86_64.pkg.tar.xz
+#      ${SUDO} pacman -U --force --needed --noconfirm make-4.0-5-x86_64.pkg.tar.xz
+#    fi
     set -e
     GROUP=$(id --group --name)
     if ! which autoconf2.13; then

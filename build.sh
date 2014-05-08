@@ -294,8 +294,8 @@ option GNU_PLUGINS        default \
 "Enable you want Binutils+GCC plugin support? Not available
 on Windows hosts"
 option COPY_SDK            no \
-"Do you want the MacOSX10.6.sdk copied from
-\$HOME/MacOSX10.6.sdk to the sysroot of the
+"Do you want the $DARWINSDKDIR copied from
+\$HOME/$DARWINSDKDIR to the sysroot of the
 built toolchain?"
 option COMPILER_RT         default \
 "Compiler-rt allows for profiling, address
@@ -303,9 +303,9 @@ sanitization, coverage reporting and other
 such runtime nicities, mostly un-tested, and
 requires --copy-sdk=yes and (if on x86-64) a
 symbolic link to be made from ..
-\${HOME}/MacOSX10.6.sdk/usr/lib/gcc/i686-apple-darwin10
+\${HOME}/${DARWINSDKDIR}/usr/lib/gcc/i686-apple-darwin10
 .. to ..
-\${HOME}/MacOSX10.6.sdk/usr/lib/gcc/x86_64-apple-darwin10
+\${HOME}/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin10
 before running this script."
 option STATIC_TOOLCHAIN    no \
 "Do you want a statically linked toolchain?
@@ -557,13 +557,13 @@ fi
 
 # Check that compiler-rt can be built if requested.
 if [ "${COMPILER_RT}" = "yes" -a "${TARGET_OS}" = "osx" ]; then
-  if [ ! -d $HOME/MacOSX10.6.sdk/usr/lib/gcc/x86_64-apple-darwin10 ]; then
+  if [ ! -d $HOME/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin10 ]; then
     if [ "${BITS}" = "64" ]; then
       echo -n "Error: You are trying to build x86_64 hosted cross compilers. Due to
 some host/target confusion you need to make a link from ..
-\${HOME}/MacOSX10.6.sdk/usr/lib/gcc/i686-apple-darwin10
+\${HOME}/${DARWINSDKDIR}/usr/lib/gcc/i686-apple-darwin10
 .. to ..
-\${HOME}/MacOSX10.6.sdk/usr/lib/gcc/x86_64-apple-darwin10
+\${HOME}/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin10
 .. please do this and then re-run this script."
       exit 1
     fi
@@ -743,7 +743,7 @@ OSXSDKURL="https://launchpad.net/~flosoft/+archive/cross-apple/+files/apple-uni-
 download_sdk()
 {
   if [ "${TARGET_OS}" = "osx" ]; then
-    if [ ! -d "${HOME}"/MacOSX10.6.sdk ]; then
+    if [ ! -d "${HOME}"/${DARWINSDKDIR} ]; then
       if [ "${BUILD_OS}" = "windows" ]; then
         echo "Error: Due to lack of native symlinks and/or incorrect symlink semantics and/or handling of them by gnutar"
         echo "       I am refusing to even attempt to un-tar $OSXSDKURL"
@@ -927,6 +927,8 @@ cross_clang_build()
         echo "CT_DARWIN_COPY_SDK_TO_SYSROOT=y" >> ${CTNG_SAMPLE_CONFIG}
       else
         echo "CT_DARWIN_COPY_SDK_TO_SYSROOT=n" >> ${CTNG_SAMPLE_CONFIG}
+        echo "CT_TARGET_CFLAGS=\"-isysroot ${HOME}/${DARWINSDKDIR} -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5\"" >> ${CTNG_SAMPLE_CONFIG}
+        echo "CT_TARGET_LDFLAGS=\"-syslibroot ${HOME}/${DARWINSDKDIR} -mmacosx-version-min=10.5\"" >> ${CTNG_SAMPLE_CONFIG}
       fi
     fi
 

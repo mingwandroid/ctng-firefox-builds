@@ -4483,3 +4483,38 @@ see also: http://comments.gmane.org/gmane.comp.security.firewalls.netfilter.deve
 # PATH=/msys64/home/ray/ctng-firefox-builds/r-eglibc_V_2.18-x86_64-213be3fb-d/bin:/e/brd-d/.build/armv6hl-unknown-linux-gnueabi/buildtools/bin:/e/brd-d/.build/tools/bin:/e/msys64/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:/e/msys64/local/bin:/e/msys64/bin:/e/msys64/opt/bin \
 #  /mingw64/bin/qtcreator.exe
 #  -E -quiet -nostdinc -MD syscall.d -MF E:/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.d-tsoft -MP -MT "E:/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.h /e/brd/.build/armv6hl-unknown-linux-gnueabi/build/build-libc-startfiles/misc/bits/syscall.d" -U __ARM_PCS_VFP -D _LIBC -isystem E:/brd/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include -isystem E:/brd/.build/armv6hl-unknown-linux-gnueabi/buildtools/lib/gcc/armv6hl-unknown-linux-gnueabi/4.8.2/include-fixed -isystem E:/msys64/home/ray/ctng-firefox-builds/r-eglibc_V_2.18-x86_64-213be3fb/armv6hl-unknown-linux-gnueabi/sysroot/usr/include ../sysdeps/unix/sysv/linux/sys/syscall.h -march=armv6 -mtune=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp -mtls-dialect=gnu -ffreestanding -dM
+
+# Installing C library headers & start files ... [228572]
+# Extra flags (multilib)   : ''
+# Multilib os dir          : '/f/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/lib/../lib64'
+# Configuring with --host  : 'x86_64-unknown-linux-gnu'
+# Configuring with --libdir: '/usr/lib/../lib64'
+# .. fair enough.
+# Building for multilib subdir='32'  ... [230080]
+# Extra flags (multilib)   : ' -m32'
+# Configuring with --host  : 'i486-unknown-linux-gnu'
+# Configuring with --libdir: '/usr/lib/../lib'
+
+# Installing C library start files ... [230264] ..
+
+# Then later:
+# Installing C library
+# Configuring C library
+# Multilib os dir          : '/f/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot/usr/lib/../lib64'
+# Configuring with --host  : 'x86_64-unknown-linux-gnu'
+# Configuring with --libdir: '/usr/lib/../lib64'
+# .. fair enough.
+# Building for multilib subdir='32'
+# Extra flags (multilib)   : ' -m32'
+# Configuring with --host  : 'i486-unknown-linux-gnu'
+# Configuring with --libdir: '/usr/lib/../lib'
+
+
+# Installing C library headers goes wrong on eglibc_V_2.15, 64 bit gets installed to the same place as 32 bit.
+# [EXTRA]    Installing C library headers
+# [DEBUG]    ==> Executing: 'make' '-j4' '-l' 'install_root=/f/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sysroot' 'install-bootstrap-headers=yes' 'BUILD_CPPFLAGS=-I/f/bsd/.build/x86_64-unknown-linux-gnu/buildtools/include/' 'BUILD_LDFLAGS=-L/f/bsd/.build/x86_64-unknown-linux-gnu/buildtools/lib -Wl,-Bstatic -lintl -Wl,-Bdynamic' 'install-headers' 
+
+# export PATH=/f/bsd/.build/x86_64-unknown-linux-gnu/buildtools/bin:"$PATH"
+# /f/bsd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -shared-libgcc -B/f/bsd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc -nostdinc++ -L/f/bsd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src -L/f/bsd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs -B/f/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/f/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /f/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /f/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include -I/f/bsd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/include/x86_64-unknown-linux-gnu -I/f/bsd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-unknown-linux-gnu/libstdc++-v3/include -I/f/bsd/.build/src/gcc-4.8.2/libstdc++-v3/libsupc++ -fPIC -DPIC -Wall -Wextra -Wwrite-strings -Wcast-qual -Wabi -fdiagnostics-show-location=once -ffunction-sections -fdata-sections -frandom-seed=compatibility-atomic-c++0x.lo -g -Os -std=gnu++11 -c ../../../../../../src/gcc-4.8.2/libstdc++-v3/src/c++11/compatibility-atomic-c++0x.cc  -fPIC -DPIC -D_GLIBCXX_SHARED -o .libs/compatibility-atomic-c++0x.o --save-temps
+
+# Ordering issues in full libc build where 32 bit is built last and overwrites the 64 bit one. Not sure why as the same 'sort -r' logic is used.

@@ -1,7 +1,7 @@
-From 2b79db261d7031a891eb742d16a8279d3b022a04 Mon Sep 17 00:00:00 2001
+From db760f97b5d9ea594dcd964b59fa79efe03e3f56 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:12:21 +0100
-Subject: [PATCH 01/37] config/gcc: Limit multilib to gcc 4.7 and up
+Subject: [PATCH 01/36] config/gcc: Limit multilib to gcc 4.7 and up
 
 Signed-off-by: Bryan Hundven <bryanhundven@gmail.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Bryan Hundven <bryanhundven@gmail.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/config/target.in b/config/target.in
-index 930876f..3182d23 100644
+index c655783..71296e6 100644
 --- a/config/target.in
 +++ b/config/target.in
 @@ -63,6 +63,7 @@ comment "Generic target options"

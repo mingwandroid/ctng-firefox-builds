@@ -119,7 +119,7 @@ TARGET_GCC_VERSIONS_armv7a="4.8.2"
 
 # Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
 # To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
-TARGET_LLVM_VERSIONS_osx="3.4"
+TARGET_LLVM_VERSIONS_osx="git"
 TARGET_LLVM_VERSIONS_windows="3.4"
 TARGET_LLVM_VERSIONS_steamsdk="none"
 TARGET_LLVM_VERSIONS_steambox="none"
@@ -564,7 +564,8 @@ some host/target confusion you need to make a link from ..
 \${HOME}/${DARWINSDKDIR}/usr/lib/gcc/i686-apple-darwin10
 .. to ..
 \${HOME}/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin10
-.. please do this and then re-run this script."
+.. please do this and then re-run this script.
+"
       exit 1
     fi
   fi

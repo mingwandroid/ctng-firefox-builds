@@ -84,9 +84,9 @@ BUILD_DEBUGGABLE_darwin="no"
 BUILD_DEBUGGABLE_windows="yes"
 BUILD_DEBUGGABLE_linux="yes"
 
-BUILD_DEBUGGERS_darwin="yes"
+BUILD_DEBUGGERS_darwin="no"
 BUILD_DEBUGGERS_windows="no" # Due to expat problems.
-BUILD_DEBUGGERS_linux="yes"
+BUILD_DEBUGGERS_linux="no"
 
 # Could try the dlfcn_win32 project for Windows support.
 # I've not made it error if you try to force the issue
@@ -119,7 +119,7 @@ TARGET_GCC_VERSIONS_armv7a="4.8.2"
 
 # Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
 # To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
-TARGET_LLVM_VERSIONS_osx="git"
+TARGET_LLVM_VERSIONS_osx="3.4.2"
 TARGET_LLVM_VERSIONS_windows="3.4"
 TARGET_LLVM_VERSIONS_steamsdk="none"
 TARGET_LLVM_VERSIONS_steambox="none"
@@ -238,6 +238,7 @@ Where applicable multilib is always enabled."
 ######################################################
 
 #option CTNG_SOURCE_URL      "mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-multilib http://crosstool-ng.org/hg/crosstool-ng" \
+#option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
 option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
 "Specify the vcs, url and name suffix for the crosstool-ng to use.
 Should be one of:
@@ -284,7 +285,7 @@ option CTNG_DEBUGGERS      default \
 "Do you want the toolchain built with crosstool-ng
 to include debuggers?"
 option LLVM_VERSION        default \
-"default, none, head, 3.4, 3.3, 3.2, 3.1 or 3.0 (I test with 3.3 mostly,
+"default, none, head, 3.4.2 3.4, 3.3, 3.2, 3.1 or 3.0 (I test with 3.3 mostly,
 then 3.4 next, then the others hardly at all)."
 option BINUTILS_VERSION    default \
 "default, none, head, or a sensible Binutils version number."

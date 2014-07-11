@@ -1,7 +1,7 @@
-From 98a8fd87a969f901842f5b12904e230a73bcd96e Mon Sep 17 00:00:00 2001
+From 53f717698155a5e2f10d2d8744157dae06d100c4 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 11 Jul 2014 14:12:50 +0100
-Subject: [PATCH] {e}glibc 2.15 .. 2.18: patches to allow GNU make 4
+Subject: [PATCH 1/2] {e}glibc 2.15 .. 2.18: patches to allow GNU make 4
 
 ---
  patches/eglibc/2_15/200-make-4.patch  | 24 ++++++++++++++++++++++++

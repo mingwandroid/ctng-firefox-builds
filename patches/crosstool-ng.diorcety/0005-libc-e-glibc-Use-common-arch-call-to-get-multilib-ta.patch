@@ -1,0 +1,77 @@
+From ce1da29209107af24c5a5178cf27923f511be033 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Sat, 12 Apr 2014 13:16:52 +0100
+Subject: [PATCH 05/38] libc/(e)glibc: Use common arch call to get multilib
+ targets
+
+The previous patch added the function 'CT_DoMultilibTarget()' to
+scripts/build/arch/*.sh.
+
+This patch calls the common function to (currently) get just the target
+tuple for the current multilib target.
+
+This patch was originally by: Cody P Schafer
+
+Signed-off-by: Bryan Hundven <bryanhundven@gmail.com>
+Signed-off-by: Ray Donnelly <mingw.android@gmail.com>
+---
+ scripts/build/libc/glibc-eglibc.sh-common | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/scripts/build/libc/glibc-eglibc.sh-common b/scripts/build/libc/glibc-eglibc.sh-common
+index 4d961fd..29d8661 100644
+--- a/scripts/build/libc/glibc-eglibc.sh-common
++++ b/scripts/build/libc/glibc-eglibc.sh-common
+@@ -140,11 +140,14 @@ do_libc_backend() {
+ 
+         CT_mkdir_pushd "${CT_BUILD_DIR}/build-libc-${libc_mode}${extra_dir//\//_}"
+ 
++        target=$(CT_DoArchMultilibTarget "${extra_flags}" ${CT_TARGET})
++
+         do_libc_backend_once extra_dir="${extra_dir}"               \
+                              extra_flags="${extra_flags}"           \
+                              libc_headers="${libc_headers}"         \
+                              libc_startfiles="${libc_startfiles}"   \
+-                             libc_full="${libc_full}"
++                             libc_full="${libc_full}"               \
++                             target="${target}"
+ 
+         CT_Popd
+ 
+@@ -183,6 +186,7 @@ do_libc_backend() {
+ #   libc_full           : Build full libc                       : bool      : n
+ #   extra_flags         : Extra CFLAGS to use (for multilib)    : string    : (empty)
+ #   extra_dir           : Extra subdir for multilib             : string    : (empty)
++#   target              : Build libc using this target (for multilib) : string : ${CT_TARGET}
+ do_libc_backend_once() {
+     local libc_headers
+     local libc_startfiles
+@@ -197,11 +201,16 @@ do_libc_backend_once() {
+     local float_extra
+     local endian_extra
+     local arg
++    local target
+ 
+     for arg in "$@"; do
+         eval "${arg// /\\ }"
+     done
+ 
++    if [ "${target}" = "" ]; then
++        target="${CT_TARGET}"
++    fi
++
+     CT_DoLog EXTRA "Configuring C library"
+ 
+     case "${CT_LIBC}" in
+@@ -354,7 +363,7 @@ do_libc_backend_once() {
+     "${src_dir}/configure"                                          \
+         --prefix=/usr                                               \
+         --build=${CT_BUILD}                                         \
+-        --host=${CT_TARGET}                                         \
++        --host=${target}                                            \
+         --cache-file="$(pwd)/config.cache"                          \
+         --without-cvs                                               \
+         --disable-profile                                           \
+-- 
+2.0.1
+

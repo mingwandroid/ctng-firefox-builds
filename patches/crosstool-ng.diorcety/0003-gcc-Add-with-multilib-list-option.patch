@@ -1,0 +1,40 @@
+From bfd5a37ce4b0c388c297e8ade180384d2536fd85 Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Sat, 12 Apr 2014 13:15:15 +0100
+Subject: [PATCH 03/38] gcc: Add --with-multilib-list option
+
+.. actually by Bryan Hundven.
+
+Signed-off-by: Ray Donnelly <mingw.android@gmail.com>
+---
+ scripts/build/cc/100-gcc.sh | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
+index c1a7c35..6575df6 100644
+--- a/scripts/build/cc/100-gcc.sh
++++ b/scripts/build/cc/100-gcc.sh
+@@ -373,6 +373,10 @@ do_gcc_core_backend() {
+     # Since that's the default, only pass --disable-multilib.
+     if [ "${CT_MULTILIB}" != "y" ]; then
+         extra_config+=("--disable-multilib")
++    else
++        if [ -n "${CT_CC_GCC_MULTILIB_LIST}" ]; then
++            extra_config+=("--with-multilib-list=${CT_CC_GCC_MULTILIB_LIST}")
++        fi
+     fi
+ 
+     if [ ! "${host/mingw/}" = "${host}" -o ! "${host/cygwin/}" = "${host}" ]; then
+@@ -866,6 +870,9 @@ do_gcc_backend() {
+ 
+     if [ "${CT_MULTILIB}" = "y" ]; then
+         extra_config+=("--enable-multilib")
++        if [ -n "${CT_CC_GCC_MULTILIB_LIST}" ]; then
++            extra_config+=("--with-multilib-list=${CT_CC_GCC_MULTILIB_LIST}")
++        fi
+     else
+         extra_config+=("--disable-multilib")
+     fi
+-- 
+2.0.1
+

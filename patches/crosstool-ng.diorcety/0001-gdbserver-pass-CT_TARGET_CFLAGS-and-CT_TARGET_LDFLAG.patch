@@ -1,0 +1,37 @@
+From 0d434713132876488ed0b803a1d36f9c30181e1d Mon Sep 17 00:00:00 2001
+From: Ray Donnelly <mingw.android@gmail.com>
+Date: Fri, 9 May 2014 00:31:33 +0100
+Subject: [PATCH 01/38] gdbserver: pass CT_TARGET_CFLAGS and CT_TARGET_LDFLAGS
+
+.. as CFLAGS and LDFLAGS respectively to configure
+---
+ scripts/build/debug/300-gdb.sh | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/scripts/build/debug/300-gdb.sh b/scripts/build/debug/300-gdb.sh
+index 5d67b6a..a976eeb 100644
+--- a/scripts/build/debug/300-gdb.sh
++++ b/scripts/build/debug/300-gdb.sh
+@@ -307,9 +307,9 @@ do_debug_gdb_build() {
+         # Bah, GNU folks strike again... :-(
+         chmod +x "${gdb_src_dir}/gdb/gdbserver/configure"
+ 
+-        gdbserver_LDFLAGS=
++        gdbserver_LDFLAGS="${CT_TARGET_LDFLAGS}"
+         if [ "${CT_GDB_GDBSERVER_STATIC}" = "y" ]; then
+-            gdbserver_LDFLAGS=-static
++            gdbserver_LDFLAGS="${gdbserver_LDFLAGS} -static"
+         fi
+ 
+         gdbserver_extra_config=("${extra_config[@]}")
+@@ -327,6 +327,7 @@ do_debug_gdb_build() {
+         CPP="${CT_TARGET}-cpp"                          \
+         LD="${CT_TARGET}-ld"                            \
+         LDFLAGS="${gdbserver_LDFLAGS}"                  \
++        CFLAGS="${CT_TARGET_CFLAGS}"                    \
+         "${gdb_src_dir}/gdb/gdbserver/configure"        \
+             --build=${CT_BUILD}                         \
+             --host=${CT_TARGET}                         \
+-- 
+2.0.1
+

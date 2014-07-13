@@ -239,9 +239,9 @@ Where applicable multilib is always enabled."
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
 #option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
-#option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
+#option CTNG_SOURCE_URL      "git{wipmultilib}:${HOME}/crosstool-ng.multilib" \
 
-option CTNG_SOURCE_URL      "git{wipmultilib}:${HOME}/crosstool-ng.multilib" \
+option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
 "Specify the vcs, url and name suffix for the crosstool-ng to use.
 Should be one of:
 git{diorcety}:https://github.com/diorcety/crosstool-ng.git
@@ -1219,7 +1219,7 @@ if [ "$OSTYPE" = "msys" ]; then
 else
   BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
 fi
-BUILDDIR=/c/b${STUB}${CTNG_SUFFIX_1ST}${DEBUG_PREFIX}
+BUILDDIR=/e/b${STUB}${CTNG_SUFFIX_1ST}${DEBUG_PREFIX}
 # Testing for Arnaud Dovi.
 # r=registry set to sensitive
 # p=posix set to 1
@@ -4528,3 +4528,163 @@ see also: http://comments.gmane.org/gmane.comp.security.firewalls.netfilter.deve
 # export asm_CPP="x86_64-unknown-linux-gnu-gcc     -m32 -c    -Iinclude  -I/c/bbd-d/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32 -Inptl/sysdeps/unix/sysv/linux/i386/i486 -Inptl/sysdeps/unix/sysv/linux/i386 -Inptl/sysdeps/unix/sysv/linux/x86 -Isysdeps/unix/sysv/linux/x86 -Isysdeps/unix/sysv/linux/i386/nptl -Isysdeps/unix/sysv/linux/i386 -Inptl/sysdeps/unix/sysv/linux -Inptl/sysdeps/pthread -Isysdeps/pthread -Isysdeps/unix/sysv/linux -Isysdeps/gnu -Isysdeps/unix/inet -Inptl/sysdeps/unix/sysv -Isysdeps/unix/sysv -Isysdeps/unix/i386 -Inptl/sysdeps/unix -Isysdeps/unix -Isysdeps/posix -Inptl/sysdeps/i386/i486 -Isysdeps/i386/i486 -Isysdeps/i386/fpu -Isysdeps/x86/fpu -Inptl/sysdeps/i386 -Isysdeps/i386 -Isysdeps/x86 -Isysdeps/wordsize-32 -Isysdeps/ieee754/ldbl-96 -Isysdeps/ieee754/dbl-64 -Isysdeps/ieee754/flt-32 -Isysdeps/ieee754 -Isysdeps/generic -Inptl   -Ilibio -I. -nostdinc -isystem /c/bbd-d/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -isystem /c/bbd-d/.build/x86_64-unknown-linux-gnu/buildtools/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -isystem /home/ray/ctng-firefox-builds/b-eglibc_V_2.17-x86_64-213be3fb-d/x86_64-unknown-linux-gnu/sysroot/usr/include  -D_LIBC_REENTRANT -include include/libc-symbols.h       -DASSEMBLER  -DGAS_SYNTAX  -Wa,--noexecstack   -E -x assembler-with-cpp"
 # export PATH=/home/ray/ctng-firefox-builds/b-eglibc_V_2.17-x86_64-213be3fb-d/bin:/c/bbd-d/.build/x86_64-unknown-linux-gnu/buildtools/bin:/c/bbd-d/.build/tools/bin:/usr/lib64/lxqt-xdg-tools:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/bin/vendor_perl:/usr/bin/vendor_perl
 # /bin/sh sysdeps/unix/make-syscalls.sh sysdeps/unix
+
+# Seems I never documented the Darwin libgcc Win64 ar/ranlib problem, so here goes:
+[INFO ]  Installing final gcc compiler
+[EXTRA]    Configuring final gcc compiler
+[EXTRA]    Building final gcc compiler
+[ERROR]    make[5]: *** [kext/crt3.o] Error 127
+[ERROR]    make[4]: *** [extrakext] Error 2
+[ERROR]    make[3]: *** [stmp-multilib] Error 2
+[ERROR]    make[2]: *** [all-gcc] Error 2
+[ERROR]    make[1]: *** [all] Error 2
+[ERROR]
+[ERROR]  >>
+[ERROR]  >>  Build failed in step 'Installing final gcc compiler'
+[ERROR]  >>        called in step '(top-level)'
+[ERROR]  >>
+[ERROR]  >>  Error happened in: CT_DoExecLog[scripts/functions@257]
+[ERROR]  >>        called from: do_gcc_backend[scripts/build/cc/100-gcc.sh@927]
+[ERROR]  >>        called from: do_gcc_for_host[scripts/build/cc/100-gcc.sh@629]
+[ERROR]  >>        called from: do_cc_for_host[scripts/build/cc.sh@56]
+[ERROR]  >>        called from: main[scripts/crosstool-NG.sh@694]
+
+pushd /e/bod-d/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/gcc
+export PATH=/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin:/e/bod-d/.build/x86_64-apple-darwin10/buildtools/bin:/e/bod-d/.build/tools/bin:/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin:$PATH
+make
+.. gives:
+rm -f ./libgcc.a
+x86_64-apple-darwin10-ar  rc ./libgcc.a libgcc/./_muldi3.o libgcc/./_negdi2.o libgcc/./_lshrdi3.o libgcc/./_ashldi3.o libgcc/./_ashrdi3.o libgcc/./_cmpdi2.o libgcc/./_ucmpdi2.o libgcc/./_clear_cache.o libgcc/./_enable_execute_stack.o libgcc/./_trampoline.o libgcc/./__main.o libgcc/./_absvsi2.o libgcc/./_absvdi2.o libgcc/./_addvsi3.o libgcc/./_addvdi3.o libgcc/./_subvsi3.o libgcc/./_subvdi3.o libgcc/./_mulvsi3.o libgcc/./_mulvdi3.o libgcc/./_negvsi2.o libgcc/./_negvdi2.o libgcc/./_ctors.o libgcc/./_ffssi2.o libgcc/./_ffsdi2.o libgcc/./_clz.o libgcc/./_clzsi2.o libgcc/./_clzdi2.o libgcc/./_ctzsi2.o libgcc/./_ctzdi2.o libgcc/./_popcount_tab.o libgcc/./_popcountsi2.o libgcc/./_popcountdi2.o libgcc/./_paritysi2.o libgcc/./_paritydi2.o libgcc/./_powisf2.o libgcc/./_powidf2.o libgcc/./_powixf2.o libgcc/./_powitf2.o libgcc/./_mulsc3.o libgcc/./_muldc3.o libgcc/./_mulxc3.o libgcc/./_multc3.o libgcc/./_divsc3.o libgcc/./_divdc3.o libgcc/./_divxc3.o libgcc/./_divtc3.o libgcc/./_bswapsi2.o libgcc/./_bswapdi2.o libgcc/./_fixunssfsi.o libgcc/./_fixunsdfsi.o libgcc/./_fixunsxfsi.o libgcc/./_fixsfdi.o libgcc/./_fixsfti.o libgcc/./_fixunssfdi.o libgcc/./_fixunssfti.o libgcc/./_floatdisf.o libgcc/./_floattisf.o libgcc/./_floatundisf.o libgcc/./_floatuntisf.o libgcc/./_fixdfdi.o libgcc/./_fixdfti.o libgcc/./_fixunsdfdi.o libgcc/./_fixunsdfti.o libgcc/./_floatdidf.o libgcc/./_floattidf.o libgcc/./_floatundidf.o libgcc/./_floatuntidf.o libgcc/./_fixxfdi.o libgcc/./_fixxfti.o libgcc/./_fixunsxfdi.o libgcc/./_fixunsxfti.o libgcc/./_floatdixf.o libgcc/./_floattixf.o libgcc/./_floatundixf.o libgcc/./_floatuntixf.o libgcc/./_fixtfdi.o libgcc/./_fixtfti.o libgcc/./_fixunstfdi.o libgcc/./_fixunstfti.o libgcc/./_floatditf.o libgcc/./_floattitf.o libgcc/./_floatunditf.o libgcc/./_floatuntitf.o libgcc/./_eprintf.o libgcc/./__gcc_bcmp.o libgcc/./_divdi3.o libgcc/./_moddi3.o libgcc/./_udivdi3.o libgcc/./_umoddi3.o libgcc/./_udiv_w_sdiv.o libgcc/./_udivmoddi4.o libgcc/./darwin-64.o
+
+ls -l libgcc.a
+.. gives:
+-rw-r--r-- 1 ray None 0 Jul 12 19:33 libgcc.a
+
+.. need to try to minimise that down some:
+rm -f ./libgcc.a && \
+x86_64-apple-darwin10-ar  rc ./libgcc.a \
+  libgcc/./_muldi3.o \
+  libgcc/./_negdi2.o \
+  libgcc/./_lshrdi3.o \
+  libgcc/./_ashldi3.o \
+  libgcc/./_ashrdi3.o \
+  libgcc/./_cmpdi2.o \
+  libgcc/./_ucmpdi2.o \
+  libgcc/./_clear_cache.o \
+  libgcc/./_enable_execute_stack.o \
+  libgcc/./_trampoline.o \
+  libgcc/./__main.o \
+  libgcc/./_absvsi2.o \
+  libgcc/./_absvdi2.o \
+  libgcc/./_addvsi3.o \
+  libgcc/./_addvdi3.o \
+  libgcc/./_subvsi3.o \
+  libgcc/./_subvdi3.o \
+  libgcc/./_mulvsi3.o \
+  libgcc/./_mulvdi3.o \
+  libgcc/./_negvsi2.o \
+  libgcc/./_negvdi2.o \
+  libgcc/./_ctors.o \
+  libgcc/./_ffssi2.o \
+  libgcc/./_ffsdi2.o \
+  libgcc/./_clz.o \
+  libgcc/./_clzsi2.o \
+  libgcc/./_clzdi2.o \
+  libgcc/./_ctzsi2.o \
+  libgcc/./_ctzdi2.o \
+  libgcc/./_popcount_tab.o \
+  libgcc/./_popcountsi2.o \
+  libgcc/./_popcountdi2.o \
+  libgcc/./_paritysi2.o \
+  libgcc/./_paritydi2.o \
+  libgcc/./_powisf2.o \
+  libgcc/./_powidf2.o \
+  libgcc/./_powixf2.o \
+  libgcc/./_powitf2.o \
+  libgcc/./_mulsc3.o \
+  libgcc/./_muldc3.o \
+  libgcc/./_mulxc3.o \
+  libgcc/./_multc3.o \
+  libgcc/./_divsc3.o \
+  libgcc/./_divdc3.o \
+  libgcc/./_divxc3.o \
+  libgcc/./_divtc3.o \
+  libgcc/./_bswapsi2.o \
+  libgcc/./_bswapdi2.o \
+  libgcc/./_fixunssfsi.o \
+  libgcc/./_fixunsdfsi.o \
+  libgcc/./_fixunsxfsi.o \
+  libgcc/./_fixsfdi.o \
+  libgcc/./_fixsfti.o \
+  libgcc/./_fixunssfdi.o \
+  libgcc/./_fixunssfti.o \
+  libgcc/./_floatdisf.o \
+  libgcc/./_floattisf.o \
+  libgcc/./_floatundisf.o \
+  libgcc/./_floatuntisf.o \
+  libgcc/./_fixdfdi.o \
+  libgcc/./_fixdfti.o \
+  libgcc/./_fixunsdfdi.o \
+  libgcc/./_fixunsdfti.o \
+  libgcc/./_floatdidf.o \
+  libgcc/./_floattidf.o \
+  libgcc/./_floatundidf.o \
+  libgcc/./_floatuntidf.o \
+  libgcc/./_fixxfdi.o \
+  libgcc/./_fixxfti.o \
+  libgcc/./_fixunsxfdi.o \
+  libgcc/./_fixunsxfti.o \
+  libgcc/./_floatdixf.o \
+  libgcc/./_floattixf.o \
+  libgcc/./_floatundixf.o \
+  libgcc/./_floatuntixf.o \
+  libgcc/./_fixtfdi.o \
+  libgcc/./_fixtfti.o \
+  libgcc/./_fixunstfdi.o \
+  libgcc/./_fixunstfti.o \
+  libgcc/./_floatditf.o \
+  libgcc/./_floattitf.o \
+  libgcc/./_floatunditf.o \
+  libgcc/./_floatuntitf.o \
+  libgcc/./_eprintf.o \
+  libgcc/./__gcc_bcmp.o \
+  libgcc/./_divdi3.o \
+  libgcc/./_moddi3.o \
+  libgcc/./_udivdi3.o \
+  libgcc/./_umoddi3.o \
+  libgcc/./_udiv_w_sdiv.o \
+  libgcc/./_udivmoddi4.o \
+  libgcc/./darwin-64.o
+
+.. of the list above,   libgcc/./_ctors.o is the smallest on Windows at 1900 bytes; using it will generate a libgcc.a but also it will say:
+E:/msys64/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_ctors.o) has no symbols
+
+rm -f ./libgcc.a && \
+x86_64-apple-darwin10-ar  rc ./libgcc.a \
+  libgcc/./_ctors.o
+
+rm -f ./libgcc.a && \
+x86_64-apple-darwin10-ar  rc ./libgcc.a \
+  libgcc/./_divtc3.o
+
+rm -f ./libgcc.a && \
+x86_64-apple-darwin10-ar  rc ./libgcc.a \
+  libgcc/./_clz.o
+
+# On Linux:
+pushd /c/bod-d/.build/x86_64-apple-darwin10/build/build-cc-gcc-final/gcc
+export PATH=/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin:/c/bod-d/.build/x86_64-apple-darwin10/buildtools/bin:/c/bod-d/.build/tools/bin:$PATH
+
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_trampoline.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_ctors.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_powitf2.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_multc3.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_divtc3.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_fixtfdi.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_fixtfti.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_fixunstfdi.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_fixunstfti.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_floatditf.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_floattitf.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_floatunditf.o) has no symbols
+/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_floatuntitf.o) has no symbols

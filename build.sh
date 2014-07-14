@@ -81,7 +81,7 @@ VENDOR_OSES_armv7a="unknown-linux-gnu"
 
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
-BUILD_DEBUGGABLE_windows="yes"
+BUILD_DEBUGGABLE_windows="no"
 BUILD_DEBUGGABLE_linux="yes"
 
 BUILD_DEBUGGERS_darwin="no"
@@ -1219,13 +1219,15 @@ if [ "$OSTYPE" = "msys" ]; then
 else
   BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
 fi
-BUILDDIR=/m/b${STUB}${CTNG_SUFFIX_1ST}${DEBUG_PREFIX}
+OUTPUTROOT=/e/${CTNG_SUFFIX_1ST}
+[ -d ${OUTPUTROOT} ] || mkdir -p ${OUTPUTROOT}
+BUILDDIR=${OUTPUTROOT}/b${STUB}${DEBUG_PREFIX}
 # Testing for Arnaud Dovi.
 # r=registry set to sensitive
 # p=posix set to 1
 # BUILDDIR=/libs/rp${CTNG_SUFFIX_1ST}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
-BUILT_XCOMPILER_PREFIX=$PWD/${STUB}-${BUILD_PREFIX}
+BUILT_XCOMPILER_PREFIX=${OUTPUTROOT}/i${STUB}${DEBUG_PREFIX}
 
 if [ -d $BUILDDIR ]; then
   echo "Error: Builddir $BUILDDIR already exists, please (re)move it and restart the build"

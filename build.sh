@@ -1219,7 +1219,7 @@ if [ "$OSTYPE" = "msys" ]; then
 else
   BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
 fi
-BUILDDIR=/e/b${STUB}${CTNG_SUFFIX_1ST}${DEBUG_PREFIX}
+BUILDDIR=/m/b${STUB}${CTNG_SUFFIX_1ST}${DEBUG_PREFIX}
 # Testing for Arnaud Dovi.
 # r=registry set to sensitive
 # p=posix set to 1

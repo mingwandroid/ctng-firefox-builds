@@ -1,14 +1,14 @@
-From d655c0b26d7691e4075dedbdc186f149956e058f Mon Sep 17 00:00:00 2001
+From 78f71bced0dec2117fcda22ffe7d0bf04f9e13de Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 15 Jul 2014 21:50:30 +0100
-Subject: [PATCH 38/38] pretend native is cross
+Subject: [PATCH 38/39] pretend native is cross
 
 ---
- scripts/crosstool-NG.sh.in | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ scripts/crosstool-NG.sh.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
-index 8a78896..7d6f017 100644
+index 8a78896..eec4234 100644
 --- a/scripts/crosstool-NG.sh.in
 +++ b/scripts/crosstool-NG.sh.in
 @@ -367,7 +367,7 @@ if [ -z "${CT_RESTART}" ]; then
@@ -20,6 +20,15 @@ index 8a78896..7d6f017 100644
              # A cross-compiler runs on the same machine it is built on
              CT_HOST="${CT_BUILD}"
              build_mangle="build_"
+@@ -510,7 +510,7 @@ if [ -z "${CT_RESTART}" ]; then
+     # Of course, neither cross-native nor canadian can run on BUILD,
+     # so don't add those PATHs in this case...
+     case "${CT_TOOLCHAIN_TYPE}" in
+-        cross)  export PATH="${CT_PREFIX_DIR}/bin:${CT_BUILDTOOLS_PREFIX_DIR}/bin:${PATH}";;
++        cross|native)  export PATH="${CT_PREFIX_DIR}/bin:${CT_BUILDTOOLS_PREFIX_DIR}/bin:${PATH}";;
+         canadian) export PATH="${CT_BUILDTOOLS_PREFIX_DIR}/bin:${PATH}";;
+         *)  ;;
+     esac
 -- 
 1.8.5.2 (Apple Git-48)
 

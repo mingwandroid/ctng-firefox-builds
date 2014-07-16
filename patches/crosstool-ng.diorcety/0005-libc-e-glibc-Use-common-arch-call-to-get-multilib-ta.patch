@@ -1,4 +1,4 @@
-From ce1da29209107af24c5a5178cf27923f511be033 Mon Sep 17 00:00:00 2001
+From a00017cee1a9b8f2255c201b67e76443f7084e39 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:16:52 +0100
 Subject: [PATCH 05/38] libc/(e)glibc: Use common arch call to get multilib

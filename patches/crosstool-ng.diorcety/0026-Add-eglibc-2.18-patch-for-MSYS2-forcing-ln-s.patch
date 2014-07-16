@@ -1,4 +1,4 @@
-From cf29ed81f83873c705fba2463221305118309c6f Mon Sep 17 00:00:00 2001
+From 87a353101e2b32cf8c97751617f40b9fc89b648e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 29 Dec 2013 04:52:41 +0000
 Subject: [PATCH 26/38] Add eglibc 2.18 patch for MSYS2 forcing ln -s

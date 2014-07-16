@@ -1,7 +1,7 @@
-From 78f71bced0dec2117fcda22ffe7d0bf04f9e13de Mon Sep 17 00:00:00 2001
+From 8ae5a2bd339f6ba567bb8708ba8a5bd2267c5563 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 15 Jul 2014 21:50:30 +0100
-Subject: [PATCH 38/39] pretend native is cross
+Subject: [PATCH 38/38] pretend native is cross
 
 ---
  scripts/crosstool-NG.sh.in | 4 ++--
@@ -30,5 +30,5 @@ index 8a78896..eec4234 100644
          *)  ;;
      esac
 -- 
-1.8.5.2 (Apple Git-48)
+2.0.1
 

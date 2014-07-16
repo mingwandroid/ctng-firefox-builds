@@ -1,7 +1,7 @@
-From 976d6d926224a0f4adc1e6f017b2b282f464d1e7 Mon Sep 17 00:00:00 2001
+From dc3f26c740343e582f545832515bf0319e2433c6 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 5 Dec 2013 23:26:41 +0000
-Subject: [PATCH 16/37] Kernel (3.10.19, 3.10.38, 3.12) header fix for unifdef
+Subject: [PATCH 16/38] Kernel (3.10.19, 3.10.38, 3.12) header fix for unifdef
  on Win32
 
 Uses upstream unifdef code.

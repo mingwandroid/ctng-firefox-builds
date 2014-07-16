@@ -1,4 +1,4 @@
-From f618d1e0d8afe25371689b8b847987f88b824666 Mon Sep 17 00:00:00 2001
+From 6e4cbe30cf2e77f9736fec2954f3b11ffaed6f3c Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:12:21 +0100
 Subject: [PATCH 02/38] config/gcc: Limit multilib to gcc 4.7 and up

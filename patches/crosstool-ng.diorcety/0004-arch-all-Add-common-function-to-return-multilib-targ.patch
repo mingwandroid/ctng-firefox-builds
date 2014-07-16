@@ -1,4 +1,4 @@
-From a27e256f684b9a1ae4a36782d561a2f7e182b77e Mon Sep 17 00:00:00 2001
+From 4ca8e60689ab24f54f2ceb195dbe21862714bc4e Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:16:01 +0100
 Subject: [PATCH 04/38] arch/all: Add common function to return multilib target

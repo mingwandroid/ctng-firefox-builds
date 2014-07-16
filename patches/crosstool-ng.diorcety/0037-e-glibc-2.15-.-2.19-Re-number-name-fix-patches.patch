@@ -1,4 +1,4 @@
-From 06df5f5ee49c2db2f5c97d07a01e8ae13ee6bae4 Mon Sep 17 00:00:00 2001
+From ca37a32d4d7bd179b3b2bb04405c6418b1b0d0b7 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 23 Feb 2014 14:44:23 +0000
 Subject: [PATCH 37/38] {e}glibc 2.15 .. 2.19: Re{number|name} + fix patches

@@ -1,4 +1,4 @@
-From f3a1e975bd04a3ab9ec92555e972141bcf4a3cb0 Mon Sep 17 00:00:00 2001
+From 4c1bab2e4068a4ac6453ec5ed38e5d34b6648dd3 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:18:15 +0100
 Subject: [PATCH 07/38] crosstool-NG.sh.in: Don't make lots of symlinks to lib

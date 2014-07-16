@@ -1,4 +1,4 @@
-From bfd5a37ce4b0c388c297e8ade180384d2536fd85 Mon Sep 17 00:00:00 2001
+From 4d8b5da58f2e5f9e067e7b8f11ede836210cee63 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:15:15 +0100
 Subject: [PATCH 03/38] gcc: Add --with-multilib-list option

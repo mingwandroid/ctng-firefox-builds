@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# When MSYS2 falls over as it inevitably will, use this script to continue it.
+# When MSYS2 falls over as it sometimes does, use this script to continue it.
 # This and build.sh should be refactored so the shared bits are in a common file.
-# .. it's just a quick hack. In reality fixing GNU make on MSYS2 is the proper fix.
+# .. it's just a quick hack, really, fixing GNU make on MSYS2 is the proper fix.
 
 THISDIR="$(dirname $0)"
 test "${THISDIR}" = "." && THISDIR=${PWD}
@@ -12,7 +12,9 @@ usage_exit()
 {
   echo ""
   echo    "Usage: ${0} ctng-install-dir build-dir final-install-dir step"
-  echo -e " e.g.: ${0} ${THISDIR}/install-ctng.diorcety /c/bsd ${THISDIR}/s-eglibc_V_2.15-x86_64-213be3fb cc_core_pass_2"
+  echo -e " e.g.: ${0} ${THISDIR}/install-ctng.diorcety /e/d/bb /e/d/ib cc_core_pass_2"
+  echo -e "   or: ${0} ${THISDIR}/install-ctng.diorcety /e/d/bo /e/d/io cc_for_host"
+  echo -e "   and to see a list the available steps: ls /e/d/bo/.build/x86_64-apple-darwin10/state/"
   exit $1
 }
 
@@ -52,7 +54,7 @@ pushd ${BUILD_DIR}
   if [ ! $? ] ; then
     echo "ERROR: ct-ng ${STEP}+ failed!"
     exit 1
-  popd
+  fi
 popd
 
 if [ "$OSTYPE" = "msys" ]; then

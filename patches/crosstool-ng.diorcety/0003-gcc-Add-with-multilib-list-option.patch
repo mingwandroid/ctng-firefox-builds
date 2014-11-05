@@ -1,4 +1,4 @@
-From 4d8b5da58f2e5f9e067e7b8f11ede836210cee63 Mon Sep 17 00:00:00 2001
+From b244e234e8c1cc36681b33a4d68b6bf8191c3e45 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:15:15 +0100
 Subject: [PATCH 03/38] gcc: Add --with-multilib-list option
@@ -7,14 +7,14 @@ Subject: [PATCH 03/38] gcc: Add --with-multilib-list option
 
 Signed-off-by: Ray Donnelly <mingw.android@gmail.com>
 ---
- scripts/build/cc/100-gcc.sh | 7 +++++++
- 1 file changed, 7 insertions(+)
+ scripts/build/cc/100-gcc.sh | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/scripts/build/cc/100-gcc.sh b/scripts/build/cc/100-gcc.sh
-index c1a7c35..6575df6 100644
+index 56b34f4..2c0b153 100644
 --- a/scripts/build/cc/100-gcc.sh
 +++ b/scripts/build/cc/100-gcc.sh
-@@ -373,6 +373,10 @@ do_gcc_core_backend() {
+@@ -377,6 +377,10 @@ do_gcc_core_backend() {
      # Since that's the default, only pass --disable-multilib.
      if [ "${CT_MULTILIB}" != "y" ]; then
          extra_config+=("--disable-multilib")
@@ -25,16 +25,17 @@ index c1a7c35..6575df6 100644
      fi
  
      if [ ! "${host/mingw/}" = "${host}" -o ! "${host/cygwin/}" = "${host}" ]; then
-@@ -866,6 +870,9 @@ do_gcc_backend() {
- 
-     if [ "${CT_MULTILIB}" = "y" ]; then
-         extra_config+=("--enable-multilib")
+@@ -877,6 +881,10 @@ do_gcc_backend() {
+     # Since that's the default, only pass --disable-multilib.
+     if [ "${CT_MULTILIB}" != "y" ]; then
+         extra_config+=("--disable-multilib")
++    else
 +        if [ -n "${CT_CC_GCC_MULTILIB_LIST}" ]; then
 +            extra_config+=("--with-multilib-list=${CT_CC_GCC_MULTILIB_LIST}")
 +        fi
-     else
-         extra_config+=("--disable-multilib")
      fi
+ 
+     if [ ! "${host/mingw/}" = "${host}" -o ! "${host/cygwin/}" = "${host}" ]; then
 -- 
-2.0.1
+2.1.3
 

@@ -1,4 +1,4 @@
-From b3cf58a63b8b48545ea85d3cae6a29b68c0aeb44 Mon Sep 17 00:00:00 2001
+From e2a2ea4a0da2e017dda0ada5da6dd739ad25c7cb Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:19:06 +0100
 Subject: [PATCH 08/38] libc/(e)glibc: Build manuals and locales last
@@ -89,5 +89,5 @@ index d8dbd91..95ab33e 100644
          fi
      fi # libc_full == y
 -- 
-2.0.1
+2.1.3
 

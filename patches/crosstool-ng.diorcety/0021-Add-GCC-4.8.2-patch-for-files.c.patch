@@ -1,4 +1,4 @@
-From 5318531850e049fd138fe1f54fdff6e4919f606a Mon Sep 17 00:00:00 2001
+From a0ecbda53863a8b682f4c7aea4b1135459b920d1 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 23 Dec 2013 13:41:25 +0000
 Subject: [PATCH 21/38] Add GCC 4.8.2 patch for files.c
@@ -159,5 +159,5 @@ index 0000000..022c35c
 +1.9.0
 +
 -- 
-2.0.1
+2.1.3
 

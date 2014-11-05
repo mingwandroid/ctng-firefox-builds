@@ -1,4 +1,4 @@
-From 5c03c2216386597e06ac814a53f461b5cffcaf68 Mon Sep 17 00:00:00 2001
+From 9f9f4b0add9d719776f94e81bbcbc5bcc7896bf4 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sun, 1 Dec 2013 11:40:10 +0000
 Subject: [PATCH 09/38] ISL MinGW-w64 build fix (lacks ffs declaration)
@@ -5951,5 +5951,5 @@ index 0000000..82a1161
 + static void swap_equality(struct isl_basic_map *bmap, int a, int b)
 + {
 -- 
-2.0.1
+2.1.3
 

@@ -1,4 +1,4 @@
-From 8a6bb463c5446c3176e36ccf46f08ede60ca95cd Mon Sep 17 00:00:00 2001
+From 61f37f8392728f25d8f6c29aebd35f2425c4740b Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 9 May 2014 00:31:33 +0100
 Subject: [PATCH 01/38] gdbserver: pass CT_TARGET_CFLAGS and CT_TARGET_LDFLAGS
@@ -33,5 +33,5 @@ index 5d67b6a..a976eeb 100644
              --build=${CT_BUILD}                         \
              --host=${CT_TARGET}                         \
 -- 
-2.0.1
+2.1.3
 

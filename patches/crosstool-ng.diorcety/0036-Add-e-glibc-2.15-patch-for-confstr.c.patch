@@ -1,4 +1,4 @@
-From 74e8c77878b0993c373cbcf4bca60cbdf899457d Mon Sep 17 00:00:00 2001
+From 24dc395c52b1d43cf0bfb243677fb724fe698e2f Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 18 Feb 2014 23:39:34 +0000
 Subject: [PATCH 36/38] Add {e}glibc 2.15 patch for confstr.c
@@ -116,5 +116,5 @@ index 0000000..04e2a0b
 + 	string_len = 0;
 + #ifndef _XBS5_ILP32_OFF32
 -- 
-2.0.1
+2.1.3
 

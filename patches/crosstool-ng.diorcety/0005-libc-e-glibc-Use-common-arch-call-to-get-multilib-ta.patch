@@ -1,4 +1,4 @@
-From a00017cee1a9b8f2255c201b67e76443f7084e39 Mon Sep 17 00:00:00 2001
+From 96510570d083a1ee7dbc16e8c05e36a641f64d38 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:16:52 +0100
 Subject: [PATCH 05/38] libc/(e)glibc: Use common arch call to get multilib
@@ -73,5 +73,5 @@ index 4d961fd..29d8661 100644
          --without-cvs                                               \
          --disable-profile                                           \
 -- 
-2.0.1
+2.1.3
 

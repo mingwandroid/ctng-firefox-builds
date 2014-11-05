@@ -1,4 +1,4 @@
-From c096d05928d40d7cac3844a1d07c805b67a8d65b Mon Sep 17 00:00:00 2001
+From 81e3cd59cc0cbdcf732b0ae954d087566122ffb8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 00:50:24 +0000
 Subject: [PATCH 29/38] Add glibc 2.15 patch to disable test for
@@ -90,5 +90,5 @@ index 0000000..852b97a
 + cat > conftest.c <<\EOF
 + void zero (void *x)
 -- 
-2.0.1
+2.1.3
 

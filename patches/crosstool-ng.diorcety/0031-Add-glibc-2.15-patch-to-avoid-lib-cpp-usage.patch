@@ -1,4 +1,4 @@
-From a59ed44d8fd8fb856c9f3e56b15fa4072a385423 Mon Sep 17 00:00:00 2001
+From 908f1f358eb864f73d6838f35b541e31ff1af0e3 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Wed, 29 Jan 2014 18:50:20 +0000
 Subject: [PATCH 31/38] Add glibc 2.15 patch to avoid /lib/cpp usage
@@ -268,5 +268,5 @@ index 0000000..a94e8c5
 + AC_CONFIG_SUBDIRS()
 + 
 -- 
-2.0.1
+2.1.3
 

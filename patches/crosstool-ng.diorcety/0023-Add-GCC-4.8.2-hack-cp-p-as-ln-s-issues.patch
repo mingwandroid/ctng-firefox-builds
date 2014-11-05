@@ -1,4 +1,4 @@
-From 3c4be272993adc97da5c437e8e41223f589e3044 Mon Sep 17 00:00:00 2001
+From 908312b8264f08f24bb874015045843672555989 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 24 Jan 2014 18:22:19 +0000
 Subject: [PATCH 23/38] Add GCC 4.8.2 hack cp -p as ln -s issues
@@ -40,5 +40,5 @@ index 0000000..33f361d
 + SHLIB_LINK = $(CC) $(LIBGCC2_CFLAGS) -shared -nodefaultlibs \
 + 	$(SHLIB_LDFLAGS) \
 -- 
-2.0.1
+2.1.3
 

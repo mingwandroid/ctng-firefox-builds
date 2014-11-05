@@ -1,4 +1,4 @@
-From 8415ac3d7c8c5e534207f527ccfcbb1577564f9c Mon Sep 17 00:00:00 2001
+From 25bec7bb095267b3f58e3cf0234da8d1bc6206a4 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Fri, 27 Dec 2013 22:16:08 +0000
 Subject: [PATCH 24/38] Add eglibc 2.18 hacky patch and hacky hack for MSYS*
@@ -102,5 +102,5 @@ index b60c407..c1c3652 100644
  
          CT_DoLog EXTRA "Installing C library"
 -- 
-2.0.1
+2.1.3
 

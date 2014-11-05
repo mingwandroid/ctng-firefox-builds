@@ -1,4 +1,4 @@
-From 8ae5a2bd339f6ba567bb8708ba8a5bd2267c5563 Mon Sep 17 00:00:00 2001
+From f3af5531fa4299171408d7318339a92a4f10ff10 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 15 Jul 2014 21:50:30 +0100
 Subject: [PATCH 38/38] pretend native is cross
@@ -8,7 +8,7 @@ Subject: [PATCH 38/38] pretend native is cross
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
-index 8a78896..eec4234 100644
+index b3108c5..3b504b5 100644
 --- a/scripts/crosstool-NG.sh.in
 +++ b/scripts/crosstool-NG.sh.in
 @@ -367,7 +367,7 @@ if [ -z "${CT_RESTART}" ]; then
@@ -30,5 +30,5 @@ index 8a78896..eec4234 100644
          *)  ;;
      esac
 -- 
-2.0.1
+2.1.3
 

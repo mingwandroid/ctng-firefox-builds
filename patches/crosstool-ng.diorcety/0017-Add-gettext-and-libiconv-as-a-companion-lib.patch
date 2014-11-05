@@ -1,4 +1,4 @@
-From f84406ab562018fddaaca20ea6e77352084c0c9b Mon Sep 17 00:00:00 2001
+From 3cd330f431a232cc0573436e8ad7b0e49258d71c Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 26 Apr 2014 14:15:21 +0100
 Subject: [PATCH 17/38] Add gettext and libiconv as a companion lib
@@ -133,24 +133,24 @@ index 0000000..361d34e
 +# CT_INSERT_VERSION_STRING_BELOW
 +    default "1.14" if LIBICONV_V_1_14
 diff --git a/config/libc/eglibc.in b/config/libc/eglibc.in
-index 227cb99..08a51fc 100644
+index 8cda847..070ef21 100644
 --- a/config/libc/eglibc.in
 +++ b/config/libc/eglibc.in
 @@ -4,6 +4,7 @@
  ##
- ## select LIBC_SUPPORT_NPTL
+ ## select LIBC_SUPPORT_THREADS_NATIVE
  ## select CC_CORE_PASSES_NEEDED
 +## select GETTEXT_NEEDED
  ##
  ## help EGLIBC (Embedded GLIBC) is a variant of the standard GNU GLIBC
  ## help that is designed to work well on embedded systems.  EGLIBC strives
 diff --git a/config/libc/glibc.in b/config/libc/glibc.in
-index 6cc3852..152513f 100644
+index 9448dba..e23617e 100644
 --- a/config/libc/glibc.in
 +++ b/config/libc/glibc.in
 @@ -4,6 +4,7 @@
  ##
- ## select LIBC_SUPPORT_NPTL
+ ## select LIBC_SUPPORT_THREADS_NATIVE
  ## select CC_CORE_PASSES_NEEDED
 +## select GETTEXT_NEEDED
  ##
@@ -942,5 +942,5 @@ index 95ab33e..b60c407 100644
          CT_DoExecLog ALL make ${JOBSFLAGS}              \
                                "${extra_make_args[@]}"   \
 -- 
-2.0.1
+2.1.3
 

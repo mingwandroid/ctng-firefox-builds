@@ -1,4 +1,4 @@
-From 320d37b438c8cc4b978d8cdcdcf089f2753f0997 Mon Sep 17 00:00:00 2001
+From 922deda9af870323b245c8cd75e6eb3cf4669d87 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 26 Apr 2014 14:15:51 +0100
 Subject: [PATCH 18/38] Fix eglibc 2_18 sunrpc Windows build issues
@@ -269,5 +269,5 @@ index 0000000..9a0440e
 + /* valid tirpc nettypes */
 + static const char *valid_ti_nettypes[] =
 -- 
-2.0.1
+2.1.3
 

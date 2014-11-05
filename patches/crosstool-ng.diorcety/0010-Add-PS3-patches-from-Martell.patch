@@ -1,4 +1,4 @@
-From f1af8c1c7ed56e02229ab72e54e9aff8ccef4f3d Mon Sep 17 00:00:00 2001
+From 181945a0eac31354db70802d0e6cf7303b3d274a Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Mon, 25 Nov 2013 22:40:03 +0000
 Subject: [PATCH 10/38] Add PS3 patches from Martell
@@ -13927,5 +13927,5 @@ index 0000000..0d92be4
 +   if (y < 0.0)
 +     N = (int) (y * ONE_OVER_PI - 0.5);
 -- 
-2.0.1
+2.1.3
 

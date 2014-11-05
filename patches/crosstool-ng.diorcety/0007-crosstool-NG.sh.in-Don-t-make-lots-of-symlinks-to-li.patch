@@ -1,4 +1,4 @@
-From 4c1bab2e4068a4ac6453ec5ed38e5d34b6648dd3 Mon Sep 17 00:00:00 2001
+From 5e8dcbeab3df879cf2049d8b9ca7a660d484db1f Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:18:15 +0100
 Subject: [PATCH 07/38] crosstool-NG.sh.in: Don't make lots of symlinks to lib
@@ -23,7 +23,7 @@ Signed-off-by: Ray Donnelly <mingw.android@gmail.com>
  1 file changed, 13 insertions(+), 11 deletions(-)
 
 diff --git a/scripts/crosstool-NG.sh.in b/scripts/crosstool-NG.sh.in
-index f38cd6b..8a78896 100644
+index 49915a4..b3108c5 100644
 --- a/scripts/crosstool-NG.sh.in
 +++ b/scripts/crosstool-NG.sh.in
 @@ -341,22 +341,24 @@ if [ -z "${CT_RESTART}" ]; then
@@ -63,5 +63,5 @@ index f38cd6b..8a78896 100644
      # Determine build system if not set by the user
      if [ -z "${CT_BUILD}" ]; then
 -- 
-2.0.1
+2.1.3
 

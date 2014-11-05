@@ -1,4 +1,4 @@
-From 4ca8e60689ab24f54f2ceb195dbe21862714bc4e Mon Sep 17 00:00:00 2001
+From 169bbb77bf4bdb2c89174074ba9037df4b166fa8 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 12 Apr 2014 13:16:01 +0100
 Subject: [PATCH 04/38] arch/all: Add common function to return multilib target
@@ -49,10 +49,10 @@ index cf6d40d..cac7f74 100644
 +    echo "${target}"
 +}
 diff --git a/scripts/build/arch/arm.sh b/scripts/build/arch/arm.sh
-index 430bdde..bf88855 100644
+index 5f6ce2f..2015692 100644
 --- a/scripts/build/arch/arm.sh
 +++ b/scripts/build/arch/arm.sh
-@@ -38,3 +38,16 @@ CT_DoArchTupleValues() {
+@@ -39,3 +39,16 @@ CT_DoArchTupleValues() {
          CT_TARGET_SYS="${CT_TARGET_SYS}hf"
      fi
  }
@@ -154,10 +154,10 @@ index 456a6e3..1ee27b7 100644
 +    echo "${target}"
 +}
 diff --git a/scripts/build/arch/mips.sh b/scripts/build/arch/mips.sh
-index 97a077f..a89d83d 100644
+index 4d732be..bf5502a 100644
 --- a/scripts/build/arch/mips.sh
 +++ b/scripts/build/arch/mips.sh
-@@ -19,3 +19,16 @@ CT_DoArchTupleValues() {
+@@ -14,3 +14,16 @@ CT_DoArchTupleValues() {
      CT_ARCH_ABI_CFLAG="-mabi=${CT_ARCH_mips_ABI}"
      CT_ARCH_WITH_ABI="--with-abi=${CT_ARCH_mips_ABI}"
  }
@@ -175,10 +175,10 @@ index 97a077f..a89d83d 100644
 +    echo "${target}"
 +}
 diff --git a/scripts/build/arch/powerpc.sh b/scripts/build/arch/powerpc.sh
-index e5ad335..aae94b1 100644
+index fbc3120..c91abce 100644
 --- a/scripts/build/arch/powerpc.sh
 +++ b/scripts/build/arch/powerpc.sh
-@@ -28,3 +28,31 @@ CT_DoArchTupleValues () {
+@@ -26,3 +26,31 @@ CT_DoArchTupleValues () {
          CT_ARCH_CC_EXTRA_CONFIG="--enable-e500_double"
      fi
  }
@@ -260,12 +260,12 @@ index 7780e40..dc5136c 100644
 +    echo "${target}"
 +}
 diff --git a/scripts/build/arch/sparc.sh b/scripts/build/arch/sparc.sh
-index 6fa3877..95999a6 100644
+index e3e7491..008251e 100644
 --- a/scripts/build/arch/sparc.sh
 +++ b/scripts/build/arch/sparc.sh
-@@ -6,3 +6,16 @@ CT_DoArchTupleValues() {
-     fi
- 
+@@ -3,3 +3,16 @@ CT_DoArchTupleValues() {
+     # That's the only thing to override
+     CT_TARGET_ARCH="sparc${target_bits_64}${CT_ARCH_SUFFIX}"
  }
 +
 +#------------------------------------------------------------------------------
@@ -339,5 +339,5 @@ index 69407db..7fbbffc 100644
 +    echo "${target}"
 +}
 -- 
-2.0.1
+2.1.3
 

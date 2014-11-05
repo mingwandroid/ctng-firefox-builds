@@ -1,4 +1,4 @@
-From eb2c3067ef168c1575318111a661e09329b33dbe Mon Sep 17 00:00:00 2001
+From dbbf25da9221e59a1e850f8678e291c257382675 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 30 Jan 2014 00:47:27 +0000
 Subject: [PATCH 32/38] Add glibc 2.16 patches
@@ -289,5 +289,5 @@ index 0000000..ab9e99b
 + AC_CONFIG_SUBDIRS()
 + 
 -- 
-2.0.1
+2.1.3
 

@@ -1,4 +1,4 @@
-From dc3f26c740343e582f545832515bf0319e2433c6 Mon Sep 17 00:00:00 2001
+From 2f3dd4644b4d58be9c495da40602a6dea30044ca Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Thu, 5 Dec 2013 23:26:41 +0000
 Subject: [PATCH 16/38] Kernel (3.10.19, 3.10.38, 3.12) header fix for unifdef
@@ -6294,5 +6294,5 @@ index 0000000..e58f2fe
 ++	return (fp);
 ++}
 -- 
-2.0.1
+2.1.3
 

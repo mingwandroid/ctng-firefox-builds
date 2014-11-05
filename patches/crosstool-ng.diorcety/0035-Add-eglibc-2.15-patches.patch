@@ -1,4 +1,4 @@
-From 9d6d2bd19effec500e3d5b6b528762434c3d351e Mon Sep 17 00:00:00 2001
+From fcfd7cbf72f5ac8485611493007a4dd9a71e405b Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Tue, 18 Feb 2014 21:26:55 +0000
 Subject: [PATCH 35/38] Add eglibc 2.15 patches
@@ -1131,5 +1131,5 @@ index 0000000..aa946ab
 ++ 
 ++ else
 -- 
-2.0.1
+2.1.3
 

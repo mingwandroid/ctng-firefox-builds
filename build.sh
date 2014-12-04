@@ -237,11 +237,20 @@ Where applicable multilib is always enabled."
 # This set of options are for the crosstool-ng build #
 ######################################################
 
+# New branches are made for the clone.
+# Format is: URL#cloned#rebased1#rebased2#
+CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#mingw-w64-updates"
+
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
 #option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
 #option CTNG_SOURCE_URL      "git{wipmultilib}:${HOME}/crosstool-ng.multilib" \
 
-option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
+#option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#mingw-w64-updates" \
+#option CTNG_SOURCE_URL      "mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-multilib http://crosstool-ng.org/hg/crosstool-ng" \
+#option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
+#option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
+
+option CTNG_SOURCE_URL      "default" \
 "Specify the vcs, url and name suffix for the crosstool-ng to use.
 Should be one of:
 git{diorcety}:https://github.com/diorcety/crosstool-ng.git
@@ -251,7 +260,7 @@ mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-multilib http://crossto
 hg{upstream}:http://crosstool-ng.org/hg/crosstool-ng
   .. (for Yann Morin's upstream project)
 Note: The first letter of the {suffix} is used as part of the build directories name so try to keep those unique."
-option CTNG_LOCAL_PATCHES  yes \
+option CTNG_LOCAL_PATCHES  no \
 "Use local patches?"
 option CTNG_PACKAGE        no \
 "Make a package for the built cross compiler."
@@ -479,11 +488,22 @@ else
   fi
 fi
 
+if [ "${CTNG_SOURCE_URL}" = "default" ]; then
+  CTNG_SOURCE_URL=$(_al CTNG_SOURCE_URL ${TARGET_OS})
+fi
+
 CTNG_VCS_AND_SUFFIX=$(echo "$CTNG_SOURCE_URL" | sed 's/\([^:]*\):.*/\1/')
-CTNG_VCS_URL=${CTNG_SOURCE_URL##${CTNG_VCS_AND_SUFFIX}:}
+CTNG_VCS_URL_AND_BRANCHES=${CTNG_SOURCE_URL##${CTNG_VCS_AND_SUFFIX}:}
 CTNG_VCS=$(echo "$CTNG_VCS_AND_SUFFIX" | sed 's/\([^{]*\){.*/\1/')
 CTNG_SUFFIX=$(echo "$CTNG_VCS_AND_SUFFIX" | sed 's/.*{\(.*\)}/\1/')
 CTNG_SUFFIX_1ST=${CTNG_SUFFIX:0:1}
+# This will break dash. I don't care (see "#!/usr/bin/env bash" at the top)
+CTNG_VCS_URL="${CTNG_VCS_URL_AND_BRANCHES%%#*}"
+CTNG_VCS_BRANCHES="${CTNG_VCS_URL_AND_BRANCHES#*\#}"
+CTNG_SUFFIX_HASH=$(echo "${CTNG_VCS_BRANCHES}" | sha1sum | cut -c1-6)
+IFS='#' read -a CTNG_VCS_BRANCHES_ARRAY <<< "$CTNG_VCS_BRANCHES"
+echo "${CTNG_VCS_BRANCHES_ARRAY[@]}"
+CTNG_FOLDER_NAME="crosstool-ng.${CTNG_SUFFIX}.${CTNG_SUFFIX_HASH}"
 
 # TODO :: Support canadian cross compiles then remove this
 HOST_OS=$BUILD_OS
@@ -864,30 +884,59 @@ cross_clang_build()
 
   CROSSTOOL_CONFIG=${BUILDDIR}/.config
   if [ "${CTNG_CLEAN}" = "yes" ]; then
-    [ -d ${BUILT_XCOMPILER_PREFIX} ]   && rm -rf ${BUILT_XCOMPILER_PREFIX}
-    [ -d crosstool-ng.${CTNG_SUFFIX} ] && rm -rf crosstool-ng.${CTNG_SUFFIX}
-    [ -d ${BUILDDIR} ]                 && rm -rf ${BUILDDIR}
+    [ -d ${BUILT_XCOMPILER_PREFIX} ] && rm -rf ${BUILT_XCOMPILER_PREFIX}
+    [ -d ${CTNG_FOLDER_NAME} ]       && rm -rf ${CTNG_FOLDER_NAME}
+    [ -d ${BUILDDIR} ]               && rm -rf ${BUILDDIR}
   fi
 
   if [ ! -f ${BUILT_XCOMPILER_PREFIX}/bin/${CROSSCC}-clang ]; then
     [ -d "${HOME}"/src ] || mkdir "${HOME}"/src
-    [ -d crosstool-ng.${CTNG_SUFFIX} ] ||
+    [ -d ${CTNG_FOLDER_NAME} ] ||
      (
       if [ "$CTNG_VCS" = "git" ]; then
-        git clone $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
+        git clone $CTNG_VCS_URL ${CTNG_FOLDER_NAME}
       elif [ "$CTNG_VCS" = "mq" ]; then
-        hg qclone -p $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
-        pushd crosstool-ng.${CTNG_SUFFIX}
+        hg qclone -p $CTNG_VCS_URL ${CTNG_FOLDER_NAME}
+        pushd ${CTNG_FOLDER_NAME}
         hg qpush -a
         popd
       elif [ "$CTNG_VCS" = "hg" ]; then
-        hg clone $CTNG_VCS_URL crosstool-ng.${CTNG_SUFFIX}
+        hg clone $CTNG_VCS_URL ${CTNG_FOLDER_NAME}
       else
         echo "Error: Unknown version control system: $CTNG_VCS"
         exit 1
       fi
+      pushd ${CTNG_FOLDER_NAME}
+        # Make a shell script to do the branch rebasing so it can be
+        # repeated easily.
+        echo '#!/usr/bin/env bash' > reclone.sh
+        MASTER_BRANCH=${CTNG_VCS_BRANCHES_ARRAY[0]}
+        for BRANCH in "${CTNG_VCS_BRANCHES_ARRAY[@]}"; do
+          if [ "${BRANCH}" = "${MASTER_BRANCH}" ]; then
+            echo "git checkout -b ${TARGET_OS} origin/${MASTER_BRANCH}" >> reclone.sh
+          else
+            echo "# rebasing ${BRANCH} onto ${TARGET_OS}"               >> reclone.sh
+            echo "# .. then merging it with ${TARGET_OS}"               >> reclone.sh
+            echo "git checkout ${BRANCH}"                               >> reclone.sh
+            echo "git rebase ${TARGET_OS}"                              >> reclone.sh
+            echo "git checkout ${TARGET_OS}"                            >> reclone.sh
+            echo "git merge ${BRANCH}"                                  >> reclone.sh
+          fi
+          if [ "${CTNG_LOCAL_PATCHES}" = "yes" ]; then
+            if [ -d "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}.${BRANCH}" ]; then
+              PATCHES=$(find "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}.${BRANCH}" -name "*.patch" | sort)
+              for PATCH in $PATCHES; do
+                echo "git am ${PATCH}"                                    >> reclone.sh
+              done
+            fi
+          fi
+          echo ""                                                       >> reclone.sh
+        done
+        chmod +x reclone.sh
+        ./reclone.sh
+      popd
       if [ "${CTNG_LOCAL_PATCHES}" = "yes" ]; then
-        pushd crosstool-ng.${CTNG_SUFFIX}
+        pushd ${CTNG_FOLDER_NAME}
         if [ -d "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}" ]; then
           PATCHES=$(find "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}" -name "*.patch" | sort)
           for PATCH in $PATCHES; do
@@ -902,7 +951,7 @@ cross_clang_build()
         popd
       fi
      ) || ( echo "Error: Failed to clone/patch crosstool-ng" && exit 1 )
-    pushd crosstool-ng.${CTNG_SUFFIX}
+    pushd ${CTNG_FOLDER_NAME}
     CTNG_SAMPLE=mozbuild-${TARGET_OS}-${BITS}
     CTNG_SAMPLE_CONFIG=samples/${CTNG_SAMPLE}/crosstool.config
     [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
@@ -2242,7 +2291,7 @@ CFLAGS= LDFLAGS= /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295
 
 
 
-/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:67:1: error: conflicting types for ‘rpl_lstat’
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:67:1: error: conflicting types for ???rpl_lstat???
  rpl_lstat (const char *file, struct stat *sbuf)
  ^
 In file included from /usr/include/time.h:145:0,
@@ -2250,14 +2299,14 @@ In file included from /usr/include/time.h:145:0,
                  from /usr/include/sys/stat.h:9,
                  from ./sys/stat.h:32,
                  from /home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:35:
-./sys/stat.h:782:1: note: previous declaration of ‘rpl_lstat’ was here
+./sys/stat.h:782:1: note: previous declaration of ???rpl_lstat??? was here
  _GL_FUNCDECL_RPL (lstat, int, (const char *name, struct stat *buf)
  ^
-/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c: In function ‘rpl_lstat’:
-/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:70:3: warning: passing argument 2 of ‘orig_lstat’ from incompatible pointer type [enabled by default]
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c: In function ???rpl_lstat???:
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:70:3: warning: passing argument 2 of ???orig_lstat??? from incompatible pointer type [enabled by default]
    int lstat_result = orig_lstat (file, sbuf);
    ^
-/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:39:1: note: expected ‘struct stat *’ but argument is of type ‘struct _stati64 *’
+/home/ray/ctng-firefox-builds/ctng-build-x-r-HEAD-x86_64-235295c4/.build/src/gettext-0.18.3.1/gettext-runtime/gnulib-lib/lstat.c:39:1: note: expected ???struct stat *??? but argument is of type ???struct _stati64 *???
  orig_lstat (const char *filename, struct stat *buf)
  ^
 In file included from ./sys/stat.h:32:0,

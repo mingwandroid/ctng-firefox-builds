@@ -239,7 +239,10 @@ Where applicable multilib is always enabled."
 
 # New branches are made for the clone.
 # Format is: URL#cloned#rebased1#rebased2#
-CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#mingw-w64-updates"
+# Call eval so that variables can be embedded.
+#CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#\${BUILD_OS}-build#\${TARGET_OS}-target"
+CTNG_SOURCE_URL_windows="git{wip}:${HOME}/crosstool-ng#official#\${BUILD_OS}-build#\${TARGET_OS}-target" \
+
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
 #option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
@@ -491,6 +494,12 @@ fi
 if [ "${CTNG_SOURCE_URL}" = "default" ]; then
   CTNG_SOURCE_URL=$(_al CTNG_SOURCE_URL ${TARGET_OS})
 fi
+
+# Use eval to dereference any variables in CTNG_SOURCE_URL
+echo BUILD_OS=$BUILD_OS
+echo HOST_OS=$HOST_OS
+echo CTNG_SOURCE_URL=$CTNG_SOURCE_URL
+CTNG_SOURCE_URL=$(eval echo ${CTNG_SOURCE_URL})
 
 CTNG_VCS_AND_SUFFIX=$(echo "$CTNG_SOURCE_URL" | sed 's/\([^:]*\):.*/\1/')
 CTNG_VCS_URL_AND_BRANCHES=${CTNG_SOURCE_URL##${CTNG_VCS_AND_SUFFIX}:}
@@ -915,12 +924,16 @@ cross_clang_build()
           if [ "${BRANCH}" = "${MASTER_BRANCH}" ]; then
             echo "git checkout -b ${TARGET_OS} origin/${MASTER_BRANCH}" >> reclone.sh
           else
-            echo "# rebasing ${BRANCH} onto ${TARGET_OS}"               >> reclone.sh
-            echo "# .. then merging it with ${TARGET_OS}"               >> reclone.sh
-            echo "git checkout ${BRANCH}"                               >> reclone.sh
-            echo "git rebase ${TARGET_OS}"                              >> reclone.sh
-            echo "git checkout ${TARGET_OS}"                            >> reclone.sh
-            echo "git merge ${BRANCH}"                                  >> reclone.sh
+            # Branches are allowed to not exist incase of using variables.
+            git show-ref --verify --quiet refs/heads/${BRANCH}
+            if [ $? ]; then
+              echo "# rebasing ${BRANCH} onto ${TARGET_OS}"               >> reclone.sh
+              echo "# .. then merging it with ${TARGET_OS}"               >> reclone.sh
+              echo "git checkout ${BRANCH}"                               >> reclone.sh
+              echo "git rebase ${TARGET_OS}"                              >> reclone.sh
+              echo "git checkout ${TARGET_OS}"                            >> reclone.sh
+              echo "git merge ${BRANCH}"                                  >> reclone.sh
+            fi
           fi
           if [ "${CTNG_LOCAL_PATCHES}" = "yes" ]; then
             if [ -d "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}.${BRANCH}" ]; then

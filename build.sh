@@ -874,8 +874,27 @@ download_build_tools()
     MINGW_W64_HASH=213be3fb
   fi
   if [ -n "$MINGW_W64_HASH" ]; then
-     MINGW_W64_HASH=-${MINGW_W64_HASH}
+    MINGW_W64_HASH=-${MINGW_W64_HASH}
   fi
+}
+
+# When hacking on crosstool-ng in a git repo on the local filesystem, we want to prefer any local
+# branches, and fall back to remote ones if they don't exist.
+local_or_remotes_origin_branch()
+{
+  local branch=${1}
+  git show-ref --verify --quiet refs/heads/${branch}
+  if [ $? -eq 0 ]; then
+    echo ${branch}
+    return 0
+  fi
+  git show-ref --verify --quiet refs/remotes/origin/${branch}
+  if [ $? -eq 0 ]; then
+    echo remotes/origin/${branch}
+    return 0
+  fi
+
+  echo "ERROR_branch_not_found"
 }
 
 cross_clang_build()
@@ -903,11 +922,21 @@ cross_clang_build()
     [ -d ${CTNG_FOLDER_NAME} ] ||
      (
       if [ "$CTNG_VCS" = "git" ]; then
-        git clone $CTNG_VCS_URL ${CTNG_FOLDER_NAME}
+        # My git-fu is failing me. During development I usually want
+        # to clone from my local filesystem, however that only clones
+        # the master branch, and 'git fetch origin' doesn't help.
+        # These two SO comments were helpful, but I can't explain why
+        # 'git fetch origin' doesn't work.
+        # http://stackoverflow.com/a/7216269/3257826
+        # http://stackoverflow.com/a/3960063/3257826
+        git clone --mirror "${CTNG_VCS_URL}" "${CTNG_FOLDER_NAME}"/.git
+        pushd "${CTNG_FOLDER_NAME}"
+          git config --bool core.bare false
+        popd
       elif [ "$CTNG_VCS" = "mq" ]; then
         hg qclone -p $CTNG_VCS_URL ${CTNG_FOLDER_NAME}
         pushd ${CTNG_FOLDER_NAME}
-        hg qpush -a
+          hg qpush -a
         popd
       elif [ "$CTNG_VCS" = "hg" ]; then
         hg clone $CTNG_VCS_URL ${CTNG_FOLDER_NAME}
@@ -922,17 +951,17 @@ cross_clang_build()
         MASTER_BRANCH=${CTNG_VCS_BRANCHES_ARRAY[0]}
         for BRANCH in "${CTNG_VCS_BRANCHES_ARRAY[@]}"; do
           if [ "${BRANCH}" = "${MASTER_BRANCH}" ]; then
-            echo "git checkout -b ${TARGET_OS} origin/${MASTER_BRANCH}" >> reclone.sh
+            echo "git checkout -b ${TARGET_OS} $(local_or_remotes_origin_branch ${MASTER_BRANCH})" >> reclone.sh
           else
             # Branches are allowed to not exist incase of using variables.
-            git show-ref --verify --quiet refs/heads/${BRANCH}
-            if [ $? ]; then
-              echo "# rebasing ${BRANCH} onto ${TARGET_OS}"               >> reclone.sh
-              echo "# .. then merging it with ${TARGET_OS}"               >> reclone.sh
-              echo "git checkout ${BRANCH}"                               >> reclone.sh
-              echo "git rebase ${TARGET_OS}"                              >> reclone.sh
-              echo "git checkout ${TARGET_OS}"                            >> reclone.sh
-              echo "git merge ${BRANCH}"                                  >> reclone.sh
+            local branch=$(local_or_remotes_origin_branch ${BRANCH})
+            if [ "${branch}" != "ERROR_branch_not_found" ]; then
+              echo "# rebasing ${BRANCH} onto ${TARGET_OS}" >> reclone.sh
+              echo "# .. then merging it with ${TARGET_OS}" >> reclone.sh
+              echo "git checkout -b ${BRANCH} ${branch}"    >> reclone.sh
+              echo "git rebase ${TARGET_OS}"                >> reclone.sh
+              echo "git checkout ${TARGET_OS}"              >> reclone.sh
+              echo "git merge ${branch}"                    >> reclone.sh
             fi
           fi
           if [ "${CTNG_LOCAL_PATCHES}" = "yes" ]; then

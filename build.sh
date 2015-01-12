@@ -240,9 +240,8 @@ Where applicable multilib is always enabled."
 # New branches are made for the clone.
 # Format is: URL#cloned#rebased1#rebased2#
 # Call eval so that variables can be embedded.
-#CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#\${BUILD_OS}-build#\${TARGET_OS}-target"
-CTNG_SOURCE_URL_windows="git{wip}:${HOME}/crosstool-ng#official#\${BUILD_OS}-build#\${TARGET_OS}-target" \
-
+CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#\${BUILD_OS}-build#\${TARGET_OS}-target"
+#CTNG_SOURCE_URL_windows="git{dy-wip}:${HOME}/crosstool-ng#official#\${BUILD_OS}-build#\${TARGET_OS}-target" \
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
 #option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \

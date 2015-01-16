@@ -379,7 +379,7 @@ copy_build_scripts()
 {
   [ -d $1 ] || mkdir $1
   option_output_all $1/regenerate.sh
-  chmod +x $1/regenerate.sh
+  chmod +x $1/regenerate.shf
   cp     ${THISDIR}/build.sh ${THISDIR}/tar-sorted.sh ${THISDIR}/mingw-w64-toolchain.sh $1/
   cp -rf ${THISDIR}/mozilla.configs $1/
   cp -rf ${THISDIR}/crosstool-ng.configs $1/
@@ -955,12 +955,16 @@ cross_clang_build()
             # Branches are allowed to not exist incase of using variables.
             local branch=$(local_or_remotes_origin_branch ${BRANCH})
             if [ "${branch}" != "ERROR_branch_not_found" ]; then
-              echo "# rebasing ${BRANCH} onto ${TARGET_OS}" >> reclone.sh
-              echo "# .. then merging it with ${TARGET_OS}" >> reclone.sh
-              echo "git checkout -b ${BRANCH} ${branch}"    >> reclone.sh
-              echo "git rebase ${TARGET_OS}"                >> reclone.sh
-              echo "git checkout ${TARGET_OS}"              >> reclone.sh
-              echo "git merge ${branch}"                    >> reclone.sh
+              echo "# rebasing ${BRANCH} onto ${TARGET_OS}"       >> reclone.sh
+              echo "# .. then merging it with ${TARGET_OS}"       >> reclone.sh
+              echo "if [ \"${branch}\" = \"${BRANCH}\" ]; then"   >> reclone.sh
+              echo "  git checkout ${branch}"                     >> reclone.sh
+              echo "else"                                         >> reclone.sh
+              echo "  git checkout -b ${BRANCH} ${branch}"        >> reclone.sh
+              echo "fi"                                           >> reclone.sh
+              echo "git rebase ${TARGET_OS}"                      >> reclone.sh
+              echo "git checkout ${TARGET_OS}"                    >> reclone.sh
+              echo "git merge ${branch}"                          >> reclone.sh
             fi
           fi
           if [ "${CTNG_LOCAL_PATCHES}" = "yes" ]; then

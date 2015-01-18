@@ -241,6 +241,9 @@ Where applicable multilib is always enabled."
 # Format is: URL#cloned#rebased1#rebased2#
 # Call eval so that variables can be embedded.
 CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
+
+CTNG_SOURCE_URL_raspi="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
+
 #CTNG_SOURCE_URL_windows="git{dy-wip}:${HOME}/crosstool-ng#official#\${BUILD_OS}-build#\${TARGET_OS}-target" \
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
@@ -848,24 +851,27 @@ download_build_tools()
   elif [ "$OSTYPE" = "darwin" ]; then
     if [ "${CTNG_LEGACY}" = "yes" ]; then
 #    # I'd like to get a hash for all other compilers too .. for now, just so my BeyondCompare sessions are less noisy, pretend they all have the hash I use most often.
-#    [ -d $PWD/apple-osx ] ||
-#    (
+    [ -d $PWD/apple-osx ] ||
+    (
 #      wget -c https://mingw-and-ndk.googlecode.com/files/multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
-#      7za x multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
-#    )
-#    MINGW_W64_PATH=$PWD/apple-osx/bin
-#    USED_CC=i686-apple-darwin11-gcc
-#    USED_CXX=i686-apple-darwin11-g++
-#    USED_LD=i686-apple-darwin11-ld
+      wget -c https://www.dropbox.com/s/sawpjkspb1y61zl/multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
+      7za x multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
+    )
+    MINGW_W64_PATH=$PWD/apple-osx/bin
+    USED_CC=i686-apple-darwin11-gcc
+    USED_CXX=i686-apple-darwin11-g++
+    USED_LD=i686-apple-darwin11-ld
 #    MINGW_W64_HASH=tc4-gcc-42
-    USED_CC=gcc-4.2
-    USED_CXX=g++-4.2
-    USED_LD=ld
+#    USED_CC=gcc-4.2
+#    USED_CXX=g++-4.2
+#    USED_LD=ld
     CT_BUILD_SUFFIX=-4.2
     # Homebrew's gcc-4.2 doesn't work with MacOSX10.6.sdk, error is: MacOSX10.6.sdk/usr/include/varargs.h:4:26: error: varargs.h: No such file or directory
     # it's an include_next thing, so that GCC has no varargs.h I guess. Trying with 10.7 instead.
     USED_CPP_FLAGS=$USED_CPP_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
     USED_LD_FLAGS=$USED_LD_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
+    export CPPFLAGS="$USED_CPP_FLAGS"
+    export LDFLAGS="$USED_LD_FLAGS"
 #    USED_LD_FLAGS=$USED_LD_FLAGS" -syslibroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5"
     MINGW_W64_HASH=hb-gcc-42
     fi
@@ -1166,10 +1172,10 @@ cross_clang_build()
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 
-    ./bootstrap && ./configure ${CTNG_CFG_ARGS} && make clean && make && make install
     if [ -n "$MINGW_W64_PATH" ]; then
       PATH="${MINGW_W64_PATH}:${PATH}"
     fi
+    ./bootstrap && ./configure ${CTNG_CFG_ARGS} && make clean && make && make install
     popd
     [ -d ${BUILDDIR} ] || mkdir ${BUILDDIR}
     pushd ${BUILDDIR}

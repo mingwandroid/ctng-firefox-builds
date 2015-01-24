@@ -427,8 +427,10 @@ copy_build_scripts()
 BUILD_OS=
 if [ "$OSTYPE" = "linux-gnu" ]; then
   BUILD_OS=linux
+  SHASUM=sha1sum
 elif [ "$OSTYPE" = "msys" ]; then
   BUILD_OS=windows
+  SHASUM=sha1sum
 #  GDBPROG=gdb.exe
 #  if which $GDBPROG > /dev/null 2>&1; then
 #    # weird, works from commandline, but not from within a running shell script.
@@ -458,6 +460,7 @@ elif [ "$OSTYPE" = "msys" ]; then
   export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR="
 elif [ "$OSTYPE" = "darwin" ]; then
   BUILD_OS=darwin
+  SHASUM=shasum
   ulimit -n 4096
 else
   echo "Error: I don't know what Operating System you are using."
@@ -511,7 +514,7 @@ CTNG_SUFFIX_1ST=${CTNG_SUFFIX:0:1}
 # This will break dash. I don't care (see "#!/usr/bin/env bash" at the top)
 CTNG_VCS_URL="${CTNG_VCS_URL_AND_BRANCHES%%#*}"
 CTNG_VCS_BRANCHES="${CTNG_VCS_URL_AND_BRANCHES#*\#}"
-CTNG_SUFFIX_HASH=$(echo "${CTNG_VCS_BRANCHES}" | sha1sum | cut -c1-6)
+CTNG_SUFFIX_HASH=$(echo "${CTNG_VCS_BRANCHES}" | ${SHASUM} | cut -c1-6)
 IFS='#' read -a CTNG_VCS_BRANCHES_ARRAY <<< "$CTNG_VCS_BRANCHES"
 echo "${CTNG_VCS_BRANCHES_ARRAY[@]}"
 CTNG_FOLDER_NAME="crosstool-ng.${CTNG_SUFFIX}.${CTNG_SUFFIX_HASH}"
@@ -870,9 +873,6 @@ download_build_tools()
     # it's an include_next thing, so that GCC has no varargs.h I guess. Trying with 10.7 instead.
     USED_CPP_FLAGS=$USED_CPP_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
     USED_LD_FLAGS=$USED_LD_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
-    export CPPFLAGS="$USED_CPP_FLAGS"
-    export LDFLAGS="$USED_LD_FLAGS"
-#    USED_LD_FLAGS=$USED_LD_FLAGS" -syslibroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5"
     MINGW_W64_HASH=hb-gcc-42
     fi
   else
@@ -1175,7 +1175,15 @@ cross_clang_build()
     if [ -n "$MINGW_W64_PATH" ]; then
       PATH="${MINGW_W64_PATH}:${PATH}"
     fi
-    ./bootstrap && ./configure ${CTNG_CFG_ARGS} && make clean && make && make install
+    ./bootstrap
+    CPPFLAGS="${USED_CPP_FLAGS}" \
+    LDFLAGS="${USED_LD_FLAGS}" \
+      ./configure ${CTNG_CFG_ARGS}
+      make clean
+    EXTRA_CFLAGS="${USED_CPP_FLAGS}" \
+    EXTRA_LDFLAGS="${USED_LD_FLAGS}" \
+      make
+      make install
     popd
     [ -d ${BUILDDIR} ] || mkdir ${BUILDDIR}
     pushd ${BUILDDIR}

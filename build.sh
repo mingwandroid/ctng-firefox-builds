@@ -296,12 +296,13 @@ option CTNG_DEBUGGABLE     default \
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
 about a year ago."
-option CTNG_LEGACY         yes \
+option CTNG_B_CC_LEGACY    mine \
 "Do you want the toolchain built with crosstool-ng
 to be built using stable, old compilers so that they
 might run on older machines? In some cases, this will
 disable 64bit builds - when build/host is OSX. In some
-cases (Windows) it has no effect."
+cases (Windows) it has no effect. Valid names are:
+no, mine, homebrew"
 option CTNG_DEBUGGERS      default \
 "Do you want the toolchain built with crosstool-ng
 to include debuggers?"
@@ -493,8 +494,8 @@ fi
 if [ "${HOST_ARCH}" = "i686" ]; then
   BITS=32
 else
-  if [ "${CTNG_LEGACY}" = "yes" -a "${BUILD_OS}" = "darwin" ]; then
-    echo "Warning: You set --ctng-legacy=yes and are building on Darwin, due to GMP configure fail 32bit binaries will be built."
+  if [ "${CTNG_B_CC_LEGACY}" = "mine" -a "${BUILD_OS}" = "darwin" ]; then
+    echo "Warning: You set --ctng-legacy=mine and are building on Darwin, due to GMP configure fail 32bit binaries will be built."
     BITS=32
   else
     BITS=64
@@ -857,28 +858,29 @@ download_build_tools()
     . ${THISDIR}/mingw-w64-toolchain.sh --arch=$HOST_ARCH --root=$PWD --path-out=MINGW_W64_PATH --hash-out=MINGW_W64_HASH --enable-verbose --enable-hash-in-path
 #      dl_compile_install_make_381
   elif [ "$OSTYPE" = "darwin" ]; then
-    if [ "${CTNG_LEGACY}" = "yes" ]; then
-#    # I'd like to get a hash for all other compilers too .. for now, just so my BeyondCompare sessions are less noisy, pretend they all have the hash I use most often.
-    [ -d $PWD/apple-osx ] ||
-    (
-#      wget -c https://mingw-and-ndk.googlecode.com/files/multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
-      wget -c https://www.dropbox.com/s/sawpjkspb1y61zl/multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
-      7za x multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
-    )
-    MINGW_W64_PATH=$PWD/apple-osx/bin
-    USED_CC=i686-apple-darwin11-gcc
-    USED_CXX=i686-apple-darwin11-g++
-    USED_LD=i686-apple-darwin11-ld
-#    MINGW_W64_HASH=tc4-gcc-42
-#    USED_CC=gcc-4.2
-#    USED_CXX=g++-4.2
-#    USED_LD=ld
-    CT_BUILD_SUFFIX=-4.2
-    # Homebrew's gcc-4.2 doesn't work with MacOSX10.6.sdk, error is: MacOSX10.6.sdk/usr/include/varargs.h:4:26: error: varargs.h: No such file or directory
-    # it's an include_next thing, so that GCC has no varargs.h I guess. Trying with 10.7 instead.
-    USED_CPP_FLAGS=$USED_CPP_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
-    USED_LD_FLAGS=$USED_LD_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
-    MINGW_W64_HASH=hb-gcc-42
+    if [ "${CTNG_B_CC_LEGACY}" = "mine" ]; then
+      [ -d $PWD/apple-osx ] ||
+      (
+        wget -c https://www.dropbox.com/s/sawpjkspb1y61zl/multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
+        7za x multiarch-darwin11-cctools127.2-gcc42-5666.3-llvmgcc42-2336.1-Darwin-120615.7z
+      )
+      export PATH=$PWD/apple-osx/bin:${PATH}
+      USED_CC=i686-apple-darwin11-gcc
+      USED_CXX=i686-apple-darwin11-g++
+      USED_LD=i686-apple-darwin11-ld
+      MINGW_W64_HASH=tc4-gcc-42
+      CT_BUILD_SUFFIX=-4.2
+      USED_CPP_FLAGS=$USED_CPP_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
+      USED_LD_FLAGS=$USED_LD_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
+    elif [ "${CTNG_B_CC_LEGACY}" = "homebrew" ]; then
+      USED_CC=gcc-4.2
+      USED_CXX=g++-4.2
+      USED_LD=ld
+      # Homebrew's gcc-4.2 doesn't work with MacOSX10.6.sdk, error is: MacOSX10.6.sdk/usr/include/varargs.h:4:26: error: varargs.h: No such file or directory
+      # it's an include_next thing, so that GCC has no varargs.h I guess. Trying with 10.7 instead.
+      USED_CPP_FLAGS=$USED_CPP_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
+      USED_LD_FLAGS=$USED_LD_FLAGS" -isysroot $HOME/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5"
+      MINGW_W64_HASH=hb-gcc-42
     fi
   else
     MINGW_W64_HASH=213be3fb
@@ -1177,19 +1179,24 @@ cross_clang_build()
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 
-    if [ -n "$MINGW_W64_PATH" ]; then
-      PATH="${MINGW_W64_PATH}:${PATH}"
-    fi
     ./bootstrap
-    CPPFLAGS="${USED_CPP_FLAGS}" \
-    LDFLAGS="${USED_LD_FLAGS}" \
-      ./configure ${CTNG_CFG_ARGS}
-      make clean
+
+    ./configure ${CTNG_CFG_ARGS}
+    make clean
+
     EXTRA_CFLAGS="${USED_CPP_FLAGS}" \
     EXTRA_LDFLAGS="${USED_LD_FLAGS}" \
       make
       make install
     popd
+
+    # The mingw-w64 compiler must be added to PATH
+    # after building conf otherwise it gets used in
+    # the conf build which fails.
+    if [ -n "${MINGW_W64_PATH}" ]; then
+      PATH="${MINGW_W64_PATH}:${PATH}"
+    fi
+
     [ -d ${BUILDDIR} ] || mkdir ${BUILDDIR}
     pushd ${BUILDDIR}
     # Horrible hack to prevent cctools autoreconf from hanging on

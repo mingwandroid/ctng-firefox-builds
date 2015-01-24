@@ -39,6 +39,11 @@
 #     <y_morin> mingwandroid: We'd first need to differentiate the build-time sysroot from the runtime sysroot
 #     <y_morin> mingwandroid: Then, we need to diferentiate between PREFIX_DIR and DEST_DIR
 
+# Useful stuff:
+# While working on splitting diorcety/crosstool-ng into a set of feature branches, I'm making lots of branches in my local clone. It is easy
+# to lose track of what's different on origin. The following can be used to see what's different between the two:
+# (git fetch origin; for branch in $(git branch -l | cut -c 3-); do echo "Diff report for branch ${branch}"; git diff origin/${branch} ${branch}; done) | less
+
 # Errors are fatal (occasionally this will be temporarily disabled)
 set -e
 

@@ -245,11 +245,12 @@ Where applicable multilib is always enabled."
 # New branches are made for the clone.
 # Format is: URL#cloned#rebased1#rebased2#
 # Call eval so that variables can be embedded.
-CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
+#CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
 
 CTNG_SOURCE_URL_raspi="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
 
-#CTNG_SOURCE_URL_windows="git{dy-wip}:${HOME}/crosstool-ng#official#\${BUILD_OS}-build#\${TARGET_OS}-target" \
+#CTNG_SOURCE_URL_windows="git{dy-wip}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
+CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#master"
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
 #option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
@@ -270,7 +271,7 @@ mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-multilib http://crossto
 hg{upstream}:http://crosstool-ng.org/hg/crosstool-ng
   .. (for Yann Morin's upstream project)
 Note: The first letter of the {suffix} is used as part of the build directories name so try to keep those unique."
-option CTNG_LOCAL_PATCHES  no \
+option CTNG_LOCAL_PATCHES  yes \
 "Use local patches?"
 option CTNG_PACKAGE        no \
 "Make a package for the built cross compiler."
@@ -913,7 +914,7 @@ cross_clang_build()
 {
   CTNG_CFG_ARGS=" \
                 --disable-local \
-                --prefix=${PWD}/install-ctng.${CTNG_SUFFIX} \
+                --prefix=${PWD}/install-ctng.${CTNG_SUFFIX_HASH} \
                 --with-libtool=${LIBTOOL} \
                 --with-libtoolize=${LIBTOOLIZE} \
                 --with-objcopy=${OBJCOPY} \
@@ -993,21 +994,6 @@ cross_clang_build()
         chmod +x reclone.sh
         ./reclone.sh
       popd
-      if [ "${CTNG_LOCAL_PATCHES}" = "yes" ]; then
-        pushd ${CTNG_FOLDER_NAME}
-        if [ -d "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}" ]; then
-          PATCHES=$(find "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}" -name "*.patch" | sort)
-          for PATCH in $PATCHES; do
-            if [ "$CTNG_VCS" = "git" ]; then
-              git am $PATCH
-            else
-              # Handle hg and hg-mq better than this.
-              patch -p1 < $PATCH
-            fi
-          done
-        fi
-        popd
-      fi
      ) || ( echo "Error: Failed to clone/patch crosstool-ng" && exit 1 )
     pushd ${CTNG_FOLDER_NAME}
     CTNG_SAMPLE=mozbuild-${TARGET_OS}-${BITS}
@@ -1207,8 +1193,8 @@ cross_clang_build()
      trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
      ( while [ 0 ] ; do COLM=$(ps aux | grep libtoolize | grep --invert-match grep | awk '{print $2}'); if [ -n "${COLM}" ]; then kill $COLM; echo $COLM; fi; sleep 10; done ) &
     fi
-    ${ROOT}/install-ctng.${CTNG_SUFFIX}/bin/ct-ng ${CTNG_SAMPLE}
-    ${ROOT}/install-ctng.${CTNG_SUFFIX}/bin/ct-ng build
+    ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng ${CTNG_SAMPLE}
+    ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng build
     if [ "${BUILD_OS}" = "windows" ]; then
       # Copy needed DLLs.
       cp ${MINGW_W64_PATH}/libstdc++*.dll     ${BUILT_XCOMPILER_PREFIX}/bin

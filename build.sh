@@ -249,8 +249,11 @@ Where applicable multilib is always enabled."
 
 CTNG_SOURCE_URL_raspi="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
 
-#CTNG_SOURCE_URL_windows="git{dy-wip}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
-CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#master"
+# To recreate my complete ctng-firefox-builds' patched version of crosstool-ng use this and set CTNG_LOCAL_PATCHES to yes.
+#CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#master"
+
+# For WIP local development use this:
+CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
 #option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
@@ -271,7 +274,7 @@ mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-multilib http://crossto
 hg{upstream}:http://crosstool-ng.org/hg/crosstool-ng
   .. (for Yann Morin's upstream project)
 Note: The first letter of the {suffix} is used as part of the build directories name so try to keep those unique."
-option CTNG_LOCAL_PATCHES  yes \
+option CTNG_LOCAL_PATCHES  no \
 "Use local patches?"
 option CTNG_PACKAGE        no \
 "Make a package for the built cross compiler."

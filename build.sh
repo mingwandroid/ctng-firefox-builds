@@ -160,6 +160,16 @@ TARGET_IS_DARWIN_raspi="no"
 TARGET_IS_DARWIN_aarch64="no"
 TARGET_IS_DARWIN_armv7a="no"
 
+# The following should probably deprecate both TARGET_IS_* above.
+TARGET_OS_SUPER_osx="darwin"
+TARGET_OS_SUPER_windows="windows"
+TARGET_OS_SUPER_steamsdk="linux"
+TARGET_OS_SUPER_steambox="linux"
+TARGET_OS_SUPER_ps3="ppceabi"
+TARGET_OS_SUPER_raspi="linux"
+TARGET_OS_SUPER_aarch64="aapcs64"
+TARGET_OS_SUPER_armv7a="armeabi"
+
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
 TARGET_LIBC_steamsdk="eglibc_V_2.15"
@@ -251,6 +261,9 @@ CTNG_SOURCE_URL_raspi="git{diorcety}:https://github.com/diorcety/crosstool-ng.gi
 
 # To recreate my complete ctng-firefox-builds' patched version of crosstool-ng use this and set CTNG_LOCAL_PATCHES to yes.
 #CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#master"
+
+# Special branch of changes for building linux toolchains hosted elsewhere (i.e. Win32 or OSX)
+CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc_hacks"
 
 # For WIP local development use this:
 CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
@@ -392,7 +405,7 @@ copy_build_scripts()
 {
   [ -d $1 ] || mkdir $1
   option_output_all $1/regenerate.sh
-  chmod +x $1/regenerate.shf
+  chmod +x $1/regenerate.sh
   cp     ${THISDIR}/build.sh ${THISDIR}/tar-sorted.sh ${THISDIR}/mingw-w64-toolchain.sh $1/
   cp -rf ${THISDIR}/mozilla.configs $1/
   cp -rf ${THISDIR}/crosstool-ng.configs $1/
@@ -441,6 +454,9 @@ if [ "$OSTYPE" = "linux-gnu" ]; then
 elif [ "$OSTYPE" = "msys" ]; then
   BUILD_OS=windows
   SHASUM=sha1sum
+  # These hacks are necessary for {e,}glibc at the "Building C library" stage.
+  # However, I put this in a "build-windows-hacks" branch instead.
+  export MSYS2_ARG_CONV_EXCL="-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH="
 #  GDBPROG=gdb.exe
 #  if which $GDBPROG > /dev/null 2>&1; then
 #    # weird, works from commandline, but not from within a running shell script.
@@ -510,11 +526,19 @@ if [ "${CTNG_SOURCE_URL}" = "default" ]; then
   CTNG_SOURCE_URL=$(_al CTNG_SOURCE_URL ${TARGET_OS})
 fi
 
+TARGET_OS_SUPER=$(_al TARGET_OS_SUPER ${TARGET_OS})
+
+if [ "${TARGET_OS_SUPER}" = "linux" ]; then
+  if [ "${BUILD_OS}" != "linux" ]; then
+	NON_LINUX_BUILD_TARGET_LINUX="#non-linux-build_linux-target"
+  fi
+fi
+
 # Use eval to dereference any variables in CTNG_SOURCE_URL
-echo BUILD_OS=$BUILD_OS
-echo HOST_OS=$HOST_OS
-echo CTNG_SOURCE_URL=$CTNG_SOURCE_URL
 CTNG_SOURCE_URL=$(eval echo ${CTNG_SOURCE_URL})
+
+echo "*** Building the following git repository and branch-set:"
+echo "*** $CTNG_SOURCE_URL"
 
 CTNG_VCS_AND_SUFFIX=$(echo "$CTNG_SOURCE_URL" | sed 's/\([^:]*\):.*/\1/')
 CTNG_VCS_URL_AND_BRANCHES=${CTNG_SOURCE_URL##${CTNG_VCS_AND_SUFFIX}:}

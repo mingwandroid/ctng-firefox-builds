@@ -454,9 +454,6 @@ if [ "$OSTYPE" = "linux-gnu" ]; then
 elif [ "$OSTYPE" = "msys" ]; then
   BUILD_OS=windows
   SHASUM=sha1sum
-  # These hacks are necessary for {e,}glibc at the "Building C library" stage.
-  # However, I put this in a "build-windows-hacks" branch instead.
-  export MSYS2_ARG_CONV_EXCL="-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH="
 #  GDBPROG=gdb.exe
 #  if which $GDBPROG > /dev/null 2>&1; then
 #    # weird, works from commandline, but not from within a running shell script.
@@ -480,10 +477,14 @@ elif [ "$OSTYPE" = "msys" ]; then
 #    echo "https://www.dropbox.com/s/zfr9f7anbml8829/make-4.0-5-x86_64.pkg.tar.xz"
 #    echo "pacman -U make-4.0-5-x86_64.pkg.tar.xz"
 #  fi
+# These hacks are necessary for {e,}glibc at the "Building C library" stage.
+# However, I put this in a "build-windows-hacks" branch instead.
   # I put a hack into MSYS2 in the interests of pragmatism
   # to allow arguments to be blacklisted from being converted
   # between their MSYS2 and Windows representations:
-  export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR="
+  # "-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" is for {e,}glibc.
+  # "-DNATIVE_SYSTEM_HEADER_DIR=" is for libgcc.
+  export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH="
 elif [ "$OSTYPE" = "darwin" ]; then
   BUILD_OS=darwin
   SHASUM=shasum

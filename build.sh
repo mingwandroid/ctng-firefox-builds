@@ -73,6 +73,7 @@ TARGET_TO_PREFIX_steamsdk="s"
 TARGET_TO_PREFIX_steambox="b"
 TARGET_TO_PREFIX_ps3="p"
 TARGET_TO_PREFIX_raspi="r"
+TARGET_TO_PREFIX_raspi2="r2"
 TARGET_TO_PREFIX_aarch64="a"
 TARGET_TO_PREFIX_armv7a="7"
 
@@ -81,6 +82,7 @@ VENDOR_OSES_windows="x86_64-w64-mingw32"
 VENDOR_OSES_steamsdk="unknown-linux-gnu"
 VENDOR_OSES_steambox="unknown-linux-gnu"
 VENDOR_OSES_raspi="unknown-linux-gnu"
+VENDOR_OSES_raspi2="unknown-linux-gnu"
 VENDOR_OSES_aarch64="unknown-linux-gnu"
 VENDOR_OSES_armv7a="unknown-linux-gnu"
 
@@ -101,11 +103,12 @@ HOST_SUPPORTS_PLUGINS_windows="no"
 HOST_SUPPORTS_PLUGINS_linux="yes"
 
 TARGET_BINUTILS_VERSIONS_osx="none"
-TARGET_BINUTILS_VERSIONS_windows="2.24"
-TARGET_BINUTILS_VERSIONS_steamsdk="2.24"
-TARGET_BINUTILS_VERSIONS_steambox="2.24"
+TARGET_BINUTILS_VERSIONS_windows="2.25"
+TARGET_BINUTILS_VERSIONS_steamsdk="2.25"
+TARGET_BINUTILS_VERSIONS_steambox="2.25"
 TARGET_BINUTILS_VERSIONS_ps3="2.23.2"
-TARGET_BINUTILS_VERSIONS_raspi="2.24"
+TARGET_BINUTILS_VERSIONS_raspi="2.25"
+TARGET_BINUTILS_VERSIONS_raspi2="2.25"
 # 2.24.51 fails with:
 # /c/bam/.build/src/binutils-2.24.51/binutils/bucomm.c:130:7: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'VPARAMS'
 # TARGET_BINUTILS_VERSIONS_aarch64="2.24.51"
@@ -113,14 +116,15 @@ TARGET_BINUTILS_VERSIONS_aarch64="2.24"
 TARGET_BINUTILS_VERSIONS_armv7a="2.24"
 
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
-TARGET_GCC_VERSIONS_windows="4.8.2"
-TARGET_GCC_VERSIONS_steamsdk="4.8.2"
-TARGET_GCC_VERSIONS_steambox="4.8.2"
+TARGET_GCC_VERSIONS_windows="4.9.2"
+TARGET_GCC_VERSIONS_steamsdk="4.9.2"
+TARGET_GCC_VERSIONS_steambox="4.9.2"
 TARGET_GCC_VERSIONS_ps3="4.7.0"
-TARGET_GCC_VERSIONS_raspi="4.8.2"
-TARGET_GCC_VERSIONS_aarch64="4.8.2"
-TARGET_GCC_VERSIONS_armv7a="4.8.2"
-#TARGET_GCC_VERSIONS_aarch64="4.9.0"
+TARGET_GCC_VERSIONS_raspi="4.9.2"
+TARGET_GCC_VERSIONS_raspi2="4.9.2"
+TARGET_GCC_VERSIONS_aarch64="4.9.2"
+TARGET_GCC_VERSIONS_armv7a="4.9.2"
+#TARGET_GCC_VERSIONS_aarch64="4.9.2"
 
 # Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
 # To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
@@ -130,6 +134,7 @@ TARGET_LLVM_VERSIONS_steamsdk="none"
 TARGET_LLVM_VERSIONS_steambox="none"
 TARGET_LLVM_VERSIONS_ps3="none"
 TARGET_LLVM_VERSIONS_raspi="none"
+TARGET_LLVM_VERSIONS_raspi2="none"
 TARGET_LLVM_VERSIONS_aarch64="none"
 TARGET_LLVM_VERSIONS_armv7a="none"
 
@@ -139,6 +144,7 @@ TARGET_COMPILER_RT_steamsdk="no"
 TARGET_COMPILER_RT_steambox="no"
 TARGET_COMPILER_RT_ps3="no"
 TARGET_COMPILER_RT_raspi="no"
+TARGET_COMPILER_RT_raspi2="no"
 TARGET_COMPILER_RT_aarch64="no"
 TARGET_COMPILER_RT_armv7a="no"
 
@@ -148,6 +154,7 @@ TARGET_IS_LINUX_steamsdk="yes"
 TARGET_IS_LINUX_steambox="yes"
 TARGET_IS_LINUX_ps3="no"
 TARGET_IS_LINUX_raspi="yes"
+TARGET_IS_LINUX_raspi2="yes"
 TARGET_IS_LINUX_aarch64="yes"
 TARGET_IS_LINUX_armv7a="yes"
 
@@ -157,6 +164,7 @@ TARGET_IS_DARWIN_steamsdk="no"
 TARGET_IS_DARWIN_steambox="no"
 TARGET_IS_DARWIN_ps3="no"
 TARGET_IS_DARWIN_raspi="no"
+TARGET_IS_DARWIN_raspi2="no"
 TARGET_IS_DARWIN_aarch64="no"
 TARGET_IS_DARWIN_armv7a="no"
 
@@ -167,6 +175,7 @@ TARGET_OS_SUPER_steamsdk="linux"
 TARGET_OS_SUPER_steambox="linux"
 TARGET_OS_SUPER_ps3="ppceabi"
 TARGET_OS_SUPER_raspi="linux"
+TARGET_OS_SUPER_raspi2="linux"
 TARGET_OS_SUPER_aarch64="aapcs64"
 TARGET_OS_SUPER_armv7a="armeabi"
 
@@ -175,7 +184,8 @@ TARGET_LIBC_windows="none"
 TARGET_LIBC_steamsdk="eglibc_V_2.15"
 TARGET_LIBC_steambox="eglibc_V_2.18"
 TARGET_LIBC_ps3="newlib"
-TARGET_LIBC_raspi="eglibc_V_2.18"
+TARGET_LIBC_raspi="glibc_linaro-2.20-2014.11"
+TARGET_LIBC_raspi2="glibc_linaro-2.20-2014.11"
 TARGET_LIBC_aarch64="eglibc_V_2.18"
 TARGET_LIBC_armv7a="eglibc_V_2.18"
 
@@ -186,7 +196,8 @@ TARGET_LINUX_K_windows="none"
 TARGET_LINUX_K_steamsdk="3.2.32"
 TARGET_LINUX_K_steambox="3.10"
 TARGET_LINUX_K_ps3="none"
-TARGET_LINUX_K_raspi="3.10"
+TARGET_LINUX_K_raspi="3.10.69"
+TARGET_LINUX_K_raspi2="3.10.69"
 TARGET_LINUX_K_aarch64="3.12"
 TARGET_LINUX_K_armv7a="3.12"
 
@@ -246,7 +257,7 @@ print_help()
 ##################################
 option TARGET_OS           osx \
 "Target OS for the build, valid values are:
-osx, windows, steamsdk, steambox, ps3, raspi, aarch64
+osx, windows, steamsdk, steambox, ps3, raspi, raspi2, aarch64
 Where applicable multilib is always enabled."
 ######################################################
 # This set of options are for the crosstool-ng build #
@@ -257,13 +268,13 @@ Where applicable multilib is always enabled."
 # Call eval so that variables can be embedded.
 #CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
 
-CTNG_SOURCE_URL_raspi="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
 
 # To recreate my complete ctng-firefox-builds' patched version of crosstool-ng use this and set CTNG_LOCAL_PATCHES to yes.
 #CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#master"
 
 # Special branch of changes for building linux toolchains hosted elsewhere (i.e. Win32 or OSX)
-CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc_hacks"
+CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 
 # For WIP local development use this:
 CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
@@ -477,14 +488,15 @@ elif [ "$OSTYPE" = "msys" ]; then
 #    echo "https://www.dropbox.com/s/zfr9f7anbml8829/make-4.0-5-x86_64.pkg.tar.xz"
 #    echo "pacman -U make-4.0-5-x86_64.pkg.tar.xz"
 #  fi
-# These hacks are necessary for {e,}glibc at the "Building C library" stage.
-# However, I put this in a "build-windows-hacks" branch instead.
+
   # I put a hack into MSYS2 in the interests of pragmatism
   # to allow arguments to be blacklisted from being converted
-  # between their MSYS2 and Windows representations:
-  # "-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" is for {e,}glibc.
-  # "-DNATIVE_SYSTEM_HEADER_DIR=" is for libgcc.
-  export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH="
+  # between their MSYS2 and Windows representations ..
+  # The NATIVE_SYSTEM_HEADER_DIR is for the GCC build.
+  # The NSLPATH,LOCALEDIR and LOCALE_ALIAS_PATH ones are
+  # for {e,}glibc at the "Building C library" stage.
+  # However, I might put this in a "build-windows-hacks" branch instead?!
+  export MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=;-DLOCALE_PATH="
 elif [ "$OSTYPE" = "darwin" ]; then
   BUILD_OS=darwin
   SHASUM=shasum
@@ -992,35 +1004,44 @@ cross_clang_build()
         MASTER_BRANCH=${CTNG_VCS_BRANCHES_ARRAY[0]}
         for BRANCH in "${CTNG_VCS_BRANCHES_ARRAY[@]}"; do
           if [ "${BRANCH}" = "${MASTER_BRANCH}" ]; then
+            echo "_FAILED=\"no\"" >> reclone.sh
             echo "git checkout -b ${TARGET_OS} $(local_or_remotes_origin_branch ${MASTER_BRANCH})" >> reclone.sh
           else
-            # Branches are allowed to not exist incase of using variables.
+          # Branches are allowed to not exist incase of using variables.
             local branch=$(local_or_remotes_origin_branch ${BRANCH})
             if [ "${branch}" != "ERROR_branch_not_found" ]; then
-              echo "# rebasing ${BRANCH} onto ${TARGET_OS}"       >> reclone.sh
-              echo "# .. then merging it with ${TARGET_OS}"       >> reclone.sh
-              echo "if [ \"${branch}\" = \"${BRANCH}\" ]; then"   >> reclone.sh
-              echo "  git checkout ${branch}"                     >> reclone.sh
-              echo "else"                                         >> reclone.sh
-              echo "  git checkout -b ${BRANCH} ${branch}"        >> reclone.sh
-              echo "fi"                                           >> reclone.sh
-              echo "git rebase ${TARGET_OS}"                      >> reclone.sh
-              echo "git checkout ${TARGET_OS}"                    >> reclone.sh
-              echo "git merge ${branch}"                          >> reclone.sh
+              echo "# rebasing ${BRANCH} onto ${TARGET_OS}"                   >> reclone.sh
+              echo "# .. then merging it with ${TARGET_OS}"                   >> reclone.sh
+              echo "read -p \"About to merge ${BRANCH}=${branch}: [Enter] key to begin...\"" >> reclone.sh
+              echo "if [ \"${branch}\" = \"${BRANCH}\" ]; then"               >> reclone.sh
+              echo "  git checkout ${branch} || _FAILED=\"yes\""              >> reclone.sh
+              echo "else"                                                     >> reclone.sh
+              echo "  git checkout -b ${BRANCH} ${branch} || _FAILED=\"yes\"" >> reclone.sh
+              echo "fi"                                                       >> reclone.sh
+              echo "git rebase ${TARGET_OS} || _FAILED=\"yes\""               >> reclone.sh
+              echo "git checkout ${TARGET_OS} || _FAILED=\"yes\""             >> reclone.sh
+              echo "git merge ${branch} || _FAILED=\"yes\""                   >> reclone.sh
+            else
+              echo "Branch ${BRANCH}=${branch} not found!"
             fi
           fi
           if [ "${CTNG_LOCAL_PATCHES}" = "yes" ]; then
             if [ -d "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}.${BRANCH}" ]; then
               PATCHES=$(find "${THISDIR}/patches/crosstool-ng.${CTNG_SUFFIX}.${BRANCH}" -name "*.patch" | sort)
               for PATCH in $PATCHES; do
-                echo "git am ${PATCH}"                                    >> reclone.sh
+                echo "git am ${PATCH} || _FAILED=\"yes\""                     >> reclone.sh
               done
             fi
           fi
-          echo ""                                                       >> reclone.sh
+          echo ""                                                             >> reclone.sh
+          echo "[ \"\${_FAILED}\" = \"yes\" ] && exit 1"                      >> reclone.sh
         done
         chmod +x reclone.sh
-        ./reclone.sh
+		./reclone.sh
+#        if ! ./reclone.sh ; then
+#          echo "Failed to create branches!"
+#          exit 1
+#        fi
       popd
      ) || ( echo "Error: Failed to clone/patch crosstool-ng" && exit 1 )
     pushd ${CTNG_FOLDER_NAME}
@@ -4486,7 +4507,7 @@ export PATH=/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/bin:/libs/
 
 
 .. continuing ct-ng at steps (e.g. ct-ng libc+) causes MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=" to not work.
-I suspect this is because ct-ng is a gnu make script and thus makev is already a loaded image when it forks so the env block is not changed?
+I suspect this is because ct-ng is a gnu make script and thus make is already a loaded image when it forks so the env block is not changed?
 Something weird like that anyway.
 
 [ALL  ]    /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -B/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -g -Os -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector   -fpic -mlong-double-80 -I. -I. -I../.././gcc -I../../../../../src/gcc-4.8.2/libgcc -I../../../../../src/gcc-4.8.2/libgcc/. -I../../../../../src/gcc-4.8.2/libgcc/../gcc -I../../../../../src/gcc-4.8.2/libgcc/../include -I../../../../../src/gcc-4.8.2/libgcc/config/libbid -DENABLE_DECIMAL_BID_FORMAT -DHAVE_CC_TLS  -DUSE_TLS -o _muldi3.o -MT _muldi3.o -MD -MP -MF _muldi3.dep -DL_muldi3 -c ../../../../../src/gcc-4.8.2/libgcc/libgcc2.c -fvisibility=hidden -DHIDE_EXPORTS
@@ -4502,7 +4523,7 @@ pushd /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/x86_64-
 MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=" PATH=/libs/ctng-firefox-builds/mingw64-213be3fb/bin:/libs/rpd/.build/x86_64-unknown-linux-gnu/buildtools/bin:$PATH /libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/xgcc -B/libs/rpd/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-final/./gcc/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/bin/ -B/libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/lib/ -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/include -isystem /libs/ctng-firefox-builds/s-eglibc_V_2.15-x86_64-213be3fb/x86_64-unknown-linux-gnu/sys-include    -g -Os -O2  -g -Os -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector   -fpic -mlong-double-80 -I. -I. -I../.././gcc -I../../../../../src/gcc-4.8.2/libgcc -I../../../../../src/gcc-4.8.2/libgcc/. -I../../../../../src/gcc-4.8.2/libgcc/../gcc -I../../../../../src/gcc-4.8.2/libgcc/../include -I../../../../../src/gcc-4.8.2/libgcc/config/libbid -DENABLE_DECIMAL_BID_FORMAT -DHAVE_CC_TLS  -DUSE_TLS -o _muldi3.o -MT _muldi3.o -MD -MP -MF _muldi3.dep -DL_muldi3 -c ../../../../../src/gcc-4.8.2/libgcc/libgcc2.c -fvisibility=hidden -DHIDE_EXPORTS
 
 .. to fix, delete gcc/cppdefault.o gcc/xgcc.exe gcc/cc1.exe and re-make.
-MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=" /libs/ctng-firefox-builds/install-ctng.diorcety/bin/ct-ng cc_for_host+
+MSYS2_ARG_CONV_EXCL="-DNATIVE_SYSTEM_HEADER_DIR=;-DNLSPATH=;-DLOCALEDIR=;-DLOCALE_ALIAS_PATH=;-DLOCALE_PATH=" /libs/ctng-firefox-builds/install-ctng.diorcety/bin/ct-ng cc_for_host+
 
 .. made a little bit easier:
 ./msys2-continue-step.sh ./install-ctng.diorcety /c/bsd ./s-eglibc_V_2.15-x86_64-213be3fb cc_core_pass_2

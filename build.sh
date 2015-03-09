@@ -1020,7 +1020,7 @@ cross_clang_build()
               echo "fi"                                                       >> reclone.sh
               echo "git rebase ${TARGET_OS} || _FAILED=\"yes\""               >> reclone.sh
               echo "git checkout ${TARGET_OS} || _FAILED=\"yes\""             >> reclone.sh
-              echo "git merge ${branch} || _FAILED=\"yes\""                   >> reclone.sh
+              echo "git merge -m "M: ${branch}" ${branch} || _FAILED=\"yes\"" >> reclone.sh
             else
               echo "Branch ${BRANCH}=${branch} not found!"
             fi
@@ -1037,7 +1037,7 @@ cross_clang_build()
           echo "[ \"\${_FAILED}\" = \"yes\" ] && exit 1"                      >> reclone.sh
         done
         chmod +x reclone.sh
-		./reclone.sh
+        ./reclone.sh
 #        if ! ./reclone.sh ; then
 #          echo "Failed to create branches!"
 #          exit 1

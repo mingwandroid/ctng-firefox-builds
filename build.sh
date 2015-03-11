@@ -91,9 +91,9 @@ BUILD_DEBUGGABLE_darwin="no"
 BUILD_DEBUGGABLE_windows="no"
 BUILD_DEBUGGABLE_linux="yes"
 
-BUILD_DEBUGGERS_darwin="no"
-BUILD_DEBUGGERS_windows="no" # Due to expat problems.
-BUILD_DEBUGGERS_linux="no"
+BUILD_DEBUGGERS_darwin="yes"
+BUILD_DEBUGGERS_windows="yes" # Due to expat problems.
+BUILD_DEBUGGERS_linux="yes"
 
 # Could try the dlfcn_win32 project for Windows support.
 # I've not made it error if you try to force the issue
@@ -274,7 +274,7 @@ Where applicable multilib is always enabled."
 
 # Special branch of changes for building linux toolchains hosted elsewhere (i.e. Win32 or OSX)
 CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
 
 # For WIP local development use this:
 CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"

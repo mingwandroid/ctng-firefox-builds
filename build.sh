@@ -115,6 +115,14 @@ TARGET_BINUTILS_VERSIONS_raspi2="2.25"
 TARGET_BINUTILS_VERSIONS_aarch64="2.24"
 TARGET_BINUTILS_VERSIONS_armv7a="2.24"
 
+TARGET_BINUTILS_VARIANTS_osx="none"
+TARGET_BINUTILS_VARIANTS_windows="ld"
+TARGET_BINUTILS_VARIANTS_steamsdk="ld, gold"
+TARGET_BINUTILS_VARIANTS_steambox="ld, gold"
+TARGET_BINUTILS_VARIANTS_ps3="ld"
+TARGET_BINUTILS_VARIANTS_raspi="ld, gold"
+TARGET_BINUTILS_VARIANTS_raspi2="gold, ld"
+
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="4.9.2"
 TARGET_GCC_VERSIONS_steamsdk="4.9.2"
@@ -339,6 +347,8 @@ option LLVM_VERSION        default \
 then 3.4 next, then the others hardly at all)."
 option BINUTILS_VERSION    default \
 "default, none, head, or a sensible Binutils version number."
+option BINUTILS_VARIANTS   default \
+"default, none, ld, gold, \"ld, gold\", \"gold, ld\""
 option GCC_VERSION        default \
 "default, none, head, or a sensible GCC version number."
 option GNU_PLUGINS        default \
@@ -574,6 +584,10 @@ VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
 if [ "${BINUTILS_VERSION}" = "default" ]; then
   BINUTILS_VERSION=$(_al TARGET_BINUTILS_VERSIONS ${TARGET_OS})
 fi
+if [ "${BINUTILS_VARIANTS}" = "default" ]; then
+  BINUTILS_VARIANTS=$(_al TARGET_BINUTILS_VARIANTS ${TARGET_OS})
+fi
+
 if [ "${GCC_VERSION}" = "default" ]; then
   GCC_VERSION=$(_al TARGET_GCC_VERSIONS ${TARGET_OS})
 fi
@@ -1090,9 +1104,24 @@ cross_clang_build()
         echo "CT_LLVM_V_3_4=y"         >> ${CTNG_SAMPLE_CONFIG}
       fi
     else
-      echo "CT_BINUTILS_binutils=y"                      >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_BINUTILS_V_${BINUTILS_VERS_}=y"           >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_BINUTILS_VERSION=\"${BINUTILS_VERSION}\"" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_binutils=y"                            >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_V_${BINUTILS_VERS_}=y"                 >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_VERSION=\"${BINUTILS_VERSION}\""       >> ${CTNG_SAMPLE_CONFIG}
+      echo "BINUTILS_LINKERS_LIST=\"${BINUTILS_VARIANTS}\""    >> ${CTNG_SAMPLE_CONFIG}
+      if [ "${BINUTILS_VARIANTS}" = "ld" ]; then
+        echo "CT_BINUTILS_LINKER_LD=y"                         >> ${CTNG_SAMPLE_CONFIG}
+      elif [ "${BINUTILS_VARIANTS}" = "gold" ]; then
+        echo "CT_BINUTILS_LINKER_GOLD=y"                       >> ${CTNG_SAMPLE_CONFIG}
+      elif [ "${BINUTILS_VARIANTS}" = "ld, gold" ]; then
+        echo "CT_BINUTILS_LINKER_LD_GOLD=y"                    >> ${CTNG_SAMPLE_CONFIG}
+      elif [ "${BINUTILS_VARIANTS}" = "gold, ld" ]; then
+        echo "CT_BINUTILS_LINKER_GOLD_LD=y"                    >> ${CTNG_SAMPLE_CONFIG}
+        # Hopefully BINUTILS_FORCE_LD_BFD can be retired soon and gold used to build glibc:
+        # https://sourceware.org/ml/libc-alpha/2014-03/msg00971.html
+        # https://sourceware.org/bugzilla/show_bug.cgi?id=14675
+        echo "BINUTILS_FORCE_LD_BFD=y"                         >> ${CTNG_SAMPLE_CONFIG}
+      fi
+
       echo "CT_BINUTILS_FOR_TARGET=y"                    >> ${CTNG_SAMPLE_CONFIG}
       # The following may only work correctly for non-cross builds, but
       # actually it's in GCC that PLUGINS are likely to fail with cross.

@@ -99,7 +99,7 @@ BUILD_DEBUGGERS_linux="yes"
 # I've not made it error if you try to force the issue
 # in-case someone wants to install dlfcn_win32 manually.
 HOST_SUPPORTS_PLUGINS_osx="yes"
-HOST_SUPPORTS_PLUGINS_windows="no"
+HOST_SUPPORTS_PLUGINS_windows="yes"
 HOST_SUPPORTS_PLUGINS_linux="yes"
 
 TARGET_BINUTILS_VERSIONS_osx="none"
@@ -274,18 +274,18 @@ Where applicable multilib is always enabled."
 # New branches are made for the clone.
 # Format is: URL#cloned#rebased1#rebased2#
 # Call eval so that variables can be embedded.
-#CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
+#CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
 
 
 # To recreate my complete ctng-firefox-builds' patched version of crosstool-ng use this and set CTNG_LOCAL_PATCHES to yes.
 #CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#master"
 
 # Special branch of changes for building linux toolchains hosted elsewhere (i.e. Win32 or OSX)
-CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
+CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
 
 # For WIP local development use this:
-CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
+CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
 #option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
@@ -1108,18 +1108,25 @@ cross_clang_build()
       echo "CT_BINUTILS_V_${BINUTILS_VERS_}=y"                 >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_BINUTILS_VERSION=\"${BINUTILS_VERSION}\""       >> ${CTNG_SAMPLE_CONFIG}
       echo "BINUTILS_LINKERS_LIST=\"${BINUTILS_VARIANTS}\""    >> ${CTNG_SAMPLE_CONFIG}
+      _GOLD=no
       if [ "${BINUTILS_VARIANTS}" = "ld" ]; then
         echo "CT_BINUTILS_LINKER_LD=y"                         >> ${CTNG_SAMPLE_CONFIG}
       elif [ "${BINUTILS_VARIANTS}" = "gold" ]; then
         echo "CT_BINUTILS_LINKER_GOLD=y"                       >> ${CTNG_SAMPLE_CONFIG}
+        _GOLD=yes
       elif [ "${BINUTILS_VARIANTS}" = "ld, gold" ]; then
         echo "CT_BINUTILS_LINKER_LD_GOLD=y"                    >> ${CTNG_SAMPLE_CONFIG}
+        _GOLD=yes
       elif [ "${BINUTILS_VARIANTS}" = "gold, ld" ]; then
         echo "CT_BINUTILS_LINKER_GOLD_LD=y"                    >> ${CTNG_SAMPLE_CONFIG}
+        _GOLD=yes
         # Hopefully BINUTILS_FORCE_LD_BFD can be retired soon and gold used to build glibc:
         # https://sourceware.org/ml/libc-alpha/2014-03/msg00971.html
         # https://sourceware.org/bugzilla/show_bug.cgi?id=14675
         echo "BINUTILS_FORCE_LD_BFD=y"                         >> ${CTNG_SAMPLE_CONFIG}
+      fi
+      if [ "${_GOLD}" = "yes" ]; then
+        echo "CT_BINUTILS_GOLD_THREADS=y"                      >> ${CTNG_SAMPLE_CONFIG}
       fi
 
       echo "CT_BINUTILS_FOR_TARGET=y"                    >> ${CTNG_SAMPLE_CONFIG}

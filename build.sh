@@ -121,7 +121,11 @@ TARGET_BINUTILS_VARIANTS_steamsdk="ld, gold"
 TARGET_BINUTILS_VARIANTS_steambox="ld, gold"
 TARGET_BINUTILS_VARIANTS_ps3="ld"
 TARGET_BINUTILS_VARIANTS_raspi="ld, gold"
-TARGET_BINUTILS_VARIANTS_raspi2="gold, ld"
+# This *could* be used iff you export CTNG_LD_IS=bfd
+# otherwise libc start files will fail:
+# "These critical programs are missing or too old: ld"
+#TARGET_BINUTILS_VARIANTS_raspi2="gold, ld"
+TARGET_BINUTILS_VARIANTS_raspi2="ld, gold"
 
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="4.9.2"

@@ -286,7 +286,7 @@ Where applicable multilib is always enabled."
 
 # Special branch of changes for building linux toolchains hosted elsewhere (i.e. Win32 or OSX)
 CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
 
 # For WIP local development use this:
 CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
@@ -561,6 +561,9 @@ if [ "${TARGET_OS_SUPER}" = "linux" ]; then
   fi
 fi
 
+# TODO :: Support canadian cross compiles then remove this
+HOST_OS=$BUILD_OS
+
 # Use eval to dereference any variables in CTNG_SOURCE_URL
 CTNG_SOURCE_URL=$(eval echo ${CTNG_SOURCE_URL})
 
@@ -579,9 +582,6 @@ CTNG_SUFFIX_HASH=$(echo "${CTNG_VCS_BRANCHES}" | ${SHASUM} | cut -c1-6)
 IFS='#' read -a CTNG_VCS_BRANCHES_ARRAY <<< "$CTNG_VCS_BRANCHES"
 echo "${CTNG_VCS_BRANCHES_ARRAY[@]}"
 CTNG_FOLDER_NAME="crosstool-ng.${CTNG_SUFFIX}.${CTNG_SUFFIX_HASH}"
-
-# TODO :: Support canadian cross compiles then remove this
-HOST_OS=$BUILD_OS
 
 # Sanitise options and lookup per-target/per-build defaults.
 VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
@@ -1030,7 +1030,7 @@ cross_clang_build()
             if [ "${branch}" != "ERROR_branch_not_found" ]; then
               echo "# rebasing ${BRANCH} onto ${TARGET_OS}"                   >> reclone.sh
               echo "# .. then merging it with ${TARGET_OS}"                   >> reclone.sh
-              echo "read -p \"About to merge ${BRANCH}=${branch}: [Enter] key to begin...\"" >> reclone.sh
+              # echo "read -p \"About to merge ${BRANCH}=${branch}: [Enter] key to begin...\"" >> reclone.sh
               echo "if [ \"${branch}\" = \"${BRANCH}\" ]; then"               >> reclone.sh
               echo "  git checkout ${branch} || _FAILED=\"yes\""              >> reclone.sh
               echo "else"                                                     >> reclone.sh

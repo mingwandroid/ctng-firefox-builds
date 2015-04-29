@@ -40,8 +40,22 @@
 #     <y_morin> mingwandroid: Then, we need to diferentiate between PREFIX_DIR and DEST_DIR
 
 # Useful stuff:
+#
+# 1. Comparing with origin:
 # While working on splitting diorcety/crosstool-ng into a set of feature branches, I'm making lots of branches in my local clone. It is easy
 # to lose track of what's different on origin. The following can be used to see what's different between the two:
+# (git fetch origin; for branch in $(git branch -l | cut -c 3-); do echo "Diff report for branch ${branch}"; git diff origin/${branch} ${branch}; done) | less
+#
+# 2. To rebase to upstream:
+# Search below for .. rebase_onto_upstream "master" "https://github.com/crosstool-ng/crosstool-ng.git" "official" "trivial-fixes" ..
+
+CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
+
+# For WIP local development use this:
+CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
+
+# for
 # (git fetch origin; for branch in $(git branch -l | cut -c 3-); do echo "Diff report for branch ${branch}"; git diff origin/${branch} ${branch}; done) | less
 
 # Errors are fatal (occasionally this will be temporarily disabled)
@@ -967,6 +981,31 @@ local_or_remotes_origin_branch()
 
   echo "ERROR_branch_not_found"
 }
+
+rebase_onto_upstream()
+{
+  local new_remote_branch=${1}; shift
+  local new_remote=${1}; shift
+  local local_branch=${1}; shift
+  git remote add upstream ${new_remote}
+  git fetch upstream
+  while [ "${local_branch}" != "" ]; do
+    local local_or_remote_branch=$(local_or_remotes_origin_branch "${local_branch}")
+    echo "local_branch = ${local_branch} .. ${local_or_remote_branch}"
+    if [ "${local_or_remote_branch}" != "${local_branch}" ]; then
+      if [ "${local_or_remote_branch}" != "ERROR_branch_not_found" ]; then
+        git checkout -b "${local_branch}" "${local_or_remote_branch}"
+        git rebase remotes/upstream/${new_remote_branch}
+      fi
+    else
+      git checkout "${local_branch}"
+      git rebase remotes/upstream/"${new_remote_branch}"
+    fi
+    local_branch=${1}; shift
+  done
+}
+
+# rebase_onto_upstream "master" "https://github.com/crosstool-ng/crosstool-ng.git" "official" "trivial-fixes" "multilib" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-build" "darwin-target" "misc-hacks" "windows-build_linux-target" "gdb-gdbserver" "non-linux-build_linux-target"
 
 cross_clang_build()
 {

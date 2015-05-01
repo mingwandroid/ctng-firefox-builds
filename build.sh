@@ -152,6 +152,16 @@ TARGET_GCC_VERSIONS_aarch64="4.9.2"
 TARGET_GCC_VERSIONS_armv7a="4.9.2"
 #TARGET_GCC_VERSIONS_aarch64="4.9.2"
 
+TARGET_SYSROOT_osx="cr-os-x"
+TARGET_SYSROOT_windows="mingw64"
+TARGET_SYSROOT_steamsdk="steamsdk"
+TARGET_SYSROOT_steambox="steambox"
+TARGET_SYSROOT_steamps3="ps3"
+TARGET_SYSROOT_raspi="raspi"
+TARGET_SYSROOT_raspi2="raspi2"
+TARGET_SYSROOT_aarch64="aarch64"
+TARGET_SYSROOT_armv7a="armv7a"
+
 # Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
 # To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
 TARGET_LLVM_VERSIONS_osx="3.5.1"
@@ -207,13 +217,13 @@ TARGET_OS_SUPER_armv7a="armeabi"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
-TARGET_LIBC_steamsdk="eglibc_V_2.15"
-TARGET_LIBC_steambox="eglibc_V_2.18"
+TARGET_LIBC_steamsdk="glibc-2.20"
+TARGET_LIBC_steambox="glibc-2.20"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="glibc_linaro-2.20-2014.11"
 TARGET_LIBC_raspi2="glibc_linaro-2.20-2014.11"
-TARGET_LIBC_aarch64="eglibc_V_2.18"
-TARGET_LIBC_armv7a="eglibc_V_2.18"
+TARGET_LIBC_aarch64="glibc-2.20"
+TARGET_LIBC_armv7a="glibc-2.20"
 
 # Careful, currently not used, the crosstool-ng.config files
 # specify the versions ATM.
@@ -574,6 +584,8 @@ if [ "${TARGET_OS_SUPER}" = "linux" ]; then
 	NON_LINUX_BUILD_TARGET_LINUX="#non-linux-build_linux-target"
   fi
 fi
+
+TARGET_SYSROOT=$(_al TARGET_SYSROOT ${TARGET_OS})
 
 # TODO :: Support canadian cross compiles then remove this
 HOST_OS=$BUILD_OS
@@ -1125,6 +1137,12 @@ cross_clang_build()
       echo "CT_BUILD_SUFFIX=\"${CT_BUILD_SUFFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
     fi
 
+    # Probably need to clean up crosstool-ng (and mingw-w64 GCC's) sysroot
+    # handling. AFAIR, "mingw" is hardcoded in the bowels of GCC config!
+    echo "CT_FORCE_SYSROOT=y"                       >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_USE_SYSROOT=y"                         >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_SYSROOT_NAME=\"${TARGET_SYSROOT}\""    >> ${CTNG_SAMPLE_CONFIG}
+
     if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "yes" ]; then
       if [ "$COPY_SDK" = "yes" ]; then
         echo "CT_DARWIN_COPY_SDK_TO_SYSROOT=y" >> ${CTNG_SAMPLE_CONFIG}
@@ -1183,6 +1201,24 @@ cross_clang_build()
     fi
 
     if [ ! "$GCC_VERSION" = "none" ]; then
+      # Figure out the ISL / Cloog version to use, from Bryan ..
+      # http://comments.gmane.org/gmane.comp.gcc.cross-compiling/17053
+      # "Yes, I have committed a change to add isl 0.14, but I need to make a
+      #  new commit that has gcc select the right companion libs needed, as
+      #  cloog is no longer needed with >=5.1.0 and <=4.9.2 isl-0.12.2 needs to
+      #  be select as well as cloog-isl."
+      GCC_VERSION_NUM=$(echo "$GCC_VERSION" | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/')
+      echo GCC_VERSION_NUM = $GCC_VERSION_NUM
+      echo "CT_ISL_NEEDED=y"                   >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_ISL=y"                          >> ${CTNG_SAMPLE_CONFIG}
+      if [ "${GCC_VERSION_NUM}" -ge "50100" ]; then
+        echo "CT_ISL_V_0_14=y"                 >> ${CTNG_SAMPLE_CONFIG}
+        echo "CT_CLOOG_NEEDED=n"               >> ${CTNG_SAMPLE_CONFIG}
+        echo "CT_CLOOG=n"                      >> ${CTNG_SAMPLE_CONFIG}
+      else
+        echo "CT_ISL_V_0_12_2=y"               >> ${CTNG_SAMPLE_CONFIG}
+        echo "CLOOG_V_0_18_1=y"                >> ${CTNG_SAMPLE_CONFIG}
+      fi
       echo "CT_CC_gcc=y"                       >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_GCC_V_${GCC_VERS_}=y"        >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_CXX=y"                  >> ${CTNG_SAMPLE_CONFIG}
@@ -4924,3 +4960,57 @@ export PATH=/home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin:/c/bod-d/
 /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_floattitf.o) has no symbols
 /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_floatunditf.o) has no symbols
 /home/ray/ctng-firefox-builds/o-none-x86_64-213be3fb-d/bin/x86_64-apple-darwin10-ranlib: file: ./libgcc.a(_floatuntitf.o) has no symbols
+
+
+# On Linux, building for Windows:
+
+[ALL  ]    x86_64-unknown-mingw32-gcc -DHAVE_CONFIG_H -I. -I/e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt  -m64 -D__LIBMSVCRT__ -I/e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/include -I/e/d/iw-d/x86_64-unknown-mingw32/sysroot/include  -pipe -std=gnu99 -D_WIN32_WINNT=0x0f00 -Wall -Wextra -Wformat -Wstrict-aliasing -Wshadow -Wpacked -Winline -Wimplicit-function-declaration -Wmissing-noreturn -Wmissing-prototypes -g -O2 -MT secapi/lib64_libmsvcrt_a-_ctime32_s.o -MD -MP -MF secapi/.deps/lib64_libmsvcrt_a-_ctime32_s.Tpo -c -o secapi/lib64_libmsvcrt_a-_ctime32_s.o `test -f 'secapi/_ctime32_s.c' || echo '/e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/'`secapi/_ctime32_s.c
+[ALL  ]    /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/secapi/_controlfp_s.c:14:17: warning: no previous prototype for '_controlfp_s' [-Wmissing-prototypes]
+[ALL  ]     errno_t __cdecl _controlfp_s(
+[ALL  ]                     ^
+[ERROR]    /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/secapi/_controlfp_s.c:22:38: error: '_MCW_DN' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                          ^
+[ERROR]    /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/secapi/_controlfp_s.c:22:48: error: '_MCW_EM' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                                    ^
+[ERROR]    /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/secapi/_controlfp_s.c:22:58: error: '_MCW_IC' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                                              ^
+[ERROR]    /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/secapi/_controlfp_s.c:22:68: error: '_MCW_RC' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                                                        ^
+[ERROR]    /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/secapi/_controlfp_s.c:22:78: error: '_MCW_PC' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                                                                  ^
+[ALL  ]    /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/secapi/_controlfp_s.c: In function '_int_controlfp_s':
+[ALL  ]    /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/secapi/_controlfp_s.c:30:5: warning: implicit declaration of function '_controlfp' [-Wimplicit-function-declaration]
+[ALL  ]         if (currentControl) *currentControl = _controlfp( 0, 0 );
+[ALL  ]         ^
+[ALL  ]    Makefile:34126: recipe for target 'secapi/lib64_libmsvcrt_a-_controlfp_s.o' failed
+[ERROR]    make[2]: *** [secapi/lib64_libmsvcrt_a-_controlfp_s.o] Error 1
+[ALL  ]    make[2]: *** Waiting for unfinished jobs....
+
+pushd /e/d/bw-d/.build/x86_64-unknown-mingw32/build/build-mingw-w64-crt
+PATH=/e/d/bw-d/.build/x86_64-unknown-mingw32/buildtools/bin:$PATH x86_64-unknown-mingw32-gcc -DHAVE_CONFIG_H -I. -I/e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt  -m64 -D__LIBMSVCRT__ -I/e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/include -I/e/d/iw-d/x86_64-unknown-mingw32/sysroot/include  -pipe -std=gnu99 -D_WIN32_WINNT=0x0f00 -Wall -Wextra -Wformat -Wstrict-aliasing -Wshadow -Wpacked -Winline -Wimplicit-function-declaration -Wmissing-noreturn -Wmissing-prototypes -g -O2 -MT secapi/lib64_libmsvcrt_a-_controlfp_s.o -MD -MP -MF secapi/.deps/lib64_libmsvcrt_a-_controlfp_s.Tpo -c -o secapi/lib64_libmsvcrt_a-_controlfp_s.o `test -f 'secapi/_controlfp_s.c' || echo '/e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/'`secapi/_controlfp_s.c
+
+Seems that:
+#include_next <float.h>
+.. doesnt find the right folder (on MSYS2 that folder being /mingw64/x86_64-w64-mingw32/include/float.h)
+Seems (find /e/d/iw-d -name float.h) that on ctng, the mingw-w64-headers got installed to:
+/e/d/iw-d/x86_64-unknown-mingw32/sysroot/usr/x86_64-unknown-mingw32/include/float.h
+.. and our compilers are searching <...> in:
+ignoring nonexistent directory "/e/d/iw-d/x86_64-unknown-mingw32/sysroot/e/d/iw-d/x86_64-unknown-mingw32/sysroot/include"
+ignoring nonexistent directory "/e/d/iw-d/x86_64-unknown-mingw32/sysroot/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt
+ /e/d/bw-d/.build/src/mingw-w64-ef5e91/mingw-w64-crt/include
+ /e/d/bw-d/.build/x86_64-unknown-mingw32/buildtools/lib/gcc/x86_64-unknown-mingw32/4.9.2/include
+ /e/d/bw-d/.build/x86_64-unknown-mingw32/buildtools/lib/gcc/x86_64-unknown-mingw32/4.9.2/include-fixed
+ /e/d/bw-d/.build/x86_64-unknown-mingw32/buildtools/lib/gcc/x86_64-unknown-mingw32/4.9.2/../../../../x86_64-unknown-mingw32/include
+ /e/d/iw-d/x86_64-unknown-mingw32/sysroot/mingw/include
+End of search list.
+
+.. of those, the three interesting ones are:

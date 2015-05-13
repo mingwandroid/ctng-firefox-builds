@@ -569,6 +569,16 @@ else
   if [ "${BUILD_OS}" = "darwin" ]; then
     if [ "${CTNG_B_CC_LEGACY}" = "mine" -o "${CTNG_B_CC_LEGACY}" = "homebrew" ]; then
       echo "Warning: You set --ctng-legacy=mine or homebrew and are building on Darwin, due to GMP configure fail 32bit binaries will be built."
+      if [ "${CTNG_B_CC_LEGACY}" = "homebrew" ]; then
+        if [ ! -d /usr/lib/i686-apple-darwin11/4.2.1/x86_64 -o ! -d /usr/lib/gcc/i686-apple-darwin11/4.2.1 ]; then
+          echo "Error: For --ctng-legacy=homebrew you need to link something to /usr/lib/i686-apple-darwin11/4.2.1/x86_64 and include"
+          echo "       e.g."
+          echo "       sudo mkdir -p /usr/lib/i686-apple-darwin11/4.2.1 /usr/lib/gcc/i686-apple-darwin11/4.2.1"
+          echo "       sudo ln -s /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib /usr/lib/i686-apple-darwin11/4.2.1/x86_64"
+          echo "       sudo ln -s /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/include /usr/lib/gcc/i686-apple-darwin11/4.2.1/include"
+          exit 1
+        fi
+      fi
       BITS=32
     fi
   fi

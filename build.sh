@@ -360,7 +360,7 @@ option CTNG_DEBUGGABLE     default \
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
 about a year ago."
-option CTNG_B_CC_LEGACY    mine \
+option CTNG_B_CC_LEGACY    homebrew \
 "Do you want the toolchain built with crosstool-ng
 to be built using stable, old compilers so that they
 might run on older machines? In some cases, this will
@@ -565,11 +565,12 @@ fi
 if [ "${HOST_ARCH}" = "i686" ]; then
   BITS=32
 else
-  if [ "${CTNG_B_CC_LEGACY}" = "mine" -a "${BUILD_OS}" = "darwin" ]; then
-    echo "Warning: You set --ctng-legacy=mine and are building on Darwin, due to GMP configure fail 32bit binaries will be built."
-    BITS=32
-  else
-    BITS=64
+  BITS=64
+  if [ "${BUILD_OS}" = "darwin" ]; then
+    if [ "${CTNG_B_CC_LEGACY}" = "mine" -o "${CTNG_B_CC_LEGACY}" = "homebrew" ]; then
+      echo "Warning: You set --ctng-legacy=mine or homebrew and are building on Darwin, due to GMP configure fail 32bit binaries will be built."
+      BITS=32
+    fi
   fi
 fi
 
@@ -1320,11 +1321,15 @@ cross_clang_build()
     if [ "$STATIC_TOOLCHAIN" = "no" ]; then
       echo "CT_WANTS_STATIC_LINK=n"        >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_STATIC_TOOLCHAIN=n"         >> ${CTNG_SAMPLE_CONFIG}
+      # One of Yann's changes must've got lost here?
       echo "CT_CC_GCC_STATIC_LIBSTDCXX=n"  >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_STATIC_LIBSTDCXX=n"      >> ${CTNG_SAMPLE_CONFIG}
     else
       echo "CT_WANTS_STATIC_LINK=y"        >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_STATIC_TOOLCHAIN=y"         >> ${CTNG_SAMPLE_CONFIG}
+      # One of Yann's changes must've got lost here?
       echo "CT_CC_GCC_STATIC_LIBSTDCXX=y"  >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_STATIC_LIBSTDCXX=y"      >> ${CTNG_SAMPLE_CONFIG}
     fi
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}

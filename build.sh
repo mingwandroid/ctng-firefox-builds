@@ -53,7 +53,7 @@ CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs
 CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
 
 # For WIP local development use this:
-CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
+CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#post_suffix_prefix#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks#debugging"
 
 # for
 # (git fetch origin; for branch in $(git branch -l | cut -c 3-); do echo "Diff report for branch ${branch}"; git diff origin/${branch} ${branch}; done) | less
@@ -152,15 +152,19 @@ TARGET_GCC_VERSIONS_aarch64="4.9.2"
 TARGET_GCC_VERSIONS_armv7a="4.9.2"
 #TARGET_GCC_VERSIONS_aarch64="4.9.2"
 
-TARGET_SYSROOT_osx="cr-os-x"
-TARGET_SYSROOT_windows="mingw64"
-TARGET_SYSROOT_steamsdk="steamsdk"
-TARGET_SYSROOT_steambox="steambox"
-TARGET_SYSROOT_steamps3="ps3"
-TARGET_SYSROOT_raspi="raspi"
-TARGET_SYSROOT_raspi2="raspi2"
-TARGET_SYSROOT_aarch64="aarch64"
-TARGET_SYSROOT_armv7a="armv7a"
+TARGET_SYSROOT=""
+
+TARGET_POST_SYSROOT_PREFIX_osx="opt/osxcc"
+# For now .. this is hardcoded in gcc/config/i386/mingw32.h
+# for 'native' builds too!
+TARGET_POST_SYSROOT_PREFIX_windows="mingw"
+TARGET_POST_SYSROOT_PREFIX_steamsdk="usr/steamsdkcc"
+TARGET_POST_SYSROOT_PREFIX_steambox="usr/steamboxcc"
+TARGET_POST_SYSROOT_PREFIX_steamps3="usr/ps3cc"
+TARGET_POST_SYSROOT_PREFIX_raspi="usr/raspicc"
+TARGET_POST_SYSROOT_PREFIX_raspi2="usr/raspi2cc"
+TARGET_POST_SYSROOT_PREFIX_aarch64="usr/aarch64cc"
+TARGET_POST_SYSROOT_PREFIX_armv7a="usr/armv7acc"
 
 # Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
 # To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
@@ -596,7 +600,11 @@ if [ "${TARGET_OS_SUPER}" = "linux" ]; then
   fi
 fi
 
-TARGET_SYSROOT=$(_al TARGET_SYSROOT ${TARGET_OS})
+# TARGET_SYSROOT=$(_al TARGET_SYSROOT ${TARGET_OS})
+if [ "${TARGET_POST_SYSROOT_PREFIX}" = "default" ]; then
+  # May want to select either mingw32 or mingw64 here if TARGET_OS=windows.
+  TARGET_POST_SYSROOT_PREFIX=$(_al TARGET_POST_SYSROOT_PREFIX ${TARGET_OS})
+fi
 
 # TODO :: Support canadian cross compiles then remove this
 HOST_OS=$BUILD_OS
@@ -1153,6 +1161,7 @@ cross_clang_build()
     echo "CT_FORCE_SYSROOT=y"                       >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_USE_SYSROOT=y"                         >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_SYSROOT_NAME=\"${TARGET_SYSROOT}\""    >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_TARGET_POST_SYSROOT_PREFIX=\"${TARGET_POST_SYSROOT_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 
     if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "yes" ]; then
       if [ "$COPY_SDK" = "yes" ]; then
@@ -5028,4 +5037,66 @@ ignoring nonexistent directory "/e/d/iw-d/x86_64-unknown-mingw32/sysroot/include
  /e/d/iw-d/x86_64-unknown-mingw32/sysroot/mingw/include
 End of search list.
 
-.. of those, the three interesting ones are:
+
+
+[ALL  ]    i386-unknown-mingw32-gcc -DHAVE_CONFIG_H -I. -I/e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt  -m32 -D__LIBMSVCRT__ -I/e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/include -I/e/d/iw/i386-unknown-mingw32/mingw64/include  -pipe -std=gnu99 -D_WIN32_WINNT=0x0f00 -Wall -Wextra -Wformat -Wstrict-aliasing -Wshadow -Wpacked -Winline -Wimplicit-function-declaration -Wmissing-noreturn -Wmissing-prototypes -g -O2 -MT secapi/lib32_libmsvcrt_a-_controlfp_s.o -MD -MP -MF secapi/.deps/lib32_libmsvcrt_a-_controlfp_s.Tpo -c -o secapi/lib32_libmsvcrt_a-_controlfp_s.o `test -f 'secapi/_controlfp_s.c' || echo '/e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/'`secapi/_controlfp_s.c
+[ALL  ]    /e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/secapi/_controlfp_s.c:14:17: warning: no previous prototype for '_controlfp_s' [-Wmissing-prototypes]
+[ALL  ]     errno_t __cdecl _controlfp_s(
+[ALL  ]                     ^
+[ERROR]    /e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/secapi/_controlfp_s.c:22:38: error: '_MCW_DN' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                          ^
+[ERROR]    /e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/secapi/_controlfp_s.c:22:48: error: '_MCW_EM' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                                    ^
+[ERROR]    /e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/secapi/_controlfp_s.c:22:58: error: '_MCW_IC' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                                              ^
+[ERROR]    /e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/secapi/_controlfp_s.c:22:68: error: '_MCW_RC' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                                                        ^
+[ERROR]    /e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/secapi/_controlfp_s.c:22:78: error: '_MCW_PC' undeclared here (not in a function)
+[ALL  ]     static const unsigned int allflags = _MCW_DN | _MCW_EM | _MCW_IC | _MCW_RC | _MCW_PC;
+[ALL  ]                                                                                  ^
+[ALL  ]    /e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/secapi/_controlfp_s.c: In function '_int_controlfp_s':
+[ALL  ]    /e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/secapi/_controlfp_s.c:30:43: warning: implicit declaration of function '_controlfp' [-Wimplicit-function-declaration]
+[ALL  ]         if (currentControl) *currentControl = _controlfp( 0, 0 );
+[ALL  ]                                               ^
+[ERROR]    make[2]: *** [secapi/lib32_libmsvcrt_a-_controlfp_s.o] Error 1
+[ALL  ]    make[2]: *** Waiting for unfinished jobs....
+
+pushd /e/d/bw/.build/i386-unknown-mingw32/build/build-mingw-w64-crt
+PATH=/e/d/bw/.build/i386-unknown-mingw32/buildtools/bin:$PATH i386-unknown-mingw32-gcc \
+  -DHAVE_CONFIG_H -I. -I/e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt  -m32 -D__LIBMSVCRT__ \
+  -I/e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/include -I/e/d/iw/i386-unknown-mingw32/mingw64/include \
+  -pipe -std=gnu99 -D_WIN32_WINNT=0x0f00 -Wall -Wextra -Wformat -Wstrict-aliasing -Wshadow -Wpacked -Winline \
+  -Wimplicit-function-declaration -Wmissing-noreturn -Wmissing-prototypes -g -O2 -MT secapi/lib32_libmsvcrt_a-_controlfp_s.o \
+  -MD -MP -MF secapi/.deps/lib32_libmsvcrt_a-_controlfp_s.Tpo -c -o secapi/lib32_libmsvcrt_a-_controlfp_s.o \
+  `test -f 'secapi/_controlfp_s.c' || echo '/e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/'`secapi/_controlfp_s.c
+
+These definitions are in:
+/e/d/iw/i386-unknown-mingw32/mingw64/usr/i386-unknown-mingw32/include/float.h
+
+But we are not looking there, only in:
+/e/d/bw/.build/src/mingw-w64-5153bd/mingw-w64-crt/include (contains only internal.h msvcrt.h oscalls.h sect_attribs.h)
+ .. and ..
+/e/d/iw/i386-unknown-mingw32/mingw64/include (does not exist)
+/e/d/iw/i386-unknown-mingw32/mingw64/mingw (does exist but is empty)
+/e/d/iw/i386-unknown-mingw32/mingw64/usr/i386-unknown-mingw32/include (does exist and is full of file-y goodness)
+
+[DEBUG]  Sanitised 'CT_SYSROOT_REL_DIR': 'mingw64' -> 'mingw64'
+[DEBUG]  Sanitised 'CT_SYSROOT_DIR': '/e/d/iw/i386-unknown-mingw32/mingw64' -> '/e/d/iw/i386-unknown-mingw32/mingw64'
+[DEBUG]  Sanitised 'CT_DEBUGROOT_DIR': '/e/d/iw/i386-unknown-mingw32//debug-root' -> '/e/d/iw/i386-unknown-mingw32/debug-root'
+[DEBUG]  Sanitised 'CT_HEADERS_DIR': '/e/d/iw/i386-unknown-mingw32/mingw64/usr/include' -> '/e/d/iw/i386-unknown-mingw32/mingw64/usr/include'
+
+.. from /Users/raydonnelly/crosstool-ng/config/toolchain.in
+
+      In fact, the sysroot path is constructed as:
+
+        ${CT_PREFIX_DIR}/${CT_TARGET}/${CT_SYSROOT_DIR_PREFIX}/${CT_SYSROOT_NAME}
+        CT_FORCE_SYSROOT=y
+        CT_USE_SYSROOT=y
+        CT_SYSROOT_NAME="sysroot"
+        CT_SYSROOT_DIR_PREFIX=""
+
+        CT_SYSROOT_REL_DIR="${CT_SYSROOT_DIR_PREFIX:+${CT_SYSROOT_DIR_PREFIX}/}${CT_SYSROOT_NAME}"

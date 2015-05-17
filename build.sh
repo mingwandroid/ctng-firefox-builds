@@ -154,17 +154,17 @@ TARGET_GCC_VERSIONS_armv7a="4.9.2"
 
 TARGET_SYSROOT=""
 
-TARGET_POST_SYSROOT_PREFIX_osx="opt/osxcc"
+POST_SYSROOT_PREFIX_osx="opt/osxcc"
 # For now .. this is hardcoded in gcc/config/i386/mingw32.h
 # for 'native' builds too!
-TARGET_POST_SYSROOT_PREFIX_windows="mingw"
-TARGET_POST_SYSROOT_PREFIX_steamsdk="usr/steamsdkcc"
-TARGET_POST_SYSROOT_PREFIX_steambox="usr/steamboxcc"
-TARGET_POST_SYSROOT_PREFIX_steamps3="usr/ps3cc"
-TARGET_POST_SYSROOT_PREFIX_raspi="usr/raspicc"
-TARGET_POST_SYSROOT_PREFIX_raspi2="usr/raspi2cc"
-TARGET_POST_SYSROOT_PREFIX_aarch64="usr/aarch64cc"
-TARGET_POST_SYSROOT_PREFIX_armv7a="usr/armv7acc"
+POST_SYSROOT_PREFIX_windows="mingw"
+POST_SYSROOT_PREFIX_steamsdk="usr/steamsdkcc"
+POST_SYSROOT_PREFIX_steambox="usr/steamboxcc"
+POST_SYSROOT_PREFIX_steamps3="usr/ps3cc"
+POST_SYSROOT_PREFIX_raspi="usr/raspicc"
+POST_SYSROOT_PREFIX_raspi2="usr/raspi2cc"
+POST_SYSROOT_PREFIX_aarch64="usr/aarch64cc"
+POST_SYSROOT_PREFIX_armv7a="usr/armv7acc"
 
 # Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
 # To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
@@ -303,21 +303,12 @@ Where applicable multilib is always enabled."
 # This set of options are for the crosstool-ng build #
 ######################################################
 
-# New branches are made for the clone.
 # Format is: URL#cloned#rebased1#rebased2#
-# Call eval so that variables can be embedded.
-#CTNG_SOURCE_URL_windows="git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target"
-
-
-# To recreate my complete ctng-firefox-builds' patched version of crosstool-ng use this and set CTNG_LOCAL_PATCHES to yes.
-#CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#master"
-
-# Special branch of changes for building linux toolchains hosted elsewhere (i.e. Win32 or OSX)
-CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
+CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
 
 # For WIP local development use this:
-CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
+CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
 #option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
@@ -329,15 +320,9 @@ CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-re
 #option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
 
 option CTNG_SOURCE_URL      "default" \
-"Specify the vcs, url and name suffix for the crosstool-ng to use.
-Should be one of:
-git{diorcety}:https://github.com/diorcety/crosstool-ng.git
-  .. (for Yann Diorcet and my LLVM+Clang fork)
-mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-multilib http://crosstool-ng.org/hg/crosstool-ng
-  .. (for Bryan Hundven, Copy P Schafer and my multilib patch queue)
-hg{upstream}:http://crosstool-ng.org/hg/crosstool-ng
-  .. (for Yann Morin's upstream project)
-Note: The first letter of the {suffix} is used as part of the build directories name so try to keep those unique."
+"Specify the git repository, cloned branch, then each subsequent
+rebased branch.
+Format is: URL#cloned#rebased1#rebased2#.."
 option CTNG_LOCAL_PATCHES  no \
 "Use local patches?"
 option CTNG_PACKAGE        no \
@@ -601,9 +586,9 @@ if [ "${TARGET_OS_SUPER}" = "linux" ]; then
 fi
 
 # TARGET_SYSROOT=$(_al TARGET_SYSROOT ${TARGET_OS})
-if [ "${TARGET_POST_SYSROOT_PREFIX}" = "default" ]; then
+if [ "${POST_SYSROOT_PREFIX}" = "default" ]; then
   # May want to select either mingw32 or mingw64 here if TARGET_OS=windows.
-  TARGET_POST_SYSROOT_PREFIX=$(_al TARGET_POST_SYSROOT_PREFIX ${TARGET_OS})
+  POST_SYSROOT_PREFIX=$(_al POST_SYSROOT_PREFIX ${TARGET_OS})
 fi
 
 # TODO :: Support canadian cross compiles then remove this
@@ -1161,7 +1146,7 @@ cross_clang_build()
     echo "CT_FORCE_SYSROOT=y"                       >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_USE_SYSROOT=y"                         >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_SYSROOT_NAME=\"${TARGET_SYSROOT}\""    >> ${CTNG_SAMPLE_CONFIG}
-    echo "CT_TARGET_POST_SYSROOT_PREFIX=\"${TARGET_POST_SYSROOT_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_POST_SYSROOT_PREFIX=\"${POST_SYSROOT_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 
     if [ "$(_al TARGET_IS_DARWIN ${TARGET_OS})" = "yes" ]; then
       if [ "$COPY_SDK" = "yes" ]; then

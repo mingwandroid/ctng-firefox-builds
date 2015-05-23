@@ -52,7 +52,7 @@ CT_ARCH_SUFFIX="v6hl"
 #
 # Generic target options
 #
-# CT_MULTILIB is not set
+CT_MULTILIB=y
 CT_ARCH_USE_MMU=y
 CT_ARCH_ENDIAN="little"
 #

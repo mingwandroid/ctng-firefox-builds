@@ -1021,7 +1021,19 @@ rebase_onto_upstream()
   done
 }
 
+force_push()
+{
+  local remote=${1}; shift
+  local local_branch=${1}; shift
+  while [ "${local_branch}" != "" ]; do
+    git checkout "${local_branch}"
+    git push $remote -f
+    local_branch=${1}; shift
+  done
+}
+
 # rebase_onto_upstream "master" "https://github.com/crosstool-ng/crosstool-ng.git" "official" "trivial-fixes" "multilib" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-build" "darwin-target" "misc-hacks" "windows-build_linux-target" "gdb-gdbserver" "non-linux-build_linux-target"
+# force_push "origin" "official" "trivial-fixes" "multilib" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-build" "darwin-target" "misc-hacks" "windows-build_linux-target" "gdb-gdbserver" "non-linux-build_linux-target"
 
 cross_clang_build()
 {

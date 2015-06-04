@@ -53,7 +53,7 @@ CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs
 CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
 
 # For WIP local development use this:
-CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#post_suffix_prefix#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks#debugging"
+CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#multilib#post_suffix_prefix#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks#debugging"
 
 # for
 # (git fetch origin; for branch in $(git branch -l | cut -c 3-); do echo "Diff report for branch ${branch}"; git diff origin/${branch} ${branch}; done) | less

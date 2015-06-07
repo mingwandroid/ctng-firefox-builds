@@ -154,6 +154,7 @@ TARGET_GCC_VERSIONS_armv7a="4.9.2"
 
 TARGET_SYSROOT=""
 
+POST_SYSROOT_PREFIX="default"
 POST_SYSROOT_PREFIX_osx="opt/osxcc"
 # For now .. this is hardcoded in gcc/config/i386/mingw32.h
 # for 'native' builds too!

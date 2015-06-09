@@ -306,7 +306,8 @@ Where applicable multilib is always enabled."
 
 # Format is: URL#cloned#rebased1#rebased2#
 CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
+#CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#gdb-gdbserver#misc-hacks"
 
 # For WIP local development use this:
 CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
@@ -350,7 +351,7 @@ option CTNG_DEBUGGABLE     default \
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
 about a year ago."
-option CTNG_B_CC_LEGACY    homebrew \
+option CTNG_B_CC_LEGACY    no \
 "Do you want the toolchain built with crosstool-ng
 to be built using stable, old compilers so that they
 might run on older machines? In some cases, this will

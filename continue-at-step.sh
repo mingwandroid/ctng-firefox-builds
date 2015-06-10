@@ -24,7 +24,7 @@ case "${1}" in
   ;;
 esac
 
-GCC_VERSION=4.8.2
+GCC_VERSION=4.9.2
 
 # Replace './' with '${THISDIR}/' in any directory arguments so that they are absolute.
 # .. of course '../' will still throw us! $(cd $1 ; pwd) would be better but doesn't

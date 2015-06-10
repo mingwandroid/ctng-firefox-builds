@@ -103,7 +103,7 @@ VENDOR_OSES_armv7a="unknown-linux-gnu"
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
 BUILD_DEBUGGABLE_windows="no"
-BUILD_DEBUGGABLE_linux="yes"
+BUILD_DEBUGGABLE_linux="no"
 
 BUILD_DEBUGGERS_darwin="yes"
 BUILD_DEBUGGERS_windows="yes" # Due to expat problems.

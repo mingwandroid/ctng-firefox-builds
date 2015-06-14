@@ -5101,3 +5101,50 @@ But we are not looking there, only in:
         CT_SYSROOT_DIR_PREFIX=""
 
         CT_SYSROOT_REL_DIR="${CT_SYSROOT_DIR_PREFIX:+${CT_SYSROOT_DIR_PREFIX}/}${CT_SYSROOT_NAME}"
+
+
+
+.. Trying to enable plugins on Windows.
+
+configure:28327: x86_64-build_w64-mingw32-gcc -o conftest.exe -g -pipe -m64 -D__USE_MINGW_ACCESS   -static-libstdc++ -static-libgcc -m64 -lstdc++ -lm -Wl,--stack,12582912 conftest.c -ldl   >&5
+e:/msys64/home/ray/ctng-firefox-builds/mingw64-213be3fb/bin/../lib/gcc/x86_64-w64-mingw32/4.8.2/../../../../x86_64-w64-mingw32/bin/ld.exe: cannot find -ldl
+collect2.exe: error: ld returned 1 exit status
+
+E:\d\br2\.build\src\gcc-5.1.0\gcc\configure.ac has
+
+# These are the normal (build=host) settings:
+BUILD_CFLAGS='$(ALL_CFLAGS)'	AC_SUBST(BUILD_CFLAGS)
+..
+# And these apply if build != host, or we are generating coverage data
+if test x$build != x$host || test "x$coverage_flags" != x
+then
+    BUILD_CFLAGS='$(INTERNAL_CFLAGS) $(T_CFLAGS) $(CFLAGS_FOR_BUILD)'
+    BUILD_CXXFLAGS='$(INTERNAL_CFLAGS) $(T_CFLAGS) $(CXXFLAGS_FOR_BUILD)'
+    BUILD_LDFLAGS='$(LDFLAGS_FOR_BUILD)'
+fi
+
+.. so add dlfcn-win32 build prefix to CFLAGS probably then, but with some tests to determine.
+PATH=/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools/bin:$PATH CFLAGS= ../../../src/gcc-5.1.0/configure --build=x86_64-build_w64-mingw32 --host=x86_64-build_w64-mingw32 --target=armv7hl-unknown-linux-gnueabihf --prefix=/e/d/ir2 --with-sysroot=/e/d/ir2/armv7hl-unknown-linux-gnueabihf/sysroot --enable-languages=c,c++,objc,obj-c++ --with-arch=armv7-a --with-tune=cortex-a7 --with-fpu=neon-vfpv4 --with-float=hard --with-pkgversion=crosstool-NG a430c45 --enable-__cxa_atexit --disable-libmudflap --disable-libgomp --disable-libssp --disable-libquadmath --disable-libquadmath-support --disable-libsanitizer --with-gmp=/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools --with-mpfr=/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools --with-mpc=/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools --with-isl=/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools --with-cloog=/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools --with-libelf=/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools --enable-threads=posix --enable-target-optspace --enable-plugin --enable-gold --disable-nls --with-local-prefix=/e/d/ir2/armv7hl-unknown-linux-gnueabihf/sysroot --enable-c99 --enable-long-long
+
+
+
+# For iterating on GCC (370-MinGW-w64-...patch) to get --enable-plugin to work ...
+    cd /tmp
+    rm -rf gcc-5.1.0
+    tar -xf ~/src/gcc-5.1.0.tar.bz2
+    cd gcc-5.1.0/
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/100-libitm-fixes-for-musl-support.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/101-fixincludes-update-for-musl-support.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/102-unwind-fix-for-musl.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/103-libstdc++-libgfortran-gthr-workaround-for-musl.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/104-musl-libc-config.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/105-add-musl-support-to-gcc.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/106-mips-musl-support.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/107-x86-musl-support.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/108-arm-musl-support.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/109-aarch64-musl-support.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/340-fix-for-windows-not-minding-non-existant-parent-dirs.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/350-windows-lrealpath-no-force-lowercase-nor-backslash.patch
+    patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/360-mingw-hack-around-cp-p-as-ln-s-issues-libgcc-s.patch
+    patch -p1 < ~/gd/ctng/370-MinGW-w64-Link-psapi-for-dlfcn-win32-plugins.patch
+    LDFLAGS="-L/e/d/br2-with-trivial-fixes/.build/armv7hl-unknown-linux-gnueabihf/buildtools/lib" CFLAGS="-I/e/d/br2-with-trivial-fixes/.build/armv7hl-unknown-linux-gnueabihf/buildtools/include" CXXFLAGS="-I/e/d/br2-with-trivial-fixes/.build/armv7hl-unknown-linux-gnueabihf/buildtools/include" ./configure --enable-plugin --enable-twoprocess

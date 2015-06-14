@@ -1923,6 +1923,8 @@ if [ ! -f bin/automake ]; then
  cd automake-${AUTOMAKE_VER}
  wget -O config.guess 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
  wget -O config.sub 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' 
+ cp config.guess lib/
+ cp config.sub lib/
  ./configure --prefix=$PWD/.. && make && make install
  cd ..
 fi

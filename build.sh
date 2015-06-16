@@ -5128,8 +5128,38 @@ PATH=/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools/bin:$PATH CFLAGS
 
 
 
-# For iterating on GCC (370-MinGW-w64-...patch) to get --enable-plugin to work ...
-    cd /tmp
+# For iterating on GCC's 370-gcc-plugin-Initial-support-for-MinGW-w64-host.patch
+# to get --enable-plugin to work ...
+    pushd /tmp
+    AUTOCONF_VER=2.64
+    AUTOMAKE_VER=1.11.1
+    [ -d tools ] || mkdir tools
+    pushd tools > /dev/null
+    if [ ! -f bin/autoconf ]; then
+    # curl -SLO http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VER}.tar.bz2
+     wget -c http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VER}.tar.gz
+     tar -xf autoconf-${AUTOCONF_VER}.tar.gz
+     cd autoconf-${AUTOCONF_VER}
+     wget -O config.guess 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
+     wget -O config.sub 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' 
+     cp config.guess build-aux/
+     cp config.sub build-aux/
+     ./configure --prefix=$PWD/.. && make && make install
+     cd ..
+    fi
+    if [ ! -f bin/automake ]; then
+     wget -c http://ftp.gnu.org/gnu/automake/automake-${AUTOMAKE_VER}.tar.gz
+     tar -xf automake-${AUTOMAKE_VER}.tar.gz
+     cd automake-${AUTOMAKE_VER}
+     wget -O config.guess 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
+     wget -O config.sub 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' 
+     cp config.guess lib/
+     cp config.sub lib/
+     ./configure --prefix=$PWD/.. && make && make install
+     cd ..
+    fi
+    export PATH=/tmp/tools/bin:$PATH
+    popd
     rm -rf gcc-5.1.0
     tar -xf ~/src/gcc-5.1.0.tar.bz2
     cd gcc-5.1.0/
@@ -5147,4 +5177,4 @@ PATH=/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools/bin:$PATH CFLAGS
     patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/350-windows-lrealpath-no-force-lowercase-nor-backslash.patch
     patch -p1 < ~/ctng-firefox-builds/crosstool-ng.diorcety.754695/patches/gcc/5.1.0/360-mingw-hack-around-cp-p-as-ln-s-issues-libgcc-s.patch
     patch -p1 < ~/gd/ctng/370-MinGW-w64-Link-psapi-for-dlfcn-win32-plugins.patch
-    LDFLAGS="-L/e/d/br2-with-trivial-fixes/.build/armv7hl-unknown-linux-gnueabihf/buildtools/lib" CFLAGS="-I/e/d/br2-with-trivial-fixes/.build/armv7hl-unknown-linux-gnueabihf/buildtools/include" CXXFLAGS="-I/e/d/br2-with-trivial-fixes/.build/armv7hl-unknown-linux-gnueabihf/buildtools/include" ./configure --enable-plugin --enable-twoprocess
+    LDFLAGS="-L/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools/lib" CFLAGS="-I/e/d/br2/.build/armv7hl-unknown-linux-gnueabihf/buildtools/include" CXXFLAGS="-I/e/d/br2-with-trivial-fixes/.build/armv7hl-unknown-linux-gnueabihf/buildtools/include" ./configure --enable-plugin --enable-twoprocess

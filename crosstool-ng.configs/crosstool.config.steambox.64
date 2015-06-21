@@ -7,7 +7,7 @@ CT_MULTILIB=y
 CT_KERNEL_linux=y
 # Get version number from:
 # http://repo.steampowered.com/steamos/pool/main/l/linux/?C=M;O=D
-CT_KERNEL_V_4_0=y
+CT_KERNEL_V_3_10=y
 CT_BINUTILS_FOR_TARGET=y
 #CT_DEBUG_dmalloc=y
 #CT_DEBUG_duma=y

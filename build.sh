@@ -5218,7 +5218,7 @@ E:\Users\ray\gd\ctng\linux-target\sysdep-unix.i
 
 
 # OSX problem with glibc startfiles_32 .. can't get it to reconfigure the same, env differences?
-export PATH=/e/d/is/bin:/e/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/bin:/e/d/bs/.build/tools/bin:/usr/local/Cellar/bash/4.2.45/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/raydonnelly/depot_tools
+export PATH=/e/d/is/bin:/e/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/bin:/e/d/bs/.build/tools/bin:/usr/local/Cellar/bash/4.2.45/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/ray/depot_tools
 export sed=/usr/local/bin/gsed
 export gperf=/usr/local/Cellar/gperf/3.0.4/bin/gperf
 export grep=/usr/local/bin/ggrep
@@ -5226,13 +5226,22 @@ export awk=/usr/local/bin/gawk
 export bash=/usr/local/Cellar/bash/4.2.45/bin/bash
 export CONFIG_SHELL=/usr/local/Cellar/bash/4.2.45/bin/bash
 pushd /e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32
-  CC="x86_64-unknown-linux-gnu-gcc" BUILD_CC="x86_64-build_apple-darwin14.3.0-gcc"
-  LFDLAGS="" \
-    bash -x /e/d/bs/.build/src/glibc-2.21/configure --prefix=/usr --build=x86_64-build_apple-darwin14.3.0 --host=i486-unknown-linux-gnu --cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache --without-cvs --disable-profile --without-gd --with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include --libdir=/usr/lib/../lib --disable-debug --disable-sanity-checks --enable-obsolete-rpc --enable-kernel=3.10.79 --with-__thread --with-tls --enable-shared --enable-add-ons=no --with-pkgversion="crosstool-NG 637aef4" > ~/gd/ctng/darwin.bad/build-libc-startfiles_32 2>&1
+    rm -rf *
+    BUILD_CC=x86_64-build_apple-darwin14.0.0-gcc CFLAGS=" -U_FORTIFY_SOURCE          -O2 " CC="x86_64-unknown-linux-gnu-gcc     -m32" AR="x86_64-unknown-linux-gnu-ar" \
+    RANLIB="x86_64-unknown-linux-gnu-ranlib" \
+     /bin/bash /e/d/bs/.build/src/glibc-2.21/configure --prefix=/usr --build=x86_64-build_apple-darwin14.0.0 --host=i486-unknown-linux-gnu \
+      --cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache --without-cvs --disable-profile --without-gd \
+      --with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include --libdir=/usr/lib/../lib --disable-debug --disable-sanity-checks --enable-obsolete-rpc \
+      --enable-kernel=3.10.79 --with-__thread --with-tls --enable-shared --enable-add-ons=no --with-pkgversion="crosstool-NG 47963ef" > ~/gd/ctng/darwin.bad/build-libc-startfiles_32 2>&1
 popd
 pushd /e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles
-  CC="x86_64-unknown-linux-gnu-gcc" BUILD_CC="x86_64-build_apple-darwin14.3.0-gcc" \
-    bash -x /e/d/bs/.build/src/glibc-2.21/configure --prefix=/usr --build=x86_64-build_apple-darwin14.3.0 --host=x86_64-unknown-linux-gnu --cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles/config.cache --without-cvs --disable-profile --without-gd --with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include --libdir=/usr/lib/../lib64 --disable-debug --disable-sanity-checks --enable-obsolete-rpc --enable-kernel=3.10.79 --with-__thread --with-tls --enable-shared --enable-add-ons=no --with-pkgversion="crosstool-NG 637aef4" > ~/gd/ctng/darwin.bad/build-libc-startfiles 2>&1
+    rm -rf *
+    BUILD_CC=x86_64-build_apple-darwin14.0.0-gcc CFLAGS=" -U_FORTIFY_SOURCE          -O2 " CC="x86_64-unknown-linux-gnu-gcc    " AR="x86_64-unknown-linux-gnu-ar" \
+    RANLIB="x86_64-unknown-linux-gnu-ranlib" \
+     /bin/bash /e/d/bs/.build/src/glibc-2.21/configure --prefix=/usr --build=x86_64-build_apple-darwin14.0.0 --host=x86_64-unknown-linux-gnu \
+      --cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles/config.cache --without-cvs --disable-profile --without-gd \
+      --with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include --libdir=/usr/lib/../lib64 --disable-debug --disable-sanity-checks --enable-obsolete-rpc \
+      --enable-kernel=3.10.79 --with-__thread --with-tls --enable-shared --enable-add-ons=no --with-pkgversion="crosstool-NG 47963ef" > ~/gd/ctng/darwin.bad/build-libc-startfiles 2>&1
 popd
 
 
@@ -5241,3 +5250,5 @@ popd
 [ERROR]    collect2: error: ld returned 1 exit status
 [ALL  ]    Makefile:947: recipe for target 'libgcc_s.so' failed
 [ERROR]    make[4]: *** [libgcc_s.so] Error 1
+
+'BUILD_CC=x86_64-build_apple-darwin14.0.0-gcc' 'CFLAGS= -U_FORTIFY_SOURCE          -O2 ' 'CC=x86_64-unknown-linux-gnu-gcc     -m32' 'AR=x86_64-unknown-linux-gnu-ar' 'RANLIB=x86_64-unknown-linux-gnu-ranlib' '/bin/bash' '/e/d/bs/.build/src/glibc-2.21/configure' '--prefix=/usr' '--build=x86_64-build_apple-darwin14.0.0' '--host=i486-unknown-linux-gnu' '--cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache' '--without-cvs' '--disable-profile' '--without-gd' '--with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include' '--libdir=/usr/lib/../lib' '--disable-debug' '--disable-sanity-checks' '--enable-obsolete-rpc' '--enable-kernel=3.10.79' '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=no' '--with-pkgversion=crosstool-NG 47963ef'

@@ -5215,3 +5215,29 @@ E:\Users\ray\gd\ctng\linux-target\sysdep-unix.i
 # 1 "E:/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/include/dlfcn.h" 1
 # 50 "E:/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/include/dlfcn.h"
 .. argh! why?
+
+
+# OSX problem with glibc startfiles_32 .. can't get it to reconfigure the same, env differences?
+export PATH=/e/d/is/bin:/e/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/bin:/e/d/bs/.build/tools/bin:/usr/local/Cellar/bash/4.2.45/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/raydonnelly/depot_tools
+export sed=/usr/local/bin/gsed
+export gperf=/usr/local/Cellar/gperf/3.0.4/bin/gperf
+export grep=/usr/local/bin/ggrep
+export awk=/usr/local/bin/gawk
+export bash=/usr/local/Cellar/bash/4.2.45/bin/bash
+export CONFIG_SHELL=/usr/local/Cellar/bash/4.2.45/bin/bash
+pushd /e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32
+  CC="x86_64-unknown-linux-gnu-gcc" BUILD_CC="x86_64-build_apple-darwin14.3.0-gcc"
+  LFDLAGS="" \
+    bash -x /e/d/bs/.build/src/glibc-2.21/configure --prefix=/usr --build=x86_64-build_apple-darwin14.3.0 --host=i486-unknown-linux-gnu --cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache --without-cvs --disable-profile --without-gd --with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include --libdir=/usr/lib/../lib --disable-debug --disable-sanity-checks --enable-obsolete-rpc --enable-kernel=3.10.79 --with-__thread --with-tls --enable-shared --enable-add-ons=no --with-pkgversion="crosstool-NG 637aef4" > ~/gd/ctng/darwin.bad/build-libc-startfiles_32 2>&1
+popd
+pushd /e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles
+  CC="x86_64-unknown-linux-gnu-gcc" BUILD_CC="x86_64-build_apple-darwin14.3.0-gcc" \
+    bash -x /e/d/bs/.build/src/glibc-2.21/configure --prefix=/usr --build=x86_64-build_apple-darwin14.3.0 --host=x86_64-unknown-linux-gnu --cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles/config.cache --without-cvs --disable-profile --without-gd --with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include --libdir=/usr/lib/../lib64 --disable-debug --disable-sanity-checks --enable-obsolete-rpc --enable-kernel=3.10.79 --with-__thread --with-tls --enable-shared --enable-add-ons=no --with-pkgversion="crosstool-NG 637aef4" > ~/gd/ctng/darwin.bad/build-libc-startfiles 2>&1
+popd
+
+
+[ALL  ]    /e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/xgcc -B/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-cc-gcc-core-pass-2/./gcc/ -B/e/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ -B/e/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/lib/ -isystem /e/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/include -isystem /e/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/sys-include    -O2  -DIN_GCC  -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wno-narrowing -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include   -fpic -mlong-double-80 -g -DIN_LIBGCC2 -fbuilding-libgcc -fno-stack-protector  -shared -nodefaultlibs -Wl,--soname=libgcc_s.so.1 -Wl,--version-script=libgcc.map -o 32/libgcc_s.so.1.tmp -g -O2 -g -Os -m32 -B./ _muldi3_s.o _negdi2_s.o _lshrdi3_s.o _ashldi3_s.o _ashrdi3_s.o _cmpdi2_s.o _ucmpdi2_s.o _clear_cache_s.o _trampoline_s.o __main_s.o _absvsi2_s.o _absvdi2_s.o _addvsi3_s.o _addvdi3_s.o _subvsi3_s.o _subvdi3_s.o _mulvsi3_s.o _mulvdi3_s.o _negvsi2_s.o _negvdi2_s.o _ctors_s.o _ffssi2_s.o _ffsdi2_s.o _clz_s.o _clzsi2_s.o _clzdi2_s.o _ctzsi2_s.o _ctzdi2_s.o _popcount_tab_s.o _popcountsi2_s.o _popcountdi2_s.o _paritysi2_s.o _paritydi2_s.o _powisf2_s.o _powidf2_s.o _powixf2_s.o _powitf2_s.o _mulsc3_s.o _muldc3_s.o _mulxc3_s.o _multc3_s.o _divsc3_s.o _divdc3_s.o _divxc3_s.o _divtc3_s.o _bswapsi2_s.o _bswapdi2_s.o _clrsbsi2_s.o _clrsbdi2_s.o _fixunssfsi_s.o _fixunsdfsi_s.o _fixunsxfsi_s.o _fixsfdi_s.o _fixdfdi_s.o _fixxfdi_s.o _fixunssfdi_s.o _fixunsdfdi_s.o _fixunsxfdi_s.o _floatdisf_s.o _floatdidf_s.o _floatdixf_s.o _floatundisf_s.o _floatundidf_s.o _floatundixf_s.o _divdi3_s.o _moddi3_s.o _udivdi3_s.o _umoddi3_s.o _udiv_w_sdiv_s.o _udivmoddi4_s.o cpuinfo_s.o tf-signs_s.o sfp-exceptions_s.o addtf3_s.o divtf3_s.o eqtf2_s.o getf2_s.o letf2_s.o multf3_s.o negtf2_s.o subtf3_s.o unordtf2_s.o fixtfsi_s.o fixunstfsi_s.o floatsitf_s.o floatunsitf_s.o fixtfdi_s.o fixunstfdi_s.o floatditf_s.o floatunditf_s.o extendsftf2_s.o extenddftf2_s.o extendxftf2_s.o trunctfsf2_s.o trunctfdf2_s.o trunctfxf2_s.o enable-execute-stack_s.o unwind-dw2_s.o unwind-dw2-fde-dip_s.o unwind-sjlj_s.o unwind-c_s.o emutls_s.o libgcc.a -lc && rm -f 32/libgcc_s.so && if [ -f 32/libgcc_s.so.1 ]; then mv -f 32/libgcc_s.so.1 32/libgcc_s.so.1.backup; else true; fi && mv 32/libgcc_s.so.1.tmp 32/libgcc_s.so.1 && ln -s libgcc_s.so.1 32/libgcc_s.so
+[ALL  ]    /e/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/x86_64-unknown-linux-gnu/bin/ld: cannot find -lc
+[ERROR]    collect2: error: ld returned 1 exit status
+[ALL  ]    Makefile:947: recipe for target 'libgcc_s.so' failed
+[ERROR]    make[4]: *** [libgcc_s.so] Error 1

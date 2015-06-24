@@ -5228,7 +5228,7 @@ export CONFIG_SHELL=/usr/local/Cellar/bash/4.2.45/bin/bash
 pushd /e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32
     rm -rf *
     BUILD_CC=x86_64-build_apple-darwin14.0.0-gcc CFLAGS=" -U_FORTIFY_SOURCE          -O2 " CC="x86_64-unknown-linux-gnu-gcc     -m32" AR="x86_64-unknown-linux-gnu-ar" \
-    RANLIB="x86_64-unknown-linux-gnu-ranlib" \
+    RANLIB="x86_64-unknown-linux-gnu-ranlib" NM="x86_64-unknown-linux-gnu-nm" \
      /bin/bash /e/d/bs/.build/src/glibc-2.21/configure --prefix=/usr --build=x86_64-build_apple-darwin14.0.0 --host=i486-unknown-linux-gnu \
       --cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache --without-cvs --disable-profile --without-gd \
       --with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include --libdir=/usr/lib/../lib --disable-debug --disable-sanity-checks --enable-obsolete-rpc \
@@ -5237,7 +5237,7 @@ popd
 pushd /e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles
     rm -rf *
     BUILD_CC=x86_64-build_apple-darwin14.0.0-gcc CFLAGS=" -U_FORTIFY_SOURCE          -O2 " CC="x86_64-unknown-linux-gnu-gcc    " AR="x86_64-unknown-linux-gnu-ar" \
-    RANLIB="x86_64-unknown-linux-gnu-ranlib" \
+    RANLIB="x86_64-unknown-linux-gnu-ranlib" NM="x86_64-unknown-linux-gnu-nm" \
      /bin/bash /e/d/bs/.build/src/glibc-2.21/configure --prefix=/usr --build=x86_64-build_apple-darwin14.0.0 --host=x86_64-unknown-linux-gnu \
       --cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles/config.cache --without-cvs --disable-profile --without-gd \
       --with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include --libdir=/usr/lib/../lib64 --disable-debug --disable-sanity-checks --enable-obsolete-rpc \

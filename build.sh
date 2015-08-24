@@ -142,14 +142,14 @@ TARGET_BINUTILS_VARIANTS_raspi="ld, gold"
 TARGET_BINUTILS_VARIANTS_raspi2="ld, gold"
 
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
-TARGET_GCC_VERSIONS_windows="5.1.0"
-TARGET_GCC_VERSIONS_steamsdk="5.1.0"
-TARGET_GCC_VERSIONS_steambox="5.1.0"
+TARGET_GCC_VERSIONS_windows="5.2.0"
+TARGET_GCC_VERSIONS_steamsdk="5.2.0"
+TARGET_GCC_VERSIONS_steambox="5.2.0"
 TARGET_GCC_VERSIONS_ps3="4.7.0"
-TARGET_GCC_VERSIONS_raspi="5.1.0"
-TARGET_GCC_VERSIONS_raspi2="5.1.0"
-TARGET_GCC_VERSIONS_aarch64="5.1.0"
-TARGET_GCC_VERSIONS_armv7a="5.1.0"
+TARGET_GCC_VERSIONS_raspi="5.2.0"
+TARGET_GCC_VERSIONS_raspi2="5.2.0"
+TARGET_GCC_VERSIONS_aarch64="5.2.0"
+TARGET_GCC_VERSIONS_armv7a="5.2.0"
 
 TARGET_SYSROOT=""
 
@@ -1037,7 +1037,7 @@ force_push()
   done
 }
 
-# rebase_onto_upstream "master" "https://github.com/crosstool-ng/crosstool-ng.git" "official" "trivial-fixes" "multilib" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-build" "darwin-target" "misc-hacks" "windows-build_linux-target" "darwin-build" "gdb-gdbserver" "non-linux-build_linux-target"
+# rebase_onto_upstream "master" "https://github.com/crosstool-ng/crosstool-ng.git" "official" "trivial-fixes" "multilib" "post_suffix_prefix" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-build" "darwin-target" "misc-hacks" "windows-build_linux-target" "darwin-build" "gdb-gdbserver" "non-linux-build_linux-target"
 # force_push "origin" "official" "trivial-fixes" "multilib" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-build" "darwin-target" "misc-hacks" "windows-build_linux-target" "gdb-gdbserver" "non-linux-build_linux-target"
 
 cross_clang_build()

@@ -748,10 +748,12 @@ if [ "${OSTYPE}" = "darwin" ]; then
     ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
   fi
   brew tap homebrew/dupes
-  brew install homebrew/dupes/gperf
+  brew install homebrew/dupes/gperf homebrew/dupes/grep
   GPERF=${BREWFIX}/Cellar/gperf/3.0.4/bin/gperf
-  brew tap homebrew/versions
-  brew install mercurial gnu-sed gnu-tar grep wget gawk binutils libelf coreutils automake gperf yasm homebrew/versions/autoconf213
+  #brew tap homebrew/versions
+  #brew install gperf homebrew/versions/autoconf213
+  brew update
+  brew install mercurial gnu-sed gnu-tar wget gawk binutils libelf coreutils automake yasm
   set -e
 elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
   if [ "${OSTYPE}" = "msys" ]; then

@@ -68,9 +68,14 @@ HOST_ARCH=$(uname -m)
 # Much of the following is NYI (and should
 # be done via the options processing anyway)
 DEBUG_CTNG=no
-DARWINVER=10
+DARWINVERMAJOR=10
+DARWINVERMINOR=6
+# The number that appears on actual triplet, e.g. i686-apple-darwin10
+DARWINSDKNUM=10
 # Make this an option (and implement it)
-DARWINSDKDIR=MacOSX10.6.sdk
+DARWINVER=${DARWINVERMAJOR}.${DARWINVERMINOR}
+DARWINSDKDIR=MacOSX${DARWINVER}.sdk
+APPLE_GCC_VERSION=4.2.1
 # Absolute filepaths for:
 # 1. crosstool-ng's final (i.e. non-sample) .config
 CROSSTOOL_CONFIG=
@@ -303,26 +308,29 @@ Where applicable multilib is always enabled."
 # This set of options are for the crosstool-ng build #
 ######################################################
 
-# Format is: URL#cloned#rebased1#rebased2#
-CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-#CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_steamsdk="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_steambox="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+REPOS=$(dirname "${THISDIR}")
 
-CTNG_SOURCE_URL_steamsdk="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+# Format is: URL#cloned#rebased1#rebased2#
+CTNG_SOURCE_URL_raspi="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+#CTNG_SOURCE_URL_raspi2="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_steambox="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_osx="git{diorcety}:${REPOS}/crosstool-ng.diorcety#master"
+
+CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcery#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 
 # For WIP local development use this:
-CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
+CTNG_SOURCE_URL_windows="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
-#option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
-#option CTNG_SOURCE_URL      "git{wipmultilib}:${HOME}/crosstool-ng.multilib" \
+#option CTNG_SOURCE_URL      "git{fork}:${REPOS}/crosstool-ng" \
+#option CTNG_SOURCE_URL      "git{wipmultilib}:${REPOS}/crosstool-ng.multilib" \
 
 #option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git#official#mingw-w64-updates" \
 #option CTNG_SOURCE_URL      "mq{multilib}:https://bitbucket.org/bhundven/crosstool-ng-multilib http://crosstool-ng.org/hg/crosstool-ng" \
 #option CTNG_SOURCE_URL      "git{diorcety}:https://github.com/diorcety/crosstool-ng.git" \
-#option CTNG_SOURCE_URL      "git{fork}:${HOME}/crosstool-ng" \
+#option CTNG_SOURCE_URL      "git{fork}:${REPOS}/crosstool-ng" \
 
 option CTNG_SOURCE_URL      "default" \
 "Specify the git repository, cloned branch, then each subsequent
@@ -548,7 +556,7 @@ fi
 # User:
 # ABI=64
 # CC=i686-build_apple-darwin11-gcc
-# CFLAGS=-O2 -g -pipe -m64 -isysroot /Users/ray/MacOSX10.6.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5 -fexceptions
+# CFLAGS=-O2 -g -pipe -m64 -isysroot /Users/ray/MacOSX${DARWINVER}.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5 -fexceptions
 # CPPFLAGS=(unset)
 # MPN_PATH=
 # GMP:
@@ -694,18 +702,6 @@ fi
 
 # Check that compiler-rt can be built if requested.
 if [ "${COMPILER_RT}" = "yes" -a "${TARGET_OS}" = "osx" ]; then
-  if [ ! -d $HOME/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin10 ]; then
-    if [ "${BITS}" = "64" ]; then
-      echo -n "Error: You are trying to build x86_64 hosted cross compilers. Due to
-some host/target confusion you need to make a link from ..
-\${HOME}/${DARWINSDKDIR}/usr/lib/gcc/i686-apple-darwin10
-.. to ..
-\${HOME}/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin10
-.. please do this and then re-run this script.
-"
-      exit 1
-    fi
-  fi
   if [ ! "${COPY_SDK}" = "yes" -a "${TARGET_OS}" = "osx" ]; then
     if [ "${COMPILER_RT_ASKED_FOR}" = "yes" ]; then
       echo "Error: You are trying to build compiler-rt but without --copy-sdk=yes. This is currently broken"
@@ -753,7 +749,7 @@ if [ "${OSTYPE}" = "darwin" ]; then
   #brew tap homebrew/versions
   #brew install gperf homebrew/versions/autoconf213
   brew update
-  brew install mercurial gnu-sed gnu-tar wget gawk binutils libelf coreutils automake yasm
+  brew install mercurial gnu-sed gnu-tar wget gawk binutils libelf coreutils automake yasm help2man
   set -e
 elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
   if [ "${OSTYPE}" = "msys" ]; then
@@ -877,8 +873,9 @@ do_sed()
     fi
 }
 
-#OSXSDKURL="http://packages.siedler25.org/pool/main/a/apple-uni-sdk-10.6/apple-uni-sdk-10.6_20110407.orig.tar.gz"
-OSXSDKURL="https://launchpad.net/~flosoft/+archive/cross-apple/+files/apple-uni-sdk-10.6_20110407.orig.tar.gz"
+#OSXSDKURL="https://launchpad.net/~flosoft/+archive/cross-apple/+files/apple-uni-sdk-10.6_20110407.orig.tar.gz"
+#OSXSDKURL="https://github.com/phracker/MacOSX-SDKs/releases/download/MacOSX10.11.sdk/MacOSX10.7.sdk.tar.xz"
+OSXSDKURL="https://github.com/phracker/MacOSX-SDKs/releases/download/MacOSX10.11.sdk/MacOSX${DARWINVER}.sdk.tar.xz"
 
 download_sdk()
 {
@@ -891,13 +888,27 @@ download_sdk()
         echo "       un-tar to your \$HOME folder (from MSYS2's perspective of course)."
         exit 1
       else
-        echo "Warning: Untarring flosoft MacOSX10.6.sdk; it probably contains broken absolute symlinks."
+        echo "Warning: Untarring phracker " $(basename OSXSDKURL);" it probably contains broken absolute symlinks."
         pushd "${HOME}"
         curl -C - -SLO $OSXSDKURL
-        tar -xf apple-uni-sdk-10.6_20110407.orig.tar.gz
-        mv apple-uni-sdk-10.6.orig/MacOSX10.6.sdk .
+        tar -xf $(basename $OSXSDKURL)
+        [[ -d apple-uni-sdk-${DARWINVER}.orig/MacOSX${DARWINVER}.sdk ]] && mv apple-uni-sdk-${DARWINVER}.orig/MacOSX${DARWINVER}.sdk .
         echo "Warning: You may want to fix the following:"
-        for LINK in $(find ${PWD}/MacOSX10.6.sdk -type l); do if [ ! -e "$LINK" ]; then echo "Broken link: $LINK"; fi; done
+        for LINK in $(find ${PWD}/MacOSX${DARWINVER}.sdk -type l); do if [ ! -e "$LINK" ]; then echo "Broken link: $LINK"; fi; done
+      fi
+      if [ "${COMPILER_RT}" = "yes" -a "${TARGET_OS}" = "osx" ]; then
+        if [ ! -d $HOME/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin${DARWINSDKNUMR} ]; then
+          if [ "${BITS}" = "64" ]; then
+            echo -n "Error: You are trying to build x86_64 hosted cross compilers. Due to
+some host/target confusion you need to make a link from ..
+\${HOME}/${DARWINSDKDIR}/usr/lib/gcc/i686-apple-darwin${DARWINSDKNUM}
+.. to ..
+\${HOME}/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin${DARWINSDKNUM}
+.. please do this and then re-run this script.
+"
+            exit 1
+          fi
+        fi
       fi
     fi
   fi
@@ -1092,7 +1103,7 @@ cross_clang_build()
       pushd ${CTNG_FOLDER_NAME}
         # Make a shell script to do the branch rebasing so it can be
         # repeated easily.
-        echo '#!/usr/bin/env bash' > reclone.sh
+        echo '#!/usr/bin/env bash -x' > reclone.sh
         MASTER_BRANCH=${CTNG_VCS_BRANCHES_ARRAY[0]}
         for BRANCH in "${CTNG_VCS_BRANCHES_ARRAY[@]}"; do
           if [ "${BRANCH}" = "${MASTER_BRANCH}" ]; then
@@ -1231,7 +1242,12 @@ cross_clang_build()
       #  new commit that has gcc select the right companion libs needed, as
       #  cloog is no longer needed with >=5.1.0 and <=4.9.2 isl-0.12.2 needs to
       #  be select as well as cloog-isl."
-      GCC_VERSION_NUM=$(echo "$GCC_VERSION" | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/')
+      if [[ ${GCC_VERSION} =~ apple.* ]]; then
+        REAL_GCC_VERSION=${APPLE_GCC_VERSION}
+      else
+        REAL_GCC_VERSION=${GCC_VERSION}
+      fi
+      GCC_VERSION_NUM=$(echo "$REAL_GCC_VERSION" | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/')
       echo GCC_VERSION_NUM = $GCC_VERSION_NUM
       echo "CT_ISL_NEEDED=y"                   >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_ISL=y"                          >> ${CTNG_SAMPLE_CONFIG}

@@ -881,17 +881,18 @@ download_sdk()
 {
   if [ "${TARGET_OS}" = "osx" ]; then
     if [ ! -d "${HOME}"/${DARWINSDKDIR} ]; then
-      if [ "${BUILD_OS}" = "windows" ]; then
+      if [ "${BUILD_OS}" = "windows" -a "no" = "yes" ]; then
         echo "Error: Due to lack of native symlinks and/or incorrect symlink semantics and/or handling of them by gnutar"
         echo "       I am refusing to even attempt to un-tar $OSXSDKURL"
         echo "       Please use a Linux OS to untar this archive, then re-tar it using -h, copy back to Windows, and then"
         echo "       un-tar to your \$HOME folder (from MSYS2's perspective of course)."
         exit 1
       else
-        echo "Warning: Untarring phracker " $(basename OSXSDKURL);" it probably contains broken absolute symlinks."
+        OSXSDKFN=$(basename ${OSXSDKURL})
+        echo "Warning: Untarring phracker ${OSXSDKFN} it probably contains broken absolute symlinks."
         pushd "${HOME}"
-        curl -C - -SLO $OSXSDKURL
-        tar -xf $(basename $OSXSDKURL)
+        curl -C - -SLO ${OSXSDKURL}
+        tar -xf ${OSXSDKFN}
         [[ -d apple-uni-sdk-${DARWINVER}.orig/MacOSX${DARWINVER}.sdk ]] && mv apple-uni-sdk-${DARWINVER}.orig/MacOSX${DARWINVER}.sdk .
         echo "Warning: You may want to fix the following:"
         for LINK in $(find ${PWD}/MacOSX${DARWINVER}.sdk -type l); do if [ ! -e "$LINK" ]; then echo "Broken link: $LINK"; fi; done
@@ -1103,7 +1104,7 @@ cross_clang_build()
       pushd ${CTNG_FOLDER_NAME}
         # Make a shell script to do the branch rebasing so it can be
         # repeated easily.
-        echo '#!/usr/bin/env bash -x' > reclone.sh
+        echo '#!/usr/bin/env bash' > reclone.sh
         MASTER_BRANCH=${CTNG_VCS_BRANCHES_ARRAY[0]}
         for BRANCH in "${CTNG_VCS_BRANCHES_ARRAY[@]}"; do
           if [ "${BRANCH}" = "${MASTER_BRANCH}" ]; then
@@ -1533,7 +1534,7 @@ if [ "$OSTYPE" = "msys" ]; then
 else
   BUILDDIR=ctng-build-${STUB}-${BUILD_PREFIX}
 fi
-OUTPUTROOT=/e/${CTNG_SUFFIX_1ST}
+OUTPUTROOT=/c/${CTNG_SUFFIX_1ST}
 [ -d ${OUTPUTROOT} ] || mkdir -p ${OUTPUTROOT}
 BUILDDIR=${OUTPUTROOT}/b${STUB}${DEBUG_PREFIX}
 # Testing for Arnaud Dovi.

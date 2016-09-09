@@ -49,11 +49,12 @@
 # 2. To rebase to upstream:
 # Search below for .. rebase_onto_upstream "master" "https://github.com/crosstool-ng/crosstool-ng.git" "official" "trivial-fixes" ..
 
-CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 
 # For WIP local development use this:
-CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#multilib#post_suffix_prefix#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks#debugging"
+CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#post_suffix_prefix#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks#debugging"
+CTNG_SOURCE_URL_windows="git{diorcety}:${HOME}/crosstool-ng#official#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks#debugging"
 
 # for
 # (git fetch origin; for branch in $(git branch -l | cut -c 3-); do echo "Diff report for branch ${branch}"; git diff origin/${branch} ${branch}; done) | less
@@ -311,17 +312,17 @@ Where applicable multilib is always enabled."
 REPOS=$(dirname "${THISDIR}")
 
 # Format is: URL#cloned#rebased1#rebased2#
-CTNG_SOURCE_URL_raspi="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-#CTNG_SOURCE_URL_raspi2="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_raspi2="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_steambox="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+#CTNG_SOURCE_URL_raspi2="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_raspi2="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_steambox="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 CTNG_SOURCE_URL_osx="git{diorcety}:${REPOS}/crosstool-ng.diorcety#master"
 
-CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcery#official#ctgitget-refs#trivial-fixes#multilib#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcery#official#ctgitget-refs#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 
 # For WIP local development use this:
-CTNG_SOURCE_URL_windows="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#multilib#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
+CTNG_SOURCE_URL_windows="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#ctgitget-refs#trivial-fixes#post_suffix_prefix#case-insensitivity#\${BUILD_OS}-build#\${TARGET_OS}-target#misc-hacks"
 
 #option CTNG_SOURCE_URL      "git{multilib}:https://bitbucket.org:bhundven/crosstool-ng.git" \
 #option CTNG_SOURCE_URL      "git{fork}:${REPOS}/crosstool-ng" \
@@ -1051,8 +1052,8 @@ force_push()
   done
 }
 
-# rebase_onto_upstream "master" "https://github.com/crosstool-ng/crosstool-ng.git" "official" "trivial-fixes" "multilib" "post_suffix_prefix" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-target" "misc-hacks" "windows-build_linux-target" "non-linux-build_linux-target" "windows-host"
-# force_push                                                              "origin" "official" "trivial-fixes" "multilib" "post_suffix_prefix" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-target" "misc-hacks" "windows-build_linux-target" "non-linux-build_linux-target" "windows-host"
+# rebase_onto_upstream "master" "https://github.com/crosstool-ng/crosstool-ng.git" "official" "trivial-fixes" "post_suffix_prefix" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-target" "misc-hacks" "windows-build_linux-target" "non-linux-build_linux-target" "windows-host"
+# force_push                                                              "origin" "official" "trivial-fixes" "post_suffix_prefix" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-target" "misc-hacks" "windows-build_linux-target" "non-linux-build_linux-target" "windows-host"
 
 cross_clang_build()
 {

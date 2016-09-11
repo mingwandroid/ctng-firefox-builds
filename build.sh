@@ -70,9 +70,9 @@ HOST_ARCH=$(uname -m)
 # be done via the options processing anyway)
 DEBUG_CTNG=no
 DARWINVERMAJOR=10
-DARWINVERMINOR=6
+DARWINVERMINOR=7
 # The number that appears on actual triplet, e.g. i686-apple-darwin10
-DARWINSDKNUM=10
+DARWINSDKNUM=11
 # Make this an option (and implement it)
 DARWINVER=${DARWINVERMAJOR}.${DARWINVERMINOR}
 DARWINSDKDIR=MacOSX${DARWINVER}.sdk

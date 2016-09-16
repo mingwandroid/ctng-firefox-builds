@@ -1073,7 +1073,7 @@ force_push()
 }
 
 # rebase_onto_upstream "master" "https://github.com/crosstool-ng/crosstool-ng.git" "official" "trivial-fixes" "post_suffix_prefix" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-target" "misc-hacks" "windows-build_linux-target" "non-linux-build_linux-target" "windows-host"
-# force_push                                                              "origin" "official" "trivial-fixes" "post_suffix_prefix" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-target" "misc-hacks" "windows-build_linux-target" "non-linux-build_linux-target" "windows-host"
+# force_push                                                              "origin" "official" "trivial-fixes" "post_suffix_prefix" "ctgitget-refs" "case-insensitivity" "windows-build" "windows-target" "linux-build" "linux-target" "darwin-target" "misc-hacks" "windows-build_linux-target" "non-linux-build_linux-target" "windows-host" "run-as-root"
 
 cross_clang_build()
 {

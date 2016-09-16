@@ -157,7 +157,7 @@ TARGET_GCC_VERSIONS_raspi2="5.2.0"
 TARGET_GCC_VERSIONS_aarch64="5.2.0"
 TARGET_GCC_VERSIONS_armv7a="5.2.0"
 
-TARGET_SYSROOT=""
+TARGET_SYSROOT="sysroot"
 
 POST_SYSROOT_PREFIX="default"
 POST_SYSROOT_PREFIX_osx="opt/osxcc"
@@ -786,20 +786,40 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
 #    fi
     set -e
     GROUP=$(id --group --name)
-    if ! which autoconf2.13; then
-     (
-      pushd /tmp
-      curl -SLO http://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz
-      tar -xf autoconf-2.13.tar.gz
-      cd autoconf-2.13
-      ./configure --prefix=/usr/local --program-suffix=2.13 && make && ${SUDO} make install
-     )
-    fi
+  elif [[ -f /etc/issue ]]; then
+    # It is expected that you install stuff from conda now.
+    ${SUDO} yum install curl bison flex gperf texinfo gawk libtool automake ncurses-devel g++ autoconf2.13 yasm python-dev -y
+    ${SUDO} yum install epel-release -y
+    ${SUDO} yum install help2man -y
   else
     ${SUDO} apt-get install git mercurial curl bison flex gperf texinfo gawk libtool automake ncurses-dev g++ autoconf2.13 yasm python-dev
   fi
 else
   SUDO=
+fi
+
+AUTOTOOLS_PREFIX=$PWD
+PATH=$AUTOTOOLS_PREFIX/bin:$PATH
+if ! autoconf --version | head -1 | grep 2.69; then
+ (
+  pushd /tmp
+  curl -SLO http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
+  tar -xf autoconf-2.69.tar.gz
+  cd autoconf-2.69
+  ./configure --prefix=$AUTOTOOLS_PREFIX && make && ${SUDO} make install
+  popd
+ )
+fi
+
+if ! automake --version | head -1 | grep 1.15; then
+ (
+  pushd /tmp
+  curl -SLO http://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz
+  tar -xf automake-1.15.tar.gz
+  cd automake-1.15
+  ./configure --prefix=$AUTOTOOLS_PREFIX && make && ${SUDO} make install
+  popd
+ )
 fi
 
        SED=${GNUFIX}sed
@@ -1154,6 +1174,8 @@ cross_clang_build()
     CTNG_SAMPLE_CONFIG=samples/${CTNG_SAMPLE}/crosstool.config
     [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
     cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${BITS} ${CTNG_SAMPLE_CONFIG}
+    echo "CT_ALLOW_BUILD_AS_ROOT=y"            >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_ALLOW_BUILD_AS_ROOT_SURE=y"       >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_PARALLEL_JOBS_OUTPUT_SYNC=y"      >> ${CTNG_SAMPLE_CONFIG}
     LLVM_VERSION_DOT=$(echo $LLVM_VERSION | tr '_' '.')
     echo "CT_LLVM_V_${LLVM_VERSION}"           >> ${CTNG_SAMPLE_CONFIG}
@@ -1355,7 +1377,7 @@ cross_clang_build()
     if [ "$CTNG_DEBUGGERS" = "yes" ]; then
       echo "CT_DEBUG_gdb=y"                >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_GDB_CROSS=y"                >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_GDB_CROSS_PYTHON=y"         >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_GDB_CROSS_PYTHON=n"         >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_GDB_V_7_6_1=y"              >> ${CTNG_SAMPLE_CONFIG}
     fi
 
@@ -1890,7 +1912,7 @@ ld: warning: can't parse dwarf compilation unit info in /home/ray/tbb-work/ctng-
 [INFO ]  Cleaning-up the toolchain's directory
 [INFO ]    Stripping all toolchain executables
 [37:15] / /usr/bin/sed: can't read /home/ray/tbb-work/ctng-build-3_3/.build/src/gcc-/gcc/version.c: No such file or directory
-[ERROR]
+[ERROR]apt
 "
 
 # Dsymutil not existing rears its ugly head again, this time with ICU as -g is used ..
@@ -1915,7 +1937,7 @@ AUTOCONF_VER=2.60
 AUTOMAKE_VER=1.9.6
 LIBTOOL_VER=1.5.22
 # Versions for isl 0.11.1
-AUTOCONF_VER=2.68
+AUTOCONF_VER=2.69
 AUTOMAKE_VER=1.11.3
 LIBTOOL_VER=2.4
 # Versions for isl 0.12.1

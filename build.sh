@@ -174,7 +174,12 @@ POST_SYSROOT_PREFIX_armv7a="usr/armv7acc"
 
 # Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
 # To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
+# The 'traditional' version which gets furthest, may want to move this to 3.4.2
 TARGET_LLVM_VERSIONS_osx="3.4"
+# The very latest from git => needs CMake?
+# TARGET_LLVM_VERSIONS_osx="devel"
+# The latest release branch from git => needs CMake?
+TARGET_LLVM_VERSIONS_osx="3.9.0"
 TARGET_LLVM_VERSIONS_windows="3.5.1"
 TARGET_LLVM_VERSIONS_steamsdk="none"
 TARGET_LLVM_VERSIONS_steambox="none"
@@ -317,7 +322,7 @@ CTNG_SOURCE_URL_raspi="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#upd
 CTNG_SOURCE_URL_raspi2="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 CTNG_SOURCE_URL_steambox="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_osx="git{diorcety}:${REPOS}/crosstool-ng.diorcety#master"
+CTNG_SOURCE_URL_osx="git{diorcety}:${REPOS}/crosstool-ng.diorcety#darwin-target"
 
 CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 
@@ -363,7 +368,7 @@ option CTNG_DEBUGGABLE     default \
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
 about a year ago."
-option CTNG_B_CC_LEGACY    no \
+option CTNG_B_CC_LEGACY    mine \
 "Do you want the toolchain built with crosstool-ng
 to be built using stable, old compilers so that they
 might run on older machines? In some cases, this will
@@ -385,7 +390,7 @@ option GCC_VERSION        default \
 option GNU_PLUGINS        default \
 "Enable you want Binutils+GCC plugin support? Not available
 on Windows hosts"
-option COPY_SDK            no \
+option COPY_SDK            default \
 "Do you want the $DARWINSDKDIR copied from
 \$HOME/$DARWINSDKDIR to the sysroot of the
 built toolchain?"
@@ -642,6 +647,18 @@ fi
 if [ "${LLVM_VERSION}" = "default" ]; then
   LLVM_VERSION=$(_al TARGET_LLVM_VERSIONS ${TARGET_OS})
 fi
+
+# This is here because it allows us to build compiler-rt.
+# Hopefully compiler-rt can be compiled on more build machines
+# these days?
+if [ "${COPY_SDK}" = "default" ]; then
+  if [ "${BUILD_OS}" = "darwin" ]; then
+    COPY_SDK=yes
+  else
+    COPY_SDK=no
+  fi
+fi
+
 # Because we do not want lack of compiler-rt availability to
 # be an Error unless it was explicitly requested.
 COMPILER_RT_ASKED_FOR="no"
@@ -1178,6 +1195,7 @@ cross_clang_build()
     echo "CT_ALLOW_BUILD_AS_ROOT_SURE=y"       >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_PARALLEL_JOBS_OUTPUT_SYNC=y"      >> ${CTNG_SAMPLE_CONFIG}
     LLVM_VERSION_DOT=$(echo $LLVM_VERSION | tr '_' '.')
+    echo "CT_CLANG_V_${LLVM_VERSION}"          >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_LLVM_V_${LLVM_VERSION}"           >> ${CTNG_SAMPLE_CONFIG}
     if [ -n "$MINGW_W64_PATH" -o -n ${USED_CC} ]; then
       if [ -n "$MINGW_W64_PATH" ]; then

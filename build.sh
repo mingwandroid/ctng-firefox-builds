@@ -1444,6 +1444,9 @@ cross_clang_build()
      ( while [ 0 ] ; do COLM=$(ps aux | grep libtoolize | grep --invert-match grep | awk '{print $2}'); if [ -n "${COLM}" ]; then kill $COLM; echo $COLM; fi; sleep 10; done ) &
     fi
     ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng ${CTNG_SAMPLE}
+    if [ "$OSTYPE" == "darwin" ]; then
+      download_build_tools
+    fi
     ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng build
     if [ "${BUILD_OS}" = "windows" ]; then
       # Copy needed DLLs.
@@ -1544,7 +1547,10 @@ firefox_package()
 }
 
 ROOT=$PWD
-download_build_tools
+# Can't build ctng itself with my compilers due to CFLAGS, we do this later instead .. this can be fixed I expect
+if [ "$OSTYPE" != "darwin" ]; then
+  download_build_tools
+fi
 
 if [ "${OSTYPE}" = "msys" ]; then
   export PYTHON=$MINGW_W64_PATH/../opt/bin/python.exe

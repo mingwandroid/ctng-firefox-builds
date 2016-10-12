@@ -175,7 +175,7 @@ POST_SYSROOT_PREFIX_armv7a="usr/armv7acc"
 # Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
 # To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
 # The 'traditional' version which gets furthest, may want to move this to 3.4.2
-TARGET_LLVM_VERSIONS_osx="3.4"
+TARGET_LLVM_VERSIONS_osx="3.4.2"
 # The very latest from git => needs CMake?
 # TARGET_LLVM_VERSIONS_osx="devel"
 # The latest release branch from git => needs CMake?
@@ -1094,6 +1094,13 @@ force_push()
 
 cross_clang_build()
 {
+  CTNG_ITSELF_CC=${USED_CC}
+  CTNG_ITSELF_CXX=${USED_CXX}
+  CTNG_ITSELF_LD=${USED_LD}
+  CTNG_ITSELF_CC=gcc
+  CTNG_ITSELF_CXX=g++
+  CTNG_ITSELF_LD=ld
+  LDFLAGS=${USED_LD_FLAGS}
   CTNG_CFG_ARGS=" \
                 --disable-local \
                 --prefix=${PWD}/install-ctng.${CTNG_SUFFIX_HASH} \
@@ -1103,7 +1110,7 @@ cross_clang_build()
                 --with-objdump=${OBJDUMP} \
                 --with-readelf=${READELF} \
                 --with-gperf=${GPERF} \
-                CC=${USED_CC} CXX=${USED_CXX} LD=${USED_LD}"
+                CC=${CTNG_ITSELF_CC} CXX=${CTNG_ITSELF_CXX} LD=${CTNG_ITSELF_LD}"
 
   CROSSTOOL_CONFIG=${BUILDDIR}/.config
   if [ "${CTNG_CLEAN}" = "yes" ]; then
@@ -1444,9 +1451,6 @@ cross_clang_build()
      ( while [ 0 ] ; do COLM=$(ps aux | grep libtoolize | grep --invert-match grep | awk '{print $2}'); if [ -n "${COLM}" ]; then kill $COLM; echo $COLM; fi; sleep 10; done ) &
     fi
     ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng ${CTNG_SAMPLE}
-    if [ "$OSTYPE" == "darwin" ]; then
-      download_build_tools
-    fi
     ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng build
     if [ "${BUILD_OS}" = "windows" ]; then
       # Copy needed DLLs.
@@ -1548,9 +1552,7 @@ firefox_package()
 
 ROOT=$PWD
 # Can't build ctng itself with my compilers due to CFLAGS, we do this later instead .. this can be fixed I expect
-if [ "$OSTYPE" != "darwin" ]; then
   download_build_tools
-fi
 
 if [ "${OSTYPE}" = "msys" ]; then
   export PYTHON=$MINGW_W64_PATH/../opt/bin/python.exe
@@ -5320,3 +5322,20 @@ popd
 [ERROR]    make[4]: *** [libgcc_s.so] Error 1
 
 'BUILD_CC=x86_64-build_apple-darwin14.0.0-gcc' 'CFLAGS= -U_FORTIFY_SOURCE          -O2 ' 'CC=x86_64-unknown-linux-gnu-gcc     -m32' 'AR=x86_64-unknown-linux-gnu-ar' 'RANLIB=x86_64-unknown-linux-gnu-ranlib' '/bin/bash' '/e/d/bs/.build/src/glibc-2.21/configure' '--prefix=/usr' '--build=x86_64-build_apple-darwin14.0.0' '--host=i486-unknown-linux-gnu' '--cache-file=/e/d/bs/.build/x86_64-unknown-linux-gnu/build/build-libc-startfiles_32/config.cache' '--without-cvs' '--disable-profile' '--without-gd' '--with-headers=/e/d/is/x86_64-unknown-linux-gnu/sysroot/usr/include' '--libdir=/usr/lib/../lib' '--disable-debug' '--disable-sanity-checks' '--enable-obsolete-rpc' '--enable-kernel=3.10.79' '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=no' '--with-pkgversion=crosstool-NG 47963ef'
+
+
+CPPFLAGS .. not getting set during GMP build.
+
+
+# LLVM fails with my OS X cross compilers:
+pushd /c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/lib
+PATH=/c/d/bo/.build/i686-apple-darwin10/buildtools/bin:$PATH i686-build_apple-darwin11-g++ -O2 -g -pipe -m32 -isysroot /Users/rdonnelly/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5 -O3 -rdynamic -Wl,-rpath -Wl,@executable_path/../lib -L/c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/Release+Asserts/lib -L/c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/Release+Asserts/lib -m32 -isysroot /Users/rdonnelly/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5  -Wl,-flat_namespace -Wl,-undefined,suppress -dynamiclib -mmacosx-version-min=10.11 -o /c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/Release+Asserts/lib/LLVMHello.dylib /c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/lib/Transforms/Hello/Release+Asserts/Hello.o    -Wl,-exported_symbols_list,/c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/lib/Transforms/Hello/Release+Asserts/Hello.exports.sed -lz -lpthread -lcurses -lm -v
+
+/Users/rdonnelly/ctng/builds/osx/apple-osx/bin/../libexec/gcc/i686-apple-darwin11/4.2.1/collect2 -dynamic -dylib -arch i386 -macosx_version_min 10.5 -macosx_version_min 10.5 -macosx_version_min 10.11 -syslibroot /Users/rdonnelly/MacOSX10.7.sdk -syslibroot /Users/rdonnelly/MacOSX10.7.sdk -weak_reference_mismatches non-weak -o /c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/Release+Asserts/lib/LLVMHello.dylib -L/c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/Release+Asserts/lib -L/c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/Release+Asserts/lib -L/Users/rdonnelly/ctng/builds/osx/apple-osx/bin/..//lib -L/Users/rdonnelly/ctng/builds/osx/apple-osx/bin/../lib/gcc/i686-apple-darwin11/4.2.1 -L/Users/rdonnelly/ctng/builds/osx/apple-osx/bin/../lib/gcc -rpath @executable_path/../lib -flat_namespace -undefined suppress /c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/lib/Transforms/Hello/Release+Asserts/Hello.o -exported_symbols_list /c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/lib/Transforms/Hello/Release+Asserts/Hello.exports.sed -lz -lpthread -lcurses -lm -lstdc++ -lSystem -lgcc -lSystem
+ld: -rpath can only be used when targeting Mac OS X 10.5 or later
+collect2: ld returned 1 exit status
+
+/Users/rdonnelly/ctng/builds/osx/apple-osx/bin/../bin/i686-apple-darwin11-ld -dynamic -dylib -arch i386 -macosx_version_min 10.5 -macosx_version_min 10.5 -macosx_version_min 10.11 -syslibroot /Users/rdonnelly/MacOSX10.7.sdk -syslibroot /Users/rdonnelly/MacOSX10.7.sdk -weak_reference_mismatches non-weak -o /c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/Release+Asserts/lib/LLVMHello.dylib -L/c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/Release+Asserts/lib -L/c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/Release+Asserts/lib -L/Users/rdonnelly/ctng/builds/osx/apple-osx/bin/..//lib -L/Users/rdonnelly/ctng/builds/osx/apple-osx/bin/../lib/gcc/i686-apple-darwin11/4.2.1 -L/Users/rdonnelly/ctng/builds/osx/apple-osx/bin/../lib/gcc -rpath @executable_path/../lib -flat_namespace -undefined suppress /c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/lib/Transforms/Hello/Release+Asserts/Hello.o -exported_symbols_list /c/d/bo/.build/i686-apple-darwin10/build/build-LLVM-host-i686-build_apple-darwin11/lib/Transforms/Hello/Release+Asserts/Hello.exports.sed -lz -lpthread -lcurses -lm -lstdc++ -lSystem -lgcc -lSystem -v
+
+
+Problem is ld incorrectly interprets -macosx_version_min 10.11. Removing that leads to success.

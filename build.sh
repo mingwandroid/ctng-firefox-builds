@@ -112,8 +112,12 @@ BUILD_DEBUGGABLE_windows="no"
 BUILD_DEBUGGABLE_linux="no"
 
 BUILD_DEBUGGERS_darwin="yes"
-BUILD_DEBUGGERS_windows="yes" # Due to expat problems.
+BUILD_DEBUGGERS_windows="yes"
 BUILD_DEBUGGERS_linux="yes"
+
+TARGET_DEBUGGERS_darwin="no"
+TARGET_DEBUGGERS_windows="yes"
+TARGET_DEBUGGERS_linux="yes"
 
 # Could try the dlfcn_win32 project for Windows support.
 # I've not made it error if you try to force the issue
@@ -706,7 +710,13 @@ if [ "${CTNG_SAVE_TEMPS}" = "default" ]; then
 fi
 
 if [ "${CTNG_DEBUGGERS}" = "default" ]; then
-  CTNG_DEBUGGERS=$(_al BUILD_DEBUGGERS ${BUILD_OS})
+  BUILD_DEBUGGERS=$(_al BUILD_DEBUGGERS ${BUILD_OS})
+  TARGET_DEBUGGERS=$(_al TARGET_DEBUGGERS ${TARGET_OS})
+  if [ "${BUILD_DEBBUGERS}" = "yes" -a "${TARGET_DEBUGGERS}" = "yes" ]; then
+    CTNG_DEBUGGERS=yes
+  else
+    CTNG_DEBUGGERS=no
+  fi
 fi
 
 # Error checking
@@ -5339,3 +5349,14 @@ collect2: ld returned 1 exit status
 
 
 Problem is ld incorrectly interprets -macosx_version_min 10.11. Removing that leads to success.
+
+# It seems there's a race condition during the build of libuuid:
+pushd /c/d/bo/.build/i686-apple-darwin10/build/build-libuuid-host-i686-build_apple-darwin11
+rm -rf *
+PATH=/c/d/bo/.build/i686-apple-darwin10/buildtools/bin:$PATH \
+CFLAGS="-O2 -g -pipe -m32 -isysroot /Users/rdonnelly/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5" \
+LDFLAGS="-m32 -isysroot /Users/rdonnelly/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5" \
+CPP="i686-build_apple-darwin11-cpp" \
+CPPFLAGS="-O2 -g -pipe -m32 -isysroot /Users/rdonnelly/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5" \
+  /c/d/bo/.build/src/e2fsprogs-libs-1.43.3/configure --prefix=/c/d/bo/.build/i686-apple-darwin10/buildtools --host=i686-build_apple-darwin11 --build=i686-build_apple-darwin11 --disable-uuidd
+PATH=/c/d/bo/.build/i686-apple-darwin10/buildtools/bin:$PATH make -j4 -l

@@ -282,6 +282,18 @@ TARGET_LINUX_K_raspi2="3.10.69"
 TARGET_LINUX_K_aarch64="3.12"
 TARGET_LINUX_K_armv7a="3.12"
 
+STATIC_TOOLCHAIN_osx="no"
+STATIC_TOOLCHAIN_windows="no"
+STATIC_TOOLCHAIN_steamsdk="no"
+STATIC_TOOLCHAIN_steambox="no"
+STATIC_TOOLCHAIN_centos5="yes"
+STATIC_TOOLCHAIN_centos6="yes"
+STATIC_TOOLCHAIN_ps3="no"
+STATIC_TOOLCHAIN_raspi="no"
+STATIC_TOOLCHAIN_raspi2="no"
+STATIC_TOOLCHAIN_aarch64="no"
+STATIC_TOOLCHAIN_armv7a="no"
+
 # Stands for associative lookup!
 _al()
 {
@@ -436,7 +448,7 @@ symbolic link to be made from ..
 .. to ..
 \${HOME}/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin10
 before running this script."
-option STATIC_TOOLCHAIN    no \
+option STATIC_TOOLCHAIN    default \
 "Do you want a statically linked toolchain?
 Plugins are not available if you say 'yes'.
 Also crosstool-ng can't be built on OSX
@@ -622,6 +634,10 @@ else
       BITS=32
     fi
   fi
+fi
+
+if [ "${CTNG_STATIC_TOOLCHAIN}" = "default" ]; then
+  CTNG_STATIC_TOOLCHAIN=$(_al STATIC_TOOLCHAIN ${TARGET_OS})
 fi
 
 if [ "${CTNG_SOURCE_URL}" = "default" ]; then

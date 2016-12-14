@@ -103,8 +103,8 @@ VENDOR_OSES_osx="apple-darwin10"
 VENDOR_OSES_windows="x86_64-w64-mingw32"
 VENDOR_OSES_steamsdk="unknown-linux-gnu"
 VENDOR_OSES_steambox="unknown-linux-gnu"
-VENDOR_OSES_centos5="unknown-linux-gnu"
-VENDOR_OSES_centos6="unknown-linux-gnu"
+VENDOR_OSES_centos5="conda_cdt5-linux-gnu"
+VENDOR_OSES_centos6="conda_cdt6-linux-gnu"
 VENDOR_OSES_raspi="unknown-linux-gnu"
 VENDOR_OSES_raspi2="unknown-linux-gnu"
 VENDOR_OSES_aarch64="unknown-linux-gnu"
@@ -260,8 +260,9 @@ TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
 TARGET_LIBC_steamsdk="glibc-2.20"
 TARGET_LIBC_steambox="glibc-2.20"
-TARGET_LIBC_centos5="glibc-2.5"
-TARGET_LIBC_centos6="glibc-2.24"
+#TARGET_LIBC_centos5="glibc-2.5"
+TARGET_LIBC_centos5="glibc-2.12.2"
+TARGET_LIBC_centos6="glibc-2.12.2"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="glibc_linaro-2.20-2014.11"
 TARGET_LIBC_raspi2="glibc_linaro-2.20-2014.11"
@@ -862,6 +863,8 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     ${SUDO} yum install curl bison flex gperf texinfo gawk libtool automake ncurses-devel g++ autoconf2.13 yasm python-dev -y
     ${SUDO} yum install epel-release -y
     ${SUDO} yum install help2man -y
+    # Only needed for very old Linux kernels, these days it's bundled.
+    ${SUDO} yum install unifdef -y
   else
     ${SUDO} apt-get install git mercurial curl bison flex gperf texinfo gawk libtool automake ncurses-dev g++ autoconf2.13 yasm python-dev
   fi
@@ -1252,6 +1255,7 @@ cross_clang_build()
     CTNG_SAMPLE_CONFIG=samples/${CTNG_SAMPLE}/crosstool.config
     [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
     cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${BITS} ${CTNG_SAMPLE_CONFIG}
+
     echo "CT_ALLOW_BUILD_AS_ROOT=y"            >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_ALLOW_BUILD_AS_ROOT_SURE=y"       >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_PARALLEL_JOBS_OUTPUT_SYNC=y"      >> ${CTNG_SAMPLE_CONFIG}
@@ -1365,9 +1369,11 @@ cross_clang_build()
       echo "CT_CC_gcc=y"                       >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_GCC_V_${GCC_VERS_}=y"        >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_CXX=y"                  >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_LANG_CXX=y"                  >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_FORTRAN=y"              >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_ADA=y"                  >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_OBJC=y"                 >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_OBJCXX=y"               >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_CC_LANG_GOLANG=y"               >> ${CTNG_SAMPLE_CONFIG}
       if [ "$STATIC_TOOLCHAIN" = "no" -a "$GNU_PLUGINS" = "yes" ]; then
         echo "CT_CC_GCC_ENABLE_PLUGINS=y"      >> ${CTNG_SAMPLE_CONFIG}
       else
@@ -1386,21 +1392,17 @@ cross_clang_build()
     echo "CT_${NATURE}=y"                      >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_TOOLCHAIN_TYPE=\"$(echo $NATURE | tr 'A-Z' 'a-z')\"" >> ${CTNG_SAMPLE_CONFIG}
 
-    # CT_LIBC="eglibc"
-    # CT_LIBC_VERSION="2_18"
-    # CT_LIBC_eglibc=y
-
-    LIBC_FAMILY=${LIBC%%_*}
+    LIBC_FAMILY=${LIBC%%-*}
     echo "CT_LIBC_${LIBC_FAMILY}=y"                  >> ${CTNG_SAMPLE_CONFIG}
     if [ "$LIBC_FAMILY" = "eglibc" \
       -o "$LIBC_FAMILY" = "glibc" ]; then
       echo "CT_LIBC=\"${LIBC_FAMILY}\""              >> ${CTNG_SAMPLE_CONFIG}
-      LIBC_VERS=${LIBC/${LIBC_FAMILY}_V_/}
+      LIBC_VERS=${LIBC/${LIBC_FAMILY}-/}
       # For some reason eglibc versions need _'s instead of .'s
       if [ "$LIBC_FAMILY" = "eglibc" ]; then
         LIBC_VERS=$(echo ${LIBC_VERS} | tr '.' '_')
       fi
-      LIBCU_=$(echo ${LIBC} | tr '.' '_' | tr 'a-z' 'A-Z')
+      LIBCU_=$(echo ${LIBC_FAMILY}_V_${LIBC_VERS} | tr '.' '_' | tr 'a-z' 'A-Z')
       echo "CT_LIBC_${LIBCU_}=y"                     >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_LIBC_VERSION=\"${LIBC_VERS}\""        >> ${CTNG_SAMPLE_CONFIG}
     fi
@@ -1473,6 +1475,16 @@ cross_clang_build()
       echo "CT_CC_GCC_STATIC_LIBSTDCXX=y"  >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_STATIC_LIBSTDCXX=y"      >> ${CTNG_SAMPLE_CONFIG}
     fi
+    
+    # Yeah, I'm conflating 'centos' with 'conda' here.
+    if [ "${TARGET_OS}" = "centos5" -o \
+         "${TARGET_OS}" = "centos6" -o \
+         "${TARGET_OS}" = "centos7" ]; then
+      echo "CT_DISABLE_MULTILIB_LIB_OSDIRNAMES=y" >> ${CTNG_SAMPLE_CONFIG}
+    else
+      echo "CT_DISABLE_MULTILIB_LIB_OSDIRNAMES=n" >> ${CTNG_SAMPLE_CONFIG}
+    fi
+
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 

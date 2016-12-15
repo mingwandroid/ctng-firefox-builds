@@ -260,8 +260,8 @@ TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
 TARGET_LIBC_steamsdk="glibc-2.20"
 TARGET_LIBC_steambox="glibc-2.20"
-#TARGET_LIBC_centos5="glibc-2.5"
-TARGET_LIBC_centos5="glibc-2.12.2"
+TARGET_LIBC_centos5="glibc-2.6"
+#TARGET_LIBC_centos5="glibc-2.12.2"
 TARGET_LIBC_centos6="glibc-2.12.2"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="glibc_linaro-2.20-2014.11"
@@ -1370,10 +1370,12 @@ cross_clang_build()
       echo "CT_CC_GCC_V_${GCC_VERS_}=y"        >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_CXX=y"                  >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_FORTRAN=y"              >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_LANG_ADA=y"                  >> ${CTNG_SAMPLE_CONFIG}
+# This needs GNAT.
+#      echo "CT_CC_LANG_ADA=y"                  >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_OBJC=y"                 >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_LANG_OBJCXX=y"               >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_CC_LANG_GOLANG=y"               >> ${CTNG_SAMPLE_CONFIG}
+# This needs C++ but can get build before it, I think.s
+#      echo "CT_CC_LANG_GOLANG=y"               >> ${CTNG_SAMPLE_CONFIG}
       if [ "$STATIC_TOOLCHAIN" = "no" -a "$GNU_PLUGINS" = "yes" ]; then
         echo "CT_CC_GCC_ENABLE_PLUGINS=y"      >> ${CTNG_SAMPLE_CONFIG}
       else

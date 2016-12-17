@@ -455,6 +455,11 @@ Plugins are not available if you say 'yes'.
 Also crosstool-ng can't be built on OSX
 if you say 'yes' here, though that needs
 to be fixed, clearly!"
+option TARGET_BITS        default \
+"How many bits would you like your target to be?
+default (usually same as host) 32 or 64 are the
+only valid answers."
+
 #################################################
 # This set of options are for the Firefox build #
 #################################################
@@ -615,27 +620,6 @@ fi
 # cclist=gcc icc cc
 # configure:5707: error: ABI=64 is not among the following valid choices: 32
 # .. so for now, on Darwin
-if [ "${HOST_ARCH}" = "i686" ]; then
-  BITS=32
-else
-  BITS=64
-  if [ "${BUILD_OS}" = "darwin" ]; then
-    if [ "${CTNG_B_CC_LEGACY}" = "mine" -o "${CTNG_B_CC_LEGACY}" = "homebrew" ]; then
-      echo "Warning: You set --ctng-legacy=mine or homebrew and are building on Darwin, due to GMP configure fail 32bit binaries will be built."
-      if [ "${CTNG_B_CC_LEGACY}" = "homebrew" ]; then
-        if [ ! -d /usr/lib/i686-apple-darwin11/4.2.1/x86_64 -o ! -d /usr/lib/gcc/i686-apple-darwin11/4.2.1 ]; then
-          echo "Error: For --ctng-legacy=homebrew you need to link something to /usr/lib/i686-apple-darwin11/4.2.1/x86_64 and include"
-          echo "       e.g."
-          echo "       sudo mkdir -p /usr/lib/i686-apple-darwin11/4.2.1 /usr/lib/gcc/i686-apple-darwin11/4.2.1"
-          echo "       sudo ln -s /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib /usr/lib/i686-apple-darwin11/4.2.1/x86_64"
-          echo "       sudo ln -s /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/include /usr/lib/gcc/i686-apple-darwin11/4.2.1/include"
-          exit 1
-        fi
-      fi
-      BITS=32
-    fi
-  fi
-fi
 
 if [ "${CTNG_STATIC_TOOLCHAIN}" = "default" ]; then
   CTNG_STATIC_TOOLCHAIN=$(_al STATIC_TOOLCHAIN ${TARGET_OS})
@@ -736,6 +720,31 @@ if [ "${STATIC_TOOLCHAIN}" = "yes" -a "${BUILD_OS}" = "darwin" ]; then
   echo "       Checking that gcc can compile a trivial statically linked program (CT_WANTS_STATIC_LINK)"
   echo "       Fixing this is somewhere on my TODO list."
   exit 1
+fi
+
+if [ "${TARGET_BITS}" == "default" ]; then
+  if [ "${HOST_ARCH}" = "i686" ]; then
+    TARGET_BITS=32
+  else
+    TARGET_BITS=64
+  fi
+fi
+
+if [ "${BUILD_OS}" = "darwin" ]; then
+  if [ "${CTNG_B_CC_LEGACY}" = "mine" -o "${CTNG_B_CC_LEGACY}" = "homebrew" ]; then
+    echo "Warning: You set --ctng-legacy=mine or homebrew and are building on Darwin, due to GMP configure fail 32bit binaries will be built."
+    if [ "${CTNG_B_CC_LEGACY}" = "homebrew" ]; then
+      if [ ! -d /usr/lib/i686-apple-darwin11/4.2.1/x86_64 -o ! -d /usr/lib/gcc/i686-apple-darwin11/4.2.1 ]; then
+        echo "Error: For --ctng-legacy=homebrew you need to link something to /usr/lib/i686-apple-darwin11/4.2.1/x86_64 and include"
+        echo "       e.g."
+        echo "       sudo mkdir -p /usr/lib/i686-apple-darwin11/4.2.1 /usr/lib/gcc/i686-apple-darwin11/4.2.1"
+        echo "       sudo ln -s /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib /usr/lib/i686-apple-darwin11/4.2.1/x86_64"
+        echo "       sudo ln -s /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/include /usr/lib/gcc/i686-apple-darwin11/4.2.1/include"
+        exit 1
+      fi
+    fi
+    TARGET_BITS=32
+  fi
 fi
 
 BINUTILS_VERS_=$(echo $BINUTILS_VERSION | tr '.' '_')
@@ -994,7 +1003,7 @@ download_sdk()
       fi
       if [ "${COMPILER_RT}" = "yes" -a "${TARGET_OS}" = "osx" ]; then
         if [ ! -d $HOME/${DARWINSDKDIR}/usr/lib/gcc/x86_64-apple-darwin${DARWINSDKNUMR} ]; then
-          if [ "${BITS}" = "64" ]; then
+          if [ "${TARGET_BITS}" = "64" ]; then
             echo -n "Error: You are trying to build x86_64 hosted cross compilers. Due to
 some host/target confusion you need to make a link from ..
 \${HOME}/${DARWINSDKDIR}/usr/lib/gcc/i686-apple-darwin${DARWINSDKNUM}
@@ -1054,8 +1063,8 @@ dl_compile_install_make_381()
 # Compilers and GNU make 3.81 (on MSYS2 anyway)
 download_build_tools()
 {
-  USED_CPP_FLAGS="-m${BITS}"
-  USED_LD_FLAGS="-m${BITS}"
+#  USED_CPP_FLAGS="-m${TARGET_BITS}"
+#  USED_LD_FLAGS="-m${TARGET_BITS}"
 
   if [ "$OSTYPE" = "msys" ]; then
     . ${THISDIR}/mingw-w64-toolchain.sh --arch=$HOST_ARCH --root=$PWD --path-out=MINGW_W64_PATH --hash-out=MINGW_W64_HASH --enable-verbose --enable-hash-in-path
@@ -1251,10 +1260,10 @@ cross_clang_build()
       popd
      ) || ( echo "Error: Failed to clone/patch crosstool-ng" && exit 1 )
     pushd ${CTNG_FOLDER_NAME}
-    CTNG_SAMPLE=mozbuild-${TARGET_OS}-${BITS}
+    CTNG_SAMPLE=mozbuild-${TARGET_OS}-${TARGET_BITS}
     CTNG_SAMPLE_CONFIG=samples/${CTNG_SAMPLE}/crosstool.config
     [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
-    cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${BITS} ${CTNG_SAMPLE_CONFIG}
+    cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${TARGET_BITS} ${CTNG_SAMPLE_CONFIG}
 
     echo "CT_ALLOW_BUILD_AS_ROOT=y"            >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_ALLOW_BUILD_AS_ROOT_SURE=y"       >> ${CTNG_SAMPLE_CONFIG}
@@ -1653,13 +1662,13 @@ else
 fi
 OUTPUTROOT=/c/${CTNG_SUFFIX_1ST}
 [ -d ${OUTPUTROOT} ] || mkdir -p ${OUTPUTROOT}
-BUILDDIR=${OUTPUTROOT}/b${STUB}${DEBUG_PREFIX}
+BUILDDIR=${OUTPUTROOT}/b${STUB}${DEBUG_PREFIX}_${TARGET_BITS}
 # Testing for Arnaud Dovi.
 # r=registry set to sensitive
 # p=posix set to 1
 # BUILDDIR=/libs/rp${CTNG_SUFFIX_1ST}
 INTALLDIR=ctng-install-${STUB}-${BUILD_PREFIX}
-BUILT_XCOMPILER_PREFIX=${OUTPUTROOT}/i${STUB}${DEBUG_PREFIX}
+BUILT_XCOMPILER_PREFIX=${OUTPUTROOT}/i${STUB}${DEBUG_PREFIX}_${TARGET_BITS}
 
 if [ -d $BUILDDIR ]; then
   echo "Error: Builddir $BUILDDIR already exists, please (re)move it and restart the build"

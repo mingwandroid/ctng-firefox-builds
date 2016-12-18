@@ -271,7 +271,7 @@ TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
 TARGET_LIBC_steamsdk="glibc-2.20"
 TARGET_LIBC_steambox="glibc-2.20"
-TARGET_LIBC_centos5="glibc-2.6"
+TARGET_LIBC_centos5="glibc-2.5"
 #TARGET_LIBC_centos5="glibc-2.12.2"
 TARGET_LIBC_centos6="glibc-2.12.2"
 TARGET_LIBC_centos7="glibc-2.17"
@@ -428,7 +428,7 @@ option CTNG_DEBUGGABLE     default \
 to be debuggable? Currently, you can't build a GCC
 with old-ish ISLs at -O2 on Windows. This was fixed
 about a year ago."
-option CTNG_B_CC_LEGACY    mine \
+option CTNG_B_CC_LEGACY    no \
 "Do you want the toolchain built with crosstool-ng
 to be built using stable, old compilers so that they
 might run on older machines? In some cases, this will
@@ -896,7 +896,7 @@ else
   SUDO=
 fi
 
-AUTOTOOLS_PREFIX=$PWD
+AUTOTOOLS_PREFIX=${BUILDDIR}
 PATH=$AUTOTOOLS_PREFIX/bin:$PATH
 if ! autoconf --version | head -1 | grep 2.69; then
  (

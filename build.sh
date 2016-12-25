@@ -99,6 +99,7 @@ TARGET_TO_PREFIX_raspi="r"
 TARGET_TO_PREFIX_raspi2="r2"
 TARGET_TO_PREFIX_aarch64="a"
 TARGET_TO_PREFIX_armv7a="7"
+TARGET_TO_PREFIX_imx351uc="i"
 
 VENDOR_OSES_osx="apple-darwin10"
 VENDOR_OSES_windows="x86_64-w64-mingw32"
@@ -111,6 +112,7 @@ VENDOR_OSES_raspi="unknown-linux-gnu"
 VENDOR_OSES_raspi2="unknown-linux-gnu"
 VENDOR_OSES_aarch64="unknown-linux-gnu"
 VENDOR_OSES_armv7a="unknown-linux-gnu"
+VENDOR_OSES_imx351uc="conda_imx-linux-uclibcgnueabi"
 
 # Defaults ..
 BUILD_DEBUGGABLE_darwin="no"
@@ -142,6 +144,7 @@ TARGET_BINUTILS_VERSIONS_centos7="2.27"
 TARGET_BINUTILS_VERSIONS_ps3="2.23.2"
 TARGET_BINUTILS_VERSIONS_raspi="2.25"
 TARGET_BINUTILS_VERSIONS_raspi2="2.25"
+TARGET_BINUTILS_VERSIONS_imx351uc="2.27"
 # 2.24.51 fails with:
 # /c/bam/.build/src/binutils-2.24.51/binutils/bucomm.c:130:7: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'VPARAMS'
 # TARGET_BINUTILS_VERSIONS_aarch64="2.24.51"
@@ -162,6 +165,7 @@ TARGET_BINUTILS_VARIANTS_raspi="ld, gold"
 # "These critical programs are missing or too old: ld"
 #TARGET_BINUTILS_VARIANTS_raspi2="gold, ld"
 TARGET_BINUTILS_VARIANTS_raspi2="ld, gold"
+TARGET_BINUTILS_VARIANTS_imx351uc="ld, gold"
 
 TARGET_GCC_VERSIONS_osx="apple_5666.3"
 TARGET_GCC_VERSIONS_windows="5.2.0"
@@ -175,6 +179,9 @@ TARGET_GCC_VERSIONS_raspi="5.2.0"
 TARGET_GCC_VERSIONS_raspi2="5.2.0"
 TARGET_GCC_VERSIONS_aarch64="5.2.0"
 TARGET_GCC_VERSIONS_armv7a="5.2.0"
+# .. soon:
+#TARGET_GCC_VERSIONS_imx351uc="6.3"
+TARGET_GCC_VERSIONS_imx351uc="6.2.1"
 
 TARGET_SYSROOT="sysroot"
 
@@ -193,6 +200,7 @@ POST_SYSROOT_PREFIX_raspi="usr/raspicc"
 POST_SYSROOT_PREFIX_raspi2="usr/raspi2cc"
 POST_SYSROOT_PREFIX_aarch64="usr/aarch64cc"
 POST_SYSROOT_PREFIX_armv7a="usr/armv7acc"
+POST_SYSROOT_PREFIX_imx351uc="usr"
 
 # Note, the released 3.4 tarball doesn't untar on Windows due to symlink targets not existing at time of creating symlink
 # To workaround this, I un-tar then re-tar it with -h flag to dereference these symlinks (on Linux).
@@ -213,6 +221,7 @@ TARGET_LLVM_VERSIONS_raspi="none"
 TARGET_LLVM_VERSIONS_raspi2="none"
 TARGET_LLVM_VERSIONS_aarch64="none"
 TARGET_LLVM_VERSIONS_armv7a="none"
+TARGET_LLVM_VERSIONS_imx351uc="none"
 
 TARGET_COMPILER_RT_osx="yes"
 TARGET_COMPILER_RT_windows="no"
@@ -226,6 +235,7 @@ TARGET_COMPILER_RT_raspi="no"
 TARGET_COMPILER_RT_raspi2="no"
 TARGET_COMPILER_RT_aarch64="no"
 TARGET_COMPILER_RT_armv7a="no"
+TARGET_COMPILER_RT_imx351uc="no"
 
 TARGET_IS_LINUX_osx="no"
 TARGET_IS_LINUX_windows="no"
@@ -239,6 +249,7 @@ TARGET_IS_LINUX_raspi="yes"
 TARGET_IS_LINUX_raspi2="yes"
 TARGET_IS_LINUX_aarch64="yes"
 TARGET_IS_LINUX_armv7a="yes"
+TARGET_IS_LINUX_imx351uc="yes"
 
 TARGET_IS_DARWIN_osx="yes"
 TARGET_IS_DARWIN_windows="no"
@@ -252,6 +263,7 @@ TARGET_IS_DARWIN_raspi="no"
 TARGET_IS_DARWIN_raspi2="no"
 TARGET_IS_DARWIN_aarch64="no"
 TARGET_IS_DARWIN_armv7a="no"
+TARGET_IS_DARWIN_imx351uc="no"
 
 # The following should probably deprecate both TARGET_IS_* above.
 TARGET_OS_SUPER_osx="darwin"
@@ -266,6 +278,8 @@ TARGET_OS_SUPER_raspi="linux"
 TARGET_OS_SUPER_raspi2="linux"
 TARGET_OS_SUPER_aarch64="aapcs64"
 TARGET_OS_SUPER_armv7a="armeabi"
+TARGET_OS_SUPER_imx351uc="linux"
+# ? "uclibcgnueabi"
 
 TARGET_LIBC_osx="none"
 TARGET_LIBC_windows="none"
@@ -280,6 +294,7 @@ TARGET_LIBC_raspi="glibc_linaro-2.20-2014.11"
 TARGET_LIBC_raspi2="glibc_linaro-2.20-2014.11"
 TARGET_LIBC_aarch64="glibc-2.20"
 TARGET_LIBC_armv7a="glibc-2.20"
+TARGET_LIBC_imx351uc="uClibc-0.9.33.2"
 
 # Careful, currently not used, the crosstool-ng.config files
 # specify the versions ATM.
@@ -382,7 +397,7 @@ CTNG_SOURCE_URL_steambox="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#
 CTNG_SOURCE_URL_osx="git{diorcety}:${REPOS}/crosstool-ng.diorcety#darwin-target"
 CTNG_SOURCE_URL_centos5="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 CTNG_SOURCE_URL_centos6="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_centos7="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_imx351uc="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#\${TARGET_OS_SUPER}-target"
 
 CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 
@@ -1334,7 +1349,7 @@ cross_clang_build()
       echo "CT_BINUTILS_binutils=y"                            >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_BINUTILS_V_${BINUTILS_VERS_}=y"                 >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_BINUTILS_VERSION=\"${BINUTILS_VERSION}\""       >> ${CTNG_SAMPLE_CONFIG}
-      echo "BINUTILS_LINKERS_LIST=\"${BINUTILS_VARIANTS}\""    >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_BINUTILS_LINKERS_LIST=\"${BINUTILS_VARIANTS}\"" >> ${CTNG_SAMPLE_CONFIG}
       _GOLD=no
       if [ "${BINUTILS_VARIANTS}" = "ld" ]; then
         echo "CT_BINUTILS_LINKER_LD=y"                         >> ${CTNG_SAMPLE_CONFIG}
@@ -1419,10 +1434,14 @@ cross_clang_build()
     echo "CT_TOOLCHAIN_TYPE=\"$(echo $NATURE | tr 'A-Z' 'a-z')\"" >> ${CTNG_SAMPLE_CONFIG}
 
     LIBC_FAMILY=${LIBC%%-*}
+    echo "LIBC_FAMILY=$LIBC_FAMILY"
     echo "CT_LIBC_${LIBC_FAMILY}=y"                  >> ${CTNG_SAMPLE_CONFIG}
     if [ "$LIBC_FAMILY" = "eglibc" \
-      -o "$LIBC_FAMILY" = "glibc" ]; then
+      -o "$LIBC_FAMILY" = "glibc" \
+      -o "$LIBC_FAMILY" = "uClibc" ]; then
       echo "CT_LIBC=\"${LIBC_FAMILY}\""              >> ${CTNG_SAMPLE_CONFIG}
+      echo CTNG_SAMPLE_CONFIG ${CTNG_SAMPLE_CONFIG}
+      cat  ${CTNG_SAMPLE_CONFIG}
       LIBC_VERS=${LIBC/${LIBC_FAMILY}-/}
       # For some reason eglibc versions need _'s instead of .'s
       if [ "$LIBC_FAMILY" = "eglibc" ]; then
@@ -1431,6 +1450,18 @@ cross_clang_build()
       LIBCU_=$(echo ${LIBC_FAMILY}_V_${LIBC_VERS} | tr '.' '_' | tr 'a-z' 'A-Z')
       echo "CT_LIBC_${LIBCU_}=y"                     >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_LIBC_VERSION=\"${LIBC_VERS}\""        >> ${CTNG_SAMPLE_CONFIG}
+    fi
+
+    # This is conflated with the imx351uc target-os.
+    if [ "${LIBC_FAMILY}" = "uClibc" ]; then
+      echo "CT_LIBC_UCLIBC_NG=n"                     >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_UCLIBC_WCHAR=y"                  >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_UCLIBC_VERBOSITY_2=y"            >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_ARCH_ABI=aapcs-linux"                 >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_KERNEL_linux=y"                       >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_KERNEL_VERSION=\"3.7.8\""             >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_KERNEL_V_3_7=y"                       >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_UCLIBC_V_0_9_33_2=y"             >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     if [ ! "$LLVM_VERSION" = "none" ]; then
@@ -1543,6 +1574,8 @@ cross_clang_build()
      ( while [ 0 ] ; do COLM=$(ps aux | grep libtoolize | grep --invert-match grep | awk '{print $2}'); if [ -n "${COLM}" ]; then kill $COLM; echo $COLM; fi; sleep 10; done ) &
     fi
     ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng ${CTNG_SAMPLE}
+ #   ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng arm-cortexa5-linux-uclibcgnueabihf
+
     ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng build
     if [ "${BUILD_OS}" = "windows" ]; then
       # Copy needed DLLs.

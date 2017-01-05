@@ -397,7 +397,7 @@ CTNG_SOURCE_URL_steambox="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#
 CTNG_SOURCE_URL_osx="git{diorcety}:${REPOS}/crosstool-ng.diorcety#darwin-target"
 CTNG_SOURCE_URL_centos5="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 CTNG_SOURCE_URL_centos6="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_imx351uc="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#\${TARGET_OS_SUPER}-target"
+CTNG_SOURCE_URL_imx351uc="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target"
 
 CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 
@@ -1459,8 +1459,8 @@ cross_clang_build()
       echo "CT_LIBC_UCLIBC_VERBOSITY_2=y"            >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_ARCH_ABI=aapcs-linux"                 >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_KERNEL_linux=y"                       >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_KERNEL_VERSION=\"3.7.8\""             >> ${CTNG_SAMPLE_CONFIG}
-      echo "CT_KERNEL_V_3_7=y"                       >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_KERNEL_VERSION=\"3.2.43\""            >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_KERNEL_V_3_2_43=y"                    >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_LIBC_UCLIBC_V_0_9_33_2=y"             >> ${CTNG_SAMPLE_CONFIG}
     fi
 

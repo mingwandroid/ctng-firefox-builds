@@ -426,7 +426,7 @@ option CTNG_CLEAN          no \
 "Remove old crosstool-ng build and artefacts
 before starting the build, otherwise an old
 crosstool-ng may be re-used."
-option CTNG_SAVE_STEPS     yes \
+option CTNG_SAVE_STEPS     no \
 "Save steps so that they can be restarted
 later. This doesn't work well for llvm
 and clang unfortunately, but while iterating
@@ -1458,6 +1458,7 @@ cross_clang_build()
       echo "CT_LIBC_UCLIBC_NG=n"                     >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_LIBC_UCLIBC_WCHAR=y"                  >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_LIBC_UCLIBC_VERBOSITY_2=y"            >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_LIBC_UCLIBC_IPV6=y"                   >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_ARCH_ABI=aapcs-linux"                 >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_KERNEL_linux=y"                       >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_KERNEL_VERSION=\"3.2.43\""            >> ${CTNG_SAMPLE_CONFIG}

@@ -1,0 +1,36 @@
+CT_LOCAL_TARBALLS_DIR="${HOME}/src"
+CT_SAVE_TARBALLS=y
+CT_ARCH_SUPPORT_ARCH=y
+# CT_ARCH_SUPPORT_ABI is not set
+CT_ARCH_SUPPORT_CPU=y
+CT_ARCH_SUPPORT_TUNE=y
+CT_ARCH_SUPPORT_FPU=y
+CT_ARCH_SUPPORTS_BOTH_ENDIAN=y
+# CT_ARCH_DEFAULT_BE is not set
+CT_ARCH_DEFAULT_LE=y
+CT_ARCH_ARCH="armv6k"
+CT_ARCH_CPU="arm1136jf-s"
+CT_ARCH_TUNE="arm1136jf-s"
+CT_ARCH_FPU="vfp"
+# CT_ARCH_BE is not set
+CT_ARCH_LE=y
+CT_ARCH_FLOAT_SW=y
+# CT_ARCH_FLOAT_HW is not set
+CT_TARGET_CFLAGS=""
+CT_TARGET_LDFLAGS=""
+
+
+#
+# General target options
+#
+# CT_ARCH_alpha is not set
+CT_ARCH_arm=y
+# CT_ARCH_ia64 is not set
+# CT_ARCH_mips is not set
+# CT_ARCH_powerpc64 is not set
+# CT_ARCH_powerpc is not set
+# CT_ARCH_sh is not set
+# CT_ARCH_x86_64 is not set
+# CT_ARCH_x86 is not set
+CT_ARCH_ARM_EABI=y
+ 

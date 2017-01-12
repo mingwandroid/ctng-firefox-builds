@@ -164,6 +164,7 @@ TARGET_BINUTILS_VARIANTS_raspi="ld, gold"
 # otherwise libc start files will fail:
 # "These critical programs are missing or too old: ld"
 #TARGET_BINUTILS_VARIANTS_raspi2="gold, ld"
+TARGET_BINUTILS_VARIANTS_aarch64="ld, gold"
 TARGET_BINUTILS_VARIANTS_raspi2="ld, gold"
 TARGET_BINUTILS_VARIANTS_imx351uc="ld, gold"
 
@@ -177,7 +178,7 @@ TARGET_GCC_VERSIONS_centos7="6.2.1"
 TARGET_GCC_VERSIONS_ps3="4.7.0"
 TARGET_GCC_VERSIONS_raspi="5.2.0"
 TARGET_GCC_VERSIONS_raspi2="5.2.0"
-TARGET_GCC_VERSIONS_aarch64="5.2.0"
+TARGET_GCC_VERSIONS_aarch64="6.3.0"
 TARGET_GCC_VERSIONS_armv7a="5.2.0"
 # .. soon:
 #TARGET_GCC_VERSIONS_imx351uc="6.3"
@@ -322,8 +323,9 @@ STATIC_TOOLCHAIN_centos7="yes"
 STATIC_TOOLCHAIN_ps3="no"
 STATIC_TOOLCHAIN_raspi="no"
 STATIC_TOOLCHAIN_raspi2="no"
-STATIC_TOOLCHAIN_aarch64="no"
+STATIC_TOOLCHAIN_aarch64="yes"
 STATIC_TOOLCHAIN_armv7a="no"
+STATIC_TOOLCHAIN_imx351uc="yes"
 
 # Stands for associative lookup!
 _al()
@@ -398,6 +400,7 @@ CTNG_SOURCE_URL_steambox="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#
 CTNG_SOURCE_URL_osx="git{diorcety}:${REPOS}/crosstool-ng.diorcety#darwin-target"
 CTNG_SOURCE_URL_centos5="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 CTNG_SOURCE_URL_centos6="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
+CTNG_SOURCE_URL_aarch64="git{official}:${REPOS}/crosstool-ng#master"
 CTNG_SOURCE_URL_imx351uc="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target"
 
 CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
@@ -5477,3 +5480,16 @@ CPP="i686-build_apple-darwin11-cpp" \
 CPPFLAGS="-O2 -g -pipe -m32 -isysroot /Users/rdonnelly/MacOSX10.7.sdk -mmacosx-version-min=10.5 -DMAXOSX_DEPLOYEMENT_TARGET=10.5" \
   /c/d/bo/.build/src/e2fsprogs-libs-1.43.3/configure --prefix=/c/d/bo/.build/i686-apple-darwin10/buildtools --host=i686-build_apple-darwin11 --build=i686-build_apple-darwin11 --disable-uuidd
 PATH=/c/d/bo/.build/i686-apple-darwin10/buildtools/bin:$PATH make -j4 -l
+
+
+
+
+Next problem: macOS targetting uClibc ends up with broken symlinks in sysroot/usr/lib
+
+pushd /tmp/fixed/arm-unknown-linux-uclibcgnueabi/sysroot/usr/lib
+links=$(find . -type l | cut -c 3-)
+for link in ${links}; do
+  target=$(readlink ${link} | sed 's#^/##' | sed 's#//#/#')
+  rm ${link}
+  ln -s ${target} ${link}
+done

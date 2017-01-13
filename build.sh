@@ -898,7 +898,7 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
 #    fi
     set -e
     GROUP=$(id --group --name)
-  elif [[ -f /etc/issue ]]; then
+  elif hash yum 2>/dev/null; then
     # It is expected that you install stuff from conda now.
     ${SUDO} yum install curl bison flex gperf texinfo gawk libtool automake ncurses-devel g++ autoconf2.13 yasm python-dev -y
     ${SUDO} yum install epel-release -y
@@ -906,7 +906,7 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
     # Only needed for very old Linux kernels, these days it's bundled.
     ${SUDO} yum install unifdef -y
   else
-    ${SUDO} apt-get install git mercurial curl bison flex gperf texinfo gawk libtool automake ncurses-dev g++ autoconf2.13 yasm python-dev
+    ${SUDO} apt-get install -y git mercurial curl bison flex gperf texinfo gawk libtool automake ncurses-dev g++ autoconf2.13 yasm python-dev
   fi
 else
   SUDO=

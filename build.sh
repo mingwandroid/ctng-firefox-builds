@@ -147,8 +147,7 @@ TARGET_BINUTILS_VERSIONS_raspi2="2.25"
 TARGET_BINUTILS_VERSIONS_imx351uc="2.27"
 # 2.24.51 fails with:
 # /c/bam/.build/src/binutils-2.24.51/binutils/bucomm.c:130:7: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'VPARAMS'
-# TARGET_BINUTILS_VERSIONS_aarch64="2.24.51"
-TARGET_BINUTILS_VERSIONS_aarch64="2.24"
+TARGET_BINUTILS_VERSIONS_aarch64="2.27"
 TARGET_BINUTILS_VERSIONS_armv7a="2.24"
 
 TARGET_BINUTILS_VARIANTS_osx="none"
@@ -293,7 +292,7 @@ TARGET_LIBC_centos7="glibc-2.17"
 TARGET_LIBC_ps3="newlib"
 TARGET_LIBC_raspi="glibc_linaro-2.20-2014.11"
 TARGET_LIBC_raspi2="glibc_linaro-2.20-2014.11"
-TARGET_LIBC_aarch64="glibc-2.20"
+TARGET_LIBC_aarch64="glibc-2.23"
 TARGET_LIBC_armv7a="glibc-2.20"
 TARGET_LIBC_imx351uc="uClibc-0.9.33.2"
 
@@ -309,7 +308,7 @@ TARGET_LINUX_K_centos7="3.10.98"
 TARGET_LINUX_K_ps3="none"
 TARGET_LINUX_K_raspi="3.10.69"
 TARGET_LINUX_K_raspi2="3.10.69"
-TARGET_LINUX_K_aarch64="3.12"
+TARGET_LINUX_K_aarch64="3.13"
 TARGET_LINUX_K_armv7a="3.12"
 TARGET_LINUX_K_imx351uc="3.2.43"
 
@@ -400,7 +399,7 @@ CTNG_SOURCE_URL_steambox="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#
 CTNG_SOURCE_URL_osx="git{diorcety}:${REPOS}/crosstool-ng.diorcety#darwin-target"
 CTNG_SOURCE_URL_centos5="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 CTNG_SOURCE_URL_centos6="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
-CTNG_SOURCE_URL_aarch64="git{official}:${REPOS}/crosstool-ng#master"
+CTNG_SOURCE_URL_aarch64="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#linux-target"
 CTNG_SOURCE_URL_imx351uc="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target"
 
 CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
@@ -901,7 +900,7 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
 #    fi
     set -e
     GROUP=$(id --group --name)
-  elif [[ -f /etc/issue ]]; then
+  elif which yum; then
     # It is expected that you install stuff from conda now.
     ${SUDO} yum install curl bison flex gperf texinfo gawk libtool automake ncurses-devel g++ autoconf2.13 yasm python-dev -y
     ${SUDO} yum install epel-release -y
@@ -1467,6 +1466,14 @@ cross_clang_build()
       echo "CT_KERNEL_VERSION=\"3.2.43\""            >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_KERNEL_V_3_2_43=y"                    >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_LIBC_UCLIBC_V_0_9_33_2=y"             >> ${CTNG_SAMPLE_CONFIG}
+    fi
+
+    if [ "${TARGET_OS}" = "aarch64" ]; then
+      echo "CT_ARCH_ABI=aapcs64"                     >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_KERNEL_linux=y"                       >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_KERNEL_VERSION=\"3.13.11\""           >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_KERNEL_V_3_13=y"                      >> ${CTNG_SAMPLE_CONFIG}
+#      echo "CT_LIBC_GLIBC_V_2_23=y"                  >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     if [ ! "$LLVM_VERSION" = "none" ]; then

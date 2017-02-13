@@ -781,6 +781,15 @@ if [ "${BUILD_OS}" = "darwin" ]; then
   fi
 fi
 
+BUILD_NCPUS=4
+if [ "${BUILD_OS}" = "linux" ]; then
+  BUILD_NCPUS=$(grep -c ^processor /proc/cpuinfo)
+elif [ "${BUILD_OS}" = "darwin" ]; then
+  BUILD_NCPUS=$(sysctl -n hw.ncpu)
+elif [ "${BUILD_OS}" = "windows" ]; then
+  BUILD_NCPUS=${NUMBER_OF_PROCESSORS}
+fi
+
 BINUTILS_VERS_=$(echo $BINUTILS_VERSION | tr '.' '_')
 GCC_VERS_=$(echo $GCC_VERSION           | tr '.' '_')
 LLVM_VERS_=$(echo $LLVM_VERSION         | tr '.' '_')
@@ -1520,7 +1529,7 @@ cross_clang_build()
     # Verbosity 2 doesn't output anything when installing the kernel headers?!
     echo "CT_KERNEL_LINUX_VERBOSITY_1=y"   >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_KERNEL_LINUX_VERBOSE_LEVEL=1" >> ${CTNG_SAMPLE_CONFIG}
-    echo "CT_PARALLEL_JOBS=4"              >> ${CTNG_SAMPLE_CONFIG}
+    echo "CT_PARALLEL_JOBS=${BUILD_NCPUS}" >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_gettext=y"                    >> ${CTNG_SAMPLE_CONFIG}
     # gettext is needed for {e}glibc-2_18; but not just on Windows!
     echo "CT_gettext_VERSION=0.18.3.1"     >> ${CTNG_SAMPLE_CONFIG}

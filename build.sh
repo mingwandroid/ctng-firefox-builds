@@ -31,13 +31,17 @@
 #    https://gist.github.com/phstc/4121839
 #
 # 5. I wanted to build Linux -> Linux native compilers but ran into a problem so chatted with Yann Morin:
-#     <y_morin> mingwandroid: Building a native toolchain is not supported in ct-ng.
-#     <y_morin> mingwandroid: A native toolchain is one without a sysroot. In such a toolchain, gcc (and ld) will search in /usr/include (and /lib and /usr/lib), without prefixing those locations with the sysroot path.
-#     <y_morin> mingwandroid: This is a bit complex to set up, so crostool-NG does not support that (for now?)
-#     <mingwandroid> y_morin: yeah, I just can't figure out where the config stuff is determining it not to be native is all, I'd be prepared to try to make the rest work if I can get over this initial hump.
-#     <y_morin> mingwandroid: I don;t want to discourage you, but that's gonna bea quite a bit of work.
-#     <y_morin> mingwandroid: We'd first need to differentiate the build-time sysroot from the runtime sysroot
-#     <y_morin> mingwandroid: Then, we need to diferentiate between PREFIX_DIR and DEST_DIR
+#    <y_morin> mingwandroid: Building a native toolchain is not supported in ct-ng.
+#    <y_morin> mingwandroid: A native toolchain is one without a sysroot. In such a toolchain, gcc (and ld) will search in /usr/include (and /lib and /usr/lib), without prefixing those locations with the sysroot path.
+#    <y_morin> mingwandroid: This is a bit complex to set up, so crostool-NG does not support that (for now?)
+#    <mingwandroid> y_morin: yeah, I just can't figure out where the config stuff is determining it not to be native is all, I'd be prepared to try to make the rest work if I can get over this initial hump.
+#    <y_morin> mingwandroid: I don;t want to discourage you, but that's gonna bea quite a bit of work.
+#    <y_morin> mingwandroid: We'd first need to differentiate the build-time sysroot from the runtime sysroot
+#    <y_morin> mingwandroid: Then, we need to diferentiate between PREFIX_DIR and DEST_DIR
+#
+# 6. macOS workaround for lack of case-sensitivity from https://github.com/pfalcon/esp-open-sdk/pull/40/commits/bb58769290387f689687ecb6bf4a75f505df5c40
+#    hdiutil create ~/Documents/case-sensitive.dmg -volname "case-sensitive" -size 10g -fs "Case-sensitive HFS+"
+#    hdiutil mount ~/Documents/case-sensitive.dmg
 
 # Useful stuff:
 #

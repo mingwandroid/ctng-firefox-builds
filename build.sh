@@ -1217,12 +1217,12 @@ cross_clang_build()
   CTNG_CFG_ARGS=" \
                 --disable-local \
                 --prefix=${PWD}/install-ctng.${CTNG_SUFFIX_HASH} \
-                --with-libtool=${LIBTOOL} \
-                --with-libtoolize=${LIBTOOLIZE} \
-                --with-objcopy=${OBJCOPY} \
-                --with-objdump=${OBJDUMP} \
-                --with-readelf=${READELF} \
-                --with-gperf=${GPERF} \
+                LIBTOOL=${LIBTOOL} \
+                LIBTOOLIZE=${LIBTOOLIZE} \
+                OBJDUMP=${OBJDUMP} \
+                OBJCOPY=${OBJCOPY} \
+                READELF=${READELF} \
+                GPERF=${GPERF} \
                 CC=${CTNG_ITSELF_CC} CXX=${CTNG_ITSELF_CXX} LD=${CTNG_ITSELF_LD}"
 
   CROSSTOOL_CONFIG=${BUILDDIR}/.config

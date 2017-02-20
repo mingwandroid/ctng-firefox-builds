@@ -42,6 +42,8 @@
 # 6. macOS workaround for lack of case-sensitivity from https://github.com/pfalcon/esp-open-sdk/pull/40/commits/bb58769290387f689687ecb6bf4a75f505df5c40
 #    hdiutil create ~/Documents/case-sensitive.dmg -volname "case-sensitive" -size 10g -fs "Case-sensitive HFS+"
 #    hdiutil mount ~/Documents/case-sensitive.dmg
+# .. or a RAMDisk with 40GB:
+#    diskutil eraseVolume "Case-sensitive HFS+" "RAMDisk" `hdiutil attach -nomount ram://83886080`
 
 # Useful stuff:
 #
@@ -699,7 +701,7 @@ CTNG_VCS_BRANCHES="${CTNG_VCS_URL_AND_BRANCHES#*\#}"
 CTNG_SUFFIX_HASH=$(echo "${CTNG_VCS_BRANCHES}" | ${SHASUM} | cut -c1-6)
 IFS='#' read -a CTNG_VCS_BRANCHES_ARRAY <<< "$CTNG_VCS_BRANCHES"
 echo "${CTNG_VCS_BRANCHES_ARRAY[@]}"
-CTNG_FOLDER_NAME="crosstool-ng.${CTNG_SUFFIX}.${CTNG_SUFFIX_HASH}"
+CTNG_FOLDER_NAME="/tmp/crosstool-ng.${CTNG_SUFFIX}.${CTNG_SUFFIX_HASH}"
 
 # Sanitise options and lookup per-target/per-build defaults.
 VENDOR_OS=$(_al VENDOR_OSES ${TARGET_OS})
@@ -859,24 +861,27 @@ CROSSCC=${HOST_ARCH}-${VENDOR_OS}
 SUDO=sudo
 GROUP=$USER
 if [ "${OSTYPE}" = "darwin" ]; then
-  BREWFIX=/usr/local
-  GNUFIX=$BREWFIX/bin/g
+  BREWFIX=${HOME}/brew
+  if [[ ! -d ${BREWFIX} ]]; then
+    mkdir $(dirname ${BREWFIX})
+    pushd $(dirname ${BREWFIX})
+    git clone https://github.com/Homebrew/brew.git
+  fi
+  export PATH=${BREWFIX}/bin:${PATH}
+  GNUFIX=${BREWFIX}/bin/g
   CC=clang
   CXX=clang++
 #  CC=llvm-gcc
 #  CXX=llvm-g++
   # To install gperf 3.0.4 I did:
   set +e
-  if ! which brew; then
-    ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
-  fi
   brew tap homebrew/dupes
-  brew install homebrew/dupes/gperf homebrew/dupes/grep
-  GPERF=${BREWFIX}/Cellar/gperf/3.0.4/bin/gperf
+  brew install gperf homebrew/dupes/grep
+  GPERF=${BREWFIX}/Cellar/gperf/3.*/bin/gperf
   #brew tap homebrew/versions
   #brew install gperf homebrew/versions/autoconf213
   brew update
-  brew install mercurial gnu-sed gnu-tar wget gawk binutils libelf coreutils automake yasm help2man
+  brew install mercurial gnu-tar gnu-sed wget gawk binutils libelf coreutils automake yasm help2man
   set -e
 elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
   if [ "${OSTYPE}" = "msys" ]; then
@@ -950,7 +955,8 @@ if ! automake --version | head -1 | grep 1.15; then
  )
 fi
 
-       SED=${GNUFIX}sed
+#       SED=${GNUFIX}sed
+       SED=/usr/bin/sed
    LIBTOOL=${GNUFIX}libtool
 LIBTOOLIZE=${GNUFIX}libtoolize
    OBJCOPY=${GNUFIX}objcopy
@@ -1214,7 +1220,7 @@ cross_clang_build()
   LDFLAGS=${USED_LD_FLAGS}
   CTNG_CFG_ARGS=" \
                 --disable-local \
-                --prefix=${PWD}/install-ctng.${CTNG_SUFFIX_HASH} \
+                --prefix=/c/ctng.${CTNG_SUFFIX_HASH} \
                 LIBTOOL=${LIBTOOL} \
                 LIBTOOLIZE=${LIBTOOLIZE} \
                 OBJDUMP=${OBJDUMP} \
@@ -1306,7 +1312,7 @@ cross_clang_build()
      ) || ( echo "Error: Failed to clone/patch crosstool-ng" && exit 1 )
     pushd ${CTNG_FOLDER_NAME}
     CTNG_SAMPLE=mozbuild-${TARGET_OS}-${TARGET_BITS}
-    CTNG_SAMPLE_CONFIG=samples/${CTNG_SAMPLE}/crosstool.config
+    CTNG_SAMPLE_CONFIG=${PWD}/samples/${CTNG_SAMPLE}/crosstool.config
     [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
     cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${TARGET_BITS} ${CTNG_SAMPLE_CONFIG}
 
@@ -1569,15 +1575,22 @@ cross_clang_build()
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_INSTALL_DIR=\"${BUILT_XCOMPILER_PREFIX}\"" >> ${CTNG_SAMPLE_CONFIG}
 
-    ./bootstrap
-
-    ./configure ${CTNG_CFG_ARGS}
-    make clean
-
-    EXTRA_CFLAGS="${USED_CPP_FLAGS}" \
-    EXTRA_LDFLAGS="${USED_LD_FLAGS}" \
-      make
-      make install
+    # Clone into /tmp to avoid a permissions issue that I had with VMware shared folders.
+#    CTNGSRC=${PWD}
+#    pushd /tmp
+#      [[ -d ctng-${CTNG_SUFFIX_HASH} ]] && rm -rf ctng-${CTNG_SUFFIX_HASH}
+#      git clone ${CTNGSRC} ctng-${CTNG_SUFFIX_HASH}
+#      cd ctng-${CTNG_SUFFIX_HASH}
+#      mkdir -p samples/${CTNG_SAMPLE}/
+#      cp ${CTNG_SAMPLE_CONFIG} samples/${CTNG_SAMPLE}/crosstool.config
+      ./bootstrap
+      ./configure ${CTNG_CFG_ARGS}
+      make clean
+      EXTRA_CFLAGS="${USED_CPP_FLAGS}" \
+      EXTRA_LDFLAGS="${USED_LD_FLAGS}" \
+        make
+        make install
+#    popd
     popd
 
     # The mingw-w64 compiler must be added to PATH
@@ -1597,10 +1610,8 @@ cross_clang_build()
      trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
      ( while [ 0 ] ; do COLM=$(ps aux | grep libtoolize | grep --invert-match grep | awk '{print $2}'); if [ -n "${COLM}" ]; then kill $COLM; echo $COLM; fi; sleep 10; done ) &
     fi
-    ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng ${CTNG_SAMPLE}
- #   ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng arm-cortexa5-linux-uclibcgnueabihf
-
-    ${ROOT}/install-ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng build
+    /c/ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng ${CTNG_SAMPLE}
+    /c/ctng.${CTNG_SUFFIX_HASH}/bin/ct-ng build
     if [ "${BUILD_OS}" = "windows" ]; then
       # Copy needed DLLs.
       cp ${MINGW_W64_PATH}/libstdc++*.dll     ${BUILT_XCOMPILER_PREFIX}/bin
@@ -5438,7 +5449,7 @@ E:\Users\ray\gd\ctng\linux-target\sysdep-unix.i
 
 # OSX problem with glibc startfiles_32 .. can't get it to reconfigure the same, env differences?
 export PATH=/e/d/is/bin:/e/d/bs/.build/x86_64-unknown-linux-gnu/buildtools/bin:/e/d/bs/.build/tools/bin:/usr/local/Cellar/bash/4.2.45/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/ray/depot_tools
-export sed=/usr/local/bin/gsed
+export sed=/usr/bin/gsed
 export gperf=/usr/local/Cellar/gperf/3.0.4/bin/gperf
 export grep=/usr/local/bin/ggrep
 export awk=/usr/local/bin/gawk
@@ -5503,12 +5514,12 @@ PATH=/c/d/bo/.build/i686-apple-darwin10/buildtools/bin:$PATH make -j4 -l
 
 
 
-Next problem: macOS targetting uClibc ends up with broken symlinks in sysroot/usr/lib
-
-pushd /tmp/fixed/arm-unknown-linux-uclibcgnueabi/sysroot/usr/lib
+# Next problem: macOS targetting uClibc ends up with broken symlinks in sysroot/usr/lib:
+pushd /c/d/ii_32/arm-unknown-linux-uclibcgnueabi/sysroot/usr/lib
 links=$(find . -type l | cut -c 3-)
 for link in ${links}; do
   target=$(readlink ${link} | sed 's#^/##' | sed 's#//#/#')
   rm ${link}
   ln -s ${target} ${link}
 done
+popd

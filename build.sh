@@ -405,7 +405,7 @@ CTNG_SOURCE_URL_osx="git{diorcety}:${REPOS}/crosstool-ng.diorcety#darwin-target"
 CTNG_SOURCE_URL_centos5="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}"
 CTNG_SOURCE_URL_centos6="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 CTNG_SOURCE_URL_aarch64="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#linux-target"
-CTNG_SOURCE_URL_imx351uc="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#case-insensitivity"
+CTNG_SOURCE_URL_imx351uc="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#darwin-build#\${BUILD_OS}-build#\${TARGET_OS_SUPER}-target#case-insensitivity"
 
 CTNG_SOURCE_URL_steamsdk="git{diorcety}:${REPOS}/crosstool-ng.diorcety#official#update-ncurses#trivial-fixes#case-insensitivity#\${BUILD_OS}-build#\${HOST_OS}-host#\${TARGET_OS_SUPER}-target#\${BUILD_OS}-build_\${TARGET_OS_SUPER}-target\${NON_LINUX_BUILD_TARGET_LINUX}#misc-hacks"
 
@@ -1316,6 +1316,7 @@ cross_clang_build()
     [ -d samples/${CTNG_SAMPLE} ] || mkdir -p samples/${CTNG_SAMPLE}
     cp "${THISDIR}"/crosstool-ng.configs/crosstool.config.${TARGET_OS}.${TARGET_BITS} ${CTNG_SAMPLE_CONFIG}
 
+    echo "CT_OBSOLETE=y"                       >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_ALLOW_BUILD_AS_ROOT=y"            >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_ALLOW_BUILD_AS_ROOT_SURE=y"       >> ${CTNG_SAMPLE_CONFIG}
     echo "CT_PARALLEL_JOBS_OUTPUT_SYNC=y"      >> ${CTNG_SAMPLE_CONFIG}
@@ -1567,9 +1568,13 @@ cross_clang_build()
     if [ "${TARGET_OS}" = "centos5" -o \
          "${TARGET_OS}" = "centos6" -o \
          "${TARGET_OS}" = "centos7" ]; then
+      # My old version of this:
       echo "CT_DISABLE_MULTILIB_LIB_OSDIRNAMES=y" >> ${CTNG_SAMPLE_CONFIG}
+      # Upstream's new version:
+      echo "CT_DEMULTILIB=y"                      >> ${CTNG_SAMPLE_CONFIG}
     else
       echo "CT_DISABLE_MULTILIB_LIB_OSDIRNAMES=n" >> ${CTNG_SAMPLE_CONFIG}
+      echo "CT_DEMULTILIB=n"                      >> ${CTNG_SAMPLE_CONFIG}
     fi
 
     echo "CT_PREFIX_DIR=\"${BUILT_XCOMPILER_PREFIX}\""  >> ${CTNG_SAMPLE_CONFIG}

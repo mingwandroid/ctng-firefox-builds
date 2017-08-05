@@ -659,8 +659,8 @@ fi
 # configure:5707: error: ABI=64 is not among the following valid choices: 32
 # .. so for now, on Darwin
 
-if [ "${CTNG_STATIC_TOOLCHAIN}" = "default" ]; then
-  CTNG_STATIC_TOOLCHAIN=$(_al STATIC_TOOLCHAIN ${TARGET_OS})
+if [ "${STATIC_TOOLCHAIN}" = "default" ]; then
+  STATIC_TOOLCHAIN=$(_al STATIC_TOOLCHAIN ${TARGET_OS})
 fi
 
 if [ "${CTNG_SOURCE_URL}" = "default" ]; then
@@ -863,7 +863,7 @@ GROUP=$USER
 if [ "${OSTYPE}" = "darwin" ]; then
   BREWFIX=${HOME}/brew
   if [[ ! -d ${BREWFIX} ]]; then
-    mkdir $(dirname ${BREWFIX})
+    [[ -d $(dirname ${BREWFIX}) ]] || mkdir $(dirname ${BREWFIX})
     pushd $(dirname ${BREWFIX})
     git clone https://github.com/Homebrew/brew.git
   fi

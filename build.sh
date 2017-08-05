@@ -1403,7 +1403,9 @@ cross_clang_build()
       fi
     fi
 
-    if [ ! "$GCC_VERSION" = "none" ]; then
+    if [ "$TARGET_OS_SUPER" = "darwin" ]; then
+      echo "Assuming *legacy* darwin target support, skipping lots of stuff"
+    elif [ ! "$GCC_VERSION" = "none" ]; then
       # Figure out the ISL / Cloog version to use, from Bryan ..
       # http://comments.gmane.org/gmane.comp.gcc.cross-compiling/17053
       # "Yes, I have committed a change to add isl 0.14, but I need to make a
@@ -1425,7 +1427,7 @@ cross_clang_build()
         echo "CT_CLOOG=n"                      >> ${CTNG_SAMPLE_CONFIG}
       else
         echo "CT_ISL_V_0_12_2=y"               >> ${CTNG_SAMPLE_CONFIG}
-        echo "CLOOG_V_0_18_1=y"                >> ${CTNG_SAMPLE_CONFIG}
+        echo "CT_CLOOG_V_0_18_1=y"             >> ${CTNG_SAMPLE_CONFIG}
       fi
       echo "CT_CC_gcc=y"                       >> ${CTNG_SAMPLE_CONFIG}
       echo "CT_CC_GCC_V_${GCC_VERS_}=y"        >> ${CTNG_SAMPLE_CONFIG}

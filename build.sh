@@ -917,6 +917,8 @@ elif [ "${OSTYPE}" = "linux-gnu" -o "${OSTYPE}" = "msys" ]; then
 #    fi
     set -e
     GROUP=$(id --group --name)
+  elif which dnf; then
+    echo "Not installing stuff on (assumed) fedora"
   elif which yum; then
     # It is expected that you install stuff from conda now.
     ${SUDO} yum install curl bison flex gperf texinfo gawk libtool automake ncurses-devel g++ autoconf2.13 yasm python-dev -y
